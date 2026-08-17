@@ -1,0 +1,1040 @@
+[
+{
+    "model": "naac.naacdocument",
+    "pk": 2,
+    "fields": {
+        "doc_type": "ssr",
+        "title": "bbb",
+        "document": "",
+        "document_url": "",
+        "description": "",
+        "uploaded_at": "2026-06-14T01:13:54.692Z",
+        "order": 0
+    }
+},
+{
+    "model": "naac.iqacmember",
+    "pk": 1,
+    "fields": {
+        "name": "Mrs. Chanchal Yadav",
+        "designation": "IQAC Cordinator",
+        "role": "coordinator",
+        "department": "",
+        "order": 0
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 9,
+    "fields": {
+        "criterion": "1",
+        "criterion_number": "1.1.1",
+        "title": "Curricular Planning and Implementation",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 1
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 10,
+    "fields": {
+        "criterion": "1",
+        "criterion_number": "1.2.1",
+        "title": "Number of Add-on / Certificate Programs",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 2
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 11,
+    "fields": {
+        "criterion": "1",
+        "criterion_number": "1.2.2",
+        "title": "Students Enrolled in Add-on / Certificate Programs",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 3
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 12,
+    "fields": {
+        "criterion": "1",
+        "criterion_number": "1.3.1",
+        "title": "Cross-cutting Issues in Curriculum",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 4
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 13,
+    "fields": {
+        "criterion": "1",
+        "criterion_number": "1.3.2",
+        "title": "Experiential Learning Activities",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 5
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 14,
+    "fields": {
+        "criterion": "1",
+        "criterion_number": "1.3.3",
+        "title": "Field Projects / Internships",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 6
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 15,
+    "fields": {
+        "criterion": "1",
+        "criterion_number": "1.4.1",
+        "title": "Institution Obtains Feedback",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 7
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 16,
+    "fields": {
+        "criterion": "1",
+        "criterion_number": "1.4.2",
+        "title": "Feedback Analysis and Action Taken",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 8
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 17,
+    "fields": {
+        "criterion": "2",
+        "criterion_number": "2.1.1",
+        "title": "Student Enrolment Percentage",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 9
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 18,
+    "fields": {
+        "criterion": "2",
+        "criterion_number": "2.1.2",
+        "title": "Reserved Category Student Admission",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 10
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 19,
+    "fields": {
+        "criterion": "2",
+        "criterion_number": "2.2.1",
+        "title": "Student–Full Time Teacher Ratio",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 11
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 20,
+    "fields": {
+        "criterion": "2",
+        "criterion_number": "2.2.2",
+        "title": "Catering to Student Diversity",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 12
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 21,
+    "fields": {
+        "criterion": "2",
+        "criterion_number": "2.3.1",
+        "title": "Student-Centric Methods",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 13
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 22,
+    "fields": {
+        "criterion": "2",
+        "criterion_number": "2.3.2",
+        "title": "ICT Enabled Teaching Learning",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 14
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 23,
+    "fields": {
+        "criterion": "2",
+        "criterion_number": "2.3.3",
+        "title": "Mentor-Mentee System",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 15
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 24,
+    "fields": {
+        "criterion": "2",
+        "criterion_number": "2.4.1",
+        "title": "Full-Time Teachers Against Sanctioned Posts",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 16
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 25,
+    "fields": {
+        "criterion": "2",
+        "criterion_number": "2.4.2",
+        "title": "Percentage of Teachers with NET/SET/PhD",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 17
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 26,
+    "fields": {
+        "criterion": "2",
+        "criterion_number": "2.4.3",
+        "title": "Average Teaching Experience",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 18
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 27,
+    "fields": {
+        "criterion": "2",
+        "criterion_number": "2.5.1",
+        "title": "Mechanism of Internal Assessment",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 19
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 28,
+    "fields": {
+        "criterion": "2",
+        "criterion_number": "2.5.2",
+        "title": "Transparency in Internal Assessment",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 20
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 29,
+    "fields": {
+        "criterion": "2",
+        "criterion_number": "2.5.3",
+        "title": "Grievance Redressal Mechanism",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 21
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 30,
+    "fields": {
+        "criterion": "2",
+        "criterion_number": "2.6.1",
+        "title": "Programme Outcomes & Course Outcomes",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 22
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 31,
+    "fields": {
+        "criterion": "2",
+        "criterion_number": "2.6.2",
+        "title": "Attainment of POs and COs",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 23
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 32,
+    "fields": {
+        "criterion": "2",
+        "criterion_number": "2.6.3",
+        "title": "Pass Percentage of Students",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 24
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 33,
+    "fields": {
+        "criterion": "2",
+        "criterion_number": "2.7.1",
+        "title": "Student Satisfaction Survey",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 25
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 34,
+    "fields": {
+        "criterion": "3",
+        "criterion_number": "3.1.1",
+        "title": "Grants Received for Research",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 26
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 35,
+    "fields": {
+        "criterion": "3",
+        "criterion_number": "3.2.1",
+        "title": "Institution has Innovation Ecosystem",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 27
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 36,
+    "fields": {
+        "criterion": "3",
+        "criterion_number": "3.2.2",
+        "title": "Workshops / Seminars on Research Methodology, IPR, Entrepreneurship",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 28
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 37,
+    "fields": {
+        "criterion": "3",
+        "criterion_number": "3.3.1",
+        "title": "Research Publications",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 29
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 38,
+    "fields": {
+        "criterion": "3",
+        "criterion_number": "3.3.2",
+        "title": "Books and Chapters Published",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 30
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 39,
+    "fields": {
+        "criterion": "3",
+        "criterion_number": "3.4.1",
+        "title": "Extension Activities Conducted",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 31
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 40,
+    "fields": {
+        "criterion": "3",
+        "criterion_number": "3.4.2",
+        "title": "Awards and Recognition for Extension Activities",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 32
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 41,
+    "fields": {
+        "criterion": "3",
+        "criterion_number": "3.4.3",
+        "title": "Student Participation in Extension Activities",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 33
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 42,
+    "fields": {
+        "criterion": "3",
+        "criterion_number": "3.5.1",
+        "title": "Functional MoUs / Collaborations",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 34
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 43,
+    "fields": {
+        "criterion": "4",
+        "criterion_number": "4.1.1",
+        "title": "Physical Facilities",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 35
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 44,
+    "fields": {
+        "criterion": "4",
+        "criterion_number": "4.1.2",
+        "title": "Infrastructure Augmentation",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 36
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 45,
+    "fields": {
+        "criterion": "4",
+        "criterion_number": "4.2.1",
+        "title": "Library Automation",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 37
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 46,
+    "fields": {
+        "criterion": "4",
+        "criterion_number": "4.2.2",
+        "title": "Expenditure on E-Resources",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 38
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 47,
+    "fields": {
+        "criterion": "4",
+        "criterion_number": "4.2.3",
+        "title": "Library Usage",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 39
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 48,
+    "fields": {
+        "criterion": "4",
+        "criterion_number": "4.3.1",
+        "title": "IT Infrastructure",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 40
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 49,
+    "fields": {
+        "criterion": "4",
+        "criterion_number": "4.3.2",
+        "title": "Student–Computer Ratio",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 41
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 50,
+    "fields": {
+        "criterion": "4",
+        "criterion_number": "4.3.3",
+        "title": "Internet Bandwidth & ICT Facilities",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 42
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 51,
+    "fields": {
+        "criterion": "4",
+        "criterion_number": "4.4.1",
+        "title": "Expenditure on Infrastructure Maintenance",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 43
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 52,
+    "fields": {
+        "criterion": "4",
+        "criterion_number": "4.4.2",
+        "title": "Maintenance Policy and System",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 44
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 53,
+    "fields": {
+        "criterion": "5",
+        "criterion_number": "5.1.1",
+        "title": "Scholarships and Freeships",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 45
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 54,
+    "fields": {
+        "criterion": "5",
+        "criterion_number": "5.1.2",
+        "title": "Capacity Development and Skill Enhancement",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 46
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 55,
+    "fields": {
+        "criterion": "5",
+        "criterion_number": "5.1.3",
+        "title": "Guidance for Competitive Examinations",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 47
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 56,
+    "fields": {
+        "criterion": "5",
+        "criterion_number": "5.1.4",
+        "title": "Grievance Redressal / Anti-Ragging / Safety Mechanisms",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 48
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 57,
+    "fields": {
+        "criterion": "5",
+        "criterion_number": "5.2.1",
+        "title": "Placement and Higher Education",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 49
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 58,
+    "fields": {
+        "criterion": "5",
+        "criterion_number": "5.2.2",
+        "title": "Students Qualifying in Competitive Examinations",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 50
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 59,
+    "fields": {
+        "criterion": "5",
+        "criterion_number": "5.3.1",
+        "title": "Sports and Cultural Activities",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 51
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 60,
+    "fields": {
+        "criterion": "5",
+        "criterion_number": "5.3.2",
+        "title": "Student Representation in Committees",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 52
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 61,
+    "fields": {
+        "criterion": "5",
+        "criterion_number": "5.3.3",
+        "title": "Student Awards and Achievements",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 53
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 62,
+    "fields": {
+        "criterion": "5",
+        "criterion_number": "5.4.1",
+        "title": "Alumni Contribution",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 54
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 63,
+    "fields": {
+        "criterion": "5",
+        "criterion_number": "5.4.2",
+        "title": "Alumni Engagement Activities",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 55
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 64,
+    "fields": {
+        "criterion": "6",
+        "criterion_number": "6.1.1",
+        "title": "Institutional Vision and Leadership",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 56
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 65,
+    "fields": {
+        "criterion": "6",
+        "criterion_number": "6.2.1",
+        "title": "Strategic / Perspective Plan Deployment",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 57
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 66,
+    "fields": {
+        "criterion": "6",
+        "criterion_number": "6.2.2",
+        "title": "E-Governance Implementation",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 58
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 67,
+    "fields": {
+        "criterion": "6",
+        "criterion_number": "6.3.1",
+        "title": "Faculty Empowerment Strategies",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 59
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 68,
+    "fields": {
+        "criterion": "6",
+        "criterion_number": "6.3.2",
+        "title": "Faculty Development Programmes",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 60
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 69,
+    "fields": {
+        "criterion": "6",
+        "criterion_number": "6.3.3",
+        "title": "Performance Appraisal System",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 61
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 70,
+    "fields": {
+        "criterion": "6",
+        "criterion_number": "6.4.1",
+        "title": "Resource Mobilization",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 62
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 71,
+    "fields": {
+        "criterion": "6",
+        "criterion_number": "6.4.2",
+        "title": "Financial Audits",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 63
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 72,
+    "fields": {
+        "criterion": "6",
+        "criterion_number": "6.5.1",
+        "title": "Internal Quality Assurance System",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 64
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 73,
+    "fields": {
+        "criterion": "6",
+        "criterion_number": "6.5.2",
+        "title": "Quality Initiatives by IQAC",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 65
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 74,
+    "fields": {
+        "criterion": "7",
+        "criterion_number": "7.1.1",
+        "title": "Gender Equity and Facilities",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 66
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 75,
+    "fields": {
+        "criterion": "7",
+        "criterion_number": "7.1.2",
+        "title": "Environmental Sustainability Measures",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 67
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 76,
+    "fields": {
+        "criterion": "7",
+        "criterion_number": "7.1.3",
+        "title": "Inclusive Environment",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 68
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 77,
+    "fields": {
+        "criterion": "7",
+        "criterion_number": "7.1.4",
+        "title": "Human Values and Professional Ethics",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 69
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 78,
+    "fields": {
+        "criterion": "7",
+        "criterion_number": "7.1.5",
+        "title": "Green Campus Initiatives",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 70
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 79,
+    "fields": {
+        "criterion": "7",
+        "criterion_number": "7.1.6",
+        "title": "Energy Conservation Practices",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 71
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 80,
+    "fields": {
+        "criterion": "7",
+        "criterion_number": "7.1.7",
+        "title": "Disabled-Friendly Environment",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 72
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 81,
+    "fields": {
+        "criterion": "7",
+        "criterion_number": "7.1.8",
+        "title": "Institutional Social Responsibility",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 73
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 82,
+    "fields": {
+        "criterion": "7",
+        "criterion_number": "7.1.9",
+        "title": "Constitutional Obligations",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 74
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 83,
+    "fields": {
+        "criterion": "7",
+        "criterion_number": "7.1.10",
+        "title": "Code of Conduct",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 75
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 84,
+    "fields": {
+        "criterion": "7",
+        "criterion_number": "7.1.11",
+        "title": "Commemorative Days and National Events",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 76
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 85,
+    "fields": {
+        "criterion": "7",
+        "criterion_number": "7.2.1",
+        "title": "Best Practices",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 77
+    }
+},
+{
+    "model": "naac.naaccriteria",
+    "pk": 86,
+    "fields": {
+        "criterion": "7",
+        "criterion_number": "7.3.1",
+        "title": "Institutional Distinctiveness",
+        "description": "",
+        "document": "",
+        "document_url": "",
+        "order": 78
+    }
+}
+]

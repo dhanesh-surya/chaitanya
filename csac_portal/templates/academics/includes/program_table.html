@@ -1,0 +1,28 @@
+{% if programs %}
+<div class="table-responsive">
+    <table class="table table-bordered table-hover align-middle">
+        <thead class="table-light text-dark">
+            <tr>
+                <th style="width: 80px;">Sr. No.</th>
+                <th>Name of the Programme leading to Degree</th>
+                <th>Year of introduction of Programme</th>
+                <th>Programme Duration</th>
+                <th>Total Seats</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for prog in programs %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td><strong>{{ prog.name }}</strong></td>
+                <td>{{ prog.introduced_year|default:"-" }}</td>
+                <td>{{ prog.duration|default:"-" }}</td>
+                <td>{{ prog.seats }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-secondary border-0 shadow-sm mb-0">{{ empty_message|default:"No programs listed at the moment." }}</div>
+{% endif %}

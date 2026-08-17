@@ -1,0 +1,2053 @@
+[
+{
+  "model": "academics.department",
+  "pk": 1,
+  "fields": {
+    "name": "Hindi",
+    "slug": "hindi",
+    "category": "arts",
+    "hod_name": "",
+    "hod_photo": "",
+    "hod_message": "",
+    "description": "<h4 style=\"text-align:justify\"><span style=\"font-size:20px\"><strong><span style=\"font-family:Times New Roman,Times,serif\"><span style=\"color:#000000\">परिचय</span></span></strong></span></h4> <h4 style=\"text-align:justify\"><span style=\"font-size:20px\"><span style=\"font-family:Times New Roman,Times,serif\"><span style=\"color:#000000\">हिन्दी विभाग चैतन्य विज्ञान एवं कला महाविद्यालय, पामगढ़ का एक अभिन्न अंग रहा है। महाविद्यालय के स्थापना के साथ ही हिन्दी विभाग की स्थापना भी वर्ष 2001 में हुई। कालांतर में स्नातकोत्तर कक्षाएं सत्र 2012-13 में प्रारंभ की गई। विद्यार्थियों के शैक्षणिक, सामाजिक, नैतिक व सांस्कृतिक आवश्यकताओं एवं कौशल विकास हेतु हिन्दी विभाग सदैव प्रतिबद्ध रहा है। विद्यार्थियों के सर्वांगीण विकास के लिए विभाग में पुस्तकों की पर्याप्त सुविधा उपलब्ध है इसके अतिरिक्त संदर्भ-ग्रंथ तथा पत्र-पत्रिकाएं भी उपलब्ध हैं। अंचल में हिन्दी भाषा के प्रचार-प्रसार एवं आंचलिक साहित्य के संरक्षण एवं संवर्धन हेतु निरंतर प्रयासरत् है।</span></span></span></h4> <h4 style=\"text-align:justify\"><span style=\"font-size:20px\"><strong><span style=\"font-family:Times New Roman,Times,serif\"><span style=\"color:#000000\">अधोसंरचना</span></span></strong></span></h4> <ul> <li> <h4 style=\"text-align:justify\"><span style=\"font-size:20px\"><span style=\"font-family:Times New Roman,Times,serif\"><span style=\"color:#000000\">विभागीय पुस्तकालय में विभिन्न पुस्तकें उपलब्ध।</span></span></span></h4> </li> <li> <h4 style=\"text-align:justify\"><span style=\"font-size:20px\"><span style=\"font-family:Times New Roman,Times,serif\"><span style=\"color:#000000\">एन लिस्ट (N-List) - INFLIBNET</span></span></span></h4> </li> <li> <h4 style=\"text-align:justify\"><span style=\"font-size:20px\"><span style=\"font-family:Times New Roman,Times,serif\"><span style=\"color:#000000\">ई-जर्नल्स और ई-पुस्तकें की सदस्यता उपलब्ध।</span></span></span></h4> </li> <li> <h4 style=\"text-align:justify\"><span style=\"font-size:20px\"><span style=\"font-family:Times New Roman,Times,serif\"><span style=\"color:#000000\">विभिन्न पत्र- पत्रिकाओं की नियमित उपलब्धता।</span></span></span></h4> </li> <li> <h4 style=\"text-align:justify\"><span style=\"font-size:20px\"><span style=\"font-family:Times New Roman,Times,serif\"><span style=\"color:#000000\">विभाग में कंप्यूटर की उपलब्धता।</span></span></span></h4> </li> <li> <h4 style=\"text-align:justify\"><span style=\"font-size:20px\"><span style=\"font-family:Times New Roman,Times,serif\"><span style=\"color:#000000\">विभाग में वाईफाई व इंटरनेट की सुविधा।</span></span></span></h4> </li> <li> <h4 style=\"text-align:justify\"><span style=\"font-size:20px\"><span style=\"font-family:Times New Roman,Times,serif\"><span style=\"color:#000000\">प्रोजेक्टर के माध्यम से कक्षा-शिक्षण ।</span></span></span></h4> </li> <li> <h4 style=\"text-align:justify\"><span style=\"font-size:20px\"><span style=\"font-family:Times New Roman,Times,serif\"><span style=\"color:#000000\">स्मार्ट क्लास रूम की सुविधा उपलब्ध।</span></span></span></h4> </li> </ul>",
+    "banner_image": "dept/banner/hindi.png",
+    "banner_image_url": "",
+    "established_year": null,
+    "order": 1
+  }
+},
+{
+  "model": "academics.department",
+  "pk": 2,
+  "fields": {
+    "name": "English",
+    "slug": "english",
+    "category": "arts",
+    "hod_name": "",
+    "hod_photo": "",
+    "hod_message": "",
+    "description": "<h5 style=\"text-align:justify\"><strong><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">BRIEF HISTORY</span></span></span></strong></h5> <p style=\"text-align:justify\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">The Department of English was established in the year 2002. The postgraduate course in English was started in 2014. The first batch came out in 2016. The Department has included contemporary needs of the society in its syllabus including various cross cutting issues. The Department continues to maintain its strength in traditional areas like Renaissance studies, Romantic, Victorian and Modern Literature. Since its inception the Department has served the society through its academic contribution. The research activities are being actively pursued. Our students are exposed to experiential learning pedagogies to enhance their learning to the various aspects of English Literature. The students are being educated with various digital contents of English Literature.</span></span></span></p> <h5 style=\"text-align:justify\"> </h5> <h5 style=\"text-align:justify\"><strong><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">INFRASTRUCTURE</span></span></span></strong></h5> <ul> <li style=\"text-align:justify\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Books in the library</span></span></span></li> <li style=\"text-align:justify\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Access to N-LIST - INFLIBNET</span></span></span></li> <li style=\"text-align:justify\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Subscribed e-Journals and e-Books</span></span></span></li> <li style=\"text-align:justify\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Computers in the department</span></span></span></li> <li style=\"text-align:justify\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Internet facility in the department</span></span></span></li> <li style=\"text-align:justify\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Audio Visual Projection facilities / Smart class</span></span></span></li> </ul> <h5 style=\"text-align:justify\"><strong><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">CAREER SCOPE</span></span></span></strong></h5> <p style=\"text-align:justify\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">The scope of M.A. English Literature for post-graduates includes content writer, teacher, translator, editor, copywriter, journalism in print and visual media.</span></span></span></p> <h5 style=\"text-align:justify\"><strong><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">FUTURE GOALS</span></span></span></strong></h5> <ul> <li style=\"text-align:justify\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">To provide quality education so that students can analyze a broad range of literatures written in English (including representative authors and major literary periods), recognizing their temporal, social, political, and artistic contexts.</span></span></span></li> <li style=\"text-align:justify\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">To provide enough exposure to the student so that they can use effectively a range of writing, reading, and research strategies applicable to multiple disciplines.</span></span></span></li> <li style=\"text-align:justify\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">To develop skills where students can write analytically and creatively, that is to express ideas clearly and incisively in their writing in ways required both inside and outside of the academy.</span></span></span></li> <li style=\"text-align:justify\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">To develop an advanced infrastructure for capacity building and skill development of the students viz. language lab, other foreign languages.</span></span></span></li> </ul>",
+    "banner_image": "dept/banner/1.png",
+    "banner_image_url": "",
+    "established_year": null,
+    "order": 2
+  }
+},
+{
+  "model": "academics.department",
+  "pk": 3,
+  "fields": {
+    "name": "Sociology",
+    "slug": "sociology",
+    "category": "arts",
+    "hod_name": "",
+    "hod_photo": "",
+    "hod_message": "",
+    "description": "<h5 style=\"text-align:justify\"><span style=\"color:#000000\"><span style=\"font-family:Times New Roman,Times,serif\">About Department</span></span></h5> <p style=\"text-align:justify\"><span style=\"color:#000000\"><span style=\"font-family:Times New Roman,Times,serif\">Our department was established in 2001 as an integral part of the college. Initially, the subject was offered only at the undergraduate level. Keeping in mind the enrollment of students and the importance of the subject, the college offered the subject at the P.G level in 2013-14. Since then, our department has been making progress at both U.G and P.G levels continuously.</span></span></p> <h5 style=\"text-align:justify\"><span style=\"color:#000000\"><span style=\"font-family:Times New Roman,Times,serif\">Mission</span></span></h5> <ul> <li style=\"text-align:justify\"><span style=\"color:#000000\"><span style=\"font-family:Times New Roman,Times,serif\">To provide quality teaching, learning, research, and consultancy in humanities and social sciences by creating, preserving, transmitting, and utilizing knowledge.</span></span></li> <li style=\"text-align:justify\"><span style=\"color:#000000\"><span style=\"font-family:Times New Roman,Times,serif\">The mission of the Department of Sociology is to promote scientific understandings of social life through teaching, scholarship, and service.</span></span></li> <li style=\"text-align:justify\"><span style=\"color:#000000\"><span style=\"font-family:Times New Roman,Times,serif\">By providing rigorous training in disciplinary methods and theories, coupled with a diversity of substantive concentrations and educational experiences, we develop robust sociological imaginations and critical thinking in our students.</span></span></li> <li style=\"text-align:justify\"><span style=\"color:#000000\"><span style=\"font-family:Times New Roman,Times,serif\">Through a variety of service activities at the local, regional, and national levels, we model for our students and others the importance of responsible community engagement.</span></span></li> </ul> <h5 style=\"text-align:justify\"><span style=\"color:#000000\"><span style=\"font-family:Times New Roman,Times,serif\">Vision</span></span></h5> <ul> <li style=\"text-align:justify\"><span style=\"color:#000000\"><span style=\"font-family:Times New Roman,Times,serif\">We are dedicated to the production, critical examination, diffusion, and application of social knowledge in its many forms.</span></span></li> <li style=\"text-align:justify\"><span style=\"color:#000000\"><span style=\"font-family:Times New Roman,Times,serif\">To build up confidence among the students.</span></span></li> <li style=\"text-align:justify\"><span style=\"color:#000000\"><span style=\"font-family:Times New Roman,Times,serif\">To provide all the necessary facilities to the needy students.</span></span></li> <li style=\"text-align:justify\"><span style=\"color:#000000\"><span style=\"font-family:Times New Roman,Times,serif\">To create social awareness among the students.</span></span></li> <li style=\"text-align:justify\"><span style=\"color:#000000\"><span style=\"font-family:Times New Roman,Times,serif\">To guide students to create an interest in research pertaining to social issues in society.</span></span></li> </ul> <h5 style=\"text-align:justify\"><span style=\"color:#000000\"><span style=\"font-family:Times New Roman,Times,serif\">Goals</span></span></h5> <ol> <li style=\"text-align:justify\"><span style=\"color:#000000\"><span style=\"font-family:Times New Roman,Times,serif\">Key concepts: Students will be well-versed in the discipline's key concepts for analyzing the social world.</span></span></li> <li style=\"text-align:justify\"><span style=\"color:#000000\"><span style=\"font-family:Times New Roman,Times,serif\">Research Methods: Students will be proficient in qualitative and quantitative sociological research methods.</span></span></li> <li style=\"text-align:justify\"><span style=\"color:#000000\"><span style=\"font-family:Times New Roman,Times,serif\">Communication: Students will be proficient in discipline-based communication.</span></span></li> <li style=\"text-align:justify\"><span style=\"color:#000000\"><span style=\"font-family:Times New Roman,Times,serif\">The Main Aim of the Undergraduate Program is to train scientists with critical sociological knowledge, with qualifications that make them competitive in the domestic and international academic and working environment.</span></span></li> <li style=\"text-align:justify\"><span style=\"color:#000000\"><span style=\"font-family:Times New Roman,Times,serif\">Graduates of the Department of Sociology may be employed as teachers in Secondary Education, Local Government Organizations, the wider public and private sectors, among others.</span></span></li> </ol> <p style=\"text-align:justify\"><span style=\"color:#000000\"><span style=\"font-family:Times New Roman,Times,serif\">Our department aims to develop thinkers, leaders, and innovators whose subsequent efforts will benefit the human social world and life on the planet. Our research ranges from broad, global sweeps of social change to micro-level social interaction, using an array of theories and methods. We generate new knowledge through our scholarship.</span></span></p>",
+    "banner_image": "dept/banner/sociology.png",
+    "banner_image_url": "",
+    "established_year": null,
+    "order": 3
+  }
+},
+{
+  "model": "academics.department",
+  "pk": 4,
+  "fields": {
+    "name": "Geography",
+    "slug": "geography",
+    "category": "arts",
+    "hod_name": "",
+    "hod_photo": "",
+    "hod_message": "",
+    "description": "<h5 style=\"text-align:justify\"><strong><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">About Department:</span></span></span></strong></h5> <p style=\"text-align:justify\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">The Department of Geography was established in 2002, initially offering undergraduate programs. The postgraduate program in geography began in 2010, with the first batch graduating in 2012. Since then, the department has been actively involved in research, leading to the establishment of the Shaheed Nandkumar Patel Vishwavidyalaya Research Centre in 2022. Notable faculty members such as Naresh Bhaskar, Dr. Roshan Namdev, Mrs. B. Khan, and Dr. N. Guria have made significant contributions to teaching and research. The department engages in society-focused research, including flood risk assessment, drought-prone zone identification, and analysis of climate change impact. To provide students and research scholars with a productive learning environment, the department is equipped with modern facilities such as smart classrooms, computer labs, Wi-Fi, and a state-of-the-art GIS laboratory.</span></span></span></p> <h5 style=\"text-align:justify\"> </h5> <h5 style=\"text-align:justify\"><strong><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Career Goal:</span></span></span></strong></h5> <p style=\"text-align:justify\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Geography graduates are equipped for diverse roles such as GIS analysts, urban planners, environmental planners, and researchers.</span></span></span></p> <h5 style=\"text-align:justify\"><strong><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Future Goal:</span></span></span></strong></h5> <ul> <li style=\"text-align: justify;\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Develop awareness of the relationship between geography and culture.</span></span></span></li> <li style=\"text-align: justify;\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Equip students with leadership skills and community engagement.</span></span></span></li> <li style=\"text-align: justify;\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Promote spatial thinking and research capabilities.</span></span></span></li> <li style=\"text-align: justify;\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Provide infrastructure including books, computers, and GIS labs.</span></span></span></li> </ul> <h5 style=\"text-align:justify\"><strong><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Infrastructure:</span></span></span></strong></h5> <ul> <li style=\"text-align: justify;\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Departmental and library books</span></span></span></li> <li style=\"text-align: justify;\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Access to N-LIST - INFLIBNET Centre</span></span></span></li> <li style=\"text-align: justify;\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Subscribed e-Journals and e-Books</span></span></span></li> <li style=\"text-align: justify;\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Computer labs and wifi facilities</span></span></span></li> <li style=\"text-align: justify;\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Geography lab equipment including maps, GPS, and weather instruments</span></span></span></li> <li style=\"text-align: justify;\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Audio-visual projection facilities</span></span></span></li> </ul>",
+    "banner_image": "dept/banner/geography.png",
+    "banner_image_url": "",
+    "established_year": null,
+    "order": 4
+  }
+},
+{
+  "model": "academics.department",
+  "pk": 5,
+  "fields": {
+    "name": "Social Work",
+    "slug": "social-work",
+    "category": "arts",
+    "hod_name": "",
+    "hod_photo": "",
+    "hod_message": "",
+    "description": "<p style=\"text-align:justify\">Social Work</p> <p> </p>",
+    "banner_image": "dept/banner/socialwork.png",
+    "banner_image_url": "",
+    "established_year": null,
+    "order": 5
+  }
+},
+{
+  "model": "academics.department",
+  "pk": 6,
+  "fields": {
+    "name": "Political Science",
+    "slug": "political-science",
+    "category": "arts",
+    "hod_name": "",
+    "hod_photo": "",
+    "hod_message": "",
+    "description": "<h5 style=\"text-align:justify\"><strong><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Department of Botany</span></span></span></strong></h5> <p style=\"text-align:justify\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">The Department of Botany, established in our college in 2017-18, had its first batch pass out in 2019. It stands as an important department in the college, offering Plant Pathology as an elective subject.</span></span></span></p> <h5 style=\"text-align:justify\"> </h5> <h5 style=\"text-align:justify\"><strong><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Infrastructure</span></span></span></strong></h5> <h5 style=\"text-align:justify\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Our College Botany lab is well-equipped for undergraduate and postgraduate students to perform various botany practicals. The laboratory is spacious, well-ventilated, and equipped with necessary instruments such as Dissecting microscopes, compound microscopes, colorimeter, centrifuge Machine, autoclave, respirometer, botanical charts and specimens. It also contains preserved plant specimens for studying botanical names and identifying particular plants in the field.</span></span></span></h5> <h5 style=\"text-align:justify\"><strong><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Herbal Garden</span></span></span></strong></h5> <p style=\"text-align:justify\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">The botanical garden, under direct care, is adorned with various specimens essential for the study of Botany. It contains major plants like Calophyllum inophyllum, Kleinhovia hospita, Tectona grandis, Polyalthia longifolia, Cycas circinalis, and Azadirachta indica.</span></span></span></p> <h5 style=\"text-align:justify\"><strong><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Career Prospects</span></span></span></strong></h5> <p style=\"text-align:justify\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">M.Sc in Botany offers excellent career opportunities in both private and public sectors in India and abroad. Graduates can pursue careers as Ecologists, Project Managers, Environmental or Safety Specialists, Scientific Researchers, Quality Control Officers, Lab Technicians, and Medical Representatives.</span></span></span></p> <h5 style=\"text-align:justify\"><strong><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Future Scope</span></span></span></strong></h5> <p style=\"text-align:justify\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Botany degree holders can work in various roles such as plant explorer, conservationist, ecologist, environmental consultant, horticulturist, plant biochemist, nursery manager, geneticist, taxonomist, plant pathologist, and farming.</span></span></span></p>",
+    "banner_image": "dept/banner/botany.png",
+    "banner_image_url": "",
+    "established_year": null,
+    "order": 6
+  }
+},
+{
+  "model": "academics.department",
+  "pk": 7,
+  "fields": {
+    "name": "History",
+    "slug": "history",
+    "category": "arts",
+    "hod_name": "",
+    "hod_photo": "",
+    "hod_message": "",
+    "description": "Department of History",
+    "banner_image": "",
+    "banner_image_url": "",
+    "established_year": null,
+    "order": 7
+  }
+},
+{
+  "model": "academics.department",
+  "pk": 8,
+  "fields": {
+    "name": "Zoology",
+    "slug": "zoology",
+    "category": "science",
+    "hod_name": "",
+    "hod_photo": "",
+    "hod_message": "",
+    "description": "<h5><strong><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Department of Zoology</span></span></span></strong></h5> <p><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Established in 2017-18, our department emphasizes a holistic approach to animal science, fostering a deep understanding of animal biology, behavior, and conservation. With a focus on fish biology as an elective subject, students delve into the diverse world of zoology.</span></span></span></p> <h5><strong><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Infrastructure</span></span></span></strong></h5> <p><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">The department boasts well-equipped laboratories with a wide range of instruments, including microscopes, pH meters, incubators, and chromatographic columns.</span></span></span></p> <h5><strong><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Career Prospects</span></span></span></strong></h5> <p><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Graduates in Zoology find abundant opportunities in both public and private sectors, including roles as animal behaviorists, conservationists, zoo curators, wildlife educators, forensic experts, and veterinarians.</span></span></span></p> <h5><strong><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Future Scope</span></span></span></strong></h5> <p><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Zoologists can specialize in various fields such as arachnology, entomology, primatology, and ornithology, with opportunities in research, conservation organizations, national parks, and media channels like National Geographic and Animal Planet.</span></span></span></p> <h5> </h5>",
+    "banner_image": "dept/banner/zoology.png",
+    "banner_image_url": "",
+    "established_year": null,
+    "order": 8
+  }
+},
+{
+  "model": "academics.department",
+  "pk": 9,
+  "fields": {
+    "name": "Physics",
+    "slug": "physics",
+    "category": "science",
+    "hod_name": "",
+    "hod_photo": "",
+    "hod_message": "",
+    "description": "Department of Physics",
+    "banner_image": "",
+    "banner_image_url": "",
+    "established_year": null,
+    "order": 9
+  }
+},
+{
+  "model": "academics.department",
+  "pk": 10,
+  "fields": {
+    "name": "Chemistry",
+    "slug": "chemistry",
+    "category": "science",
+    "hod_name": "",
+    "hod_photo": "",
+    "hod_message": "",
+    "description": "<h5 style=\"text-align:justify\"><span style=\"color:#000000\"><strong><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\">Establishment</span></span></strong></span></h5> <p style=\"text-align:justify\"><span style=\"color:#000000\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\">The Department of Commerce and Management was established in the college in 2007-08 with B.Com, in which other courses were also added with time, B.B.A. in 2008-09, B.Com Computer Application in 2022-23 keeping in mind the new technology and M.Com in 2023-24, whose main objective is to promote education, knowledge and innovation in commerce and management.</span></span></span></p> <h5 style=\"text-align:justify\"> </h5> <h5 style=\"text-align:justify\"><span style=\"color:#000000\"><strong><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\">Infrastructure</span></span></strong></span></h5> <ul> <li style=\"text-align:justify\"><span style=\"color:#000000\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\">Books in the departmental library</span></span></span></li> <li style=\"text-align:justify\"><span style=\"color:#000000\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\">Books in the library</span></span></span></li> <li style=\"text-align:justify\"><span style=\"color:#000000\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\">N-list, INFLIBNET Access</span></span></span></li> <li style=\"text-align:justify\"><span style=\"color:#000000\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\">Subscribed E-Journals and e-Books</span></span></span></li> <li style=\"text-align:justify\"><span style=\"color:#000000\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\">Journals/periodicals subscribed by the department</span></span></span></li> <li style=\"text-align:justify\"><span style=\"color:#000000\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\">Computers in the department</span></span></span></li> <li style=\"text-align:justify\"><span style=\"color:#000000\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\">Internet facility in the department WIFI</span></span></span></li> <li style=\"text-align:justify\"><span style=\"color:#000000\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\">Audio Visual facilities/Smart classroom</span></span></span></li> <li style=\"text-align:justify\"><span style=\"color:#000000\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\">Free Notes of all the necessary topics</span></span></span></li> </ul> <h5 style=\"text-align:justify\"><span style=\"color:#000000\"><strong><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\">Career Scope</span></span></strong></span></h5> <p style=\"text-align:justify\"><span style=\"color:#000000\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\">After completing Commerce and Management, a student is well-prepared to sustain as an employee or as an entrepreneur. The student has adequate knowledge of adapting to the changes in the flexible business. Some Employment Options in Commerce and Management are Accountant, Banking, Chartered Accountant, Company Secretary, Cost Accountant, NBFC, Finance Analyst, Finance Planner, Finance Manager, Finance Consultant, Investment Analyst, Stock Broker, Portfolio Manager, Teaching, Tax Auditor, Tax Consultant, Auditor, Statistician, Mobile Application Developer, Accounts Assistant, Computer Programmer, Computer Assistant, Lecturer Computer Application, CEO, Retail Manager, HRM, Marketing Manager, Investment Banker.</span></span></span></p> <h5 style=\"text-align:justify\"><span style=\"color:#000000\"><strong><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\">Future Goals</span></span></strong></span></h5> <ul> <li style=\"text-align:justify\"><span style=\"color:#000000\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\">Excellence in teaching-learning process as reflected in results</span></span></span></li> <li style=\"text-align:justify\"><span style=\"color:#000000\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\">Contribution to the existing knowledge through research</span></span></span></li> <li style=\"text-align:justify\"><span style=\"color:#000000\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\">Service to the society through extension activities</span></span></span></li> <li style=\"text-align:justify\"><span style=\"color:#000000\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\">STUDENTS Learning &amp; Empowerment</span></span></span></li> <li style=\"text-align:justify\"><span style=\"color:#000000\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\">FACULTY &amp; STAFF Development</span></span></span></li> <li style=\"text-align:justify\"><span style=\"color:#000000\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\">CURRICULUM Enhancement &amp; Enrichment</span></span></span></li> <li style=\"text-align:justify\"><span style=\"color:#000000\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\">TECHNOLOGY, INFRASTRUCTURE, FINANCIAL RESOURCES, Optimal utilization</span></span></span></li> <li style=\"text-align:justify\"><span style=\"color:#000000\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\">ACADEMIA INDUSTRY Relationships</span></span></span></li> <li style=\"text-align:justify\"><span style=\"color:#000000\"><span style=\"font-size:14px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\">COMMUNITY Environment &amp; Value Orientation</span></span></span></li> </ul>",
+    "banner_image": "dept/banner/chemistry.png",
+    "banner_image_url": "",
+    "established_year": null,
+    "order": 10
+  }
+},
+{
+  "model": "academics.department",
+  "pk": 11,
+  "fields": {
+    "name": "Mathematics",
+    "slug": "mathematics",
+    "category": "science",
+    "hod_name": "",
+    "hod_photo": "",
+    "hod_message": "",
+    "description": "<h5><strong><span style=\"font-size:14px\"><span style=\"font-family:Verdana,Geneva,sans-serif\"><span style=\"color:#000000\">Establishment and Overview</span></span></span></strong></h5> <p><span style=\"font-family:Verdana,Geneva,sans-serif\"><span style=\"color:#000000\">Established in 2006, the Computer Science Department offers a range of UG (BCA, B.Sc. CS), PG (M.Sc. CS), and Diploma (DCA, PGDCA) courses. It also conducts enrichment and value-added courses.</span></span></p> <h5> </h5> <h5><strong><span style=\"font-size:14px\"><span style=\"font-family:Verdana,Geneva,sans-serif\"><span style=\"color:#000000\">Infrastructure</span></span></span></strong></h5> <ul> <li><span style=\"font-family:Verdana,Geneva,sans-serif\"><span style=\"color:#000000\">Advanced Computer Lab with modern hardware and software.</span></span></li> <li><span style=\"font-family:Verdana,Geneva,sans-serif\"><span style=\"color:#000000\">Smart classes and E-learning resources with high-speed Wi-Fi.</span></span></li> <li><span style=\"font-family:Verdana,Geneva,sans-serif\"><span style=\"color:#000000\">Departmental Library &amp; Digital Library with standard textbooks and reference books.</span></span></li> </ul> <h5><strong><span style=\"font-size:14px\"><span style=\"font-family:Verdana,Geneva,sans-serif\"><span style=\"color:#000000\">Career Prospects</span></span></span></strong></h5> <p><span style=\"font-family:Verdana,Geneva,sans-serif\"><span style=\"color:#000000\">The department aims to prepare professionals such as Software Engineers, Hardware Engineers, Web Developers, System Analysts, Network Engineers, Database Administrators, and System Administrators.</span></span></p> <h5><strong><span style=\"font-size:14px\"><span style=\"font-family:Verdana,Geneva,sans-serif\"><span style=\"color:#000000\">Future Scope</span></span></span></strong></h5> <ul> <li><span style=\"font-family:Verdana,Geneva,sans-serif\"><span style=\"color:#000000\">Introduction of Ph.D. courses.</span></span></li> <li><span style=\"font-family:Verdana,Geneva,sans-serif\"><span style=\"color:#000000\">Offering job-oriented professional courses in technologies like AI, Machine Learning, Data Science, Full Stack Development, Robotics Process Automation, Cloud Computing, Virtual Reality, Augmented Reality, Blockchain Technology, 5G technology, and Cybersecurity.</span></span></li> </ul> <h5> </h5> <p> </p> <table> </table>",
+    "banner_image": "dept/banner/maths.png",
+    "banner_image_url": "",
+    "established_year": null,
+    "order": 11
+  }
+},
+{
+  "model": "academics.department",
+  "pk": 12,
+  "fields": {
+    "name": "Botany",
+    "slug": "botany",
+    "category": "science",
+    "hod_name": "",
+    "hod_photo": "",
+    "hod_message": "",
+    "description": "<h5 style=\"text-align:justify\"><strong><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">About Department</span></span></span></strong></h5> <p style=\"text-align:justify\"><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">The Department is one of those in few departments which were established soon after the inception of the Chaitanya Science &amp; Arts College, Pamgarh in 2002. Over the period, the department has been nurtured under the able guidance of the eminent and educationalist/chemists. Late Dr. S.k. Vajapai then principal and eminent chemist extended his expertise in the modernization of infrastructure of the department. The present faculty members are actively engaged besides their teaching Programme in pursuing other scientific activities in frontier area of chemistry. To keep a pace with the advancement in frontier areas of chemistry our faculty members have been visiting laboratories and industries of renowned chemists of country and states. In addition, the department has been successful in establishing chemistry instrumentation, equipped with a number of modern, sophisticated instruments. This has brought the department to a level where we can venture to pursue skills in frontier areas of chemistry.</span></span></span></p> <p style=\"text-align:justify\"> </p> <h5 style=\"text-align:justify\"><strong><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Infrastructure</span></span></span></strong></h5> <p style=\"text-align:justify\"><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">The department has well-ventilated classrooms and most of them are equipped with multimedia projectors. The department also has tutorial rooms, seminar hall and virtual classrooms. The department has well-equipped laboratories and each lab is equipped with the modern and latest equipment to provide good hands on experience to students in all areas of their curriculum and to facilitate research activities.</span></span></span></p> <h5 style=\"text-align:justify\"><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Facilities and Expertise Available in the Department</span></span></span></h5> <h6 style=\"text-align:justify\"><strong><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">For the students:</span></span></span></strong></h6> <ul> <li style=\"text-align:justify\"><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Virtual classrooms, seminar hall</span></span></span></li> <li style=\"text-align:justify\"><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Well-furnished library with the facility of e-library</span></span></span></li> <li style=\"text-align:justify\"><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Smart boards in smart Class Rooms</span></span></span></li> <li style=\"text-align:justify\"><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">24x7 Internet facilities within department for all students.</span></span></span></li> </ul> <h6 style=\"text-align:justify\"><strong><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Laboratory Expertise:</span></span></span></strong></h6> <ul> <li style=\"text-align:justify\"><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Estimation by gravimetric and volumetric analysis</span></span></span></li> <li style=\"text-align:justify\"><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Isolation of natural pigments</span></span></span></li> <li style=\"text-align:justify\"><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Synthetic Organic Chemistry</span></span></span></li> </ul> <h6 style=\"text-align:justify\"><strong><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Instruments and facilities:</span></span></span></strong></h6> <ul> <li style=\"text-align:justify\"><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Conductivity Measurement instrument</span></span></span></li> <li style=\"text-align:justify\"><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Water analyzer</span></span></span></li> <li style=\"text-align:justify\"><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Photoelectric Colorimeter</span></span></span></li> <li style=\"text-align:justify\"><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">pH meter</span></span></span></li> </ul> <h5 style=\"text-align:justify\"><strong><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Student Support and Progression</span></span></span></strong></h5> <ul> <li style=\"text-align:justify\"><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Career Counseling</span></span></span></li> <li style=\"text-align:justify\"><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Mentor for each Course</span></span></span></li> <li style=\"text-align:justify\"><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Soft-skill development</span></span></span></li> <li style=\"text-align:justify\"><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Problems solution related to grievance redressal guidance</span></span></span></li> <li style=\"text-align:justify\"><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Awareness about anti ragging activities</span></span></span></li> </ul> <h5 style=\"text-align:justify\"><strong><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Best practice for the development of Chemistry</span></span></span></strong></h5> <ul> <li style=\"text-align:justify\"><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Donating personal books to the SC/ST students</span></span></span></li> <li style=\"text-align:justify\"><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Providing counseling to the students</span></span></span></li> <li style=\"text-align:justify\"><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Academic counseling</span></span></span></li> <li style=\"text-align:justify\"><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Career counseling</span></span></span></li> <li style=\"text-align:justify\"><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Felicitation ceremony/Programme for the university and class toppers</span></span></span></li> </ul> <h5 style=\"text-align:justify\"><strong><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Teaching-Learning and Evaluation</span></span></span></strong></h5> <ul> <li style=\"text-align:justify\"><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">NET/SET Preparation</span></span></span></li> <li style=\"text-align:justify\"><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Seminars in each semester</span></span></span></li> <li style=\"text-align:justify\"><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Assignments in each semester</span></span></span></li> <li style=\"text-align:justify\"><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Semester Results : Before 15th January &amp; 15th July</span></span></span></li> <li style=\"text-align:justify\"><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Internal Evaluation : Transparent</span></span></span></li> </ul> <h5 style=\"text-align:justify\"><strong><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Career Scopes</span></span></span></strong></h5> <p style=\"text-align:justify\"><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">A chemistry graduate can go for becoming pharmacologist, toxicologist, forensic scientist, chemistry teacher, geochemist among others. Chemistry plays an important and useful role towards the development and growth of number of industries. This includes industries like glass, cement, paper, textile, leather, dye etc. There is a huge application of chemistry in industries like paints, pigments, petroleum, sugar, plastics, and pharmaceuticals.</span></span></span></p> <h5 style=\"text-align:justify\"><strong><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">Future Goals</span></span></span></strong></h5> <ul> <li style=\"text-align:justify\"><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">To provide a broad foundation in chemistry that stresses scientific reasoning and analytical problem solving with molecular perspectives.</span></span></span></li> <li style=\"text-align:justify\"><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">To provide students with the skills required to succeed in graduate school, the chemical industry or professional schools.</span></span></span></li> <li style=\"text-align:justify\"><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\"><span style=\"color:#000000\">To expose the students to a breadth of experimental techniques using modern instrumentation.</span></span></span></li> </ul> <h5 style=\"text-align:justify\"> </h5> <ol> </ol>",
+    "banner_image": "dept/banner/botany.png",
+    "banner_image_url": "",
+    "established_year": null,
+    "order": 12
+  }
+},
+{
+  "model": "academics.department",
+  "pk": 13,
+  "fields": {
+    "name": "Forestry",
+    "slug": "forestry",
+    "category": "science",
+    "hod_name": "",
+    "hod_photo": "",
+    "hod_message": "",
+    "description": "<h5><strong><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\">Department of Mathematics</span></span></strong></h5> <p><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\">Unlock the beauty of numbers and patterns with our Mathematics Department. The Mathematics Department at our institution is dedicated to fostering a deep understanding of mathematical concepts and their applications. Through rigorous coursework, innovative teaching methods, and personalized mentorship, we empower students to excel in problem-solving and critical thinking skills, preparing them for diverse career paths in academia, industry, and beyond.</span></span></p> <h5><strong><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\">Career Opportunities</span></span></strong></h5> <p><span style=\"font-size:16px\"><span style=\"font-family:Tahoma,Geneva,sans-serif\">A degree in mathematics opens doors to a wide range of career opportunities in various fields, including academia, finance, technology, data science, cryptography, engineering, and more. Graduates with strong mathematical skills are in high demand across industries for their analytical prowess and problem-solving abilities.</span></span></p>",
+    "banner_image": "dept/banner/Forestry.jpg",
+    "banner_image_url": "",
+    "established_year": null,
+    "order": 13
+  }
+},
+{
+  "model": "academics.department",
+  "pk": 14,
+  "fields": {
+    "name": "Computer Science",
+    "slug": "computer-science",
+    "category": "science",
+    "hod_name": "",
+    "hod_photo": "",
+    "hod_message": "",
+    "description": "<p><span style=\"font-size:14px\"><span style=\"font-family:Times New Roman,Times,serif\">The Department of Forestry and Biodiversity, established in 2021, operates within the Faculty of Science, with a mission to foster comprehensive growth in forestry by nurturing world-class professionals and addressing the multifaceted needs of India's forests and its diverse biodiversity. Our endeavors encompass teaching, research, consultancy, extension activities, and publication to serve the forestry sector and advance academic and research excellence.</span></span></p> <p><span style=\"font-size:14px\"><span style=\"font-family:Times New Roman,Times,serif\">Our department is dedicated to addressing contemporary forestry challenges, including global concerns such as climate change, biodiversity conservation, wetlands preservation, and sustainable resource management. We emphasize solution-oriented research to tackle emerging issues and actively engage in technology transfer to stakeholders, including farmers, state forest departments, and voluntary organizations.</span></span></p> <p><span style=\"font-size:14px\"><span style=\"font-family:Times New Roman,Times,serif\">Specializations offered in Silviculture &amp; Agroforestry; Tree Breeding &amp; Forest Genetic Resources; and Forest Products &amp; Utilization enable students to delve deeper into their areas of interest, fostering expertise in diverse facets of forestry.</span></span></p> <p><span style=\"font-size:14px\"><span style=\"font-family:Times New Roman,Times,serif\">By adhering to our vision and mission, we strive to make meaningful contributions to forestry and biodiversity conservation, ensuring a sustainable future for generations to come.</span></span></p>",
+    "banner_image": "dept/banner/cs.png",
+    "banner_image_url": "",
+    "established_year": null,
+    "order": 14
+  }
+},
+{
+  "model": "academics.department",
+  "pk": 15,
+  "fields": {
+    "name": "Commerce & Management",
+    "slug": "commerce-management",
+    "category": "commerce",
+    "hod_name": "",
+    "hod_photo": "",
+    "hod_message": "",
+    "description": "",
+    "banner_image": "",
+    "banner_image_url": "",
+    "established_year": null,
+    "order": 50
+  }
+},
+{
+  "model": "academics.department",
+  "pk": 16,
+  "fields": {
+    "name": "Economics",
+    "slug": "economics",
+    "category": "arts",
+    "hod_name": "",
+    "hod_photo": "",
+    "hod_message": "",
+    "description": "",
+    "banner_image": "",
+    "banner_image_url": "",
+    "established_year": null,
+    "order": 50
+  }
+},
+{
+  "model": "academics.department",
+  "pk": 17,
+  "fields": {
+    "name": "Music",
+    "slug": "music",
+    "category": "arts",
+    "hod_name": "",
+    "hod_photo": "",
+    "hod_message": "",
+    "description": "",
+    "banner_image": "",
+    "banner_image_url": "",
+    "established_year": null,
+    "order": 50
+  }
+},
+{
+  "model": "academics.departmentbanner",
+  "pk": 1,
+  "fields": {
+    "department": 1,
+    "image": "dept/banner/hindi.png",
+    "caption": "Hindi Department",
+    "order": 0
+  }
+},
+{
+  "model": "academics.departmentbanner",
+  "pk": 2,
+  "fields": {
+    "department": 2,
+    "image": "dept/banner/1.png",
+    "caption": "English Department",
+    "order": 0
+  }
+},
+{
+  "model": "academics.departmentbanner",
+  "pk": 3,
+  "fields": {
+    "department": 3,
+    "image": "dept/banner/sociology.png",
+    "caption": "Sociology Department",
+    "order": 0
+  }
+},
+{
+  "model": "academics.departmentbanner",
+  "pk": 4,
+  "fields": {
+    "department": 4,
+    "image": "dept/banner/geography.png",
+    "caption": "Geography Department",
+    "order": 0
+  }
+},
+{
+  "model": "academics.departmentbanner",
+  "pk": 5,
+  "fields": {
+    "department": 5,
+    "image": "dept/banner/socialwork.png",
+    "caption": "Social Work Department",
+    "order": 0
+  }
+},
+{
+  "model": "academics.departmentbanner",
+  "pk": 6,
+  "fields": {
+    "department": 6,
+    "image": "dept/banner/botany.png",
+    "caption": "Political Science Department",
+    "order": 0
+  }
+},
+{
+  "model": "academics.departmentbanner",
+  "pk": 7,
+  "fields": {
+    "department": 8,
+    "image": "dept/banner/zoology.png",
+    "caption": "Zoology Department",
+    "order": 0
+  }
+},
+{
+  "model": "academics.departmentbanner",
+  "pk": 8,
+  "fields": {
+    "department": 10,
+    "image": "dept/banner/chemistry.png",
+    "caption": "Chemistry Department",
+    "order": 0
+  }
+},
+{
+  "model": "academics.departmentbanner",
+  "pk": 9,
+  "fields": {
+    "department": 11,
+    "image": "dept/banner/maths.png",
+    "caption": "Mathematics Department",
+    "order": 0
+  }
+},
+{
+  "model": "academics.departmentbanner",
+  "pk": 10,
+  "fields": {
+    "department": 12,
+    "image": "dept/banner/botany.png",
+    "caption": "Botany Department",
+    "order": 0
+  }
+},
+{
+  "model": "academics.departmentbanner",
+  "pk": 11,
+  "fields": {
+    "department": 13,
+    "image": "dept/banner/Forestry.jpg",
+    "caption": "Forestry Department",
+    "order": 0
+  }
+},
+{
+  "model": "academics.departmentbanner",
+  "pk": 12,
+  "fields": {
+    "department": 14,
+    "image": "dept/banner/cs.png",
+    "caption": "Computer Science Department",
+    "order": 0
+  }
+},
+{
+  "model": "academics.departmentbanner",
+  "pk": 13,
+  "fields": {
+    "department": 4,
+    "image": "dept/banner/canva-various-sport-equipment-gear-MAEw4JWpYTg.jpg",
+    "caption": "Tools",
+    "order": 0
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 1,
+  "fields": {
+    "department": 8,
+    "name": "Dr. Vinod Kumar Gupta",
+    "designation": "Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 1
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 2,
+  "fields": {
+    "department": 12,
+    "name": "Dr. Veenapani Dubey",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 4
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 3,
+  "fields": {
+    "department": 2,
+    "name": "Dr. Gulshan Das",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 5
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 4,
+  "fields": {
+    "department": 5,
+    "name": "Dr. A.K. Kaul",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 6
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 5,
+  "fields": {
+    "department": 8,
+    "name": "Dr. Geetanjali Tiwari",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 7
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 6,
+  "fields": {
+    "department": 15,
+    "name": "Dr. Ajay Shrivastava",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 8
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 7,
+  "fields": {
+    "department": 10,
+    "name": "Dr. Mahendra Sahu",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 9
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 8,
+  "fields": {
+    "department": 16,
+    "name": "Dr. Rajeev Kumar Awasthi",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 10
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 9,
+  "fields": {
+    "department": 14,
+    "name": "Dr. S.K. Sharma",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 11
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 10,
+  "fields": {
+    "department": 15,
+    "name": "Dr. Ashok Singh Yadav",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 12
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 11,
+  "fields": {
+    "department": 12,
+    "name": "Dr. Fergus Mark Anthony",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 13
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 12,
+  "fields": {
+    "department": 6,
+    "name": "Dr. Kiran Dubey",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 14
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 13,
+  "fields": {
+    "department": 9,
+    "name": "Mr. Vivek Yashwant Joglekar",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 15
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 14,
+  "fields": {
+    "department": 3,
+    "name": "Mr. Jitendra Kumar",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 16
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 15,
+  "fields": {
+    "department": 6,
+    "name": "Mr. D.K. Kaushik",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 17
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 16,
+  "fields": {
+    "department": 4,
+    "name": "Mr. Roshan Kumar",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 18
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 17,
+  "fields": {
+    "department": 14,
+    "name": "Mr. Prabhat Kumar Mishra",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 19
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 18,
+  "fields": {
+    "department": 12,
+    "name": "Miss Ruby Singh",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 20
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 19,
+  "fields": {
+    "department": 14,
+    "name": "Mr. Ishwar Prasad Suryawanshi",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 21
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 20,
+  "fields": {
+    "department": 8,
+    "name": "Mr. Ajay Kumar Sahu",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 22
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 21,
+  "fields": {
+    "department": 2,
+    "name": "Mr. Rohan Verma",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 23
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 22,
+  "fields": {
+    "department": 2,
+    "name": "Miss Suparna Das",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 24
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 23,
+  "fields": {
+    "department": 12,
+    "name": "Miss Satrupa Singh",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 25
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 24,
+  "fields": {
+    "department": 14,
+    "name": "Mr. Dhaneshwar Suryavanshi",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 26
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 25,
+  "fields": {
+    "department": 8,
+    "name": "Mrs. Shubdha V. Joglekar",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 27
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 26,
+  "fields": {
+    "department": 7,
+    "name": "Mr. Siddhant Sharma",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 28
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 27,
+  "fields": {
+    "department": 3,
+    "name": "Mr. Sanjay Baghel",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 29
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 28,
+  "fields": {
+    "department": 15,
+    "name": "Mr. Moradhwaj Dixit",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 30
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 29,
+  "fields": {
+    "department": 2,
+    "name": "Mrs. Chanchal Yadav",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 31
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 30,
+  "fields": {
+    "department": 14,
+    "name": "Mr. Indra Kumar Patel",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 32
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 31,
+  "fields": {
+    "department": 15,
+    "name": "Miss Neha Sahu",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 33
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 32,
+  "fields": {
+    "department": 2,
+    "name": "Miss Yamini Lahare",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 34
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 33,
+  "fields": {
+    "department": 1,
+    "name": "Miss Leena Yadav",
+    "designation": "Assistant Professor",
+    "qualification": "MA",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 35
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 34,
+  "fields": {
+    "department": 10,
+    "name": "Miss Anubha Tiwari",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 36
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 35,
+  "fields": {
+    "department": 17,
+    "name": "Mr. Arijit Bhattacharjee",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 37
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 36,
+  "fields": {
+    "department": 9,
+    "name": "Miss Priti Bhardwaj",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 38
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 37,
+  "fields": {
+    "department": 8,
+    "name": "Miss Bhagwati Sahu",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 39
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 38,
+  "fields": {
+    "department": 5,
+    "name": "Mr. Abhishek Pandey",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 40
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 39,
+  "fields": {
+    "department": 10,
+    "name": "Mr. Devanand Sahu",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 41
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 40,
+  "fields": {
+    "department": 14,
+    "name": "Mr. Bhushan Kumar Kashyap",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 42
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 41,
+  "fields": {
+    "department": 10,
+    "name": "Mr. Rishabh Deo Pandey",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 43
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 42,
+  "fields": {
+    "department": 4,
+    "name": "Miss Bushra Khan",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 44
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 43,
+  "fields": {
+    "department": 10,
+    "name": "Miss Bhawana Pandey",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 45
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 44,
+  "fields": {
+    "department": 11,
+    "name": "Mr. Anantjeet Singh Chandel",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 46
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 45,
+  "fields": {
+    "department": 8,
+    "name": "Miss Dimple Patel",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 47
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 46,
+  "fields": {
+    "department": 12,
+    "name": "Mr. Nand Kumar Dasena",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 48
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 47,
+  "fields": {
+    "department": 11,
+    "name": "Mr. Jhula Ram Yadav",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 49
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 48,
+  "fields": {
+    "department": 1,
+    "name": "Mr. Suresh Kumar Bhardwaj",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 50
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 49,
+  "fields": {
+    "department": 14,
+    "name": "Mrs. Anima Choubey",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 51
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 50,
+  "fields": {
+    "department": 11,
+    "name": "Mr. Yogesh Kumar",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 52
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 51,
+  "fields": {
+    "department": 12,
+    "name": "Mr. Rahul Patel",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 53
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 52,
+  "fields": {
+    "department": 15,
+    "name": "Mr. Rupesh Kumar",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 54
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 53,
+  "fields": {
+    "department": 4,
+    "name": "Mr. Vikas Dinkar",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 55
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 54,
+  "fields": {
+    "department": 14,
+    "name": "Mr. Salik Ram",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 56
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 55,
+  "fields": {
+    "department": 3,
+    "name": "Mr. Harishankar Dasena",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 57
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 56,
+  "fields": {
+    "department": 5,
+    "name": "Miss Priya Dubey",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 58
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 57,
+  "fields": {
+    "department": 9,
+    "name": "Miss Akanksha",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 59
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 58,
+  "fields": {
+    "department": 1,
+    "name": "Mr. N.M. Tiwari",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 60
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 59,
+  "fields": {
+    "department": 1,
+    "name": "Mr. Aashutosh Aditya",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 61
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 60,
+  "fields": {
+    "department": 4,
+    "name": "Mr. Amitesh Singh",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 62
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 61,
+  "fields": {
+    "department": 9,
+    "name": "Mr. Aruj Verma",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 63
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 62,
+  "fields": {
+    "department": 10,
+    "name": "Mr. Djendra Kumar",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 64
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 63,
+  "fields": {
+    "department": 11,
+    "name": "Mrs. Mayuri Deshmukh",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 65
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 64,
+  "fields": {
+    "department": 3,
+    "name": "Mrs. Aparna Tiwari",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 66
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 65,
+  "fields": {
+    "department": 11,
+    "name": "Mr. Chandrashekhar Yadav",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 67
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 66,
+  "fields": {
+    "department": 9,
+    "name": "Miss Pranjali Tiwari",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 68
+  }
+},
+{
+  "model": "academics.departmentfaculty",
+  "pk": 67,
+  "fields": {
+    "department": 6,
+    "name": "Mrs. Bhagwati Sahu",
+    "designation": "Assistant Professor",
+    "qualification": "",
+    "specialization": "",
+    "photo": "",
+    "email": "",
+    "phone": "",
+    "order": 69
+  }
+},
+{
+  "model": "academics.program",
+  "pk": 22,
+  "fields": {
+    "department": null,
+    "name": "B.A. I, II, III (FC, Political Science, History, Music, Sociology, Hindi, Geography, Economics)",
+    "program_type": "ug",
+    "duration": "3",
+    "eligibility": "",
+    "seats": "290",
+    "introduced_year": 2001,
+    "affiliation_status": "Permanent",
+    "fee_per_year": null,
+    "description": "",
+    "order": 0
+  }
+},
+{
+  "model": "academics.program",
+  "pk": 23,
+  "fields": {
+    "department": null,
+    "name": "B.Sc. I, II, III (FC, Chemistry, Botany, Zoology)",
+    "program_type": "ug",
+    "duration": "3",
+    "eligibility": "",
+    "seats": "180",
+    "introduced_year": 2001,
+    "affiliation_status": "Permanent",
+    "fee_per_year": null,
+    "description": "",
+    "order": 10
+  }
+},
+{
+  "model": "academics.program",
+  "pk": 24,
+  "fields": {
+    "department": null,
+    "name": "B.Sc. I, II, III (FC, Physics, Chemistry, Maths, Computer Science)",
+    "program_type": "ug",
+    "duration": "3",
+    "eligibility": "",
+    "seats": "60",
+    "introduced_year": 2001,
+    "affiliation_status": "Permanent",
+    "fee_per_year": null,
+    "description": "",
+    "order": 20
+  }
+},
+{
+  "model": "academics.program",
+  "pk": 25,
+  "fields": {
+    "department": 13,
+    "name": "B.Sc. I, II (Forestry)",
+    "program_type": "ug",
+    "duration": "3",
+    "eligibility": "",
+    "seats": "40",
+    "introduced_year": 2022,
+    "affiliation_status": "Temporary",
+    "fee_per_year": null,
+    "description": "",
+    "order": 30
+  }
+},
+{
+  "model": "academics.program",
+  "pk": 26,
+  "fields": {
+    "department": 15,
+    "name": "B.Com. I, II, III (All Compulsory Subject)",
+    "program_type": "ug",
+    "duration": "3",
+    "eligibility": "",
+    "seats": "30",
+    "introduced_year": 2007,
+    "affiliation_status": "Permanent",
+    "fee_per_year": null,
+    "description": "",
+    "order": 40
+  }
+},
+{
+  "model": "academics.program",
+  "pk": 27,
+  "fields": {
+    "department": 15,
+    "name": "B.Com. I, II (Computer Application)",
+    "program_type": "ug",
+    "duration": "3",
+    "eligibility": "",
+    "seats": "40",
+    "introduced_year": 2022,
+    "affiliation_status": "Temporary",
+    "fee_per_year": null,
+    "description": "",
+    "order": 50
+  }
+},
+{
+  "model": "academics.program",
+  "pk": 28,
+  "fields": {
+    "department": 14,
+    "name": "PGDCA (All Compulsory Subject)",
+    "program_type": "diploma",
+    "duration": "1",
+    "eligibility": "",
+    "seats": "95",
+    "introduced_year": 2007,
+    "affiliation_status": "Permanent",
+    "fee_per_year": null,
+    "description": "",
+    "order": 60
+  }
+},
+{
+  "model": "academics.program",
+  "pk": 29,
+  "fields": {
+    "department": 14,
+    "name": "B.C.A I, II, III (All Compulsory Subject)",
+    "program_type": "ug",
+    "duration": "3",
+    "eligibility": "",
+    "seats": "35",
+    "introduced_year": 2007,
+    "affiliation_status": "Permanent",
+    "fee_per_year": null,
+    "description": "",
+    "order": 70
+  }
+},
+{
+  "model": "academics.program",
+  "pk": 30,
+  "fields": {
+    "department": 15,
+    "name": "B.B.A. I, II, III (All Compulsory Subject)",
+    "program_type": "ug",
+    "duration": "3",
+    "eligibility": "",
+    "seats": "30",
+    "introduced_year": 2008,
+    "affiliation_status": "Permanent",
+    "fee_per_year": null,
+    "description": "",
+    "order": 80
+  }
+},
+{
+  "model": "academics.program",
+  "pk": 31,
+  "fields": {
+    "department": 14,
+    "name": "DCA (All Compulsory Subject)",
+    "program_type": "diploma",
+    "duration": "1",
+    "eligibility": "",
+    "seats": "40",
+    "introduced_year": 2008,
+    "affiliation_status": "Permanent",
+    "fee_per_year": null,
+    "description": "",
+    "order": 90
+  }
+},
+{
+  "model": "academics.program",
+  "pk": 32,
+  "fields": {
+    "department": 5,
+    "name": "MSW Pre/Final (All Compulsory Subject)",
+    "program_type": "pg",
+    "duration": "2",
+    "eligibility": "",
+    "seats": "20",
+    "introduced_year": 2013,
+    "affiliation_status": "Permanent",
+    "fee_per_year": null,
+    "description": "",
+    "order": 100
+  }
+},
+{
+  "model": "academics.program",
+  "pk": 33,
+  "fields": {
+    "department": null,
+    "name": "M.A. Pre/Final (Hindi, Sociology, Geography)",
+    "program_type": "pg",
+    "duration": "2",
+    "eligibility": "",
+    "seats": "30 - 30",
+    "introduced_year": 2014,
+    "affiliation_status": "Permanent",
+    "fee_per_year": null,
+    "description": "",
+    "order": 110
+  }
+},
+{
+  "model": "academics.program",
+  "pk": 34,
+  "fields": {
+    "department": 2,
+    "name": "M.A. Pre/Final (English)",
+    "program_type": "pg",
+    "duration": "2",
+    "eligibility": "",
+    "seats": "20",
+    "introduced_year": 2015,
+    "affiliation_status": "Permanent",
+    "fee_per_year": null,
+    "description": "",
+    "order": 120
+  }
+},
+{
+  "model": "academics.program",
+  "pk": 35,
+  "fields": {
+    "department": 6,
+    "name": "M.A. Pre (Political Science)",
+    "program_type": "pg",
+    "duration": "2",
+    "eligibility": "",
+    "seats": "30",
+    "introduced_year": 2023,
+    "affiliation_status": "Temporary",
+    "fee_per_year": null,
+    "description": "",
+    "order": 130
+  }
+},
+{
+  "model": "academics.program",
+  "pk": 36,
+  "fields": {
+    "department": 11,
+    "name": "M.Sc. Pre/Final (Maths)",
+    "program_type": "pg",
+    "duration": "2",
+    "eligibility": "",
+    "seats": "20",
+    "introduced_year": 2015,
+    "affiliation_status": "Permanent",
+    "fee_per_year": null,
+    "description": "",
+    "order": 140
+  }
+},
+{
+  "model": "academics.program",
+  "pk": 37,
+  "fields": {
+    "department": null,
+    "name": "M.Sc. Pre/Final (Computer Science, Chemistry)",
+    "program_type": "pg",
+    "duration": "2",
+    "eligibility": "",
+    "seats": "40 - 40",
+    "introduced_year": 2016,
+    "affiliation_status": "Permanent",
+    "fee_per_year": null,
+    "description": "",
+    "order": 150
+  }
+},
+{
+  "model": "academics.program",
+  "pk": 38,
+  "fields": {
+    "department": null,
+    "name": "M.Sc. Pre/Final (Botany, Zoology)",
+    "program_type": "pg",
+    "duration": "2",
+    "eligibility": "",
+    "seats": "40 - 40",
+    "introduced_year": 2018,
+    "affiliation_status": "Permanent",
+    "fee_per_year": null,
+    "description": "",
+    "order": 160
+  }
+},
+{
+  "model": "academics.program",
+  "pk": 39,
+  "fields": {
+    "department": 9,
+    "name": "M.Sc. Pre/Final (Physics)",
+    "program_type": "pg",
+    "duration": "2",
+    "eligibility": "",
+    "seats": "20",
+    "introduced_year": 2019,
+    "affiliation_status": "Permanent",
+    "fee_per_year": null,
+    "description": "",
+    "order": 170
+  }
+},
+{
+  "model": "academics.program",
+  "pk": 40,
+  "fields": {
+    "department": 15,
+    "name": "M.Com Pre (All Compulsory Subject)",
+    "program_type": "pg",
+    "duration": "2",
+    "eligibility": "",
+    "seats": "30",
+    "introduced_year": 2023,
+    "affiliation_status": "Temporary",
+    "fee_per_year": null,
+    "description": "",
+    "order": 180
+  }
+},
+{
+  "model": "academics.copomapping",
+  "pk": 1,
+  "fields": {
+    "department": 2,
+    "course_code": "cc",
+    "course_name": "hindi",
+    "program_outcomes": "gfgfg",
+    "course_outcomes": "fgfg",
+    "mapping_matrix": "gfg"
+  }
+},
+{
+  "model": "academics.copomapping",
+  "pk": 2,
+  "fields": {
+    "department": 2,
+    "course_code": "rt",
+    "course_name": "eng",
+    "program_outcomes": "fdfd",
+    "course_outcomes": "dfd",
+    "mapping_matrix": ""
+  }
+},
+{
+  "model": "academics.syllabus",
+  "pk": 1,
+  "fields": {
+    "department": 14,
+    "program": null,
+    "title": "DCA I, II Sem",
+    "document": "syllabus/DCA_Syllbus.pdf",
+    "document_url": "",
+    "academic_year": "",
+    "order": 1,
+    "uploaded_at": "2026-06-18T05:17:48.389Z"
+  }
+},
+{
+  "model": "academics.syllabus",
+  "pk": 2,
+  "fields": {
+    "department": 4,
+    "program": null,
+    "title": "M.A. Geography I, II Sem",
+    "document": "syllabus/Geography_Syllabus.pdf",
+    "document_url": "",
+    "academic_year": "",
+    "order": 2,
+    "uploaded_at": "2026-06-18T05:17:48.403Z"
+  }
+},
+{
+  "model": "academics.syllabus",
+  "pk": 3,
+  "fields": {
+    "department": 2,
+    "program": null,
+    "title": "M.A. English I, II Sem",
+    "document": "syllabus/M.A._English_Syllabus.pdf",
+    "document_url": "",
+    "academic_year": "",
+    "order": 3,
+    "uploaded_at": "2026-06-18T05:17:48.413Z"
+  }
+},
+{
+  "model": "academics.syllabus",
+  "pk": 4,
+  "fields": {
+    "department": 6,
+    "program": null,
+    "title": "MA Political Science I, II Sem",
+    "document": "syllabus/M._A._Political_Science_Syllabus.pdf",
+    "document_url": "",
+    "academic_year": "",
+    "order": 4,
+    "uploaded_at": "2026-06-18T05:17:48.425Z"
+  }
+},
+{
+  "model": "academics.syllabus",
+  "pk": 5,
+  "fields": {
+    "department": 3,
+    "program": null,
+    "title": "M. A. Sociology I, II Sem",
+    "document": "syllabus/M._A._Sociology_Syllabus.pdf",
+    "document_url": "",
+    "academic_year": "",
+    "order": 5,
+    "uploaded_at": "2026-06-18T05:17:48.436Z"
+  }
+},
+{
+  "model": "academics.syllabus",
+  "pk": 6,
+  "fields": {
+    "department": 15,
+    "program": null,
+    "title": "M.Com I, II Sem",
+    "document": "syllabus/M.COM_Syllabus.pdf",
+    "document_url": "",
+    "academic_year": "",
+    "order": 6,
+    "uploaded_at": "2026-06-18T05:17:48.446Z"
+  }
+},
+{
+  "model": "academics.syllabus",
+  "pk": 7,
+  "fields": {
+    "department": 12,
+    "program": null,
+    "title": "M.Sc. Botany I, II Sem",
+    "document": "syllabus/M.Sc._Botany_Syllabus.pdf",
+    "document_url": "",
+    "academic_year": "",
+    "order": 7,
+    "uploaded_at": "2026-06-18T05:17:48.458Z"
+  }
+},
+{
+  "model": "academics.syllabus",
+  "pk": 8,
+  "fields": {
+    "department": 10,
+    "program": null,
+    "title": "M.Sc. Chemistry I, II Sem",
+    "document": "syllabus/M.Sc._Chemistry_Syllabus.pdf",
+    "document_url": "",
+    "academic_year": "",
+    "order": 8,
+    "uploaded_at": "2026-06-18T05:17:48.468Z"
+  }
+},
+{
+  "model": "academics.syllabus",
+  "pk": 9,
+  "fields": {
+    "department": 14,
+    "program": null,
+    "title": "M.Sc. Computer Science I, II Sem",
+    "document": "syllabus/M.Sc_Computer_Science_Syllabus.pdf",
+    "document_url": "",
+    "academic_year": "",
+    "order": 9,
+    "uploaded_at": "2026-06-18T05:17:48.478Z"
+  }
+},
+{
+  "model": "academics.syllabus",
+  "pk": 10,
+  "fields": {
+    "department": 11,
+    "program": null,
+    "title": "M.Sc. Mathematics I, II Sem",
+    "document": "syllabus/M.Sc_Mathematics_Syllabus.pdf",
+    "document_url": "",
+    "academic_year": "",
+    "order": 10,
+    "uploaded_at": "2026-06-18T05:17:48.493Z"
+  }
+},
+{
+  "model": "academics.syllabus",
+  "pk": 11,
+  "fields": {
+    "department": 9,
+    "program": null,
+    "title": "M.Sc. Physics I, II Sem",
+    "document": "syllabus/M.Sc._physics_syllabus.pdf",
+    "document_url": "",
+    "academic_year": "",
+    "order": 11,
+    "uploaded_at": "2026-06-18T05:17:48.504Z"
+  }
+},
+{
+  "model": "academics.syllabus",
+  "pk": 12,
+  "fields": {
+    "department": 8,
+    "program": null,
+    "title": "M.Sc. Zoology I, II Sem",
+    "document": "syllabus/M.Sc._Zoology_Syllabus.pdf",
+    "document_url": "",
+    "academic_year": "",
+    "order": 12,
+    "uploaded_at": "2026-06-18T05:17:48.513Z"
+  }
+},
+{
+  "model": "academics.syllabus",
+  "pk": 13,
+  "fields": {
+    "department": 5,
+    "program": null,
+    "title": "MSW I, II Sem",
+    "document": "syllabus/MSW_Syllabus.pdf",
+    "document_url": "",
+    "academic_year": "",
+    "order": 13,
+    "uploaded_at": "2026-06-18T05:17:48.524Z"
+  }
+},
+{
+  "model": "academics.syllabus",
+  "pk": 14,
+  "fields": {
+    "department": 14,
+    "program": null,
+    "title": "PGDCA I, II Sem",
+    "document": "syllabus/PGDCA_Syllabus.pdf",
+    "document_url": "",
+    "academic_year": "",
+    "order": 14,
+    "uploaded_at": "2026-06-18T05:17:48.534Z"
+  }
+},
+{
+  "model": "academics.syllabus",
+  "pk": 15,
+  "fields": {
+    "department": 1,
+    "program": 22,
+    "title": "B.A Second Semester Syllabus",
+    "document": "syllabus/UG_Arts_Second_Semester_Syllabus.pdf",
+    "document_url": "",
+    "academic_year": "",
+    "order": 15,
+    "uploaded_at": "2026-06-18T05:17:48.544Z"
+  }
+},
+{
+  "model": "academics.syllabus",
+  "pk": 16,
+  "fields": {
+    "department": 15,
+    "program": null,
+    "title": "BBA Second Semester Syllabus",
+    "document": "syllabus/UG_BBA_Second_Semester_Syllabus.pdf",
+    "document_url": "",
+    "academic_year": "",
+    "order": 16,
+    "uploaded_at": "2026-06-18T05:17:48.555Z"
+  }
+},
+{
+  "model": "academics.syllabus",
+  "pk": 17,
+  "fields": {
+    "department": 14,
+    "program": null,
+    "title": "BCA Second Semester Syllabus",
+    "document": "syllabus/UG_BCA_Second_Semester_Syllabus.pdf",
+    "document_url": "",
+    "academic_year": "",
+    "order": 17,
+    "uploaded_at": "2026-06-18T05:17:48.567Z"
+  }
+},
+{
+  "model": "academics.syllabus",
+  "pk": 18,
+  "fields": {
+    "department": 15,
+    "program": null,
+    "title": "B.Com Second Semester Syllabus",
+    "document": "syllabus/UG_B.Com_Second_Semester_Syllabus.pdf",
+    "document_url": "",
+    "academic_year": "",
+    "order": 18,
+    "uploaded_at": "2026-06-18T05:17:48.577Z"
+  }
+},
+{
+  "model": "academics.syllabus",
+  "pk": 19,
+  "fields": {
+    "department": 12,
+    "program": 23,
+    "title": "B.Sc. Bio Second Semester Syllabus",
+    "document": "syllabus/UG_Bio_Second_Semester_Syllabus.pdf",
+    "document_url": "",
+    "academic_year": "",
+    "order": 19,
+    "uploaded_at": "2026-06-18T05:17:48.588Z"
+  }
+},
+{
+  "model": "academics.syllabus",
+  "pk": 20,
+  "fields": {
+    "department": 11,
+    "program": null,
+    "title": "B.Sc. (Maths) Second Semester Syllabus",
+    "document": "syllabus/UG_Maths_Second_Semester_Syllabus.pdf",
+    "document_url": "",
+    "academic_year": "",
+    "order": 20,
+    "uploaded_at": "2026-06-18T05:17:48.599Z"
+  }
+}
+]

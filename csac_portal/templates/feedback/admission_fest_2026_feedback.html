@@ -1,0 +1,342 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!-- Breadcrumb Section -->
+<section class="rts-breadcrumb breadcrumb-height breadcumb-bg" style="{% with bcimg=breadcrumb_images.feedback_student %}{% if bcimg %}background-image: url('{{ bcimg }}');{% endif %}{% endwith %}">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb-content">
+                    <h2 class="section-title">{{ breadcrumb }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Feedback Form Section -->
+<section class="rts-section-padding py-5">
+    <div class="container">
+
+        <div class="row justify-content-center">
+            <div class="col-lg-9">
+
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-success alert-dismissible fade show shadow-sm mb-4" role="alert">
+                            <i class="fas fa-check-circle me-2"></i> {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <div class="card border-0 shadow-lg" style="border-top: 5px solid #E61013 !important;">
+                    <div class="card-body p-4 p-md-5">
+
+                        <!-- Header -->
+                        <div class="text-center mb-4">
+                            <p class="text-uppercase fw-semibold mb-1 small" style="letter-spacing: 1px; color: #6b7280;">
+                                Chaitanya Science and Arts College, Pamgarh
+                            </p>
+                            <p class="text-muted small mb-3">An Autonomous Institution | NAAC Accredited Grade 'A'</p>
+                            <h3 class="fw-bold mb-2" style="color: #E61013;">
+                                ✨ Admission Fest 2026 – Feedback Form ✨
+                            </h3>
+                            <p class="text-muted mb-0">
+                                Special Meet &amp; Greet with Chhattisgarh Superstar <strong>Mann Qureshi</strong>
+                            </p>
+                        </div>
+
+                        <div class="alert border-0 mb-4" style="background: #fff5f5; color: #4b5563;">
+                            <p class="mb-2">Thank you for being a part of <strong>Admission Fest 2026</strong>!</p>
+                            <p class="mb-0 small">
+                                We hope you enjoyed the celebration and the special opportunity to meet
+                                Chhattisgarh Superstar Mann Qureshi. Your feedback is valuable to us — please
+                                take a minute to share your experience and help us make our future events even better.
+                            </p>
+                        </div>
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                        {% endif %}
+
+                        <form method="post" class="needs-validation" novalidate>
+                            {% csrf_token %}
+
+                            <!-- Section 1 -->
+                            <div class="mb-5">
+                                <h5 class="fw-bold border-bottom pb-2 mb-1" style="color: #E61013;">
+                                    <i class="fas fa-user me-2"></i>Tell Us About Yourself
+                                </h5>
+                                <p class="text-muted small mb-4">Just a few details before you share your Admission Fest experience.</p>
+
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold text-dark">
+                                            {{ form.name.label }} <span class="text-danger">*</span>
+                                        </label>
+                                        {{ form.name }}
+                                        <div class="text-danger small">{{ form.name.errors }}</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold text-dark">
+                                            {{ form.visitor_type.label }} <span class="text-danger">*</span>
+                                        </label>
+                                        {{ form.visitor_type }}
+                                        <div class="text-danger small">{{ form.visitor_type.errors }}</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold text-dark">{{ form.institution_name.label }}</label>
+                                        {{ form.institution_name }}
+                                        <div class="form-text">Optional</div>
+                                        <div class="text-danger small">{{ form.institution_name.errors }}</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold text-dark">{{ form.city_village.label }}</label>
+                                        {{ form.city_village }}
+                                        <div class="form-text">Optional</div>
+                                        <div class="text-danger small">{{ form.city_village.errors }}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Section 2 -->
+                            <div class="mb-5">
+                                <h5 class="fw-bold border-bottom pb-2 mb-1" style="color: #E61013;">
+                                    <i class="fas fa-calendar-check me-2"></i>Your Admission Fest Experience
+                                </h5>
+                                <p class="text-muted small mb-4">Tell us what brought you to Admission Fest 2026.</p>
+
+                                <div class="mb-4">
+                                    <label class="form-label fw-semibold text-dark">
+                                        {{ form.attractions.label }} <span class="text-danger">*</span>
+                                    </label>
+                                    <p class="text-muted small mb-2">Select all that apply</p>
+                                    <div class="row g-2">
+                                        {% for checkbox in form.attractions %}
+                                            <div class="col-md-6">
+                                                <div class="form-check">
+                                                    {{ checkbox.tag }}
+                                                    <label class="form-check-label" for="{{ checkbox.id_for_label }}">
+                                                        {{ checkbox.choice_label }}
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="text-danger small">{{ form.attractions.errors }}</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold text-dark">
+                                        {{ form.heard_from.label }} <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.heard_from }}
+                                    <div class="text-danger small">{{ form.heard_from.errors }}</div>
+                                </div>
+                            </div>
+
+                            <!-- Section 3 -->
+                            <div class="mb-5">
+                                <h5 class="fw-bold border-bottom pb-2 mb-1" style="color: #E61013;">
+                                    <i class="fas fa-star me-2"></i>Rate Your Experience
+                                </h5>
+                                <p class="text-muted small mb-4">Please rate different aspects of Admission Fest 2026.</p>
+
+                                <div class="mb-3 row align-items-center border-bottom py-2">
+                                    <label class="col-sm-7 col-form-label fw-semibold text-dark">
+                                        {{ form.overall_rating.label }} <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="col-sm-5">
+                                        {{ form.overall_rating }}
+                                        <div class="text-danger small">{{ form.overall_rating.errors }}</div>
+                                    </div>
+                                </div>
+                                <div class="mb-3 row align-items-center border-bottom py-2">
+                                    <label class="col-sm-7 col-form-label fw-semibold text-dark">
+                                        {{ form.organization_rating.label }} <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="col-sm-5">
+                                        {{ form.organization_rating }}
+                                        <div class="text-danger small">{{ form.organization_rating.errors }}</div>
+                                    </div>
+                                </div>
+                                <div class="mb-3 row align-items-center border-bottom py-2">
+                                    <label class="col-sm-7 col-form-label fw-semibold text-dark">
+                                        {{ form.hospitality_rating.label }} <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="col-sm-5">
+                                        {{ form.hospitality_rating }}
+                                        <div class="text-danger small">{{ form.hospitality_rating.errors }}</div>
+                                    </div>
+                                </div>
+                                <div class="mb-3 row align-items-center border-bottom py-2">
+                                    <label class="col-sm-7 col-form-label fw-semibold text-dark">
+                                        {{ form.atmosphere_rating.label }} <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="col-sm-5">
+                                        {{ form.atmosphere_rating }}
+                                        <div class="text-danger small">{{ form.atmosphere_rating.errors }}</div>
+                                    </div>
+                                </div>
+                                <div class="mb-3 row align-items-center border-bottom py-2">
+                                    <label class="col-sm-7 col-form-label fw-semibold text-dark">
+                                        {{ form.stage_programme_rating.label }} <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="col-sm-5">
+                                        {{ form.stage_programme_rating }}
+                                        <div class="text-danger small">{{ form.stage_programme_rating.errors }}</div>
+                                    </div>
+                                </div>
+                                <div class="mb-3 row align-items-center border-bottom py-2">
+                                    <label class="col-sm-7 col-form-label fw-semibold text-dark">
+                                        {{ form.crowd_management_rating.label }} <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="col-sm-5">
+                                        {{ form.crowd_management_rating }}
+                                        <div class="text-danger small">{{ form.crowd_management_rating.errors }}</div>
+                                    </div>
+                                </div>
+                                <div class="mb-3 row align-items-center border-bottom py-2">
+                                    <label class="col-sm-7 col-form-label fw-semibold text-dark">
+                                        {{ form.facilities_rating.label }} <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="col-sm-5">
+                                        {{ form.facilities_rating }}
+                                        <div class="text-danger small">{{ form.facilities_rating.errors }}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Section 4 -->
+                            <div class="mb-5">
+                                <h5 class="fw-bold border-bottom pb-2 mb-1" style="color: #E61013;">
+                                    <i class="fas fa-microphone-alt me-2"></i>Mann Qureshi – Meet &amp; Greet
+                                </h5>
+                                <p class="text-muted small mb-4">Tell us about your experience of the special Meet &amp; Greet.</p>
+
+                                <div class="mb-4">
+                                    <label class="form-label fw-semibold text-dark">
+                                        {{ form.attended_meet_greet.label }} <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="d-flex flex-column gap-2 mt-1">
+                                        {% for radio in form.attended_meet_greet %}
+                                            <div class="form-check">
+                                                {{ radio.tag }}
+                                                <label class="form-check-label" for="{{ radio.id_for_label }}">
+                                                    {{ radio.choice_label }}
+                                                </label>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="text-danger small">{{ form.attended_meet_greet.errors }}</div>
+                                </div>
+
+                                <div class="mb-3 row align-items-center border-bottom py-2">
+                                    <label class="col-sm-7 col-form-label fw-semibold text-dark">
+                                        {{ form.meet_greet_rating.label }}
+                                    </label>
+                                    <div class="col-sm-5">
+                                        {{ form.meet_greet_rating }}
+                                        <div class="form-text">Optional if you did not attend</div>
+                                        <div class="text-danger small">{{ form.meet_greet_rating.errors }}</div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold text-dark">
+                                        {{ form.excitement_level.label }} <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.excitement_level }}
+                                    <div class="text-danger small">{{ form.excitement_level.errors }}</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold text-dark">
+                                        {{ form.presence_made_exciting.label }} <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.presence_made_exciting }}
+                                    <div class="text-danger small">{{ form.presence_made_exciting.errors }}</div>
+                                </div>
+                            </div>
+
+                            <!-- Section 5 -->
+                            <div class="mb-5">
+                                <h5 class="fw-bold border-bottom pb-2 mb-1" style="color: #E61013;">
+                                    <i class="fas fa-comment-dots me-2"></i>Your Thoughts &amp; Future Events
+                                </h5>
+                                <p class="text-muted small mb-4">Help us make the next Admission Fest even better.</p>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold text-dark">{{ form.best_part.label }}</label>
+                                    {{ form.best_part }}
+                                    <div class="text-danger small">{{ form.best_part.errors }}</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold text-dark">{{ form.improvements.label }}</label>
+                                    {{ form.improvements }}
+                                    <div class="text-danger small">{{ form.improvements.errors }}</div>
+                                </div>
+
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold text-dark">
+                                            {{ form.would_recommend.label }} <span class="text-danger">*</span>
+                                        </label>
+                                        {{ form.would_recommend }}
+                                        <div class="text-danger small">{{ form.would_recommend.errors }}</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold text-dark">
+                                            {{ form.would_attend_again.label }} <span class="text-danger">*</span>
+                                        </label>
+                                        {{ form.would_attend_again }}
+                                        <div class="text-danger small">{{ form.would_attend_again.errors }}</div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold text-dark">{{ form.interested_in_admission.label }}</label>
+                                    {{ form.interested_in_admission }}
+                                    <div class="form-text">Optional</div>
+                                    <div class="text-danger small">{{ form.interested_in_admission.errors }}</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold text-dark">{{ form.additional_comments.label }}</label>
+                                    {{ form.additional_comments }}
+                                    <div class="text-danger small">{{ form.additional_comments.errors }}</div>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn text-white w-100 fw-bold py-3" style="background-color: #E61013;">
+                                <i class="fas fa-paper-plane me-2"></i>Submit Feedback
+                            </button>
+
+                            <p class="text-center text-muted small mt-3 mb-0">
+                                Chaitanya Science and Arts College, Pamgarh · ✨ Learn • Grow • Achieve ✨
+                            </p>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<style>
+    #id_attractions .form-check-input,
+    .form-check-input {
+        margin-top: 0.3rem;
+    }
+    select.form-select option:first-child {
+        color: #6b7280;
+    }
+</style>
+
+{% endblock %}

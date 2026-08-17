@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!-- Breadcrumb Section -->
+<section class="rts-breadcrumb breadcrumb-height breadcumb-bg" style="{% with bcimg=breadcrumb_images.academics_programs %}{% if bcimg %}background-image: url('{{ bcimg }}');{% endif %}{% endwith %}">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb-content">
+                    <h2 class="section-title">{{ breadcrumb }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Programs Section -->
+<section class="rts-section-padding py-5">
+    <div class="container">
+
+        <div class="row mb-5">
+            <div class="col-12 text-center">
+                <h2 class="fw-bold" style="color: #E61013;">Academic Programs Offered</h2>
+                <hr style="border-color:#E61013;border-width:3px;width:60px;opacity:1;margin:auto;">
+                <p class="text-muted mt-3">We offer comprehensive programs designed to nurture intellectual curiosity, critical thinking, and career preparedness.</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <ul class="nav nav-tabs justify-content-center border-bottom mb-4" id="programTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active fw-bold text-dark px-4 py-3" id="all-tab" data-bs-toggle="tab" data-bs-target="#all-pane" type="button" role="tab" aria-controls="all-pane" aria-selected="true">
+                            <i class="fas fa-list me-2 text-danger"></i> All Programs
+                        </button>
+                    </li>
+                    {% for program_type in program_types %}
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-bold text-dark px-4 py-3" id="{{ program_type.code }}-tab" data-bs-toggle="tab" data-bs-target="#{{ program_type.code }}-pane" type="button" role="tab" aria-controls="{{ program_type.code }}-pane" aria-selected="false">
+                            <i class="{{ program_type.icon_class }} me-2 text-danger"></i> {{ program_type.tab_label }}
+                        </button>
+                    </li>
+                    {% endfor %}
+                </ul>
+
+                <div class="tab-content bg-white p-4 rounded shadow-sm border" id="programTabsContent">
+                    <div class="tab-pane fade show active" id="all-pane" role="tabpanel" aria-labelledby="all-tab">
+                        <h4 class="fw-bold mb-3 text-dark">All Academic Programs</h4>
+                        {% include 'academics/includes/program_table.html' with programs=all_programs %}
+                    </div>
+
+                    {% for section in program_tab_sections %}
+                    <div class="tab-pane fade" id="{{ section.program_type.code }}-pane" role="tabpanel" aria-labelledby="{{ section.program_type.code }}-tab">
+                        <h4 class="fw-bold mb-3 text-dark">{{ section.program_type.tab_label }}</h4>
+                        {% include 'academics/includes/program_table.html' with programs=section.programs %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<style>
+    .nav-tabs .nav-link.active {
+        border-color: #E61013 #E61013 #fff !important;
+        border-top: 3px solid #E61013 !important;
+        color: #E61013 !important;
+    }
+</style>
+
+{% endblock %}

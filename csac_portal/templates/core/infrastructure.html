@@ -1,0 +1,571 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+  /* Infrastructure Page Premium Styles */
+  .quick-nav-link {
+    background: #f3f4f6;
+    color: #4b5563;
+    padding: 8px 20px;
+    border-radius: 50px;
+    font-size: 13.5px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: 1px solid #e5e7eb;
+    display: inline-block;
+  }
+  .quick-nav-link:hover {
+    background: #B71A34;
+    color: white;
+    border-color: #B71A34;
+    box-shadow: 0 4px 10px rgba(183, 26, 52, 0.2);
+    transform: translateY(-2px);
+  }
+  
+  .infra-card {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    padding: 20px;
+    height: 100%;
+  }
+  .infra-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+  }
+  
+  .infra-slider-container {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  }
+  .infra-slide-img {
+    width: 100%;
+    height: 240px;
+    object-fit: cover;
+    border-radius: 12px;
+    display: block;
+    transition: transform 0.5s ease;
+  }
+  .infra-slider-container:hover .infra-slide-img {
+    transform: scale(1.02);
+  }
+  
+  .infra-slide-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: all 0.3s ease;
+    border-radius: 12px;
+    z-index: 5;
+  }
+  .infra-slider-container:hover .infra-slide-overlay {
+    opacity: 1;
+  }
+  .infra-slide-zoom-btn {
+    width: 44px;
+    height: 44px;
+    background: #B71A34;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    box-shadow: 0 4px 10px rgba(183, 26, 52, 0.3);
+    transform: scale(0.8);
+    transition: all 0.3s ease;
+  }
+  .infra-slider-container:hover .infra-slide-zoom-btn {
+    transform: scale(1);
+  }
+  
+  .infra-slider-container .swiper-button-next,
+  .infra-slider-container .swiper-button-prev {
+    width: 32px !important;
+    height: 32px !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    color: #B71A34 !important;
+    border-radius: 50% !important;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1) !important;
+    transition: all 0.3s ease !important;
+    margin-top: -16px !important;
+  }
+  .infra-slider-container .swiper-button-next::after,
+  .infra-slider-container .swiper-button-prev::after {
+    font-size: 11px !important;
+    font-weight: bold !important;
+  }
+  .infra-slider-container .swiper-button-next:hover,
+  .infra-slider-container .swiper-button-prev:hover {
+    background: #B71A34 !important;
+    color: #ffffff !important;
+  }
+  .infra-slider-container .swiper-pagination-bullet-active {
+    background: #B71A34 !important;
+  }
+  
+  .infra-video-btn {
+    text-decoration: none;
+    color: #4b5563;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s ease;
+  }
+  .infra-video-btn:hover {
+    color: #B71A34;
+  }
+  .infra-video-btn .video-play-icon-small {
+    width: 32px;
+    height: 32px;
+    background: rgba(183, 26, 52, 0.08);
+    color: #B71A34;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(183, 26, 52, 0.15);
+  }
+  .infra-video-btn:hover .video-play-icon-small {
+    background: #B71A34;
+    color: white;
+    box-shadow: 0 4px 10px rgba(183, 26, 52, 0.25);
+  }
+  
+  .infra-card-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 12px;
+    position: relative;
+    padding-bottom: 8px;
+  }
+  .infra-card-title-link {
+    color: inherit;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: color 0.25s ease;
+  }
+  .infra-card-title-link:hover {
+    color: #B71A34;
+  }
+  .infra-card-title-link .infra-title-arrow {
+    font-size: 12px;
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: all 0.25s ease;
+  }
+  .infra-card-title-link:hover .infra-title-arrow {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  .infra-card-title::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 35px;
+    height: 3px;
+    background: #B71A34;
+    border-radius: 2px;
+    transition: width 0.25s ease;
+  }
+  .infra-card-title-link:hover::after {
+    width: 55px;
+  }
+  .infra-view-gallery-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 14px;
+    padding: 8px 16px;
+    border-radius: 50px;
+    background: rgba(183, 26, 52, 0.08);
+    border: 1px solid rgba(183, 26, 52, 0.18);
+    color: #B71A34;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.25s ease;
+  }
+  .infra-view-gallery-btn:hover {
+    background: #B71A34;
+    color: #ffffff;
+    border-color: #B71A34;
+    box-shadow: 0 4px 12px rgba(183, 26, 52, 0.25);
+  }
+  
+  .infra-card-desc {
+    color: #4b5563;
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 0;
+    text-align: justify;
+  }
+  
+  .section-subtitle-premium {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(183, 26, 52, 0.08);
+    border: 1px solid rgba(183, 26, 52, 0.2);
+    border-radius: 50px;
+    padding: 6px 18px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #B71A34;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  
+  .infra-caption-badge {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    background: rgba(183, 26, 52, 0.9);
+    color: #ffffff;
+    padding: 4px 12px;
+    border-radius: 50px;
+    font-size: 11px;
+    font-weight: 700;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    z-index: 10;
+    pointer-events: none;
+    max-width: calc(100% - 24px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    letter-spacing: 0.5px;
+  }
+  
+  @media only screen and (max-width: 768px) {
+    .infra-card {
+      padding: 16px;
+    }
+    .infra-slide-img {
+      height: 200px;
+    }
+  }
+
+  /* Infrastructure lightbox — 80% viewport preview */
+  .mfp-wrap.mfp-infra-lightbox .mfp-container {
+    padding: 0 10vw 80px;
+  }
+  .mfp-infra-lightbox .mfp-image-holder .mfp-content {
+    max-width: 80vw !important;
+    width: 80vw !important;
+    height: auto;
+  }
+  .mfp-infra-lightbox img.mfp-img {
+    max-width: 80vw !important;
+    max-height: 80vh !important;
+    width: auto !important;
+    height: auto !important;
+    padding: 12px 0;
+    margin: 0 auto;
+    object-fit: contain;
+  }
+  .mfp-infra-lightbox .mfp-figure:after {
+    top: 12px;
+    bottom: 12px;
+  }
+  .mfp-infra-lightbox .mfp-figure figure {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+  }
+  .mfp-wrap.mfp-infra-lightbox .mfp-bottom-bar {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    top: auto;
+    margin-top: 0;
+    width: auto;
+    max-width: min(88vw, 720px);
+    z-index: 1047;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: rgba(17, 24, 39, 0.78);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 50px;
+    padding: 12px 32px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+  }
+  .mfp-wrap.mfp-infra-lightbox .mfp-title {
+    text-align: center !important;
+    width: auto;
+    max-width: 100%;
+    padding: 0;
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.45;
+    color: #ffffff;
+    letter-spacing: 0.2px;
+  }
+  .mfp-wrap.mfp-infra-lightbox .mfp-counter {
+    position: static;
+    text-align: center;
+    width: auto;
+    margin-top: 3px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 12px;
+  }
+  @media (max-width: 768px) {
+    .mfp-wrap.mfp-infra-lightbox .mfp-container {
+      padding: 0 4vw 72px;
+    }
+    .mfp-wrap.mfp-infra-lightbox .mfp-bottom-bar {
+      bottom: 18px;
+      padding: 10px 22px;
+      max-width: 92vw;
+    }
+    .mfp-infra-lightbox .mfp-image-holder .mfp-content {
+      max-width: 92vw !important;
+      width: 92vw !important;
+    }
+    .mfp-infra-lightbox img.mfp-img {
+      max-width: 92vw !important;
+      max-height: 75vh !important;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Breadcrumb Section -->
+<section class="rts-breadcrumb breadcrumb-height breadcumb-bg" style="{% with bcimg=breadcrumb_images.infrastructure %}{% if bcimg %}background-image: url('{{ bcimg }}');{% endif %}{% endwith %}">
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+        <div class="breadcrumb-content">
+          <h2 class="section-title">{{ breadcrumb }}</h2>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Infrastructure Content Section -->
+<section class="rts-section-padding py-5" style="background: #f9fafb;">
+  <div class="container">
+    
+    <!-- Intro Header -->
+    <div class="row mb-4 text-center">
+      <div class="col-lg-8 mx-auto">
+        <span class="section-subtitle-premium">Campus Facilities</span>
+        <h2 class="fw-bold mb-3" style="color: #111827;">World-Class Infrastructure</h2>
+        <p class="text-muted lh-lg fs-5 mb-0">
+          Chaitanya Science and Arts College offers a meticulously planned campus with state-of-the-art facilities. 
+          Discover the infrastructure designed to foster academic and personal excellence.
+        </p>
+      </div>
+    </div>
+
+    <!-- Quick Navigation Category Badges -->
+    <div class="row mb-5">
+      <div class="col-12">
+        <div class="quick-nav-container text-center">
+          <div class="d-flex flex-wrap justify-content-center gap-2">
+            {% for item in infrastructure_list %}
+              <a href="#infra-section-{{ item.slug }}" class="quick-nav-link">
+                {{ item.title }}
+              </a>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Infrastructure Compact Grid -->
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+      {% for item in infrastructure_list %}
+        <div class="col" id="infra-section-{{ item.slug }}">
+          <div class="infra-card d-flex flex-column">
+            
+            <!-- Top Column: Media / Slider -->
+            <div class="mb-4">
+              {% if item.images.all %}
+                {% if item.images.all|length > 1 %}
+                  <!-- Swiper for multiple images -->
+                  <div class="infra-slider-container">
+                    <div class="swiper" id="infra-swiper-{{ item.id }}">
+                      <div class="swiper-wrapper">
+                        {% for img in item.images.all %}
+                          <div class="swiper-slide">
+                            <div class="position-relative">
+                              <img src="{{ img.get_image }}" alt="{{ img.caption|default:item.title }}" class="infra-slide-img" />
+                              <a href="{{ img.get_image }}" class="infra-slide-overlay infra-popup-{{ item.id }}" title="{{ img.caption|default:item.title }}">
+                                <span class="infra-slide-zoom-btn">
+                                  <i class="fa-solid fa-magnifying-glass-plus"></i>
+                                </span>
+                              </a>
+                              {% if img.caption %}
+                                <span class="infra-caption-badge">{{ img.caption }}</span>
+                              {% endif %}
+                            </div>
+                          </div>
+                        {% endfor %}
+                      </div>
+                      <!-- Swiper Controls -->
+                      <div class="swiper-pagination" id="infra-pagination-{{ item.id }}"></div>
+                      <div class="swiper-button-next" id="infra-next-{{ item.id }}"></div>
+                      <div class="swiper-button-prev" id="infra-prev-{{ item.id }}"></div>
+                    </div>
+                  </div>
+                {% else %}
+                  <!-- Single Image layout -->
+                  {% with img=item.images.all.0 %}
+                    <div class="infra-slider-container">
+                      <div class="position-relative">
+                        <img src="{{ img.get_image }}" alt="{{ img.caption|default:item.title }}" class="infra-slide-img" />
+                        <a href="{{ img.get_image }}" class="infra-slide-overlay single-popup" title="{{ img.caption|default:item.title }}">
+                          <span class="infra-slide-zoom-btn">
+                            <i class="fa-solid fa-magnifying-glass-plus"></i>
+                          </span>
+                        </a>
+                        {% if img.caption %}
+                          <span class="infra-caption-badge">{{ img.caption }}</span>
+                        {% endif %}
+                      </div>
+                    </div>
+                  {% endwith %}
+                {% endif %}
+              {% else %}
+                <!-- Fallback Placeholder Image -->
+                <div class="infra-slider-container">
+                  <img src="{% static 'assets/images/chaitanya_video.jpg' %}" alt="{{ item.title }}" class="infra-slide-img" />
+                </div>
+              {% endif %}
+            </div>
+            
+            <!-- Bottom Column: Text Details -->
+            <div class="d-flex flex-column flex-grow-1">
+              <h4 class="infra-card-title">
+                <a href="{% url 'core:infrastructure_detail' item.slug %}" class="infra-card-title-link">
+                  {{ item.title }}
+                  <i class="fa-solid fa-arrow-right infra-title-arrow"></i>
+                </a>
+              </h4>
+              <p class="infra-card-desc flex-grow-1" style="white-space: pre-line;">{{ item.description }}</p>
+              <a href="{% url 'core:infrastructure_detail' item.slug %}" class="infra-view-gallery-btn">
+                <i class="fa-solid fa-images"></i>
+                View Full Gallery
+              </a>
+              
+              {% if item.video_url %}
+                <div class="mt-4 pt-3 border-top">
+                  <a href="{{ item.video_url }}" class="infra-video-btn popup-video d-inline-flex align-items-center gap-2">
+                    <span class="video-play-icon-small">
+                      <i class="fa-solid fa-play"></i>
+                    </span>
+                    <span class="video-play-text-small">Watch Video Tour</span>
+                  </a>
+                </div>
+              {% endif %}
+            </div>
+
+          </div>
+        </div>
+      {% empty %}
+        <div class="col-12 text-center py-5">
+          <h4 class="text-muted">No infrastructure facilities have been added yet.</h4>
+        </div>
+      {% endfor %}
+    </div>
+
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  $(document).ready(function() {
+    // Smooth scrolling for quick jump navigation links
+    $('.quick-nav-link').on('click', function(e) {
+      if (this.hash !== "") {
+        e.preventDefault();
+        var hash = this.hash;
+        $('html, body').animate({
+          scrollTop: $(hash).offset().top - 100
+        }, 800);
+      }
+    });
+
+    // Initialize Swiper sliders dynamically for each infrastructure item with multiple images
+    {% for item in infrastructure_list %}
+      {% if item.images.all|length > 1 %}
+        if (typeof Swiper !== 'undefined' && document.getElementById('infra-swiper-{{ item.id }}')) {
+          new Swiper('#infra-swiper-{{ item.id }}', {
+            slidesPerView: 1,
+            loop: true,
+            speed: 600,
+            autoplay: { delay: 4000, disableOnInteraction: false, pauseOnMouseEnter: true },
+            navigation: {
+              nextEl: '#infra-next-{{ item.id }}',
+              prevEl: '#infra-prev-{{ item.id }}',
+            },
+            pagination: {
+              el: '#infra-pagination-{{ item.id }}',
+              clickable: true,
+            }
+          });
+        }
+
+        // Initialize MagnificPopup for this specific item's images
+        if (typeof $.fn.magnificPopup !== 'undefined') {
+          $('.infra-popup-{{ item.id }}').magnificPopup({
+            type: 'image',
+            gallery: {
+              enabled: true
+            },
+            closeOnContentClick: true,
+            mainClass: 'mfp-infra-lightbox',
+            image: {
+              verticalFit: false,
+              titleSrc: 'title'
+            }
+          });
+        }
+      {% endif %}
+    {% endfor %}
+
+    // Initialize MagnificPopup for single image showcase items
+    if (typeof $.fn.magnificPopup !== 'undefined') {
+      $('.single-popup').magnificPopup({
+        type: 'image',
+        closeOnContentClick: true,
+        mainClass: 'mfp-infra-lightbox',
+        image: {
+          verticalFit: false,
+          titleSrc: 'title'
+        }
+      });
+    }
+  });
+</script>
+{% endblock %}

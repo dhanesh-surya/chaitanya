@@ -1,0 +1,315 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+  :root {
+    --nep-red: #B71A34;
+    --nep-dark: #1a1a2e;
+  }
+  .nep-tab-btn {
+    width: 100%;
+    border: 1px solid rgba(0,0,0,0.06);
+    background: #fff;
+    color: #4b5563;
+    font-weight: 600;
+    padding: 14px 20px;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    cursor: pointer;
+  }
+  .nep-tab-btn:hover {
+    background: rgba(183, 26, 52, 0.04);
+    color: var(--nep-red);
+    border-color: rgba(183, 26, 52, 0.2);
+  }
+  .nep-tab-btn.active {
+    background: var(--nep-red) !important;
+    color: #fff !important;
+    border-color: var(--nep-red);
+    box-shadow: 0 4px 15px rgba(183, 26, 52, 0.2);
+  }
+  .nep-tab-btn.active i {
+    color: #fff !important;
+  }
+  .nep-content-card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+    border: 1px solid rgba(0,0,0,0.05);
+    padding: 30px;
+  }
+  .nep-file-item {
+    background: #f9fafb;
+    border: 1px solid rgba(0,0,0,0.04);
+    border-radius: 10px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.2s ease;
+  }
+  .nep-file-item:hover {
+    border-color: rgba(183, 26, 52, 0.2);
+    background: #fff;
+    box-shadow: 0 4px 12px rgba(183, 26, 52, 0.05);
+  }
+  .nep-link-item {
+    background: #f9fafb;
+    border: 1px solid rgba(0,0,0,0.04);
+    border-radius: 10px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    color: inherit;
+  }
+  .nep-link-item:hover {
+    border-color: rgba(183, 26, 52, 0.2);
+    background: #fff;
+    box-shadow: 0 4px 12px rgba(183, 26, 52, 0.05);
+    color: var(--nep-red);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Breadcrumb Section -->
+<section class="rts-breadcrumb breadcrumb-height breadcumb-bg" style="{% with bcimg=breadcrumb_images.nep %}{% if bcimg %}background-image: url('{{ bcimg }}');{% endif %}{% endwith %}">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb-content">
+                    <h2 class="section-title">{{ breadcrumb }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- NEP Section -->
+<section class="rts-section-padding py-5" style="background: #f9fafb;">
+    <div class="container">
+
+        <!-- Heading -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <h2 class="fw-bold mb-3" style="color: #B71A34;">NEP 2020 Implementation</h2>
+                <p class="text-muted lh-lg fs-6">
+                    In alignment with the National Education Policy (NEP) 2020, Chaitanya Science and Arts College has adopted the new educational framework to transition towards a more holistic, flexible, and multidisciplinary system of higher education. NEP 2020 aims to empower students by giving them choice and flexibility, focusing on skill development, and fostering research at all levels.
+                </p>
+            </div>
+        </div>
+
+        {% if nep_tabs %}
+        <!-- Dynamic Tab Layout -->
+        <div class="row g-4">
+            <!-- Left side: Tab navigation list -->
+            <div class="col-lg-3 col-md-4">
+                <div class="d-flex flex-column gap-2" id="nep-tabs-list" role="tablist">
+                    {% for tab in nep_tabs %}
+                        <button class="nep-tab-btn {% if forloop.first %}active{% endif %}" id="tab-btn-{{ tab.id }}" data-bs-toggle="tab" data-bs-target="#tab-pane-{{ tab.id }}" type="button" role="tab" aria-controls="tab-pane-{{ tab.id }}" aria-selected="{% if forloop.first %}true{% else %}false{% endif %}">
+                            <span>{{ tab.title }}</span>
+                            <i class="fa-solid fa-chevron-right text-muted"></i>
+                        </button>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Right side: Tab contents -->
+            <div class="col-lg-9 col-md-8">
+                <div class="tab-content" id="nep-tabs-content">
+                    {% for tab in nep_tabs %}
+                        <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" id="tab-pane-{{ tab.id }}" role="tabpanel" aria-labelledby="tab-btn-{{ tab.id }}">
+                            <div class="nep-content-card">
+                                <h4 class="fw-bold mb-4" style="color: #B71A34; font-size: 22px;">{{ tab.title }}</h4>
+                                
+                                <!-- Description (CKEditor content) -->
+                                {% if tab.description %}
+                                    <div class="text-muted lh-lg mb-4" style="font-size: 15px;">
+                                        {{ tab.description|safe }}
+                                    </div>
+                                {% endif %}
+                                
+                                <!-- Files Uploading Section -->
+                                {% if tab.files.exists %}
+                                    <div class="mt-4 pt-4 border-top">
+                                        <h5 class="fw-bold mb-3" style="font-size: 16px; color: #111827;">
+                                            <i class="fa-solid fa-file-arrow-down text-danger me-2"></i> Downloadable Documents &amp; Files
+                                        </h5>
+                                        <div class="d-flex flex-column gap-2">
+                                            {% for f in tab.files.all %}
+                                                <div class="nep-file-item">
+                                                    <div class="d-flex align-items-center gap-3">
+                                                        <i class="fa-solid fa-file-pdf text-danger fs-4"></i>
+                                                        <span class="fw-bold text-dark" style="font-size: 14.5px;">{{ f.title }}</span>
+                                                    </div>
+                                                    <a href="{{ f.file.url }}" target="_blank" class="btn btn-outline-danger btn-sm px-3 py-1 rounded-3" style="font-size: 12px; font-weight: 600; color:#B71A34; border-color:#B71A34;">
+                                                        <i class="fa-solid fa-download me-1"></i> Download
+                                                    </a>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+                                
+                                <!-- Links Section -->
+                                {% if tab.links.exists %}
+                                    <div class="mt-4 pt-4 border-top">
+                                        <h5 class="fw-bold mb-3" style="font-size: 16px; color: #111827;">
+                                            <i class="fa-solid fa-globe text-danger me-2"></i> Reference Links &amp; Portals
+                                        </h5>
+                                        <div class="d-flex flex-column gap-2">
+                                            {% for link in tab.links.all %}
+                                                <a href="{{ link.url }}" target="_blank" class="nep-link-item">
+                                                    <div class="d-flex align-items-center gap-3">
+                                                        <i class="fa-solid fa-link text-secondary"></i>
+                                                        <span class="fw-bold" style="font-size: 14.5px;">{{ link.title }}</span>
+                                                    </div>
+                                                    <span style="font-size: 12px; color: #B71A34; font-weight: 600;">
+                                                        Visit Site <i class="fa-solid fa-arrow-up-right-from-square ms-1" style="font-size: 10px;"></i>
+                                                    </span>
+                                                </a>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+                                
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        {% else %}
+        <!-- Fallback (Original Static Layout) -->
+        <!-- Key Pillars -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm text-center p-3">
+                    <div class="mb-3 text-danger fs-1"><i class="fas fa-university"></i></div>
+                    <h6 class="fw-bold">4-Year Degree Programs</h6>
+                    <p class="text-muted small mb-0">Undergraduate programs with multiple entry and exit options (Certificate, Diploma, Degree, and Honors).</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm text-center p-3">
+                    <div class="mb-3 text-danger fs-1"><i class="fas fa-wallet"></i></div>
+                    <h6 class="fw-bold">Academic Bank of Credits</h6>
+                    <p class="text-muted small mb-0">Digital integration with ABC portal to securely store academic credits earned by students.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm text-center p-3">
+                    <div class="mb-3 text-danger fs-1"><i class="fas fa-puzzle-piece"></i></div>
+                    <h6 class="fw-bold">Multidisciplinary Choices</h6>
+                    <p class="text-muted small mb-0">Opportunity for science students to study arts subjects and vice versa through open electives.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm text-center p-3">
+                    <div class="mb-3 text-danger fs-1"><i class="fas fa-tools"></i></div>
+                    <h6 class="fw-bold">Skill &amp; Vocations</h6>
+                    <p class="text-muted small mb-0">Mandatory skill enhancement courses to bridge the gap between academic theory and job market readiness.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Curriculum Structure -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <h3 class="fw-bold mb-4" style="color: #B71A34;">NEP UG Program Structure</h3>
+                <div class="table-responsive shadow-sm rounded">
+                    <table class="table table-bordered table-hover align-middle mb-0">
+                        <thead class="table-danger text-dark">
+                            <tr>
+                                <th>Exit Point</th>
+                                <th>Duration</th>
+                                <th>Credential Awarded</th>
+                                <th>Min. Credits Required</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Exit after Year 1</strong></td>
+                                <td>2 Semesters</td>
+                                <td>UG Certificate</td>
+                                <td>40 - 44 Credits</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Exit after Year 2</strong></td>
+                                <td>4 Semesters</td>
+                                <td>UG Diploma</td>
+                                <td>80 - 88 Credits</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Exit after Year 3</strong></td>
+                                <td>6 Semesters</td>
+                                <td>Bachelor's Degree</td>
+                                <td>120 - 132 Credits</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Complete Year 4</strong></td>
+                                <td>8 Semesters</td>
+                                <td>Bachelor's Degree (Honors / with Research)</td>
+                                <td>160 - 176 Credits</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Implementation Roadmap -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header text-white fw-bold fs-5" style="background-color: #B71A34;">
+                        <i class="fas fa-road me-2"></i> NEP Student Checklist &amp; Action Plan
+                    </div>
+                    <div class="card-body bg-light">
+                        <ol class="list-group list-group-numbered list-group-flush bg-transparent">
+                            <li class="list-group-item bg-transparent text-muted">Register on the ABC (Academic Bank of Credits) portal to get your unique ABC ID.</li>
+                            <li class="list-group-item bg-transparent text-muted">Choose your Major and Minor courses during admission counseling.</li>
+                            <li class="list-group-item bg-transparent text-muted">Select your Multi-Disciplinary Course (MDC) and Skill Enhancement Course (SEC) based on interest.</li>
+                            <li class="list-group-item bg-transparent text-muted">Participate in Internship / Apprenticeship / Community Service during vacations.</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  $(document).ready(function() {
+    // Custom tab switching handler
+    $('.nep-tab-btn').on('click', function(e) {
+      e.preventDefault();
+      
+      // Update active class on tab buttons
+      $('.nep-tab-btn').removeClass('active').attr('aria-selected', 'false');
+      $(this).addClass('active').attr('aria-selected', 'true');
+      
+      // Toggle visibility of target tab panels
+      var target = $(this).data('bs-target');
+      $('#nep-tabs-content .tab-pane').removeClass('show active');
+      $(target).addClass('show active');
+    });
+  });
+</script>
+{% endblock %}

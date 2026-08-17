@@ -1,0 +1,72 @@
+﻿{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!-- Breadcrumb Section -->
+<section class="rts-breadcrumb breadcrumb-height breadcumb-bg" style="{% with bcimg=breadcrumb_images.students_scholarship %}{% if bcimg %}background-image: url('{{ bcimg }}');{% endif %}{% endwith %}">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb-content">
+                    <h2 class="section-title">{{ breadcrumb }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Scholarships Section -->
+<section class="rts-section-padding py-5">
+    <div class="container">
+
+        <div class="row mb-5">
+            <div class="col-12 text-center">
+                <h2 class="fw-bold" style="color: #E61013;">Scholarships &amp; Financial Aid</h2>
+                <hr style="border-color:#E61013;border-width:3px;width:60px;opacity:1;margin:auto;">
+                <p class="text-muted mt-3">We support talented and deserving students by providing information on various college, state, and national scholarships.</p>
+            </div>
+        </div>
+
+        {% if scholarships %}
+        <div class="row g-4">
+            {% for scholarship in scholarships %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm" style="border-top: 4px solid #E61013 !important;">
+                    <div class="card-body p-4 d-flex flex-column">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <span class="badge bg-danger text-white px-3 py-2 fw-bold">Amount: {{ scholarship.amount }}</span>
+                            {% if scholarship.deadline %}
+                                <small class="text-muted"><i class="fas fa-clock text-danger me-1"></i> Deadline: {{ scholarship.deadline }}</small>
+                            {% endif %}
+                        </div>
+                        <h5 class="fw-bold text-dark mb-3">{{ scholarship.name }}</h5>
+                        <p class="text-muted small mb-3 flex-grow-1">{{ scholarship.description|linebreaksbr }}</p>
+                        
+                        <div class="bg-light p-3 rounded mb-4 border">
+                            <h6 class="fw-bold text-dark small mb-1"><i class="fas fa-user-shield text-danger me-2"></i> Eligibility</h6>
+                            <p class="text-muted mb-0 small">{{ scholarship.eligibility }}</p>
+                        </div>
+
+                        {% if scholarship.link %}
+                            <a href="{{ scholarship.link }}" class="btn text-white w-100 fw-semibold mt-auto" style="background-color: #E61013;" target="_blank">
+                                <i class="fas fa-external-link-alt me-2"></i>Apply Online
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="alert alert-secondary text-center py-5 border-0 shadow-sm">
+            <i class="fas fa-hand-holding-usd fa-3x mb-3 text-muted"></i>
+            <h5 class="fw-bold">No Active Scholarships Listed</h5>
+            <p class="text-muted mb-0">Scholarship opportunities will be updated as soon as notifications are released.</p>
+        </div>
+        {% endif %}
+
+    </div>
+</section>
+
+{% endblock %}

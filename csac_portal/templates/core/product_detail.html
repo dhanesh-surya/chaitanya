@@ -1,0 +1,535 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ product.name }} - Chaitanya Science and Arts College{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* Premium Product Detail Styles */
+  .detail-card {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 30px;
+    margin-bottom: 40px;
+  }
+  
+  .product-price-large {
+    font-size: 28px;
+    font-weight: 800;
+    color: #B71A34;
+    margin-bottom: 20px;
+    font-family: 'Roboto Slab', serif;
+  }
+  
+  .specs-list dt {
+    font-weight: 600;
+    color: #374151;
+    font-size: 14px;
+    width: 120px;
+  }
+  
+  .specs-list dd {
+    color: #4b5563;
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+  
+  .stock-status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 4px 12px;
+    border-radius: 50px;
+  }
+  .stock-status-indicator--in {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+  }
+  .stock-status-indicator--out {
+    background: rgba(107, 114, 128, 0.1);
+    color: #4b5563;
+    border: 1px solid rgba(107, 114, 128, 0.2);
+  }
+
+  .purchase-btn {
+    width: 100%;
+    background: #B71A34;
+    color: white !important;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-weight: 600;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .purchase-btn:hover {
+    background: #9d152a;
+    box-shadow: 0 4px 12px rgba(183, 26, 52, 0.25);
+    transform: translateY(-1px);
+  }
+  .purchase-btn:disabled {
+    background: #e5e7eb !important;
+    color: #9ca3af !important;
+    cursor: not-allowed;
+    box-shadow: none !important;
+    transform: none !important;
+  }
+
+  /* Custom Review Cards styling */
+  .review-card {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+  }
+  .review-card:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+    margin-bottom: 0;
+  }
+  
+  .reviewer-avatar {
+    width: 45px;
+    height: 45px;
+    background: rgba(183, 26, 52, 0.08);
+    color: #B71A34;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 16px;
+  }
+
+  /* Custom Purchase Modal Overlay */
+  .custom-modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    backdrop-filter: blur(4px);
+    padding: 16px;
+  }
+  .custom-modal-content {
+    background: #ffffff;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    overflow: hidden;
+    position: relative;
+    animation: modalSlideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  @keyframes modalSlideUp {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  .custom-modal-header {
+    background: #B71A34;
+    color: #ffffff;
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .custom-modal-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #ffffff;
+  }
+  .custom-modal-close {
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    font-size: 28px;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+    padding: 0;
+    display: flex;
+    align-items: center;
+  }
+  .custom-modal-close:hover {
+    opacity: 1;
+  }
+  .custom-modal-body {
+    padding: 24px;
+  }
+  .custom-modal-body label {
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 6px;
+    display: block;
+    font-size: 13.5px;
+  }
+  .custom-modal-body .form-group {
+    margin-bottom: 16px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Breadcrumb Section -->
+<section class="rts-breadcrumb breadcrumb-height breadcumb-bg" style="{% with bcimg=breadcrumb_images.about %}{% if bcimg %}background-image: url('{{ bcimg }}');{% endif %}{% endwith %}">
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+        <div class="breadcrumb-content">
+          <h2 class="section-title">{{ product.name }}</h2>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Product Detail Area -->
+<section class="py-5" style="background: #f9fafb;">
+  <div class="container">
+    
+    <!-- Navigation Back Link -->
+    <div class="mb-4">
+      <a href="{% url 'core:products' %}" class="btn btn-light py-3 px-5 border shadow-sm rounded-3 fw-bold" style="font-size: 17px; color: #4b5563; text-decoration: none; display: inline-flex; align-items: center;">
+        <i class="fa-solid fa-arrow-left me-2"></i> Back to our product page
+      </a>
+    </div>
+
+    <!-- Django Messages Alert banners -->
+    {% if messages %}
+    <div class="row mb-4">
+      <div class="col-12">
+        {% for message in messages %}
+          <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert" style="border-radius: 8px;">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Main Detail Card -->
+    <div class="detail-card">
+      <div class="row g-5">
+        
+        <!-- Left Side: Product Images Gallery -->
+        <div class="col-lg-6">
+          <div class="product-gallery">
+            <div class="main-image-container mb-3" style="position: relative; height: 420px; border-radius: 12px; overflow: hidden; background: #ffffff; border: 1px solid rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: center;">
+              <a href="{{ product.get_image }}" class="product-gallery-popup" id="main-image-link">
+                <img id="main-product-image" src="{{ product.get_image }}" alt="{{ product.name }}" style="width: 100%; height: 100%; object-fit: contain; padding: 20px;">
+              </a>
+            </div>
+            
+            {% if images %}
+            <div class="row g-2">
+              <!-- Default main image thumbnail -->
+              <div class="col-3">
+                <div class="gallery-thumb active" style="height: 85px; border-radius: 8px; overflow: hidden; border: 2px solid #B71A34; cursor: pointer; background: white;" onclick="switchMainImage('{{ product.get_image }}', this)">
+                  <img src="{{ product.get_image }}" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+              </div>
+              <!-- Additional gallery images -->
+              {% for img in images %}
+              <div class="col-3">
+                <div class="gallery-thumb" style="height: 85px; border-radius: 8px; overflow: hidden; border: 2px solid transparent; cursor: pointer; background: white;" onclick="switchMainImage('{{ img.get_image }}', this)">
+                  <img src="{{ img.get_image }}" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Right Side: Specifications and Buy Action -->
+        <div class="col-lg-6">
+          <div class="d-flex flex-column h-100">
+            
+            <!-- Category Badge -->
+            {% if product.category %}
+            <div class="mb-2">
+              <span class="badge bg-danger rounded-pill px-3 py-2" style="font-size: 12px; font-weight: 700; letter-spacing: 0.5px; background-color: #B71A34 !important;">
+                {{ product.category.name }}
+              </span>
+            </div>
+            {% endif %}
+
+            <!-- Title -->
+            <h2 class="fw-bold mb-2 text-dark" style="font-size: 30px;">{{ product.name }}</h2>
+
+            <!-- Rating Stars display -->
+            <div class="rating-stars mb-4 d-flex align-items-center gap-1" style="color: #f59e0b; font-size: 18px;">
+              {% for i in rating_range %}
+                {% if i <= avg_rating_int %}
+                  <i class="fa-solid fa-star"></i>
+                {% else %}
+                  <i class="fa-regular fa-star"></i>
+                {% endif %}
+              {% endfor %}
+              {% if reviews.exists %}
+                <span class="text-muted ms-2" style="font-size: 13.5px; font-weight: 500;">({{ avg_rating }} out of 5 stars from {{ reviews.count }} review{% if reviews.count != 1 %}s{% endif %})</span>
+              {% else %}
+                <span class="text-muted ms-2" style="font-size: 13.5px; font-weight: 500;">(No reviews yet)</span>
+              {% endif %}
+            </div>
+
+            <!-- Price -->
+            <div class="product-price-large">₹{{ product.price }}</div>
+
+            <!-- Details List -->
+            <div class="mb-4">
+              <dl class="specs-list row">
+                <dt class="col-sm-4 text-muted">Availability:</dt>
+                <dd class="col-sm-8">
+                  {% if product.in_stock %}
+                    <span class="stock-status-indicator stock-status-indicator--in">
+                      <i class="fa-solid fa-circle-check"></i> In Stock
+                    </span>
+                  {% else %}
+                    <span class="stock-status-indicator stock-status-indicator--out">
+                      <i class="fa-solid fa-circle-xmark"></i> Out of Stock
+                    </span>
+                  {% endif %}
+                </dd>
+                
+                <dt class="col-sm-4 text-muted">Items Included:</dt>
+                <dd class="col-sm-8">Official Brand Seal, Premium Package Box</dd>
+
+                <dt class="col-sm-4 text-muted">Delivery Options:</dt>
+                <dd class="col-sm-8">Campus Collection / Student Desk Pickup</dd>
+              </dl>
+            </div>
+
+            <!-- Separator -->
+            <hr class="my-4" style="opacity: 0.1;">
+
+            <!-- Short Description -->
+            <div class="mb-4">
+              <h5 class="fw-bold mb-2 text-dark" style="font-size: 16px;">Product Description</h5>
+              <p class="text-muted lh-lg" style="font-size: 14.5px; text-align: justify;">{{ product.description }}</p>
+            </div>
+
+            <!-- Express Buy Interest button -->
+            <div class="mt-auto">
+              {% if product.in_stock %}
+                <button class="purchase-btn trigger-purchase-modal">
+                  <i class="fa-solid fa-cart-shopping"></i> Express Buy Interest
+                </button>
+              {% else %}
+                <button class="purchase-btn" disabled>
+                  <i class="fa-solid fa-circle-xmark"></i> Currently Out of Stock
+                </button>
+              {% endif %}
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Review Section & Submission block -->
+    <div class="row g-4">
+      
+      <!-- Left side: Review List -->
+      <div class="col-lg-7">
+        <div class="card border-0 shadow-sm rounded-4 p-4" style="background: white; border: 1px solid rgba(0, 0, 0, 0.05) !important;">
+          <h5 class="fw-bold mb-4" style="color: #111827; font-size: 14px;">
+            <i class="fa-solid fa-comments text-danger me-2"></i> Buyer Reviews
+          </h5>
+          
+          <div class="reviews-wrapper">
+            {% for r in reviews %}
+              <div class="review-card">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                  <div class="d-flex align-items-center gap-3">
+                    <div class="reviewer-avatar">
+                      {{ r.reviewer_name|slice:":1"|upper }}
+                    </div>
+                    <div>
+                      <h6 class="mb-0 fw-bold" style="font-size: 15px; color: #111827;">{{ r.reviewer_name }}</h6>
+                      <span class="text-muted" style="font-size: 12px;">{{ r.created_at|date:"M d, Y" }}</span>
+                    </div>
+                  </div>
+                  <div class="review-stars" style="color: #f59e0b; font-size: 14px;">
+                    {% for star in rating_range %}
+                      {% if star <= r.rating %}
+                        <i class="fa-solid fa-star"></i>
+                      {% else %}
+                        <i class="fa-regular fa-star"></i>
+                      {% endif %}
+                    {% endfor %}
+                  </div>
+                </div>
+                <p class="mb-0 text-muted lh-lg" style="font-size: 14px; padding-left: 58px; text-align: justify;">
+                  {{ r.review_text }}
+                </p>
+              </div>
+            {% empty %}
+              <div class="text-center py-5">
+                <h5 class="text-muted mb-2">No reviews available for this product yet.</h5>
+                <p class="text-muted mb-0" style="font-size: 13.5px;">Be the first one to share your purchase experience!</p>
+              </div>
+            {% endfor %}
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Right side: Add review form -->
+      <div class="col-lg-5">
+        <div class="card border-0 shadow-sm rounded-4 p-4" style="background: white; border: 1px solid rgba(0, 0, 0, 0.05) !important;">
+          <h5 class="fw-bold mb-4" style="color: #111827; font-size: 14px;">
+            <i class="fa-solid fa-pen-to-square text-danger me-2"></i> Write a Review
+          </h5>
+          
+          <form method="POST" action=".">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+              <label for="id_reviewer_name" class="form-label fw-bold text-muted" style="font-size: 13px;">Full Name *</label>
+              {{ review_form.reviewer_name }}
+            </div>
+
+            <div class="mb-3">
+              <label for="id_reviewer_email" class="form-label fw-bold text-muted" style="font-size: 13px;">Email Address *</label>
+              {{ review_form.reviewer_email }}
+            </div>
+
+            <div class="mb-3">
+              <label for="id_rating" class="form-label fw-bold text-muted" style="font-size: 13px;">Rating Stars *</label>
+              {{ review_form.rating }}
+            </div>
+
+            <div class="mb-3">
+              <label for="id_review_text" class="form-label fw-bold text-muted" style="font-size: 13px;">Review Message *</label>
+              {{ review_form.review_text }}
+            </div>
+
+            <button type="submit" class="btn btn-danger w-100 py-2 mt-2" style="background-color: #B71A34; border-color: #B71A34; font-weight: 600; border-radius: 8px;">
+              <i class="fa-solid fa-paper-plane me-1"></i> Submit Review
+            </button>
+          </form>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<!-- Purchase Inquiry Popup Modal -->
+<div id="purchase-inquiry-modal" class="custom-modal-overlay" style="display: none;">
+  <div class="custom-modal-content">
+    
+    <div class="custom-modal-header">
+      <h3 class="custom-modal-title">Buy Interest: {{ product.name }}</h3>
+      <button class="custom-modal-close" id="close-modal-btn" aria-label="Close Modal">&times;</button>
+    </div>
+
+    <div class="custom-modal-body">
+      <form method="POST" action="." id="purchase-form">
+        {% csrf_token %}
+        
+        <!-- Hidden product selector -->
+        <input type="hidden" name="product" id="id_product" value="{{ product.id }}">
+
+        <div class="form-group">
+          <label for="id_name">Your Full Name *</label>
+          {{ inquiry_form.name }}
+        </div>
+
+        <div class="form-group">
+          <label for="id_email">Email Address *</label>
+          {{ inquiry_form.email }}
+        </div>
+
+        <div class="form-group">
+          <label for="id_phone">Phone Number *</label>
+          {{ inquiry_form.phone }}
+        </div>
+
+        <div class="form-group">
+          <label for="id_message">Inquiry Message (Optional)</label>
+          {{ inquiry_form.message }}
+        </div>
+
+        <button type="submit" class="purchase-btn mt-4">
+          <i class="fa-solid fa-paper-plane"></i> Submit Inquiry
+        </button>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Switching Main product image via thumbnail clicks
+  function switchMainImage(url, element) {
+    document.getElementById('main-product-image').src = url;
+    document.getElementById('main-image-link').href = url;
+    
+    // Remove border styles from all other thumbnails
+    var thumbs = document.getElementsByClassName('gallery-thumb');
+    for (var i = 0; i < thumbs.length; i++) {
+      thumbs[i].style.borderColor = 'transparent';
+    }
+    // Set active border on selected thumbnail
+    element.style.borderColor = '#B71A34';
+  }
+
+  $(document).ready(function() {
+    var modal = $('#purchase-inquiry-modal');
+
+    // Trigger purchase modal open
+    $('.trigger-purchase-modal').on('click', function() {
+      modal.fadeIn(300);
+    });
+
+    // Close modal triggers
+    $('#close-modal-btn, #purchase-inquiry-modal').on('click', function(e) {
+      if (e.target === this || this.id === 'close-modal-btn') {
+        modal.fadeOut(200);
+        $('#purchase-form')[0].reset();
+      }
+    });
+
+    // Initialize MagnificPopup for product gallery lightbox
+    $('.product-gallery-popup').magnificPopup({
+      type: 'image',
+      gallery: {
+        enabled: true
+      },
+      zoom: {
+        enabled: true,
+        duration: 300,
+        opener: function(element) {
+          return element.find('img');
+        }
+      }
+    });
+  });
+</script>
+{% endblock %}

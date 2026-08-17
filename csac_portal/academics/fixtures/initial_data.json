@@ -1,0 +1,140 @@
+[
+  {
+    "model": "academics.department",
+    "pk": 1,
+    "fields": {"name": "Hindi", "slug": "hindi", "category": "arts", "hod_name": "", "description": "Department of Hindi", "order": 1}
+  },
+  {
+    "model": "academics.department",
+    "pk": 2,
+    "fields": {"name": "English", "slug": "english", "category": "arts", "hod_name": "", "description": "Department of English", "order": 2}
+  },
+  {
+    "model": "academics.department",
+    "pk": 3,
+    "fields": {"name": "Sociology", "slug": "sociology", "category": "arts", "hod_name": "", "description": "Department of Sociology", "order": 3}
+  },
+  {
+    "model": "academics.department",
+    "pk": 4,
+    "fields": {"name": "Geography", "slug": "geography", "category": "arts", "hod_name": "", "description": "Department of Geography", "order": 4}
+  },
+  {
+    "model": "academics.department",
+    "pk": 5,
+    "fields": {"name": "Social Work", "slug": "social-work", "category": "arts", "hod_name": "", "description": "Department of Social Work", "order": 5}
+  },
+  {
+    "model": "academics.department",
+    "pk": 6,
+    "fields": {"name": "Political Science", "slug": "political-science", "category": "arts", "hod_name": "", "description": "Department of Political Science", "order": 6}
+  },
+  {
+    "model": "academics.department",
+    "pk": 7,
+    "fields": {"name": "History", "slug": "history", "category": "arts", "hod_name": "", "description": "Department of History", "order": 7}
+  },
+  {
+    "model": "academics.department",
+    "pk": 8,
+    "fields": {"name": "Zoology", "slug": "zoology", "category": "science", "hod_name": "", "description": "Department of Zoology", "order": 8}
+  },
+  {
+    "model": "academics.department",
+    "pk": 9,
+    "fields": {"name": "Physics", "slug": "physics", "category": "science", "hod_name": "", "description": "Department of Physics", "order": 9}
+  },
+  {
+    "model": "academics.department",
+    "pk": 10,
+    "fields": {"name": "Chemistry", "slug": "chemistry", "category": "science", "hod_name": "", "description": "Department of Chemistry", "order": 10}
+  },
+  {
+    "model": "academics.department",
+    "pk": 11,
+    "fields": {"name": "Mathematics", "slug": "mathematics", "category": "science", "hod_name": "", "description": "Department of Mathematics", "order": 11}
+  },
+  {
+    "model": "academics.department",
+    "pk": 12,
+    "fields": {"name": "Botany", "slug": "botany", "category": "science", "hod_name": "", "description": "Department of Botany", "order": 12}
+  },
+  {
+    "model": "academics.department",
+    "pk": 13,
+    "fields": {"name": "Forestry", "slug": "forestry", "category": "science", "hod_name": "", "description": "Department of Forestry", "order": 13}
+  },
+  {
+    "model": "academics.department",
+    "pk": 14,
+    "fields": {"name": "Computer Science", "slug": "computer-science", "category": "science", "hod_name": "", "description": "Department of Computer Science", "order": 14}
+  },
+  {
+    "model": "core.sitesettings",
+    "pk": 1,
+    "fields": {
+      "college_name_en": "Chaitanya Science and Arts College",
+      "college_name_hi": "चैतन्य विज्ञान एवं कला महाविद्यालय, पामगढ़",
+      "tagline": "An Autonomous College, Approved by UGC | Accredited with Grade 'A' by NAAC",
+      "address_line1": "PAMGARH, JANJGIR-CHAMPA (C.G.), 495554",
+      "address_line2": "Affiliated to Shaheed Nandkumar Patel Vishwavidyalaya, Raigarh, Chhattisgarh, India",
+      "phone": "+91-9425540666",
+      "email": "chaitanyapamgarh@gmail.com",
+      "facebook_url": "https://www.facebook.com/ChaitanyaPamgarh/",
+      "youtube_url": "https://www.youtube.com/@ChaitanyaCollegePamgarh",
+      "instagram_url": "https://www.instagram.com/chaitanya_college_pamgarh/",
+      "google_maps_embed": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3702.645182693546!2d82.44566047479239!3d21.87121777999742!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a27cf617fc4296d%3A0x953b038528c66828!2sChaitanya%20Science%20and%20Arts%20College%2C%20Pamgarh!5e0!3m2!1sen!2sin!4v1724811425906!5m2!1sen!2sin",
+      "established_year": 2001
+    }
+  },
+  {
+    "model": "core.statcounter",
+    "pk": 1,
+    "fields": {"label": "Courses on Arts, Science, Commerce & Management", "value": "18+", "order": 1}
+  },
+  {
+    "model": "core.statcounter",
+    "pk": 2,
+    "fields": {"label": "Students filled with joy", "value": "8000+", "order": 2}
+  },
+  {
+    "model": "core.statcounter",
+    "pk": 3,
+    "fields": {"label": "Faculty & Staff", "value": "50+", "order": 3}
+  },
+  {
+    "model": "core.statcounter",
+    "pk": 4,
+    "fields": {"label": "Years of Excellence", "value": "25+", "order": 4}
+  },
+  {
+    "model": "core.importantlink",
+    "pk": 1,
+    "fields": {"name": "www.snpv.ac.in", "url": "http://www.snpv.ac.in", "category": "important", "order": 1}
+  },
+  {
+    "model": "core.importantlink",
+    "pk": 2,
+    "fields": {"name": "www.ugc.gov.in", "url": "https://www.ugc.gov.in/", "category": "important", "order": 2}
+  },
+  {
+    "model": "core.importantlink",
+    "pk": 3,
+    "fields": {"name": "www.naac.gov.in", "url": "http://www.naac.gov.in", "category": "important", "order": 3}
+  },
+  {
+    "model": "core.importantlink",
+    "pk": 4,
+    "fields": {"name": "www.digilocker.gov.in", "url": "https://www.digilocker.gov.in/", "category": "important", "order": 4}
+  },
+  {
+    "model": "core.importantlink",
+    "pk": 5,
+    "fields": {"name": "Admission Online", "url": "https://www.snpvraigarh.in/", "category": "quick", "order": 1}
+  },
+  {
+    "model": "core.importantlink",
+    "pk": 6,
+    "fields": {"name": "University Notices", "url": "https://snpv.ac.in/notice-board", "category": "quick", "order": 2}
+  }
+]

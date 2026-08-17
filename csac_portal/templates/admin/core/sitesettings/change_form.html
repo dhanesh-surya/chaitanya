@@ -1,0 +1,43 @@
+{% extends "admin/change_form.html" %}
+
+{% block after_field_sets %}
+  {{ block.super }}
+  <datalist id="font-families-datalist">
+    <option value="Roboto Slab">
+    <option value="Outfit">
+    <option value="Inter">
+    <option value="Poppins">
+    <option value="Montserrat">
+    <option value="Playfair Display">
+    <option value="Lora">
+    <option value="Oswald">
+    <option value="Open Sans">
+    <option value="Roboto">
+    <option value="Arial">
+    <option value="Times New Roman">
+    <option value="Georgia">
+  </datalist>
+
+  <datalist id="font-sizes-datalist">
+    <option value="12px">
+    <option value="14px">
+    <option value="16px">
+    <option value="18px">
+    <option value="20px">
+    <option value="22px">
+    <option value="24px">
+    <option value="26px">
+    <option value="28px">
+    <option value="30px">
+    <option value="32px">
+    <option value="36px">
+    <option value="40px">
+    <option value="48px">
+    <option value="56px">
+    <option value="64px">
+    <option value="1rem">
+    <option value="1.25rem">
+    <option value="1.5rem">
+    <option value="2rem">
+  </datalist>
+{% endblock %}

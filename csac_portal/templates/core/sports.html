@@ -1,0 +1,813 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+  /* ===== SPORTS PAGE — PREMIUM DESIGN ===== */
+  :root {
+    --sport-red:    #B71A34;
+    --sport-dark:   #0f0f0f;
+    --sport-dark2:  #181818;
+    --sport-gold:   #f59e0b;
+    --sport-gray:   #f4f4f6;
+  }
+
+  /* ---- HERO STATS STRIP ---- */
+  .sports-stats-strip {
+    background: var(--sport-red);
+    padding: 14px 0;
+  }
+  .sports-stat-item {
+    text-align: center;
+    color: #fff;
+    border-right: 1px solid rgba(255,255,255,0.2);
+    padding: 4px 0;
+  }
+  .sports-stat-item:last-child { border-right: none; }
+  .sports-stat-item .stat-val {
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1;
+    font-family: 'Roboto Slab', serif;
+  }
+  .sports-stat-item .stat-lbl {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    opacity: 0.85;
+    margin-top: 2px;
+  }
+
+  /* ---- SECTION LABELS ---- */
+  .sports-section-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(183,26,52,0.08);
+    border: 1px solid rgba(183,26,52,0.2);
+    border-radius: 50px;
+    padding: 5px 16px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--sport-red);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  /* ---- INTRO SECTION ---- */
+  .sports-intro {
+    background: #fff;
+    padding: 60px 0;
+  }
+
+  /* ---- FACILITIES SECTION ---- */
+  .facilities-section {
+    background: var(--sport-dark);
+    padding: 70px 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .facilities-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 60px,
+      rgba(183,26,52,0.03) 60px,
+      rgba(183,26,52,0.03) 61px
+    );
+  }
+  .facility-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 28px 22px;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    transition: all 0.3s ease;
+  }
+  .facility-card:hover {
+    background: rgba(183,26,52,0.12);
+    border-color: rgba(183,26,52,0.35);
+    transform: translateY(-3px);
+  }
+  .facility-icon {
+    width: 48px;
+    height: 48px;
+    background: rgba(183,26,52,0.15);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: var(--sport-red);
+    flex-shrink: 0;
+  }
+  .facility-text { color: rgba(255,255,255,0.82); font-size: 14.5px; line-height: 1.5; }
+  .facilities-section h2, .facilities-section .sports-section-label { color: #fff !important; }
+
+  /* ---- NOTICES SECTION ---- */
+  .notices-section {
+    background: var(--sport-gray);
+    padding: 70px 0;
+  }
+  .notice-item {
+    background: #fff;
+    border-radius: 12px;
+    padding: 18px 22px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border: 1px solid rgba(0,0,0,0.05);
+    transition: all 0.25s ease;
+    margin-bottom: 12px;
+    text-decoration: none;
+    color: inherit;
+  }
+  .notice-item:hover {
+    border-color: rgba(183,26,52,0.25);
+    box-shadow: 0 4px 18px rgba(183,26,52,0.08);
+    transform: translateX(4px);
+  }
+  .notice-date-badge {
+    min-width: 52px;
+    text-align: center;
+    background: var(--sport-red);
+    color: #fff;
+    border-radius: 10px;
+    padding: 8px 6px;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  .notice-date-badge .nd-day { font-size: 20px; font-weight: 800; display: block; line-height: 1; }
+  .notice-item-title {
+    font-size: 14.5px;
+    font-weight: 600;
+    color: #1a1a2e;
+    line-height: 1.4;
+    flex-grow: 1;
+  }
+  .notice-doc-link {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--sport-red);
+    white-space: nowrap;
+    text-decoration: none;
+  }
+  .notice-doc-link:hover { text-decoration: underline; }
+  .notice-empty {
+    text-align: center;
+    padding: 40px;
+    color: #9ca3af;
+    background: #fff;
+    border-radius: 12px;
+    border: 2px dashed #e5e7eb;
+  }
+
+  /* ---- EVENTS SECTION ---- */
+  .events-section {
+    background: #fff;
+    padding: 70px 0;
+  }
+  .event-card {
+    background: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.06);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  .event-card:hover {
+    box-shadow: 0 10px 30px rgba(183,26,52,0.1);
+    border-color: rgba(183,26,52,0.15);
+    transform: translateY(-4px);
+  }
+  .event-img-wrap {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+    background: #f3f4f6;
+  }
+  .event-img-wrap img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+  .event-card:hover .event-img-wrap img { transform: scale(1.05); }
+  .event-date-pill {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: var(--sport-red);
+    color: #fff;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .event-upcoming-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: #10b981;
+    color: #fff;
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .event-past-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: #6b7280;
+    color: #fff;
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .event-body { padding: 20px; flex-grow: 1; display: flex; flex-direction: column; }
+  .event-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 8px;
+    line-height: 1.35;
+  }
+  .event-meta {
+    font-size: 12.5px;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+  }
+  .event-body .btn-sport-sm {
+    margin-top: auto;
+    padding-top: 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--sport-red);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: gap 0.2s ease;
+  }
+  .event-body .btn-sport-sm:hover { gap: 10px; }
+
+  /* ---- GALLERY SECTION ---- */
+  .gallery-section {
+    background: var(--sport-dark);
+    padding: 70px 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .gallery-section::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 200px;
+    background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.5));
+    pointer-events: none;
+  }
+  .gallery-item {
+    position: relative;
+    border-radius: 14px;
+    overflow: hidden;
+    height: 220px;
+    cursor: pointer;
+    display: block;
+    text-decoration: none;
+  }
+  .gallery-item img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+  .gallery-item:hover img { transform: scale(1.08); }
+  .gallery-item-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(183,26,52,0.75) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    display: flex;
+    align-items: flex-end;
+    padding: 14px;
+  }
+  .gallery-item:hover .gallery-item-overlay { opacity: 1; }
+  .gallery-item-caption {
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  .gallery-tag {
+    display: inline-block;
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 11px;
+    color: #fff;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .gallery-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: rgba(255,255,255,0.4);
+  }
+  .gallery-zoom-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.7);
+    opacity: 0;
+    font-size: 28px;
+    color: #fff;
+    transition: all 0.3s ease;
+  }
+  .gallery-item:hover .gallery-zoom-icon {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  /* ---- HAPPENINGS SECTION ---- */
+  .happenings-section {
+    background: var(--sport-gray);
+    padding: 70px 0;
+  }
+  .happening-card {
+    background: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.05);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    text-decoration: none;
+    color: inherit;
+  }
+  .happening-card:hover {
+    box-shadow: 0 10px 30px rgba(183,26,52,0.1);
+    border-color: rgba(183,26,52,0.15);
+    transform: translateY(-4px);
+  }
+  .happening-img {
+    height: 185px;
+    overflow: hidden;
+    background: #f3f4f6;
+  }
+  .happening-img img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+  .happening-card:hover .happening-img img { transform: scale(1.05); }
+  .happening-body { padding: 18px; flex-grow: 1; }
+  .happening-category {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--sport-red);
+    margin-bottom: 6px;
+  }
+  .happening-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #111827;
+    line-height: 1.4;
+    margin-bottom: 8px;
+  }
+  .happening-date {
+    font-size: 12px;
+    color: #9ca3af;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .happening-empty {
+    text-align: center;
+    padding: 40px;
+    color: #9ca3af;
+    background: #fff;
+    border-radius: 12px;
+    border: 2px dashed #e5e7eb;
+  }
+
+  /* ---- ACHIEVEMENTS / POLICIES SECTION ---- */
+  .achiev-section {
+    background: #fff;
+    padding: 70px 0;
+  }
+  .achiev-card {
+    background: var(--sport-gray);
+    border-radius: 16px;
+    overflow: hidden;
+    height: 100%;
+  }
+  .achiev-header {
+    background: var(--sport-red);
+    color: #fff;
+    padding: 16px 22px;
+    font-size: 16px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .achiev-list { padding: 20px 22px; list-style: none; margin: 0; }
+  .achiev-list li {
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    font-size: 14px;
+    color: #374151;
+    line-height: 1.5;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .achiev-list li:last-child { border-bottom: none; }
+  .achiev-list li i { color: var(--sport-red); margin-top: 2px; flex-shrink: 0; }
+
+  /* ---- SECTION TITLE SHARED ---- */
+  .sports-section-title {
+    font-size: 30px;
+    font-weight: 800;
+    color: #111827;
+    margin-bottom: 8px;
+    line-height: 1.2;
+  }
+  .sports-section-title.light { color: #fff; }
+  .sports-section-sub {
+    color: #6b7280;
+    font-size: 15.5px;
+    max-width: 520px;
+    line-height: 1.65;
+  }
+  .sports-section-sub.light { color: rgba(255,255,255,0.65); }
+
+  /* ---- CTA STRIP ---- */
+  .sports-cta-strip {
+    background: linear-gradient(135deg, #B71A34 0%, #7c0f22 100%);
+    padding: 55px 0;
+  }
+
+  @media (max-width: 768px) {
+    .sports-stat-item { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.15); }
+    .sports-section-title { font-size: 24px; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Breadcrumb Section -->
+<section class="rts-breadcrumb breadcrumb-height breadcumb-bg" style="{% with bcimg=breadcrumb_images.sports %}{% if bcimg %}background-image: url('{{ bcimg }}');{% endif %}{% endwith %}">
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+        <div class="breadcrumb-content">
+          <h2 class="section-title">{{ breadcrumb }}</h2>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======= STATS STRIP ======= -->
+<div class="sports-stats-strip">
+  <div class="container">
+    <div class="row g-0">
+      <div class="col-6 col-md-3 sports-stat-item">
+        <div class="stat-val">15+</div>
+        <div class="stat-lbl">Sports Disciplines</div>
+      </div>
+      <div class="col-6 col-md-3 sports-stat-item">
+        <div class="stat-val">500+</div>
+        <div class="stat-lbl">Student Athletes</div>
+      </div>
+      <div class="col-6 col-md-3 sports-stat-item">
+        <div class="stat-val">20+</div>
+        <div class="stat-lbl">Trophies Won</div>
+      </div>
+      <div class="col-6 col-md-3 sports-stat-item">
+        <div class="stat-val">5</div>
+        <div class="stat-lbl">Coaching Staff</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======= INTRO / ABOUT SPORTS ======= -->
+<section class="sports-intro">
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6">
+        <span class="sports-section-label"><i class="fa-solid fa-football"></i> About Sports at CSAC</span>
+        <h2 class="sports-section-title">{{ settings.page_intro_title }}</h2>
+        <p class="sports-section-sub mt-3">{{ settings.page_intro }}</p>
+        <div class="mt-4 d-flex flex-wrap gap-3">
+          <a href="{% url 'core:happenings' %}" class="btn btn-danger px-4 py-2 fw-bold rounded-3" style="background:#B71A34; border-color:#B71A34; font-size:14px;">
+            <i class="fa-solid fa-images me-2"></i>View All Happenings
+          </a>
+          <a href="{% url 'core:notices' %}" class="btn btn-outline-secondary px-4 py-2 fw-bold rounded-3" style="font-size:14px;">
+            <i class="fa-solid fa-bell me-2"></i>All Notices
+          </a>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="row g-3">
+          {% for facility in facilities %}
+          <div class="col-12">
+            <div class="d-flex align-items-center gap-3 p-3 rounded-3" style="background: #fef2f2; border-left: 4px solid #B71A34;">
+              <i class="fa-solid fa-check-circle" style="color:#B71A34; font-size:18px; flex-shrink:0;"></i>
+              <span style="font-size:14.5px; font-weight:600; color:#374151;">{{ facility }}</span>
+            </div>
+          </div>
+          {% empty %}
+          <div class="col-12 text-muted text-center py-3">No facilities listed yet.</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======= SPORTS NOTICES ======= -->
+{% if settings.show_notices %}
+<section class="notices-section" id="sports-notices">
+  <div class="container">
+    <div class="row mb-4">
+      <div class="col-lg-8">
+        <span class="sports-section-label"><i class="fa-solid fa-bullhorn"></i> Notice Board</span>
+        <h2 class="sports-section-title">Sports Notices &amp; Updates</h2>
+        <p class="sports-section-sub">Latest circulars, trial announcements and sports-related official notices.</p>
+      </div>
+      <div class="col-lg-4 text-lg-end d-flex align-items-end justify-content-lg-end">
+        <a href="{% url 'core:notices' %}" class="btn btn-outline-danger fw-bold rounded-3 px-4" style="font-size:13px; border-color:#B71A34; color:#B71A34;">
+          View All Notices <i class="fa-solid fa-arrow-right ms-1"></i>
+        </a>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-lg-10 mx-auto">
+        {% for notice in sports_notices %}
+        <a class="notice-item" {% if notice.document %}href="{{ notice.document.url }}" target="_blank"{% elif notice.document_url %}href="{{ notice.document_url }}" target="_blank"{% else %}href="{% url 'core:notices' %}"{% endif %}>
+          <div class="notice-date-badge">
+            <span class="nd-day">{{ notice.published_date|date:"d" }}</span>
+            {{ notice.published_date|date:"M" }}
+          </div>
+          <div class="notice-item-title">{{ notice.title }}</div>
+          {% if notice.document or notice.document_url %}
+          <span class="notice-doc-link"><i class="fa-solid fa-file-pdf me-1"></i>PDF</span>
+          {% endif %}
+        </a>
+        {% empty %}
+        <div class="notice-empty">
+          <i class="fa-solid fa-bell-slash fs-2 mb-3 d-block" style="color:#d1d5db;"></i>
+          <h5 class="fw-bold text-muted mb-1">No Sports Notices Yet</h5>
+          <p class="text-muted mb-0" style="font-size:13.5px;">Check back soon or visit the main Notice Board.</p>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- ======= UPCOMING SPORTS EVENTS ======= -->
+{% if settings.show_events %}
+<section class="events-section" id="sports-events">
+  <div class="container">
+    <div class="row mb-4">
+      <div class="col-lg-8">
+        <span class="sports-section-label"><i class="fa-solid fa-calendar-days"></i> Upcoming Events</span>
+        <h2 class="sports-section-title">Sports Events Calendar</h2>
+        <p class="sports-section-sub">Tournaments, trials and sports competitions — don't miss out.</p>
+      </div>
+      <div class="col-lg-4 text-lg-end d-flex align-items-end justify-content-lg-end">
+        <a href="{% url 'core:happenings' %}" class="btn btn-outline-danger fw-bold rounded-3 px-4" style="font-size:13px; border-color:#B71A34; color:#B71A34;">
+          All Happenings <i class="fa-solid fa-arrow-right ms-1"></i>
+        </a>
+      </div>
+    </div>
+    {% if sports_events %}
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+      {% for event in sports_events %}
+      <div class="col">
+        <div class="event-card">
+          <div class="event-img-wrap">
+            <img src="{{ event.get_image }}" alt="{{ event.title }}">
+            <span class="event-date-pill">{{ event.date|date:"d M Y" }}</span>
+            {% if event.date >= today %}
+              <span class="event-upcoming-badge"><i class="fa-solid fa-circle-dot me-1"></i>Upcoming</span>
+            {% else %}
+              <span class="event-past-badge">Completed</span>
+            {% endif %}
+          </div>
+          <div class="event-body">
+            <h5 class="event-title">{{ event.title }}</h5>
+            {% if event.location %}
+            <div class="event-meta"><i class="fa-solid fa-location-dot" style="color:#B71A34;"></i> {{ event.location }}</div>
+            {% endif %}
+            {% if event.time %}
+            <div class="event-meta"><i class="fa-solid fa-clock" style="color:#B71A34;"></i> {{ event.time }}</div>
+            {% endif %}
+            <a href="{% url 'core:event_detail' event.pk %}" class="btn-sport-sm">
+              View Details <i class="fa-solid fa-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="row">
+      <div class="col-12">
+        <div class="notice-empty">
+          <i class="fa-solid fa-calendar-xmark fs-2 mb-3 d-block" style="color:#d1d5db;"></i>
+          <h5 class="fw-bold text-muted mb-1">No Sports Events Scheduled</h5>
+          <p class="text-muted mb-0" style="font-size:13.5px;">Mark events as "Is Sports Event" in the admin to show them here.</p>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endif %}
+
+<!-- ======= SPORTS GALLERY ======= -->
+{% if settings.show_gallery %}
+<section class="gallery-section" id="sports-gallery">
+  <div class="container position-relative" style="z-index:2;">
+    <div class="row mb-5">
+      <div class="col-lg-8">
+        <span class="sports-section-label" style="background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.2); color:#fff;"><i class="fa-solid fa-images"></i> Photo Gallery</span>
+        <h2 class="sports-section-title light">Sports Gallery</h2>
+        <p class="sports-section-sub light">Captured moments of our athletes in action.</p>
+      </div>
+    </div>
+    {% if gallery_images %}
+    <div class="row g-3">
+      {% for img in gallery_images %}
+      <div class="col-6 col-md-4 col-lg-3">
+        <a href="{{ img.get_image }}" class="gallery-item sports-gallery-popup">
+          <img src="{{ img.get_image }}" alt="{{ img.caption|default:'Sports Gallery' }}">
+          <div class="gallery-item-overlay">
+            {% if img.sport_tag %}<span class="gallery-tag">{{ img.sport_tag }}</span><br>{% endif %}
+            {% if img.caption %}<span class="gallery-item-caption">{{ img.caption }}</span>{% endif %}
+          </div>
+          <i class="fa-solid fa-magnifying-glass-plus gallery-zoom-icon"></i>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="gallery-empty">
+      <i class="fa-solid fa-camera-slash fs-2 mb-3 d-block"></i>
+      <h5 class="fw-bold mb-1">No Gallery Images Yet</h5>
+      <p style="font-size:13.5px;">Upload images via Sports Gallery Images in the admin panel.</p>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endif %}
+
+<!-- ======= SPORTS HAPPENINGS ======= -->
+{% if settings.show_happenings %}
+<section class="happenings-section" id="sports-happenings">
+  <div class="container">
+    <div class="row mb-4">
+      <div class="col-lg-8">
+        <span class="sports-section-label"><i class="fa-solid fa-trophy"></i> Recent Activities</span>
+        <h2 class="sports-section-title">Sports Happenings</h2>
+        <p class="sports-section-sub">A look back at our recent sports events, championships and celebrations.</p>
+      </div>
+      <div class="col-lg-4 text-lg-end d-flex align-items-end justify-content-lg-end">
+        <a href="{% url 'core:happenings' %}" class="btn btn-outline-danger fw-bold rounded-3 px-4" style="font-size:13px; border-color:#B71A34; color:#B71A34;">
+          See All Happenings <i class="fa-solid fa-arrow-right ms-1"></i>
+        </a>
+      </div>
+    </div>
+    {% if sports_happenings %}
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+      {% for h in sports_happenings %}
+      <div class="col">
+        <a href="{% url 'core:happening_detail' h.pk %}" class="happening-card">
+          <div class="happening-img">
+            <img src="{{ h.get_image }}" alt="{{ h.title }}">
+          </div>
+          <div class="happening-body">
+            {% if h.category %}<div class="happening-category">{{ h.category }}</div>{% endif %}
+            <div class="happening-title">{{ h.title }}</div>
+            {% if h.date %}
+            <div class="happening-date">
+              <i class="fa-solid fa-calendar-day" style="color:#B71A34;"></i> {{ h.date|date:"d M Y" }}
+            </div>
+            {% endif %}
+          </div>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="happening-empty">
+      <i class="fa-solid fa-person-running fs-2 mb-3 d-block" style="color:#d1d5db;"></i>
+      <h5 class="fw-bold text-muted mb-1">No Sports Happenings Yet</h5>
+      <p class="text-muted mb-0" style="font-size:13.5px;">Mark happenings as "Is Sports Activity" in the admin to show them here.</p>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endif %}
+
+<!-- ======= ACHIEVEMENTS & POLICIES ======= -->
+<section class="achiev-section">
+  <div class="container">
+    <div class="row mb-5 text-center">
+      <div class="col-lg-7 mx-auto">
+        <span class="sports-section-label"><i class="fa-solid fa-medal"></i> Recognition &amp; Support</span>
+        <h2 class="sports-section-title">Our Sports Legacy</h2>
+      </div>
+    </div>
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="achiev-card">
+          <div class="achiev-header">
+            <i class="fa-solid fa-trophy"></i> Annual Sports Events &amp; Achievements
+          </div>
+          <ul class="achiev-list">
+            {% for item in achievements %}
+            <li><i class="fa-solid fa-medal"></i> {{ item }}</li>
+            {% empty %}
+            <li class="text-muted">No achievements listed.</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="achiev-card">
+          <div class="achiev-header">
+            <i class="fa-solid fa-shield-halved"></i> Sports Policies &amp; Benefits
+          </div>
+          <ul class="achiev-list">
+            {% for item in policies %}
+            <li><i class="fa-solid fa-check-circle"></i> {{ item }}</li>
+            {% empty %}
+            <li class="text-muted">No policies listed.</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======= CTA STRIP ======= -->
+<div class="sports-cta-strip text-center">
+  <div class="container">
+    <h3 class="text-white fw-bold mb-2" style="font-size: 26px;">Ready to Represent CSAC?</h3>
+    <p class="text-white mb-4" style="opacity: 0.85; font-size: 15px;">Contact the Physical Education Department for sports trials, scholarships and enrolment.</p>
+    <a href="{% url 'core:contact' %}" class="btn btn-light fw-bold px-5 py-2 rounded-3" style="color: #B71A34; font-size: 15px;">
+      <i class="fa-solid fa-envelope me-2"></i>Contact Us
+    </a>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  $(document).ready(function () {
+    // Initialize MagnificPopup for gallery lightbox
+    if ($('.sports-gallery-popup').length) {
+      $('.sports-gallery-popup').magnificPopup({
+        type: 'image',
+        gallery: { enabled: true },
+        zoom: { enabled: true, duration: 300 }
+      });
+    }
+  });
+</script>
+{% endblock %}

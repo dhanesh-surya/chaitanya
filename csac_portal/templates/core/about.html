@@ -1,0 +1,298 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+
+    .single-about-info {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        background: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        margin-bottom: 20px;
+    }
+    .single-about-info .icon img {
+        width: 50px;
+        height: 50px;
+    }
+    .single-about-info .content h3 {
+        font-size: 28px;
+        color: #E61013;
+        margin-bottom: 0;
+        font-weight: 700;
+    }
+    .single-about-info .desc p {
+        margin-bottom: 0;
+        color: #666;
+        font-size: 14px;
+    }
+    .funfact-wrapper-custom {
+        background: #E61013;
+        padding: 40px 0;
+        color: white;
+    }
+    .funfact-item-custom h2 {
+        font-size: 42px;
+        font-weight: 800;
+        margin-bottom: 5px;
+        color: white;
+    }
+    .funfact-item-custom p {
+        font-size: 16px;
+        color: white;
+        opacity: 0.85;
+        margin-bottom: 0;
+    }
+    .vision-mission-title {
+        background: #E61013;
+        color: white;
+        padding: 10px 15px;
+        font-size: 20px;
+        font-weight: 700;
+        border: 1px solid #cccccc;
+    }
+    .vision-mission-body {
+        background: #eeeeee;
+        padding: 15px;
+        border: 1px solid #cccccc;
+        font-size: 16px;
+        color: #333;
+        line-height: 1.6;
+    }
+    .features-list-custom {
+        list-style: none;
+        padding-left: 0;
+    }
+    .features-list-custom li {
+        position: relative;
+        padding-left: 30px;
+        margin-bottom: 12px;
+        font-size: 18px;
+        color: #333;
+    }
+    .features-list-custom li::before {
+        content: "\f0c8"; /* square icon */
+        font-family: "Font Awesome 6 Free";
+        font-weight: 900;
+        position: absolute;
+        left: 0;
+        top: 2px;
+        color: #E61013;
+        font-size: 14px;
+    }
+    .leadership-section-custom {
+        background: #fff;
+        padding: 60px 0;
+        border-top: 1px solid #eee;
+    }
+    .leadership-section-title {
+        font-size: 28px;
+        font-weight: 700;
+        color: #111827;
+        margin-bottom: 28px;
+        text-align: center;
+    }
+</style>
+
+<!-- Breadcrumb Section -->
+{% with page_bc=about.get_breadcrumb_image %}
+<section class="rts-breadcrumb breadcrumb-height breadcumb-bg" style="{% if page_bc %}background-image: url('{{ page_bc }}');{% elif breadcrumb_images.about %}background-image: url('{{ breadcrumb_images.about }}');{% endif %}">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb-content">
+                    <h2 class="section-title">{{ about.page_title }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endwith %}
+
+
+
+<!-- About Us Section -->
+<section class="rts-about-university rts-section-padding py-5">
+    <div class="container">
+        <div class="row mb-5">
+            <div class="col-lg-7 col-md-12">
+                <h3 class="fw-bold mb-4" style="color: #E61013; font-size: 32px;">{{ about.about_us_title }}</h3>
+                <div class="text-muted fs-5 lh-lg" style="text-align: justify; font-family: 'Times New Roman', Times, serif;">
+                    {% if about.about_us_description_1 %}
+                        <div class="mb-3">{{ about.about_us_description_1|safe }}</div>
+                    {% endif %}
+                    {% if about.about_us_description_2 %}
+                        <div class="mb-3">{{ about.about_us_description_2|safe }}</div>
+                    {% endif %}
+                    {% if about.about_us_description_3 %}
+                        <div class="mb-0">{{ about.about_us_description_3|safe }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-5 col-md-12 mt-4 mt-lg-0">
+                <div class="text-center mb-4">
+                    <img alt="College Building" src="{{ about.get_about_us_image }}" class="img-fluid rounded shadow" style="max-height: 350px; width: 100%; object-fit: cover;">
+                </div>
+                <div class="stats-details">
+                    <!-- Stat 1 -->
+                    <div class="single-about-info">
+                        <div class="icon">
+                            <img alt="icon" src="{% static about.stat1_icon %}">
+                        </div>
+                        <div class="content">
+                            <h3>{{ about.stat1_value }}</h3>
+                            <div class="desc">
+                                <p>{{ about.stat1_label }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Stat 2 -->
+                    <div class="single-about-info">
+                        <div class="icon">
+                            <img alt="icon" src="{% static about.stat2_icon %}">
+                        </div>
+                        <div class="content">
+                            <h3>{{ about.stat2_value }}</h3>
+                            <div class="desc">
+                                <p>{{ about.stat2_label }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Stat 3 -->
+                    <div class="single-about-info">
+                        <div class="icon">
+                            <img alt="icon" src="{% static about.stat3_icon %}">
+                        </div>
+                        <div class="content">
+                            <h3>{{ about.stat3_value }}</h3>
+                            <div class="desc">
+                                <p>{{ about.stat3_label }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Fun Facts Red Bar -->
+<section class="funfact-wrapper-custom">
+    <div class="container">
+        <div class="row text-center g-4">
+            <div class="col-md-4 funfact-item-custom">
+                <h2>{{ about.funfact1_value }}</h2>
+                <p>{{ about.funfact1_label }}</p>
+            </div>
+            <div class="col-md-4 funfact-item-custom">
+                <h2>{{ about.funfact2_value }}</h2>
+                <p>{{ about.funfact2_label }}</p>
+            </div>
+            <div class="col-md-4 funfact-item-custom">
+                <h2>{{ about.funfact3_value }}</h2>
+                <p>{{ about.funfact3_label }}</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Mission & Vision Section -->
+<section class="py-5" style="background-color: #fafafa;">
+    <div class="container">
+        {% if about.mission_statement %}
+            <blockquote class="text-center mb-5 px-3">
+                <div class="fw-normal lh-base" style="font-family: 'Times New Roman', Times, serif; color: #000; font-size: 24px;">
+                    {{ about.mission_statement|safe }}
+                </div>
+            </blockquote>
+        {% endif %}
+
+        <div class="row g-4">
+            <!-- Vision -->
+            <div class="col-md-12 col-lg-6">
+                <div class="vision-mission-title">{{ about.vision_title }}</div>
+                <div class="vision-mission-body" style="font-family: Calibri, sans-serif;">
+                    {{ about.vision_text|safe }}
+                </div>
+            </div>
+            <!-- Mission -->
+            <div class="col-md-12 col-lg-6">
+                <div class="vision-mission-title">{{ about.mission_title }}</div>
+                <div class="vision-mission-body" style="font-family: Calibri, sans-serif;">
+                    {% if about.mission_text_1 %}
+                        <div class="mb-2">{{ about.mission_text_1|safe }}</div>
+                    {% endif %}
+                    {% if about.mission_text_2 %}
+                        <div class="mb-0">{{ about.mission_text_2|safe }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Governance -->
+        {% if about.governance_text %}
+            <div class="row mt-5">
+                <div class="col-12">
+                    <div class="vision-mission-body bg-white p-4 shadow-sm" style="border-radius: 8px;">
+                        <h4 class="fw-bold mb-3" style="font-family: 'Times New Roman', Times, serif;">{{ about.governance_title }}</h4>
+                        <div style="text-align: justify; font-family: 'Times New Roman', Times, serif; font-size: 18px; line-height: 1.8; color: #444;">
+                            {{ about.governance_text|safe }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Distinctive Features Section -->
+<section class="py-5">
+    <div class="container">
+        <h3 class="fw-bold mb-4" style="color: #000; font-family: 'Times New Roman', Times, serif; font-size: 28px;">
+            {{ about.features_title }}
+        </h3>
+        
+        <ul class="features-list-custom mt-3" style="font-family: 'Times New Roman', Times, serif;">
+            {% for feature in features %}
+                <li>{{ feature }}</li>
+            {% empty %}
+                <li class="text-muted">No distinctive features listed.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</section>
+
+<!-- Leadership Messages Section -->
+<section class="leadership-section-custom">
+    <div class="container">
+        <h3 class="leadership-section-title">Leadership Messages</h3>
+        <div class="row g-4">
+            {% for member in leadership_members %}
+                <div class="col-lg-6">
+                    {% include 'core/includes/leadership_card.html' with member=member show_edit=False %}
+                </div>
+            {% empty %}
+                <div class="col-12">
+                    <div class="card feedback-card" style="padding:12px;">
+                        <div class="card-body">
+                            <div class="card-text" style="padding:5px;text-align:justify;">
+                                <p>{{ about.testimonial_text|safe }}</p>
+                                <div class="nameplate-container">
+                                    <img alt="{{ about.testimonial_author }}" class="nameplate-img" src="{% if about.testimonial_author_image %}{{ about.testimonial_author_image.url }}{% else %}https://chaitanyafiles01.s3.amazonaws.com/aboutImages/vkgupta.png{% endif %}">
+                                    <div class="name-template">
+                                        <h5 class="name leadership-name">{{ about.testimonial_author }}</h5>
+                                        <p class="organization">Chaitanya Science and Arts College</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

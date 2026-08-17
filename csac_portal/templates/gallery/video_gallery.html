@@ -1,0 +1,182 @@
+﻿{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!-- Breadcrumb Section -->
+<section class="rts-breadcrumb breadcrumb-height breadcumb-bg" style="{% with bcimg=breadcrumb_images.gallery_videos %}{% if bcimg %}background-image: url('{{ bcimg }}');{% endif %}{% endwith %}">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb-content">
+                    <h2 class="section-title">{{ breadcrumb }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Video Gallery Section -->
+<section class="rts-section-padding py-5">
+    <div class="container">
+
+        <!-- Filters/Categories Toggle Button -->
+        {% if categories %}
+        <div class="row mb-3">
+            <div class="col-12 text-start">
+                <button class="btn btn-outline-danger d-inline-flex align-items-center gap-2" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse" aria-expanded="false" aria-controls="filterCollapse" style="border-radius: 8px; padding: 10px 18px; font-weight: 600; font-size: 15px; border-color: #E61013; color: #E61013;">
+                    <i class="fas fa-filter"></i> Filter Videos
+                </button>
+            </div>
+        </div>
+
+        <!-- Collapsible Filters Container -->
+        <div class="collapse mb-4" id="filterCollapse">
+            <div class="card card-body border-0 shadow-sm p-4" style="background-color: #f8f9fa; border-radius: 12px;">
+                <h6 class="fw-bold mb-3" style="color: #333; font-family: Roboto Slab, serif;"><i class="fas fa-tags me-2" style="color: #E61013;"></i> Select Category</h6>
+                <div class="row row-cols-auto g-2">
+                    <div class="col">
+                        <button class="btn btn-outline-danger filter-btn active text-nowrap" data-filter="all" style="border-radius: 6px; padding: 8px 16px; font-weight: 500;">All Videos</button>
+                    </div>
+                    {% for cat in categories %}
+                        <div class="col">
+                            <button class="btn btn-outline-danger filter-btn text-nowrap" data-filter="{{ cat.id }}" style="border-radius: 6px; padding: 8px 16px; font-weight: 500;">{{ cat.name }}</button>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Video Grid -->
+        {% if items %}
+        <div class="row g-4" id="video-grid">
+            {% for item in items %}
+            <div class="col-sm-6 col-md-4 col-lg-4 video-item" data-category="{{ item.category.id }}">
+                <div class="card h-100 border-0 shadow-sm overflow-hidden position-relative video-card">
+                    
+                    <!-- Video Thumbnail with play icon overlay -->
+                    <div class="position-relative overflow-hidden" style="height: 200px; background-color: #000;">
+                        {% if item.get_video_thumbnail %}
+                            <img src="{{ item.get_video_thumbnail }}" alt="{{ item.title }}" class="w-100 h-100" style="object-fit: cover; opacity: 0.85;">
+                        {% else %}
+                            <!-- Placeholder youtube thumbnail if image not set but video url exists -->
+                            <img src="" class="w-100 h-100 youtube-thumb" data-url="{{ item.video_url }}" alt="{{ item.title }}" style="object-fit: cover; opacity: 0.85; display: none;">
+                            <div class="position-absolute start-0 end-0 top-0 bottom-0 d-flex align-items-center justify-content-center thumb-fallback">
+                                <i class="fas fa-video fa-3x text-white-50"></i>
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Play Icon -->
+                        <a href="{{ item.video_url }}" class="position-absolute top-50 start-50 translate-middle text-white play-icon-btn d-flex align-items-center justify-content-center rounded-circle" target="_blank" style="width: 60px; height: 60px; background-color: rgba(230, 16, 19, 0.9); transition: all 0.3s;">
+                            <i class="fas fa-play" style="margin-left: 4px; font-size: 1.5rem;"></i>
+                        </a>
+                    </div>
+
+                    <div class="card-body p-3">
+                        <h6 class="fw-bold text-dark mb-1">{{ item.title }}</h6>
+                        {% if item.description %}
+                            <p class="text-muted small mb-2">{{ item.description|truncatewords:15 }}</p>
+                        {% endif %}
+                        <div class="d-flex align-items-center justify-content-between mt-2 border-top pt-2">
+                            <span class="badge bg-secondary small">{{ item.category.name }}</span>
+                            {% if item.date %}
+                                <small class="text-muted"><i class="fas fa-calendar-alt me-1"></i> {{ item.date }}</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="alert alert-secondary text-center py-5 border-0 shadow-sm">
+            <i class="fas fa-video-slash fa-3x mb-3 text-muted"></i>
+            <h5 class="fw-bold">No Videos in Gallery</h5>
+            <p class="text-muted mb-0">Videos will be uploaded soon. Please check back later.</p>
+        </div>
+        {% endif %}
+
+    </div>
+</section>
+
+<!-- Client side categories filtering & YouTube thumbnail extraction -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Categories Filter
+        const buttons = document.querySelectorAll('.filter-btn');
+        const items = document.querySelectorAll('.video-item');
+
+        buttons.forEach(button => {
+            button.addEventListener('click', () => {
+                buttons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+
+                const filter = button.getAttribute('data-filter');
+
+                items.forEach(item => {
+                    const itemCat = item.getAttribute('data-category');
+                    if (filter === 'all' || itemCat === filter) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        // Youtube thumbnail extraction
+        const youtubeThumbs = document.querySelectorAll('.youtube-thumb');
+        youtubeThumbs.forEach(img => {
+            const url = img.getAttribute('data-url');
+            if (url) {
+                const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+                const match = url.match(regExp);
+                if (match && match[2].length == 11) {
+                    const videoId = match[2];
+                    img.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+                    img.style.display = 'block';
+                    const fallback = img.nextElementSibling;
+                    if (fallback) fallback.style.display = 'none';
+                }
+            }
+        });
+    });
+</script>
+
+<style>
+    .video-card {
+        max-width: 300px;
+        margin: 0 auto;
+    }
+    .w-100 {
+        max-width: 300px;
+    }
+    .video-card:hover .play-icon-btn {
+        transform: translate(-50%, -50%) scale(1.1);
+        background-color: #fff !important;
+        color: #E61013 !important;
+        box-shadow: 0 0 15px rgba(255,255,255,0.8);
+    }
+    .filter-btn {
+        background-color: #fff !important;
+        color: #E61013 !important;
+        border-color: #E61013 !important;
+        transition: all 0.25s ease !important;
+    }
+    .filter-btn:hover {
+        background-color: #E61013 !important;
+        color: #fff !important;
+        border-color: #E61013 !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 4px 8px rgba(230, 16, 19, 0.1) !important;
+    }
+    .filter-btn.active {
+        background-color: #E61013 !important;
+        color: #fff !important;
+        border-color: #E61013 !important;
+        box-shadow: 0 4px 12px rgba(230, 16, 19, 0.2) !important;
+    }
+</style>
+
+{% endblock %}

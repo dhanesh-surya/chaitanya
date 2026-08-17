@@ -1,0 +1,284 @@
+﻿{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    #custom-page-swiper, .custom-page-banner {
+        height: 400px !important;
+        width: 100%;
+        margin: 0 auto;
+    }
+    #custom-page-swiper .swiper-slide {
+        height: 400px !important;
+    }
+    .swiper-slide img {
+        transition: transform 1.2s ease-in-out;
+        object-fit: cover;
+    }
+    .swiper-slide-active img {
+        transform: scale(1.03);
+    }
+    .w-100 {
+        max-width: 1280px;
+    }
+    @media (max-width: 768px) {
+        #custom-page-swiper, .custom-page-banner {
+            height: 250px !important;
+        }
+        #custom-page-swiper .swiper-slide {
+            height: 250px !important;
+        }
+    }
+    
+    /* Activity Timeline Styles */
+    .activity-timeline {
+        position: relative;
+        padding-left: 30px;
+        border-left: 2px solid #e9ecef;
+    }
+    .activity-item {
+        position: relative;
+        margin-bottom: 30px;
+    }
+    .activity-item::before {
+        content: '';
+        position: absolute;
+        left: -37px;
+        top: 5px;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background-color: #E61013;
+        border: 3px solid #fff;
+        box-shadow: 0 0 0 3px rgba(230, 16, 19, 0.2);
+    }
+    .gallery-area a:hover img {
+        transform: scale(1.05);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Breadcrumb Section -->
+<section class="rts-breadcrumb breadcrumb-height breadcumb-bg" style="{% with bcimg=breadcrumb_images.custom_page %}{% if bcimg %}background-image: url('{{ bcimg }}');{% endif %}{% endwith %}">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb-content">
+                    <h2 class="section-title">{{ breadcrumb }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="rts-section-padding py-5">
+    <div class="container">
+
+        <!-- Image Slider -->
+        {% if page.show_slider and page.slides.all %}
+        <div class="row mb-5">
+            <div class="col-12 position-relative">
+                <div class="swiper swiper-data rounded shadow-sm overflow-hidden" 
+                     id="custom-page-swiper"
+                     data-swiper='{"slidesPerView":1,"loop":{{ page.slides.count|yesno:"true,false" }},"speed":1000,"autoplay":{"delay":5000,"disableOnInteraction":false},"navigation":{"nextEl":"#slider-next","prevEl":"#slider-prev"}}'>
+                    <div class="swiper-wrapper">
+                        {% for slide in page.slides.all %}
+                        <div class="swiper-slide position-relative">
+                            <img src="{{ slide.image.url }}" alt="{{ page.title }} - Slide {{ forloop.counter }}" class="w-100 h-100" style="object-fit: cover;">
+                            {% if slide.caption %}
+                            <div class="position-absolute bottom-0 start-0 w-100 p-4" style="background: linear-gradient(transparent, rgba(0, 0, 0, 0.85)); z-index: 2;">
+                                <h5 class="text-white mb-0 fw-semibold" style="font-family: 'Roboto Slab', serif; letter-spacing: 0.5px;">{{ slide.caption }}</h5>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% if page.slides.count > 1 %}
+                    <button id="slider-prev" class="slider__btn position-absolute top-50 start-0 translate-middle-y ms-3 border-0 rounded-circle d-flex align-items-center justify-content-center" 
+                            style="width: 44px; height: 44px; background: rgba(0, 0, 0, 0.5); color: #fff; z-index: 10; cursor: pointer; transition: all 0.3s;"
+                            onmouseover="this.style.background='#E61013'" onmouseout="this.style.background='rgba(0,0,0,0.5)'">
+                        <i class="fa-light fa-arrow-left"></i>
+                    </button>
+                    <button id="slider-next" class="slider__btn position-absolute top-50 end-0 translate-middle-y me-3 border-0 rounded-circle d-flex align-items-center justify-content-center" 
+                            style="width: 44px; height: 44px; background: rgba(0, 0, 0, 0.5); color: #fff; z-index: 10; cursor: pointer; transition: all 0.3s;"
+                            onmouseover="this.style.background='#E61013'" onmouseout="this.style.background='rgba(0,0,0,0.5)'">
+                        <i class="fa-light fa-arrow-right"></i>
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Description Section -->
+        {% if page.description %}
+        <div class="row mb-5">
+            <div class="col-12">
+                <h4 class="fw-bold mb-3 pb-2 border-bottom text-uppercase" style="border-color: #E61013 !important; color: #E61013;">
+                    <i class="fas fa-info-circle me-2"></i>About
+                </h4>
+                <div class="text-muted lh-lg fs-6">
+                    {{ page.description|safe|linebreaks }}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Members Section -->
+        {% if page.show_members and page.members.all %}
+        <div class="row mb-5">
+            <div class="col-12">
+                <h4 class="fw-bold mb-4 pb-2 border-bottom text-uppercase" style="border-color: #E61013 !important; color: #E61013;">
+                    <i class="fas fa-users me-2"></i>Members &amp; Team
+                </h4>
+                <div class="row g-4">
+                    {% for member in page.members.all %}
+                    <div class="col-sm-6 col-md-4 col-lg-3">
+                        <div class="card h-100 border-0 shadow-sm text-center">
+                            <div class="card-body py-4">
+                                {% if member.photo %}
+                                    <img src="{{ member.photo.url }}" alt="{{ member.name }}" class="rounded-circle mb-3 border border-3" style="width: 100px; height: 100px; object-fit: cover; border-color: #E61013 !important;">
+                                {% else %}
+                                    <div class="rounded-circle mb-3 mx-auto bg-light border border-3 d-flex align-items-center justify-content-center" style="width: 100px; height: 100px; border-color: #E61013 !important;">
+                                        <i class="fas fa-user fa-2x text-secondary"></i>
+                                    </div>
+                                {% endif %}
+                                <h6 class="fw-bold text-dark mb-1">{{ member.name }}</h6>
+                                {% if member.role %}
+                                    <span class="badge text-white py-1 px-2 fw-semibold mb-2" style="background-color: #E61013;">{{ member.role }}</span>
+                                {% endif %}
+                                <p class="text-muted small mb-2">{{ member.designation }}</p>
+                                
+                                {% if member.email or member.phone %}
+                                <div class="mt-2 border-top pt-2" style="font-size: 0.85em;">
+                                    {% if member.email %}
+                                        <div class="text-muted text-truncate" title="{{ member.email }}"><i class="fas fa-envelope text-danger me-1"></i> {{ member.email }}</div>
+                                    {% endif %}
+                                    {% if member.phone %}
+                                        <div class="text-muted"><i class="fas fa-phone text-danger me-1"></i> {{ member.phone }}</div>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Activities Section -->
+        {% if page.show_activities and page.activities.all %}
+        <div class="row mb-5">
+            <div class="col-12">
+                <h4 class="fw-bold mb-4 pb-2 border-bottom text-uppercase" style="border-color: #E61013 !important; color: #E61013;">
+                    <i class="fas fa-chart-line me-2"></i>Activities &amp; Announcements
+                </h4>
+                <div class="activity-timeline ms-2 mt-4">
+                    {% for activity in page.activities.all %}
+                    <div class="activity-item">
+                        <div class="card border-0 shadow-sm bg-light mb-3">
+                            <div class="card-body p-4">
+                                <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                                    <h5 class="fw-bold text-dark mb-1">{{ activity.title }}</h5>
+                                    {% if activity.date %}
+                                        <span class="text-muted small"><i class="far fa-calendar-alt me-1"></i> {{ activity.date|date:"F d, Y" }}</span>
+                                    {% endif %}
+                                </div>
+                                {% if activity.description %}
+                                    <div class="text-muted mt-2 mb-3">{{ activity.description|linebreaks }}</div>
+                                {% endif %}
+                                
+                                {% if activity.image %}
+                                    <div class="mb-3">
+                                        <img src="{{ activity.image.url }}" alt="{{ activity.title }}" class="rounded img-fluid" style="max-height: 250px; object-fit: cover;">
+                                    </div>
+                                {% endif %}
+                                
+                                {% if activity.attachment %}
+                                    <a href="{{ activity.attachment.url }}" class="btn btn-sm btn-danger px-3 py-2 fw-semibold" download>
+                                        <i class="fas fa-file-pdf me-2"></i>View/Download Attachment
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Events Section -->
+        {% if page.show_events and page.events.all %}
+        <div class="row mb-5">
+            <div class="col-12">
+                <h4 class="fw-bold mb-4 pb-2 border-bottom text-uppercase" style="border-color: #E61013 !important; color: #E61013;">
+                    <i class="fas fa-calendar-alt me-2"></i>Related Events &amp; Happenings
+                </h4>
+                <div class="row g-4">
+                    {% for event in page.events.all %}
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 border-0 shadow-sm overflow-hidden">
+                            {% if event.happening.get_image %}
+                                <img src="{{ event.happening.get_image }}" class="card-img-top" alt="{{ event.happening.title }}" style="height: 200px; object-fit: cover;">
+                            {% endif %}
+                            <div class="card-body p-4">
+                                <div class="d-flex align-items-center mb-2 justify-content-between">
+                                    {% if event.happening.category %}
+                                        <span class="badge bg-danger text-white py-1 px-2 fw-semibold">{{ event.happening.category }}</span>
+                                    {% endif %}
+                                    {% if event.happening.date %}
+                                        <span class="text-muted small"><i class="far fa-calendar-alt me-1"></i> {{ event.happening.date|date:"M d, Y" }}</span>
+                                    {% endif %}
+                                </div>
+                                <h5 class="fw-bold text-dark mb-3" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{{ event.happening.title }}</h5>
+                                <p class="text-muted small mb-4" style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">{{ event.happening.description|striptags }}</p>
+                                <a href="{% url 'core:happening_detail' event.happening.id %}" class="btn btn-sm btn-outline-danger fw-semibold">
+                                    Read More <i class="fas fa-arrow-right ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Gallery Section -->
+        {% if page.show_gallery and page.gallery_images.all %}
+        <div class="row mb-5">
+            <div class="col-12">
+                <h4 class="fw-bold mb-4 pb-2 border-bottom text-uppercase" style="border-color: #E61013 !important; color: #E61013;">
+                    <i class="fas fa-images me-2"></i>Photo Gallery
+                </h4>
+                <div class="row g-4 gallery-area">
+                    {% for img in page.gallery_images.all %}
+                    <div class="col-sm-6 col-md-4 col-lg-3">
+                        <div class="card h-100 border-0 shadow-sm overflow-hidden">
+                            <a href="{{ img.image.url }}" class="popup-image" title="{{ img.caption|default:page.title }}">
+                                <div style="height: 200px; overflow: hidden; position: relative;">
+                                    <img src="{{ img.image.url }}" alt="{{ img.caption }}" class="w-100 h-100" style="object-fit: cover; transition: transform 0.3s ease;">
+                                </div>
+                            </a>
+                            {% if img.caption %}
+                            <div class="card-body py-3 px-3">
+                                <p class="card-text text-muted text-truncate mb-0" style="font-size: 0.9em;">{{ img.caption }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+</section>
+
+{% endblock %}

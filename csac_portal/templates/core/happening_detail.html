@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ happening.title }} - Chaitanya Science and Arts College{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb area -->
+<div class="rts-breadcrumb-area breadcrumb-bg" style="background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('{{ happening.banner_image_url|default:'/static/assets/images/banner/breadcrumb.jpg' }}'); padding: 60px 0; background-size: cover; background-position: center;">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="breadcrumb-inner text-center">
+          <h1 class="title" style="color: white; font-size: 32px; line-height: 1.3;">{{ happening.title }}</h1>
+          <ul class="list-unstyled d-flex justify-content-center gap-2 mt-2" style="color: rgba(255,255,255,0.8); margin-bottom: 0;">
+            <li><a href="{% url 'core:home' %}" style="color: white;">Home</a></li>
+            <li>/</li>
+            <li><a href="{% url 'core:happenings' %}" style="color: white;">Recent Happenings</a></li>
+            <li>/</li>
+            <li>Event Details</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Event Details Area -->
+<div class="rts-event-details pt--80 pb--80" style="background: #fdfdfd; padding: 80px 0;">
+  <div class="container">
+    <div class="row g-5">
+      <!-- Main Content -->
+      <div class="col-lg-8 col-md-12">
+        <div class="event-details-content" style="background: white; border: 1px solid #eee; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.03); padding: 30px;">
+          
+          {% if happening.get_image %}
+          <div class="event-main-image mb-4" style="border-radius: 6px; overflow: hidden; height: 450px;">
+            <img alt="{{ happening.title }}" src="{{ happening.get_image }}" style="width: 100%; height: 100%; object-fit: cover;"/>
+          </div>
+          {% endif %}
+          
+          <div class="event-about-section">
+            <h3 style="font-size: 26px; border-bottom: 2px solid #B71A34; display: inline-block; padding-bottom: 8px; margin-bottom: 20px; color: #333;">About The Event</h3>
+            <div class="event-description-text" style="line-height: 1.7; color: #444; font-size: 16px; text-align: justify;">
+              {% if happening.description %}
+                {{ happening.description|safe }}
+              {% else %}
+                <p>No detailed description is currently available for this event.</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Sidebar -->
+      <div class="col-lg-4 col-md-12">
+        <div class="event-sidebar" style="position: sticky; top: 100px; width: max-content; min-width: 100%;">
+          <!-- Event Info Box -->
+          <div class="info-box mb-4" style="background: white; border: 1px solid #eee; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); padding: 25px;">
+            <h4 style="font-size: 20px; margin-bottom: 20px; color: #333; font-weight: 700; border-bottom: 1px solid #f0f0f0; padding-bottom: 12px;">Event Information</h4>
+            
+            <div class="info-item d-flex align-items-center mb-3" style="font-size: 15px;">
+              <span style="color: #B71A34; font-size: 18px; margin-right: 12px; width: 24px; text-align: center;"><i class="fa-regular fa-calendar-days"></i></span>
+              <div>
+                <strong style="display: block; color: #555; font-size: 13px; text-transform: uppercase;">Date</strong>
+                <span style="color: #333; font-weight: 500;">{% if happening.date %}{{ happening.date|date:"F d, Y" }}{% else %}To Be Announced{% endif %}</span>
+              </div>
+            </div>
+
+            {% if happening.category %}
+            <div class="info-item d-flex align-items-center mb-3" style="font-size: 15px;">
+              <span style="color: #B71A34; font-size: 18px; margin-right: 12px; width: 24px; text-align: center;"><i class="fa-regular fa-tags"></i></span>
+              <div>
+                <strong style="display: block; color: #555; font-size: 13px; text-transform: uppercase;">Category</strong>
+                <span style="color: #333; font-weight: 500;">{{ happening.category }}</span>
+              </div>
+            </div>
+            {% endif %}
+
+            {% if happening.participants_count %}
+            <div class="info-item d-flex align-items-center mb-3" style="font-size: 15px;">
+              <span style="color: #B71A34; font-size: 18px; margin-right: 12px; width: 24px; text-align: center;"><i class="fa-regular fa-users"></i></span>
+              <div>
+                <strong style="display: block; color: #555; font-size: 13px; text-transform: uppercase;">Total Participants</strong>
+                <span style="color: #333; font-weight: 500;">{{ happening.participants_count }}</span>
+              </div>
+            </div>
+            {% endif %}
+          </div>
+          
+          <!-- Actions / Downloads -->
+          {% if happening.brochure or happening.registration_link %}
+          <div class="actions-box" style="background: white; border: 1px solid #eee; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); padding: 25px;">
+            <h4 style="font-size: 20px; margin-bottom: 20px; color: #333; font-weight: 700; border-bottom: 1px solid #f0f0f0; padding-bottom: 12px; white-space: nowrap;">Registration &amp; Documents</h4>
+            
+            {% if happening.registration_link %}
+            <a href="{{ happening.registration_link }}" target="_blank" class="btn btn-primary w-100" style="background-color: #B71A34; border-color: #B71A34; font-weight: 600; padding: 12px; font-size: 15px; border-radius: 6px; display: flex !important; width: 100% !important; min-width: max-content !important; align-items: center; justify-content: center; gap: 8px; color: white; white-space: nowrap;">
+              <i class="fa-solid fa-pen-to-square"></i> Register For Event
+            </a>
+            {% elif happening.brochure %}
+            <a href="{{ happening.brochure.url }}" target="_blank" class="btn btn-outline-secondary w-100" style="font-weight: 600; padding: 12px; font-size: 15px; border-radius: 6px; display: flex !important; width: 100% !important; min-width: max-content !important; align-items: center; justify-content: center; gap: 8px; border-color: #ccc; color: #555; white-space: nowrap;">
+              <i class="fa-solid fa-file-pdf"></i> Download Brochure
+            </a>
+            {% endif %}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    
+    <!-- Image Gallery -->
+    {% if gallery_images %}
+    <div class="row mt-5">
+      <div class="col-12">
+        <div class="gallery-section" style="background: white; border: 1px solid #eee; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); padding: 30px;">
+          <h3 style="font-size: 26px; border-bottom: 2px solid #B71A34; display: inline-block; padding-bottom: 8px; margin-bottom: 30px; color: #333;">Event Image Gallery</h3>
+          <div class="row g-4" style="display: flex; flex-wrap: wrap;">
+            {% for g_image in gallery_images %}
+            <div class="col-lg-3 col-md-4 col-sm-6" style="display: flex;">
+              <div class="gallery-item" style="width: 100%; border-radius: 6px; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.05); border: 1px solid #f0f0f0;">
+                <a href="{{ g_image.get_image }}" class="popup-image" title="{{ g_image.caption }}">
+                  <div style="height: 180px; overflow: hidden; position: relative;">
+                    <img alt="{{ g_image.caption|default:happening.title }}" src="{{ g_image.get_image }}" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease;"/>
+                  </div>
+                </a>
+                {% if g_image.caption %}
+                <div style="padding: 10px; font-size: 14px; color: #555; text-align: center; background: #fafafa; border-top: 1px solid #f0f0f0;">
+                  {{ g_image.caption }}
+                </div>
+                {% endif %}
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<style>
+  .gallery-item:hover img {
+    transform: scale(1.08);
+  }
+</style>
+{% endblock %}

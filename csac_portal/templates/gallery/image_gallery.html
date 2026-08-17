@@ -1,0 +1,201 @@
+﻿{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!-- Breadcrumb Section -->
+<section class="rts-breadcrumb breadcrumb-height breadcumb-bg" style="{% with bcimg=breadcrumb_images.gallery_images %}{% if bcimg %}background-image: url('{{ bcimg }}');{% endif %}{% endwith %}">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb-content">
+                    <h2 class="section-title">{{ breadcrumb }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Image Gallery Section -->
+<section class="rts-section-padding py-5">
+    <div class="container">
+
+        <!-- Filters/Categories Redesign -->
+        {% if categories %}
+        <div class="row mb-4">
+            <div class="col-12 text-center">
+                <button class="btn btn-danger filter-toggle-btn d-inline-flex align-items-center gap-2" type="button" data-bs-toggle="collapse" data-bs-target="#filter-collapse" aria-expanded="false" aria-controls="filter-collapse">
+                    <i class="fas fa-filter"></i>
+                    <span>Filter by Category</span>
+                    <i class="fas fa-chevron-down toggle-chevron"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="collapse" id="filter-collapse">
+            <div class="row mb-5">
+                <div class="col-12">
+                    <div class="portfolio-menu filter-grid">
+                        <button class="btn btn-outline-danger filter-btn active" data-filter="all">All Photos</button>
+                        {% for cat in categories %}
+                            <button class="btn btn-outline-danger filter-btn" data-filter="{{ cat.id }}">{{ cat.name }}</button>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Gallery Grid -->
+        {% if items %}
+        <div class="row g-4" id="gallery-grid">
+            {% for item in items %}
+            <div class="col-sm-6 col-md-4 col-lg-3 gallery-item" data-category="{{ item.category.id }}">
+                <div class="card h-100 border-0 shadow-sm overflow-hidden position-relative gallery-card">
+                    {% if item.get_image %}
+                        <a href="{{ item.get_image }}" class="popup-image" title="{{ item.title }}">
+                            <img src="{{ item.get_image }}" alt="{{ item.title }}" class="card-img-top w-100" style="height: 220px; object-fit: cover; transition: transform .3s;">
+                        </a>
+                    {% else %}
+                        <div class="d-flex align-items-center justify-content-center bg-light" style="height: 220px;">
+                            <i class="fas fa-image fa-3x text-muted"></i>
+                        </div>
+                    {% endif %}
+                    <div class="card-body p-3">
+                        <h6 class="fw-bold text-dark mb-1">{{ item.title }}</h6>
+                        {% if item.description %}
+                            <p class="text-muted small mb-2">{{ item.description|truncatewords:12 }}</p>
+                        {% endif %}
+                        <div class="d-flex align-items-center justify-content-between mt-2 border-top pt-2">
+                            <span class="badge bg-secondary small">{{ item.category.name }}</span>
+                            {% if item.date %}
+                                <small class="text-muted"><i class="fas fa-calendar-alt me-1"></i> {{ item.date }}</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="alert alert-secondary text-center py-5 border-0 shadow-sm">
+            <i class="fas fa-images fa-3x mb-3 text-muted"></i>
+            <h5 class="fw-bold">No Photos in Gallery</h5>
+            <p class="text-muted mb-0">Photos will be uploaded soon. Please check back later.</p>
+        </div>
+        {% endif %}
+
+    </div>
+</section>
+
+<!-- Simple client-side category filtering logic -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const buttons = document.querySelectorAll('.filter-btn');
+        const items = document.querySelectorAll('.gallery-item');
+
+        buttons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Remove active class from other buttons
+                buttons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+
+                const filter = button.getAttribute('data-filter');
+
+                items.forEach(item => {
+                    const itemCat = item.getAttribute('data-category');
+                    if (filter === 'all' || itemCat === filter) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+        });
+    });
+</script>
+
+<style>
+    .gallery-card:hover img {
+        transform: scale(1.05);
+    }
+    .filter-toggle-btn {
+        background-color: #E61013 !important;
+        border-color: #E61013 !important;
+        padding: 12px 28px !important;
+        font-weight: 600 !important;
+        font-size: 15px !important;
+        border-radius: 30px !important;
+        box-shadow: 0 4px 15px rgba(230, 16, 19, 0.15) !important;
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+        color: #fff !important;
+    }
+    .filter-toggle-btn:hover {
+        background-color: #b71a34 !important;
+        border-color: #b71a34 !important;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(230, 16, 19, 0.25) !important;
+    }
+    .filter-toggle-btn:focus, .filter-toggle-btn:active {
+        box-shadow: 0 0 0 0.25rem rgba(230, 16, 19, 0.25) !important;
+        outline: none !important;
+    }
+    .toggle-chevron {
+        font-size: 12px;
+        transition: transform 0.3s ease;
+    }
+    .filter-toggle-btn[aria-expanded="true"] .toggle-chevron {
+        transform: rotate(180deg);
+    }
+    .filter-grid {
+        display: grid;
+        grid-template-columns: repeat(4, max-content);
+        justify-content: center;
+        gap: 16px;
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+    .filter-grid .filter-btn {
+        width: 100% !important;
+    }
+    @media (max-width: 991px) {
+        .filter-grid {
+            grid-template-columns: repeat(3, max-content);
+        }
+    }
+    @media (max-width: 767px) {
+        .filter-grid {
+            grid-template-columns: repeat(2, max-content);
+        }
+    }
+    @media (max-width: 480px) {
+        .filter-grid {
+            grid-template-columns: repeat(1, max-content);
+        }
+    }
+    .filter-btn {
+        border-radius: 20px !important;
+        font-weight: 500 !important;
+        padding: 8px 24px !important;
+        font-size: 14px !important;
+        border-color: #dee2e6 !important;
+        color: #495057 !important;
+        transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+        background-color: #f8f9fa !important;
+    }
+    .filter-btn:hover {
+        background-color: #E61013 !important;
+        color: #fff !important;
+        border-color: #E61013 !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 4px 12px rgba(230, 16, 19, 0.2) !important;
+    }
+    .filter-btn.active {
+        background-color: #E61013 !important;
+        color: #fff !important;
+        border-color: #E61013 !important;
+        box-shadow: 0 4px 12px rgba(230, 16, 19, 0.2) !important;
+    }
+</style>
+
+{% endblock %}

@@ -1,0 +1,156 @@
+﻿{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!-- Breadcrumb Section -->
+<section class="rts-breadcrumb breadcrumb-height breadcumb-bg" style="{% with bcimg=breadcrumb_images.students_alumni %}{% if bcimg %}background-image: url('{{ bcimg }}');{% endif %}{% endwith %}">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb-content">
+                    <h2 class="section-title">{{ breadcrumb }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Alumni Section -->
+<section class="rts-section-padding py-5">
+    <div class="container">
+
+        <!-- Intro -->
+        <div class="row mb-5">
+            <div class="col-12 text-center">
+                <h2 class="fw-bold" style="color: #E61013;">Alumni Community</h2>
+                <hr style="border-color:#E61013;border-width:3px;width:60px;opacity:1;margin:auto;">
+                <p class="text-muted mt-3">Celebrating our graduates who are making a positive impact in their respective fields across the globe.</p>
+            </div>
+        </div>
+
+        <!-- Featured Alumni Section -->
+        {% if featured %}
+        <div class="row mb-5">
+            <div class="col-12">
+                <h4 class="fw-bold mb-4 pb-2 border-bottom" style="border-color: #E61013 !important; color: #E61013;">
+                    <i class="fas fa-star me-2"></i>Distinguished Alumni
+                </h4>
+                <div class="row g-4">
+                    {% for alum in featured %}
+                    <div class="col-md-6 col-lg-3">
+                        <div class="card h-100 border-0 shadow-sm text-center">
+                            <div class="card-body p-4">
+                                {% if alum.photo %}
+                                    <img src="{{ alum.photo.url }}" alt="{{ alum.name }}" class="rounded-circle mb-3 border border-3" style="width: 110px; height: 110px; object-fit: cover; border-color: #E61013 !important;">
+                                {% else %}
+                                    <div class="rounded-circle mb-3 mx-auto bg-light border border-3 d-flex align-items-center justify-content-center" style="width: 110px; height: 110px; border-color: #E61013 !important;">
+                                        <i class="fas fa-user fa-3x text-secondary"></i>
+                                    </div>
+                                {% endif %}
+                                <h5 class="fw-bold text-dark mb-1">{{ alum.name }}</h5>
+                                <p class="text-danger small fw-semibold mb-2">Batch: {{ alum.batch_year }} ({{ alum.program }})</p>
+                                <p class="text-muted small mb-3"><strong>{{ alum.current_position }}</strong> at {{ alum.organization }}</p>
+                                {% if alum.testimonial %}
+                                    <p class="text-muted small mb-0 italic">"{{ alum.testimonial|truncatewords:20 }}"</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- All Alumni Table -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <h4 class="fw-bold mb-4 pb-2 border-bottom" style="border-color: #E61013 !important; color: #E61013;">
+                    <i class="fas fa-list me-2"></i>Alumni Directory
+                </h4>
+                {% if all_alumni %}
+                <div class="table-responsive shadow-sm border bg-white rounded">
+                    <table class="table table-striped table-hover align-middle mb-0">
+                        <thead class="table-danger text-dark">
+                            <tr>
+                                <th>Name</th>
+                                <th>Batch Year</th>
+                                <th>Program</th>
+                                <th>Current Designation &amp; Organization</th>
+                                <th>Achievements / Special Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for alum in all_alumni %}
+                            <tr>
+                                <strong><td class="fw-bold">{{ alum.name }}</td></strong>
+                                <td>{{ alum.batch_year }}</td>
+                                <td>{{ alum.program }}</td>
+                                <td>{{ alum.current_position }} {% if alum.organization %}at {{ alum.organization }}{% endif %}</td>
+                                <td class="small">{{ alum.achievement|default:"-" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-secondary border-0 shadow-sm">No alumni records registered in the directory yet.</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Academic Merit List Summary -->
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex align-items-center justify-content-between mb-4 border-bottom pb-2" style="border-color: #E61013 !important;">
+                    <h4 class="fw-bold mb-0" style="color: #E61013;">
+                        <i class="fas fa-medal me-2"></i>University Merit &amp; Medals List
+                    </h4>
+                    <a href="{% url 'students:merit_list' %}" class="btn btn-sm btn-outline-danger px-3 py-1"><i class="fas fa-external-link-alt me-1"></i> View Full List</a>
+                </div>
+                {% if merit_list %}
+                <div class="table-responsive shadow-sm border bg-white rounded">
+                    <table class="table table-bordered table-hover align-middle mb-0">
+                        <thead class="table-danger text-dark">
+                            <tr>
+                                <th>Student Name</th>
+                                <th>Subject</th>
+                                <th>Year</th>
+                                <th>Medal / Rank Type</th>
+                                <th>Rank (If applicable)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for merit in merit_list|slice:":10" %}
+                            <tr>
+                                <strong><td class="fw-bold">{{ merit.student_name }}</td></strong>
+                                <td>{{ merit.subject }}</td>
+                                <td>{{ merit.year }}</td>
+                                <td>
+                                    {% if merit.medal_type == 'gold' %}
+                                        <span class="badge bg-warning text-dark"><i class="fas fa-medal me-1"></i> Gold Medal</span>
+                                    {% elif merit.medal_type == 'silver' %}
+                                        <span class="badge bg-light text-dark border"><i class="fas fa-medal me-1"></i> Silver Medal</span>
+                                    {% elif merit.medal_type == 'bronze' %}
+                                        <span class="badge bg-danger text-white"><i class="fas fa-medal me-1"></i> Bronze Medal</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary text-white"><i class="fas fa-award me-1"></i> Univ. Rank</span>
+                                    {% endif %}
+                                </td>
+                                <td class="fw-bold text-center">{% if merit.rank %}{{ merit.rank }}{% else %}-{% endif %}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-secondary border-0 shadow-sm">No merit achievements recorded yet.</div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}

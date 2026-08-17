@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    .edit-container {
+        max-width: 700px;
+        margin: 40px auto;
+    }
+    .card-edit {
+        border-radius: 12px;
+        border: none;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+    .form-label-custom {
+        font-weight: 600;
+        color: #333;
+        margin-top: 15px;
+        display: block;
+    }
+    .btn-save {
+        background-color: #E61013;
+        color: white;
+        font-weight: 600;
+        padding: 10px 30px;
+        border-radius: 30px;
+        border: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(230, 16, 19, 0.3);
+    }
+    .btn-save:hover {
+        background-color: #c90e10;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(230, 16, 19, 0.4);
+    }
+    .btn-cancel {
+        background-color: #6c757d;
+        color: white;
+        font-weight: 600;
+        padding: 10px 30px;
+        border-radius: 30px;
+        border: none;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    .btn-cancel:hover {
+        background-color: #5a6268;
+        color: white;
+        transform: translateY(-2px);
+    }
+</style>
+
+<section class="rts-breadcrumb breadcrumb-height breadcumb-bg" style="{% with bcimg=breadcrumb_images.staff_nonteaching %}{% if bcimg %}background-image: url('{{ bcimg }}');{% endif %}{% endwith %}">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb-content">
+                    <h2 class="section-title">{{ page_title }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container edit-container">
+    <div class="card card-edit">
+        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+            <h4 class="fw-bold mb-0" style="color: #E61013;"><i class="fas fa-users-cog me-2"></i>Edit Non-Teaching Staff Page</h4>
+            <a href="{% url 'core:staff_nonteaching' %}" class="btn btn-outline-secondary btn-sm rounded-pill"><i class="fas fa-arrow-left me-1"></i>Back to Page</a>
+        </div>
+        <div class="card-body p-4">
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <div class="mb-3">
+                    <label class="form-label-custom" for="{{ form.title.id_for_label }}">Page Title</label>
+                    {{ form.title }}
+                    <small class="text-muted">e.g. Non-Teaching Staff</small>
+                    {{ form.title.errors }}
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label-custom" for="{{ form.subtitle.id_for_label }}">Page Subtitle</label>
+                    {{ form.subtitle }}
+                    <small class="text-muted">Short description shown below the heading.</small>
+                    {{ form.subtitle.errors }}
+                </div>
+
+                <div class="d-flex justify-content-end gap-3 pt-3 border-top">
+                    <a href="{% url 'core:staff_nonteaching' %}" class="btn-cancel">Cancel</a>
+                    <button type="submit" class="btn-save"><i class="fas fa-save me-2"></i>Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

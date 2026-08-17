@@ -1,0 +1,164 @@
+﻿{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!-- Breadcrumb Section -->
+<section class="rts-breadcrumb breadcrumb-height breadcumb-bg" style="{% with bcimg=breadcrumb_images.gallery_news %}{% if bcimg %}background-image: url('{{ bcimg }}');{% endif %}{% endwith %}">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb-content">
+                    <h2 class="section-title">{{ breadcrumb }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- News Gallery Section -->
+<section class="rts-section-padding py-5">
+    <div class="container">
+
+        <!-- Filters/Categories Toggle Button -->
+        {% if categories %}
+        <div class="row mb-3">
+            <div class="col-12 text-start">
+                <button class="btn btn-outline-danger d-inline-flex align-items-center gap-2" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse" aria-expanded="false" aria-controls="filterCollapse" style="border-radius: 8px; padding: 10px 18px; font-weight: 600; font-size: 15px; border-color: #E61013; color: #E61013;">
+                    <i class="fas fa-filter"></i> Filter News
+                </button>
+            </div>
+        </div>
+
+        <!-- Collapsible Filters Container -->
+        <div class="collapse mb-4" id="filterCollapse">
+            <div class="card card-body border-0 shadow-sm p-4" style="background-color: #f8f9fa; border-radius: 12px;">
+                <h6 class="fw-bold mb-3" style="color: #333; font-family: Roboto Slab, serif;"><i class="fas fa-tags me-2" style="color: #E61013;"></i> Select Category</h6>
+                <div class="row row-cols-auto g-2">
+                    <div class="col">
+                        <button class="btn btn-outline-danger filter-btn active text-nowrap" data-filter="all" style="border-radius: 6px; padding: 8px 16px; font-weight: 500;">All News</button>
+                    </div>
+                    {% for cat in categories %}
+                        <div class="col">
+                            <button class="btn btn-outline-danger filter-btn text-nowrap" data-filter="{{ cat.id }}">{{ cat.name }}</button>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- News Grid -->
+        {% if items %}
+        <div class="row g-4" id="news-grid">
+            {% for item in items %}
+            <div class="col-sm-6 col-md-4 col-lg-4 news-item" data-category="{{ item.category.id }}">
+                <div class="card h-100 border-0 shadow-sm overflow-hidden news-card">
+                    {% if item.get_image %}
+                        <a href="{{ item.get_image }}" class="popup-image" title="{{ item.title }}">
+                            <img src="{{ item.get_image }}" alt="{{ item.title }}" class="card-img-top w-100">
+                        </a>
+                    {% else %}
+                        <div class="d-flex align-items-center justify-content-center bg-light news-fallback-placeholder">
+                            <i class="fas fa-newspaper fa-3x text-muted"></i>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="badge bg-danger text-white">{{ item.news_source|default:"Press Release" }}</span>
+                            {% if item.date %}
+                                <small class="text-muted"><i class="fas fa-calendar-alt me-1"></i> {{ item.date }}</small>
+                            {% endif %}
+                        </div>
+                        <h5 class="fw-bold text-dark mb-2 mt-2">{{ item.title }}</h5>
+                        {% if item.description %}
+                            <p class="text-muted small mb-0 lh-lg">{{ item.description }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="alert alert-secondary text-center py-5 border-0 shadow-sm">
+            <i class="fas fa-newspaper fa-3x mb-3 text-muted"></i>
+            <h5 class="fw-bold">No News Items Available</h5>
+            <p class="text-muted mb-0">Press clippings and news notifications will be uploaded here.</p>
+        </div>
+        {% endif %}
+
+    </div>
+</section>
+
+<!-- Client side categories filtering -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const buttons = document.querySelectorAll('.filter-btn');
+        const items = document.querySelectorAll('.news-item');
+
+        buttons.forEach(button => {
+            button.addEventListener('click', () => {
+                buttons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+
+                const filter = button.getAttribute('data-filter');
+
+                items.forEach(item => {
+                    const itemCat = item.getAttribute('data-category');
+                    if (filter === 'all' || itemCat === filter) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+        });
+    });
+</script>
+
+<style>
+    .news-card {
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        border: 1px solid #eef0f2 !important;
+        background-color: #fff;
+    }
+    .news-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08) !important;
+    }
+    .news-card img {
+        width: 100% !important;
+        max-width: 500px !important;
+        height: 240px;
+        object-fit: cover;
+        transition: transform 0.4s ease;
+    }
+    .news-card:hover img {
+        transform: scale(1.05);
+    }
+    .news-fallback-placeholder {
+        height: 240px;
+    }
+    .filter-btn {
+        background-color: #fff !important;
+        color: #E61013 !important;
+        border-color: #E61013 !important;
+        transition: all 0.25s ease !important;
+    }
+    .filter-btn:hover {
+        background-color: #E61013 !important;
+        color: #fff !important;
+        border-color: #E61013 !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 4px 8px rgba(230, 16, 19, 0.1) !important;
+    }
+    .filter-btn.active {
+        background-color: #E61013 !important;
+        color: #fff !important;
+        border-color: #E61013 !important;
+        box-shadow: 0 4px 12px rgba(230, 16, 19, 0.2) !important;
+    }
+</style>
+
+{% endblock %}

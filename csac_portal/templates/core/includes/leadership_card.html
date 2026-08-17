@@ -1,0 +1,39 @@
+<div class="card feedback-card h-100 {% if modern_home %}home-leadership-card{% endif %}" style="padding:12px;">
+  <div class="card-body">
+    {% if show_edit and request.user.is_staff and member.role %}
+      <div class="text-end mb-2">
+        <a href="{% url 'core:edit_leadership' member.role %}" class="btn btn-xs btn-outline-danger rounded-pill py-1 px-3" style="font-size: 12px; font-weight: 600;">
+          <i class="fas fa-edit me-1"></i>Edit Message
+        </a>
+      </div>
+    {% endif %}
+    <div class="card-text" style="padding:5px;{% if not modern_home %}text-align:justify;{% endif %}">
+      {% if member.message %}
+        {% if modern_home %}
+          <div class="leadership-message-block">
+            <div class="leadership-message-icon" aria-hidden="true">
+              <i class="fa-solid fa-quote-left"></i>
+            </div>
+            <div class="leadership-message-text">{{ member.message|linebreaksbr }}</div>
+          </div>
+        {% else %}
+          <p>{{ member.message|linebreaksbr }}</p>
+        {% endif %}
+      {% endif %}
+      <div class="nameplate-container {% if modern_home %}home-leadership-nameplate{% endif %}">
+        <img alt="{{ member.name }}" class="nameplate-img" src="{{ member.get_photo_url }}"/>
+        <div class="name-template">
+          <h5 class="name leadership-name">{{ member.name }}</h5>
+          <p class="title">{{ member.get_role_display }}{% if member.qualification %}, {{ member.qualification }}{% endif %}</p>
+          {% if member.email %}
+            <p class="leadership-email-simple">
+              <i class="fa-regular fa-envelope" aria-hidden="true"></i>
+              <a href="mailto:{{ member.email }}">{{ member.email }}</a>
+            </p>
+          {% endif %}
+          <p class="organization">Chaitanya Science and Arts College</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

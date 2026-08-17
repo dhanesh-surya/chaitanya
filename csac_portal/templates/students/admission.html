@@ -1,0 +1,101 @@
+﻿{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!-- Breadcrumb Section -->
+<section class="rts-breadcrumb breadcrumb-height breadcumb-bg" style="{% with bcimg=breadcrumb_images.students_admission %}{% if bcimg %}background-image: url('{{ bcimg }}');{% endif %}{% endwith %}">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb-content">
+                    <h2 class="section-title">{{ breadcrumb }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Admission Info Section -->
+<section class="rts-section-padding py-5">
+    <div class="container">
+
+        <!-- Online Admission Callout -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="p-4 p-md-5 rounded text-white text-center text-md-start d-md-flex align-items-center justify-content-between shadow" style="background: linear-gradient(135deg, #E61013 0%, #a00c0e 100%);">
+                    <div class="mb-4 mb-md-0">
+                        <h3 class="fw-bold mb-2">Apply Online for Admission</h3>
+                        <p class="mb-0 opacity-75">Submit your applications digitally from the comfort of your home. Easy, fast, and secure.</p>
+                    </div>
+                    <a href="{% url 'students:online_admission' %}" class="btn btn-light fw-bold px-5 py-3 text-uppercase shadow-sm" style="color: #E61013; letter-spacing: 1px;">
+                        <i class="fas fa-edit me-2"></i>Apply Now
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        {% if info %}
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2 class="fw-bold mb-3" style="color: #E61013;">{{ info.title }}</h2>
+                <hr style="border-color:#E61013;border-width:3px;width:60px;opacity:1;">
+            </div>
+        </div>
+
+        <div class="row g-5">
+            <!-- Left Side: Procedure Details -->
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header text-white fw-bold py-3" style="background-color: #E61013;">
+                        <i class="fas fa-info-circle me-2"></i> Admission Procedure
+                    </div>
+                    <div class="card-body bg-light text-muted lh-lg fs-6">
+                        {{ info.content|safe|linebreaks }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side: Important Dates & Docs -->
+            <div class="col-lg-4">
+                <!-- Important Dates -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header text-white fw-bold py-3" style="background-color: #E61013;">
+                        <i class="fas fa-calendar-alt me-2"></i> Important Dates
+                    </div>
+                    <div class="card-body bg-light text-muted small lh-lg">
+                        {% if info.important_dates %}
+                            {{ info.important_dates|linebreaks }}
+                        {% else %}
+                            <p class="mb-0 italic">Important dates will be announced shortly.</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Documents Required -->
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header text-white fw-bold py-3" style="background-color: #E61013;">
+                        <i class="fas fa-file-alt me-2"></i> Required Documents
+                    </div>
+                    <div class="card-body bg-light text-muted small lh-lg">
+                        {% if info.documents_required %}
+                            {{ info.documents_required|linebreaks }}
+                        {% else %}
+                            <p class="mb-0 italic">A list of required certificates will be detailed here.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-secondary text-center py-5 border-0 shadow-sm">
+            <i class="fas fa-university fa-3x mb-3 text-muted"></i>
+            <h5 class="fw-bold">Admission Details Coming Soon</h5>
+            <p class="text-muted mb-0">The admission policy and calendar for the upcoming academic session are currently being finalized.</p>
+        </div>
+        {% endif %}
+
+    </div>
+</section>
+
+{% endblock %}

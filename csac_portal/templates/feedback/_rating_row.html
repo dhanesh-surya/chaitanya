@@ -1,0 +1,10 @@
+<div class="mb-3 row align-items-center border-bottom py-2">
+    <label class="col-sm-7 col-form-label fw-semibold text-dark">
+        {{ field.label }}{% if required %} <span class="text-danger">*</span>{% endif %}
+        {% if help %}<div class="form-text fw-normal">{{ help }}</div>{% endif %}
+    </label>
+    <div class="col-sm-5">
+        {{ field }}
+        <div class="text-danger small">{{ field.errors }}</div>
+    </div>
+</div>

@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Institution's Innovation Council (IIC) - Chaitanya Science and Arts College{% endblock %}
+
+{% block content %}
+
+<!-- Breadcrumb Section -->
+<section class="rts-breadcrumb breadcrumb-height breadcumb-bg" style="{% with bcimg=breadcrumb_images.iic %}{% if bcimg %}background-image: url('{{ bcimg }}');{% endif %}{% endwith %}">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb-content text-center">
+                    <h2 class="section-title text-white fw-bold mb-2">{{ breadcrumb }}</h2>
+                    <div class="breadcrumb-menu" style="display: flex; justify-content: center; gap: 8px; font-size: 14px; color: #fff;">
+                        <a href="{% url 'core:home' %}" style="color: #fff; text-decoration: none;">Home</a>
+                        <span>/</span>
+                        <span style="color: rgba(255, 255, 255, 0.7);">IIC</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- About Section -->
+<section class="about v__2 pt--120 pb--80">
+    <div class="container">
+        <div class="row justify-content-md-center g-5 align-items-center">
+            <div class="col-lg-6 col-md-9">
+                <div class="about__left--content d-flex align-items-center justify-content-between">
+                    <div class="about__left--content--left" style="flex: 1; text-align: center;">
+                        <img alt="About IIC 1" src="{{ settings.get_about_image_1 }}" class="img-fluid rounded shadow-sm" style="max-height: 400px; object-fit: cover; border-radius: 12px;"/>
+                    </div>
+                    <div class="about__left--content--center" style="margin: 0 15px;">
+                        <div class="rts__circle v__1">
+                            <svg class="spinner" viewbox="0 0 100 100">
+                                <defs>
+                                    <path d="M50,50 m-37,0a37,37 0 1,1 74,0a37,37 0 1,1 -74,0" id="circle"></path>
+                                </defs>
+                                <text>
+                                    <textpath xlink:href="#circle">Explore Innovation   *   And Entrepreneurship   *   </textpath>
+                                </text>
+                            </svg>
+                            <div class="rts__circle--icon">
+                                <i class="fa-light fa-arrow-right"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="about__left--content--right" style="flex: 1; text-align: center;">
+                        <img alt="About IIC 2" src="{{ settings.get_about_image_2 }}" class="img-fluid rounded shadow-sm" style="max-height: 400px; object-fit: cover; border-radius: 12px;"/>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 col-md-9">
+                <div class="about__right--content pl--30">
+                    <div class="about__right--content--sub mb--20 d-flex align-items-center gap-2" style="font-weight: 600; color: #E61013; font-size: 16px;">
+                        <img alt="cap" src="{% static 'assets/images/icon/e-cap-pix.svg' %}" style="width: 20px;"/> {{ settings.sub_title }}
+                    </div>
+                    <h2 class="about__right--content--title fw-bold mb--25" style="font-size: 36px; line-height: 1.2; font-family: 'Outfit', sans-serif;">{{ settings.title }}</h2>
+                    <p class="about__right--content--description text-muted lh-lg" style="font-size: 16px; text-align: justify; font-family: 'Inter', sans-serif;">
+                        {{ settings.description|linebreaksbr }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Gallery Section -->
+<div class="rts-gallery section-bg rts-section-padding" style="background-color: #f8f9fa;">
+    <div class="container">
+        <div class="row mb--40">
+            <div class="col-12 text-center">
+                <span class="text-uppercase fw-bold text-danger mb-2 d-inline-block" style="font-size: 13px; letter-spacing: 1.5px;">Visual Highlights</span>
+                <h2 class="rts-section-title fw-bold" style="font-size: 32px; font-family: 'Outfit', sans-serif;">Our IIC Gallery</h2>
+                <div style="width: 50px; height: 3px; background-color: #E61013; margin: 15px auto 0 auto; border-radius: 2px;"></div>
+            </div>
+        </div>
+        <div class="gallery-area">
+            <div class="row g-4">
+                {% for item in gallery_images %}
+                <div class="col-lg-4 col-md-6">
+                    <div class="single-gallery shadow-sm rounded overflow-hidden position-relative" style="transition: transform 0.3s ease, box-shadow 0.3s ease;">
+                        <a class="single-gallery__item gallery-popup" href="{{ item.get_image }}" title="{{ item.caption }}">
+                            <img alt="{{ item.caption|default:'Gallery Image' }}" src="{{ item.get_image }}" class="w-100" style="height: 250px; object-fit: cover; transition: transform 0.5s ease;"/>
+                            <div class="single-gallery__icon position-absolute top-50 start-50 translate-middle bg-white rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; opacity: 0; transition: opacity 0.3s ease;">
+                                <i class="fa-light fa-circle-plus text-danger" style="font-size: 20px;"></i>
+                            </div>
+                        </a>
+                        {% if item.caption %}
+                        <div class="p-3 bg-white border-top text-center">
+                            <span class="fw-medium text-dark" style="font-size: 14px; font-family: 'Inter', sans-serif;">{{ item.caption }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Happenings Slider Section -->
+<div class="rts-campus-section rts-section-padding">
+    <div class="container">
+        <div class="row mb--45">
+            <div class="col-12 text-center">
+                <span class="text-uppercase fw-bold text-danger mb-2 d-inline-block" style="font-size: 13px; letter-spacing: 1.5px;">Events & Workshops</span>
+                <h3 class="rts-section-title fw-bold" style="font-size: 32px; font-family: 'Outfit', sans-serif;">IIC Activities, Workshops & Events</h3>
+                <div style="width: 50px; height: 3px; background-color: #E61013; margin: 15px auto 0 auto; border-radius: 2px;"></div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="rts__testimonial--active swiper swiper-data" data-swiper='{"slidesPerView":3,"loop":true,"speed":1000,"pagination":{"el":".rts__pagination","clickable":true},"autoplay":{"delay":7000},"breakpoints":{"320":{"slidesPerView":1},"575":{"slidesPerView":1.5},"768":{"slidesPerView":2},"991":{"slidesPerView":2.2},"1201":{"slidesPerView":3}}}'>
+                    <div class="swiper-wrapper">
+                        {% for happening in happenings %}
+                        <div class="swiper-slide">
+                            <div class="rts__research--single card border-0 shadow-sm h-100 rounded overflow-hidden" style="margin: 10px;">
+                                <div class="rts__research--single--thumb position-relative overflow-hidden" style="height: 220px;">
+                                    <a href="{% url 'core:happening_detail' happening.pk %}">
+                                        <img alt="{{ happening.title }}" src="{{ happening.get_image }}" class="w-100 h-100" style="object-fit: cover; transition: transform 0.5s ease;"/>
+                                    </a>
+                                    {% if happening.date %}
+                                    <span class="position-absolute bottom-0 end-0 bg-danger text-white px-3 py-1 m-3 rounded-pill fw-bold" style="font-size: 12px; font-family: 'Outfit', sans-serif;">
+                                        {{ happening.date|date:"M d, Y" }}
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                <div class="rts__research--single--meta p-4 bg-white d-flex flex-column justify-content-between" style="min-height: 200px;">
+                                    <div>
+                                        {% if happening.category %}
+                                        <span class="badge bg-light text-danger text-uppercase mb-2" style="font-size: 11px; font-weight: 700; letter-spacing: 0.5px; padding: 6px 12px; border-radius: 4px;">{{ happening.category }}</span>
+                                        {% endif %}
+                                        <h5 class="fw-bold mb-3" style="font-size: 18px; line-height: 1.4; font-family: 'Outfit', sans-serif;">
+                                            <a class="text-dark hover-danger text-decoration-none" href="{% url 'core:happening_detail' happening.pk %}" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; transition: color 0.2s ease;">
+                                                {{ happening.title }}
+                                            </a>
+                                        </h5>
+                                    </div>
+                                    <p class="text-muted" style="font-size: 14px; line-height: 1.6; font-family: 'Inter', sans-serif; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                                        {{ happening.description|striptags|truncatewords:25 }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <!-- Pagination dots -->
+                    <div class="rts__pagination v__1 text-center mt--30"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom CSS for IIC Page Styles -->
+<style>
+    .w-100 {
+        max-width: 450px;
+    }
+    /* Hover effects for gallery and cards */
+    .single-gallery:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+    }
+    .single-gallery:hover img {
+        transform: scale(1.05);
+    }
+    .single-gallery:hover .single-gallery__icon {
+        opacity: 1 !important;
+    }
+    
+    .rts__research--single:hover img {
+        transform: scale(1.05);
+    }
+    
+    .hover-danger:hover {
+        color: #E61013 !important;
+    }
+    
+    /* Spinning circle customization */
+    .rts__circle.v__1 {
+        position: relative;
+        width: 120px;
+        height: 120px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background-color: #fff;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    .rts__circle.v__1 svg.spinner {
+        animation: rotate 20s linear infinite;
+        width: 100%;
+        height: 100%;
+    }
+    .rts__circle.v__1 svg.spinner text {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 600;
+        font-size: 9px;
+        fill: #333;
+        letter-spacing: 1.5px;
+    }
+    .rts__circle--icon {
+        position: absolute;
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background-color: #E61013;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 10px rgba(230, 16, 19, 0.3);
+    }
+    .rts__circle--icon i {
+        font-size: 16px;
+    }
+    
+    @keyframes rotate {
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+    
+    /* Swiper slide margins and layouts */
+    .swiper-slide {
+        height: auto;
+    }
+</style>
+
+{% endblock %}

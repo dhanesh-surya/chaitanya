@@ -1,0 +1,365 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    .edit-container {
+        max-width: 900px;
+        margin: 40px auto;
+    }
+    .card-edit {
+        border-radius: 12px;
+        border: none;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+    .accordion-button:not(.collapsed) {
+        background-color: rgba(230, 16, 19, 0.1);
+        color: #E61013;
+    }
+    .accordion-button:focus {
+        border-color: #E61013;
+        box-shadow: 0 0 0 0.25rem rgba(230, 16, 19, 0.25);
+    }
+    .form-label-custom {
+        font-weight: 600;
+        color: #333;
+        margin-top: 10px;
+    }
+    .btn-save {
+        background-color: #E61013;
+        color: white;
+        font-weight: 600;
+        padding: 10px 30px;
+        border-radius: 30px;
+        border: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(230, 16, 19, 0.3);
+    }
+    .btn-save:hover {
+        background-color: #c90e10;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(230, 16, 19, 0.4);
+    }
+    .btn-cancel {
+        background-color: #6c757d;
+        color: white;
+        font-weight: 600;
+        padding: 10px 30px;
+        border-radius: 30px;
+        border: none;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    .btn-cancel:hover {
+        background-color: #5a6268;
+        color: white;
+        transform: translateY(-2px);
+    }
+</style>
+
+<!-- Breadcrumb Section -->
+<section class="rts-breadcrumb breadcrumb-height breadcumb-bg" style="{% with bcimg=breadcrumb_images.about %}{% if bcimg %}background-image: url('{{ bcimg }}');{% endif %}{% endwith %}">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb-content">
+                    <h2 class="section-title">Edit About Page</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container edit-container">
+    <div class="card card-edit">
+        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+            <h4 class="fw-bold mb-0" style="color: #E61013;"><i class="fas fa-edit me-2"></i>Edit About Page Content</h4>
+            <a href="{% url 'core:about' %}" class="btn btn-outline-secondary btn-sm rounded-pill"><i class="fas fa-arrow-left me-1"></i>Back to View</a>
+        </div>
+        <div class="card-body p-4">
+            <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <!-- Accordion for form grouping -->
+                <div class="accordion mb-4" id="aboutPageFormAccordion">
+                    
+                    <!-- Section 1: General & Header -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingGeneral">
+                            <button class="accordion-button fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGeneral" aria-expanded="true" aria-controls="collapseGeneral">
+                                <i class="fas fa-heading me-2"></i> 1. General & Header Settings
+                            </button>
+                        </h2>
+                        <div id="collapseGeneral" class="accordion-collapse collapse show" aria-labelledby="headingGeneral" data-bs-parent="#aboutPageFormAccordion">
+                            <div class="accordion-body bg-light">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label-custom">Page Title</label>
+                                        {{ form.page_title }}
+                                        <small class="text-muted">Heading in the header section.</small>
+                                        {{ form.page_title.errors }}
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label-custom">Breadcrumb Image Path</label>
+                                        {{ form.breadcrumb_image }}
+                                        <small class="text-muted">Relative static path or absolute URL.</small>
+                                        {{ form.breadcrumb_image.errors }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: About Us -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingAboutUs">
+                            <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAboutUs" aria-expanded="false" aria-controls="collapseAboutUs">
+                                <i class="fas fa-info-circle me-2"></i> 2. About Us Main Section
+                            </button>
+                        </h2>
+                        <div id="collapseAboutUs" class="accordion-collapse collapse" aria-labelledby="headingAboutUs" data-bs-parent="#aboutPageFormAccordion">
+                            <div class="accordion-body bg-light">
+                                <div class="mb-3">
+                                    <label class="form-label-custom">Section Title</label>
+                                    {{ form.about_us_title }}
+                                    {{ form.about_us_title.errors }}
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label-custom">Paragraph 1</label>
+                                    {{ form.about_us_description_1 }}
+                                    {{ form.about_us_description_1.errors }}
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label-custom">Paragraph 2</label>
+                                    {{ form.about_us_description_2 }}
+                                    {{ form.about_us_description_2.errors }}
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label-custom">Paragraph 3</label>
+                                    {{ form.about_us_description_3 }}
+                                    {{ form.about_us_description_3.errors }}
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label-custom">Section Image File</label>
+                                    {{ form.about_us_image }}
+                                    {% if form.instance.about_us_image %}
+                                        <div class="mt-2">
+                                            <span class="d-block text-muted small">Current Image:</span>
+                                            <img src="{{ form.instance.about_us_image.url }}" class="preview-img" style="max-width: 150px; border-radius: 8px; margin-top: 10px;" alt="Current Image">
+                                        </div>
+                                    {% endif %}
+                                    {{ form.about_us_image.errors }}
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label-custom">Section Image URL (Fallback)</label>
+                                    {{ form.about_us_image_url }}
+                                    {{ form.about_us_image_url.errors }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: Stat Cards & Fun Facts -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingStats">
+                            <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseStats" aria-expanded="false" aria-controls="collapseStats">
+                                <i class="fas fa-chart-bar me-2"></i> 3. Counter Stats & Fun Facts
+                            </button>
+                        </h2>
+                        <div id="collapseStats" class="accordion-collapse collapse" aria-labelledby="headingStats" data-bs-parent="#aboutPageFormAccordion">
+                            <div class="accordion-body bg-light">
+                                <h5 class="fw-bold mb-3 border-bottom pb-2 text-danger">Vertical Statistic Cards (Next to Image)</h5>
+                                <div class="row">
+                                    <!-- Stat 1 -->
+                                    <div class="col-md-4 mb-3">
+                                        <div class="p-3 border rounded bg-white">
+                                            <h6 class="fw-bold text-secondary">Card 1</h6>
+                                            <label class="form-label-custom small">Value</label>
+                                            {{ form.stat1_value }}
+                                            <label class="form-label-custom small">Label</label>
+                                            {{ form.stat1_label }}
+                                            <label class="form-label-custom small">Icon File Path</label>
+                                            {{ form.stat1_icon }}
+                                        </div>
+                                    </div>
+                                    <!-- Stat 2 -->
+                                    <div class="col-md-4 mb-3">
+                                        <div class="p-3 border rounded bg-white">
+                                            <h6 class="fw-bold text-secondary">Card 2</h6>
+                                            <label class="form-label-custom small">Value</label>
+                                            {{ form.stat2_value }}
+                                            <label class="form-label-custom small">Label</label>
+                                            {{ form.stat2_label }}
+                                            <label class="form-label-custom small">Icon File Path</label>
+                                            {{ form.stat2_icon }}
+                                        </div>
+                                    </div>
+                                    <!-- Stat 3 -->
+                                    <div class="col-md-4 mb-3">
+                                        <div class="p-3 border rounded bg-white">
+                                            <h6 class="fw-bold text-secondary">Card 3</h6>
+                                            <label class="form-label-custom small">Value</label>
+                                            {{ form.stat3_value }}
+                                            <label class="form-label-custom small">Label</label>
+                                            {{ form.stat3_label }}
+                                            <label class="form-label-custom small">Icon File Path</label>
+                                            {{ form.stat3_icon }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <h5 class="fw-bold my-3 border-bottom pb-2 text-danger">Fun Facts (Red Banner Bar)</h5>
+                                <div class="row">
+                                    <!-- Fact 1 -->
+                                    <div class="col-md-4 mb-3">
+                                        <div class="p-3 border rounded bg-white">
+                                            <h6 class="fw-bold text-secondary">Fact 1</h6>
+                                            <label class="form-label-custom small">Value</label>
+                                            {{ form.funfact1_value }}
+                                            <label class="form-label-custom small">Label</label>
+                                            {{ form.funfact1_label }}
+                                        </div>
+                                    </div>
+                                    <!-- Fact 2 -->
+                                    <div class="col-md-4 mb-3">
+                                        <div class="p-3 border rounded bg-white">
+                                            <h6 class="fw-bold text-secondary">Fact 2</h6>
+                                            <label class="form-label-custom small">Value</label>
+                                            {{ form.funfact2_value }}
+                                            <label class="form-label-custom small">Label</label>
+                                            {{ form.funfact2_label }}
+                                        </div>
+                                    </div>
+                                    <!-- Fact 3 -->
+                                    <div class="col-md-4 mb-3">
+                                        <div class="p-3 border rounded bg-white">
+                                            <h6 class="fw-bold text-secondary">Fact 3</h6>
+                                            <label class="form-label-custom small">Value</label>
+                                            {{ form.funfact3_value }}
+                                            <label class="form-label-custom small">Label</label>
+                                            {{ form.funfact3_label }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 4: Vision, Mission & Governance -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingVision">
+                            <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseVision" aria-expanded="false" aria-controls="collapseVision">
+                                <i class="fas fa-eye me-2"></i> 4. Vision, Mission & Governance
+                            </button>
+                        </h2>
+                        <div id="collapseVision" class="accordion-collapse collapse" aria-labelledby="headingVision" data-bs-parent="#aboutPageFormAccordion">
+                            <div class="accordion-body bg-light">
+                                <div class="mb-3">
+                                    <label class="form-label-custom">Main Introductory Quote</label>
+                                    {{ form.mission_statement }}
+                                    {{ form.mission_statement.errors }}
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label-custom">Vision Title</label>
+                                        {{ form.vision_title }}
+                                        <label class="form-label-custom mt-2">Vision Text</label>
+                                        {{ form.vision_text }}
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label-custom">Mission Title</label>
+                                        {{ form.mission_title }}
+                                        <label class="form-label-custom mt-2">Mission Item 1</label>
+                                        {{ form.mission_text_1 }}
+                                        <label class="form-label-custom mt-2">Mission Item 2</label>
+                                        {{ form.mission_text_2 }}
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="mb-3">
+                                    <label class="form-label-custom">Governance Title</label>
+                                    {{ form.governance_title }}
+                                    <label class="form-label-custom mt-2">Governance Description</label>
+                                    {{ form.governance_text }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 5: Distinctive Features -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingFeatures">
+                            <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFeatures" aria-expanded="false" aria-controls="collapseFeatures">
+                                <i class="fas fa-list-ul me-2"></i> 5. Distinctive Features
+                            </button>
+                        </h2>
+                        <div id="collapseFeatures" class="accordion-collapse collapse" aria-labelledby="headingFeatures" data-bs-parent="#aboutPageFormAccordion">
+                            <div class="accordion-body bg-light">
+                                <div class="mb-3">
+                                    <label class="form-label-custom">Features List Title</label>
+                                    {{ form.features_title }}
+                                    {{ form.features_title.errors }}
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label-custom">Features List (one per line)</label>
+                                    {{ form.features_list }}
+                                    <small class="text-muted">Enter each feature on a separate line. Do not use bullets; they will be formatted automatically.</small>
+                                    {{ form.features_list.errors }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 6: Testimonial -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingTestimonial">
+                            <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTestimonial" aria-expanded="false" aria-controls="collapseTestimonial">
+                                <i class="fas fa-quote-left me-2"></i> 6. Principal Message / Testimonial
+                            </button>
+                        </h2>
+                        <div id="collapseTestimonial" class="accordion-collapse collapse" aria-labelledby="headingTestimonial" data-bs-parent="#aboutPageFormAccordion">
+                            <div class="accordion-body bg-light">
+                                <div class="mb-3">
+                                    <label class="form-label-custom">Message Text</label>
+                                    {{ form.testimonial_text }}
+                                    {{ form.testimonial_text.errors }}
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label-custom">Author Name</label>
+                                        {{ form.testimonial_author }}
+                                        {{ form.testimonial_author.errors }}
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label-custom">Author Image URL</label>
+                                        {{ form.testimonial_author_image }}
+                                        {{ form.testimonial_author_image.errors }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Form Controls -->
+                <div class="d-flex justify-content-end gap-3 pt-3 border-top">
+                    <a href="{% url 'core:about' %}" class="btn-cancel">Cancel</a>
+                    <button type="submit" class="btn-save"><i class="fas fa-save me-2"></i>Save Changes</button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

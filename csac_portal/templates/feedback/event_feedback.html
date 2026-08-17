@@ -1,0 +1,353 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<section class="rts-breadcrumb breadcrumb-height breadcumb-bg" style="{% with bcimg=breadcrumb_images.feedback_student %}{% if bcimg %}background-image: url('{{ bcimg }}');{% endif %}{% endwith %}">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb-content">
+                    <h2 class="section-title">{{ breadcrumb }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="rts-section-padding py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-9">
+
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-success alert-dismissible fade show shadow-sm mb-4" role="alert" style="white-space: pre-line;">
+                            <i class="fas fa-check-circle me-2"></i>{{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <div class="card border-0 shadow-lg" style="border-top: 5px solid #E61013 !important;">
+                    <div class="card-body p-4 p-md-5">
+
+                        <!-- Language switcher -->
+                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4 p-3 rounded-3" style="background: #f8f9fa; border: 1px solid #e5e7eb;">
+                            <div class="fw-semibold text-dark">
+                                <i class="fas fa-language me-2" style="color: #E61013;"></i>{{ t.choose_language }}
+                            </div>
+                            <div class="btn-group" role="group" aria-label="Language">
+                                <a href="?lang=en"
+                                   class="btn btn-sm fw-semibold {% if lang == 'en' %}text-white{% else %}btn-outline-secondary{% endif %}"
+                                   style="{% if lang == 'en' %}background-color:#E61013;border-color:#E61013;{% endif %}">
+                                    {{ t.english }}
+                                </a>
+                                <a href="?lang=hi"
+                                   class="btn btn-sm fw-semibold {% if lang == 'hi' %}text-white{% else %}btn-outline-secondary{% endif %}"
+                                   style="{% if lang == 'hi' %}background-color:#E61013;border-color:#E61013;{% endif %}">
+                                    {{ t.hindi }}
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="text-center mb-4">
+                            <p class="text-uppercase fw-semibold mb-1 small" style="letter-spacing: 1px; color: #6b7280;">
+                                {{ copy.institution_line }}
+                            </p>
+                            {% if copy.accreditation_line %}
+                                <p class="text-muted small mb-3">{{ copy.accreditation_line }}</p>
+                            {% endif %}
+                            <h3 class="fw-bold mb-2" style="color: #E61013;">
+                                ✨ {{ copy.title }} ✨
+                            </h3>
+                            {% if copy.subtitle %}
+                                <p class="text-muted mb-0">{{ copy.subtitle }}</p>
+                            {% endif %}
+                        </div>
+
+                        {% if copy.intro_text %}
+                            <div class="alert border-0 mb-4" style="background: #fff5f5; color: #4b5563; white-space: pre-line;">{{ copy.intro_text }}</div>
+                        {% endif %}
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                        {% endif %}
+
+                        <form method="post" class="needs-validation" novalidate>
+                            {% csrf_token %}
+                            <input type="hidden" name="lang" value="{{ lang }}">
+
+                            <!-- Section 1 -->
+                            <div class="mb-5">
+                                <h5 class="fw-bold border-bottom pb-2 mb-1" style="color: #E61013;">
+                                    <i class="fas fa-user me-2"></i>{{ t.section_about }}
+                                </h5>
+                                <p class="text-muted small mb-4">{{ t.section_about_help }}</p>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold text-dark">{{ form.name.label }} <span class="text-danger">*</span></label>
+                                        {{ form.name }}
+                                        <div class="text-danger small">{{ form.name.errors }}</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold text-dark">{{ form.visitor_type.label }} <span class="text-danger">*</span></label>
+                                        {{ form.visitor_type }}
+                                        <div class="text-danger small">{{ form.visitor_type.errors }}</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold text-dark">{{ form.institution_name.label }}</label>
+                                        {{ form.institution_name }}
+                                        <div class="form-text">{{ t.optional }}</div>
+                                        <div class="text-danger small">{{ form.institution_name.errors }}</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold text-dark">{{ form.city_village.label }}</label>
+                                        {{ form.city_village }}
+                                        <div class="form-text">{{ t.optional }}</div>
+                                        <div class="text-danger small">{{ form.city_village.errors }}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Section 2 -->
+                            <div class="mb-5">
+                                <h5 class="fw-bold border-bottom pb-2 mb-1" style="color: #E61013;">
+                                    <i class="fas fa-calendar-check me-2"></i>{{ t.section_experience }}
+                                </h5>
+                                <p class="text-muted small mb-4">{{ t.section_experience_help }}</p>
+
+                                <div class="mb-4">
+                                    <label class="form-label fw-semibold text-dark">{{ form.attractions.label }} <span class="text-danger">*</span></label>
+                                    <p class="text-muted small mb-2">{{ t.select_all }}</p>
+                                    <div class="row g-2">
+                                        {% for checkbox in form.attractions %}
+                                            <div class="col-md-6">
+                                                <div class="form-check">
+                                                    {{ checkbox.tag }}
+                                                    <label class="form-check-label" for="{{ checkbox.id_for_label }}">{{ checkbox.choice_label }}</label>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="text-danger small">{{ form.attractions.errors }}</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold text-dark">{{ form.heard_from.label }} <span class="text-danger">*</span></label>
+                                    {{ form.heard_from }}
+                                    <div class="text-danger small">{{ form.heard_from.errors }}</div>
+                                </div>
+                            </div>
+
+                            <!-- Section 3 – Ratings -->
+                            <div class="mb-5">
+                                <h5 class="fw-bold border-bottom pb-2 mb-1" style="color: #E61013;">
+                                    <i class="fas fa-star me-2"></i>{{ t.section_rate }}
+                                </h5>
+                                <p class="text-muted small mb-4">{{ t.section_rate_help }}</p>
+
+                                {% include "feedback/_rating_row.html" with field=form.overall_rating required=True %}
+                                {% include "feedback/_rating_row.html" with field=form.organization_rating required=True %}
+                                {% include "feedback/_rating_row.html" with field=form.hospitality_rating required=True %}
+                                {% include "feedback/_rating_row.html" with field=form.atmosphere_rating required=True %}
+                                {% include "feedback/_rating_row.html" with field=form.stage_programme_rating required=True %}
+                                {% include "feedback/_rating_row.html" with field=form.crowd_management_rating required=True %}
+                                {% include "feedback/_rating_row.html" with field=form.facilities_rating required=True %}
+                            </div>
+
+                            <!-- Section 4 – Meet & Greet -->
+                            {% if campaign.show_meet_greet_section %}
+                            <div class="mb-5">
+                                <h5 class="fw-bold border-bottom pb-2 mb-1" style="color: #E61013;">
+                                    <i class="fas fa-microphone-alt me-2"></i>
+                                    {% if copy.guest %}{{ copy.guest }} – {% endif %}{{ t.section_meet_greet }}
+                                </h5>
+                                <p class="text-muted small mb-4">{{ t.section_meet_greet_help }}</p>
+
+                                <div class="mb-4">
+                                    <label class="form-label fw-semibold text-dark">{{ form.attended_meet_greet.label }} <span class="text-danger">*</span></label>
+                                    <div class="d-flex flex-column gap-2 mt-1">
+                                        {% for radio in form.attended_meet_greet %}
+                                            <div class="form-check">
+                                                {{ radio.tag }}
+                                                <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="text-danger small">{{ form.attended_meet_greet.errors }}</div>
+                                </div>
+
+                                {% include "feedback/_rating_row.html" with field=form.meet_greet_rating required=False help=t.optional_if_not_attend %}
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold text-dark">{{ form.excitement_level.label }} <span class="text-danger">*</span></label>
+                                    {{ form.excitement_level }}
+                                    <div class="text-danger small">{{ form.excitement_level.errors }}</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold text-dark">{{ form.presence_made_exciting.label }} <span class="text-danger">*</span></label>
+                                    {{ form.presence_made_exciting }}
+                                    <div class="text-danger small">{{ form.presence_made_exciting.errors }}</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold text-dark">{{ form.enjoy_most_meet_greet.label }}</label>
+                                    {{ form.enjoy_most_meet_greet }}
+                                    <div class="form-text">{{ t.optional }}</div>
+                                    <div class="text-danger small">{{ form.enjoy_most_meet_greet.errors }}</div>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Section 5 – College -->
+                            {% if campaign.show_college_experience_section %}
+                            <div class="mb-5">
+                                <h5 class="fw-bold border-bottom pb-2 mb-1" style="color: #E61013;">
+                                    <i class="fas fa-university me-2"></i>{{ t.section_college }}
+                                </h5>
+                                <p class="text-muted small mb-4">{{ t.section_college_help }}</p>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold text-dark">{{ form.college_knowledge.label }} <span class="text-danger">*</span></label>
+                                    {{ form.college_knowledge }}
+                                    <div class="text-danger small">{{ form.college_knowledge.errors }}</div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="form-label fw-semibold text-dark">{{ form.learned_experienced.label }}</label>
+                                    <p class="text-muted small mb-2">{{ t.select_all_optional }}</p>
+                                    <div class="row g-2">
+                                        {% for checkbox in form.learned_experienced %}
+                                            <div class="col-md-6">
+                                                <div class="form-check">
+                                                    {{ checkbox.tag }}
+                                                    <label class="form-check-label" for="{{ checkbox.id_for_label }}">{{ checkbox.choice_label }}</label>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="text-danger small">{{ form.learned_experienced.errors }}</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold text-dark">{{ form.campus_impression.label }} <span class="text-danger">*</span></label>
+                                    {{ form.campus_impression }}
+                                    <div class="text-danger small">{{ form.campus_impression.errors }}</div>
+                                </div>
+
+                                <div class="mb-4 mt-4 p-3 rounded-3" style="background: #fff8f0; border: 1px solid #f5d0b5;">
+                                    <label class="form-label fw-semibold text-dark mb-1">
+                                        {{ form.contribution_areas.label }}
+                                    </label>
+                                    <p class="text-muted small mb-3">{{ t.select_all_optional }}</p>
+                                    <div class="row g-2">
+                                        {% for checkbox in form.contribution_areas %}
+                                            <div class="col-md-6">
+                                                <div class="form-check">
+                                                    {{ checkbox.tag }}
+                                                    <label class="form-check-label" for="{{ checkbox.id_for_label }}">{{ checkbox.choice_label }}</label>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="text-danger small">{{ form.contribution_areas.errors }}</div>
+
+                                    <div class="mt-3">
+                                        <label class="form-label fw-semibold text-dark">{{ form.contribution_other_suggestion.label }}</label>
+                                        {{ form.contribution_other_suggestion }}
+                                        <div class="form-text">{{ t.optional }}</div>
+                                        <div class="text-danger small">{{ form.contribution_other_suggestion.errors }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Section 6 – Impact -->
+                            {% if campaign.show_event_impact_section %}
+                            <div class="mb-5">
+                                <h5 class="fw-bold border-bottom pb-2 mb-1" style="color: #E61013;">
+                                    <i class="fas fa-heart me-2"></i>{{ t.section_impression }}
+                                </h5>
+                                <p class="text-muted small mb-4">{{ t.section_impression_help }}</p>
+
+                                {% include "feedback/_rating_row.html" with field=form.memorable_scale required=True help=t.scale_memorable %}
+                                {% include "feedback/_rating_row.html" with field=form.attend_future_scale required=True help=t.scale_likely %}
+                                {% include "feedback/_rating_row.html" with field=form.recommend_events_scale required=True help=t.scale_likely %}
+
+                                <div class="mb-3 mt-3">
+                                    <label class="form-label fw-semibold text-dark">{{ form.another_celebrity_meet.label }} <span class="text-danger">*</span></label>
+                                    {{ form.another_celebrity_meet }}
+                                    <div class="text-danger small">{{ form.another_celebrity_meet.errors }}</div>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Section 7 – Voice -->
+                            {% if campaign.show_voice_section %}
+                            <div class="mb-5">
+                                <h5 class="fw-bold border-bottom pb-2 mb-1" style="color: #E61013;">
+                                    <i class="fas fa-comment-dots me-2"></i>{{ t.section_voice }}
+                                </h5>
+                                <p class="text-muted small mb-4">{{ t.section_voice_help }}</p>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold text-dark">{{ form.best_part.label }}</label>
+                                    {{ form.best_part }}
+                                    <div class="text-danger small">{{ form.best_part.errors }}</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold text-dark">{{ form.improvements.label }}</label>
+                                    {{ form.improvements }}
+                                    <div class="text-danger small">{{ form.improvements.errors }}</div>
+                                </div>
+                                {% if campaign.show_meet_greet_section %}
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold text-dark">{{ form.message_for_guest.label }}</label>
+                                    {{ form.message_for_guest }}
+                                    <div class="text-danger small">{{ form.message_for_guest.errors }}</div>
+                                </div>
+                                {% endif %}
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold text-dark">{{ form.additional_comments.label }}</label>
+                                    {{ form.additional_comments }}
+                                    <div class="text-danger small">{{ form.additional_comments.errors }}</div>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Final -->
+                            <div class="mb-5">
+                                <h5 class="fw-bold border-bottom pb-2 mb-3" style="color: #E61013;">
+                                    <i class="fas fa-flag-checkered me-2"></i>{{ t.section_final }}
+                                </h5>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold text-dark">{{ form.final_description.label }} <span class="text-danger">*</span></label>
+                                    {{ form.final_description }}
+                                    <div class="text-danger small">{{ form.final_description.errors }}</div>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn text-white w-100 fw-bold py-3" style="background-color: #E61013;">
+                                <i class="fas fa-paper-plane me-2"></i>{{ t.submit }}
+                            </button>
+
+                            {% if copy.tagline %}
+                                <p class="text-center text-muted small mt-3 mb-0">
+                                    {{ copy.institution_line }} · {{ copy.tagline }}
+                                </p>
+                            {% endif %}
+                        </form>
+                    </div>
+                </div>
+
+                <p class="text-center mt-3">
+                    <a href="{% url 'feedback:event_feedback_list' %}" class="text-muted small">
+                        <i class="fas fa-arrow-left me-1"></i> {{ t.all_forms }}
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

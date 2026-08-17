@@ -1,0 +1,133 @@
+﻿{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!-- Breadcrumb Section -->
+<section class="rts-breadcrumb breadcrumb-height breadcumb-bg" style="{% with bcimg=breadcrumb_images.co_po %}{% if bcimg %}background-image: url('{{ bcimg }}');{% endif %}{% endwith %}">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb-content">
+                    <h2 class="section-title">{{ breadcrumb }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CO-PO Mapping Section -->
+<section class="rts-section-padding py-5">
+    <div class="container">
+
+        <div class="row mb-5">
+            <div class="col-12 text-center">
+                <h2 class="fw-bold" style="color: #E61013;">Course Outcomes &amp; Program Outcomes (CO-PO)</h2>
+                <hr style="border-color:#E61013;border-width:3px;width:60px;opacity:1;margin:auto;">
+                <p class="text-muted mt-3">Course Outcomes (CO) define the knowledge, skills, and behavior students acquire. Program Outcomes (PO) represent what students are expected to know and be able to do upon graduation.</p>
+            </div>
+        </div>
+
+        {% if departments %}
+        <div class="row">
+            <div class="col-lg-3 mb-4">
+                <!-- Nav tabs -->
+                <div class="nav flex-column nav-pills shadow-sm rounded bg-white p-3 border" id="v-pills-tab" role="tablist" aria-orientation="vertical" style="border-top: 4px solid #E61013 !important;">
+                    <h6 class="fw-bold mb-3 px-2 text-dark">Departments</h6>
+                    {% for dept in departments %}
+                    <button class="nav-link text-start mb-2 fw-semibold {% if forloop.first %}active{% endif %}"
+                            id="v-pills-{{ dept.slug }}-tab"
+                            data-bs-toggle="pill"
+                            data-bs-target="#v-pills-{{ dept.slug }}"
+                            type="button"
+                            role="tab"
+                            aria-controls="v-pills-{{ dept.slug }}"
+                            aria-selected="{% if forloop.first %}true{% else %}false{% endif %}">
+                        {{ dept.name }}
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="col-lg-9">
+                <!-- Tab panes -->
+                <div class="tab-content bg-transparent" id="v-pills-tabContent">
+                    {% for dept in departments %}
+                    <div class="tab-pane fade {% if forloop.first %}show active{% endif %}"
+                         id="v-pills-{{ dept.slug }}"
+                         role="tabpanel"
+                         aria-labelledby="v-pills-{{ dept.slug }}-tab">
+
+                        <h4 class="fw-bold mb-4" style="color: #E61013;">Department of {{ dept.name }} Mappings</h4>
+
+                        {% if dept.copo_mappings.all %}
+                        <div class="accordion shadow-sm" id="accordion-{{ dept.slug }}">
+                            {% for mapping in dept.copo_mappings.all %}
+                            <div class="accordion-item border">
+                                <h2 class="accordion-header" id="heading-{{ mapping.id }}">
+                                    <button class="accordion-button collapsed fw-bold text-dark"
+                                            type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#collapse-{{ mapping.id }}"
+                                            aria-expanded="false"
+                                            aria-controls="collapse-{{ mapping.id }}">
+                                        <span class="badge me-3" style="background-color: #E61013;">{{ mapping.course_code }}</span>
+                                        {{ mapping.course_name }}
+                                    </button>
+                                </h2>
+                                <div id="collapse-{{ mapping.id }}"
+                                     class="accordion-collapse collapse"
+                                     aria-labelledby="heading-{{ mapping.id }}"
+                                     data-bs-parent="#accordion-{{ dept.slug }}">
+                                    <div class="accordion-body bg-light text-muted">
+                                        <div class="row g-4">
+                                            <div class="col-md-6">
+                                                <h6 class="fw-bold text-dark mb-2"><i class="fas fa-bullseye me-2 text-danger"></i> Course Outcomes (COs)</h6>
+                                                <div class="lh-lg small bg-white p-3 rounded border">{{ mapping.course_outcomes|linebreaks }}</div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <h6 class="fw-bold text-dark mb-2"><i class="fas fa-graduation-cap me-2 text-danger"></i> Program Outcomes (POs)</h6>
+                                                <div class="lh-lg small bg-white p-3 rounded border">{{ mapping.program_outcomes|linebreaks }}</div>
+                                            </div>
+                                            {% if mapping.mapping_matrix %}
+                                            <div class="col-12">
+                                                <h6 class="fw-bold text-dark mb-2"><i class="fas fa-th me-2 text-danger"></i> CO-PO Mapping Matrix</h6>
+                                                <div class="bg-white p-3 rounded border text-center font-monospace small overflow-auto">
+                                                    {{ mapping.mapping_matrix|linebreaks }}
+                                                </div>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="alert alert-secondary border-0 shadow-sm">No mappings are registered for this department yet.</div>
+                        {% endif %}
+
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-secondary text-center border-0 shadow-sm py-4">No departments found. Please add departments from the admin panel first.</div>
+        {% endif %}
+
+    </div>
+</section>
+
+<!-- Custom CSS to style active tab state -->
+<style>
+    .nav-pills .nav-link.active {
+        background-color: #E61013 !important;
+        color: #fff !important;
+    }
+    .nav-pills .nav-link {
+        color: #555;
+    }
+</style>
+
+{% endblock %}

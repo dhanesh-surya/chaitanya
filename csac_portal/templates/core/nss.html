@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}National Service Scheme (NSS) - Chaitanya Science and Arts College{% endblock %}
+
+{% block content %}
+
+<!-- Custom Banner / Breadcrumb Section -->
+<section class="rts-breadcrumb-area breadcrumb-bg" style="background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('{{ nss_settings.get_banner_image }}'); padding: 100px 0 80px 0; background-size: cover; background-position: center; position: relative; overflow: hidden;">
+    <!-- Subtle overlay grid or decoration -->
+    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 80% 20%, rgba(230, 16, 19, 0.15) 0%, transparent 50%); pointer-events: none;"></div>
+    
+    <div class="container" style="position: relative; z-index: 2;">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <div class="breadcrumb-inner text-start">
+                    <span class="text-uppercase fw-bold text-danger mb-3 d-inline-block tracking-wider" style="font-size: 14px; letter-spacing: 2px;">Community Service & Leadership</span>
+                    <h1 class="title text-white fw-bold mb-3" style="font-size: 42px; line-height: 1.2; font-family: 'Outfit', sans-serif;">{{ nss_settings.banner_title }}</h1>
+                    <p class="text-white-50 mb-4 lh-lg" style="font-size: 16px; max-width: 720px; font-family: 'Inter', sans-serif;">
+                        {{ nss_settings.banner_description }}
+                    </p>
+                    <a class="rts-theme-btn btn-arrow bg-danger text-white border-0 py-3 px-5 rounded-pill d-inline-flex align-items-center" href="#activities" style="background: linear-gradient(135deg, #E61013, #B71A34) !important; box-shadow: 0 4px 15px rgba(230, 16, 19, 0.4); transition: transform 0.2s ease;">
+                        View Our Activities <i class="fa-solid fa-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+            {% if nss_settings.get_banner_icon %}
+            <div class="col-lg-4 text-center d-none d-lg-block">
+                <img src="{{ nss_settings.get_banner_icon }}" alt="NSS Symbol" style="max-height: 220px; filter: drop-shadow(0 8px 16px rgba(0,0,0,0.4)); animation: nss-spin 40s linear infinite;">
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- NSS Activities & About Section -->
+<section id="activities" class="rts-section-padding py-5" style="background: #fafafa; position: relative;">
+    <div class="container py-4">
+        <!-- Section Header -->
+        <div class="row mb-5 justify-content-center">
+            <div class="col-lg-10 text-center">
+                <span class="text-uppercase fw-bold" style="color: #B71A34; font-size: 13px; letter-spacing: 1.5px;">National Service Scheme</span>
+                <h2 class="fw-bold mt-2 mb-3" style="font-size: 36px; font-family: 'Outfit', sans-serif; color: #1f2937;">{{ nss_settings.about_title }}</h2>
+                <div class="mx-auto mb-4" style="height: 3px; width: 60px; background-color: #E61013; border-radius: 2px;"></div>
+                <p class="text-muted lh-lg mx-auto" style="font-size: 16px; max-width: 900px;">
+                    {{ nss_settings.about_description }}
+                </p>
+            </div>
+        </div>
+
+        <!-- Activities Grid -->
+        <div class="row g-4 justify-content-center">
+            {% for activity in activities %}
+            <div class="col-lg-4 col-md-6 col-sm-12" style="display: flex;">
+                <div class="card border-0 p-4 shadow-sm w-100 nss-activity-card" style="border-radius: 12px; background: white; transition: all 0.3s ease; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between;">
+                    <!-- Top shadow/accent line -->
+                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, #E61013, #B71A34);"></div>
+                    
+                    <div class="card-body p-0">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="fw-bold" style="font-size: 24px; color: rgba(183, 26, 52, 0.15); font-family: 'Outfit', sans-serif;">{{ activity.serial_number }}</span>
+                            <div style="background-color: rgba(230, 16, 19, 0.08); color: #E61013; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                                <i class="fa-solid {{ activity.fa_icon }}"></i>
+                            </div>
+                        </div>
+                        <h5 class="fw-bold mb-0 text-dark" style="font-size: 16px; line-height: 1.5; font-family: 'Inter', sans-serif; text-align: left;">
+                            {{ activity.title }}
+                        </h5>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- NSS Gallery Section -->
+<section class="rts-gallery section-bg rts-section-padding py-5" style="background: #ffffff;">
+    <div class="container py-4">
+        <div class="row mb-5 justify-content-center">
+            <div class="col-lg-8 text-center">
+                <span class="text-uppercase fw-bold" style="color: #B71A34; font-size: 13px; letter-spacing: 1.5px;">Memories of Service</span>
+                <h2 class="fw-bold mt-2" style="font-size: 36px; font-family: 'Outfit', sans-serif; color: #1f2937;">Our NSS Gallery</h2>
+                <div class="mx-auto mt-3" style="height: 3px; width: 60px; background-color: #E61013; border-radius: 2px;"></div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            {% for img in gallery_images %}
+            <div class="col-lg-4 col-md-6 col-sm-12">
+                <div class="nss-gallery-card" style="border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); position: relative; aspect-ratio: 4/3; background: #f3f4f6; transition: all 0.3s ease;">
+                    <a class="single-gallery__item w-100 h-100 d-block" href="{{ img.get_image }}" target="_blank" title="{{ img.caption }}">
+                        <img src="{{ img.get_image }}" alt="{{ img.caption }}" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;" class="gallery-img">
+                        <div class="gallery-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.75)); opacity: 0; transition: opacity 0.3s ease; display: flex; align-items: flex-end; padding: 20px;">
+                            <div class="text-white">
+                                <span style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #E61013; font-weight: bold;">NSS Camp</span>
+                                <h6 class="mb-0 text-white mt-1" style="font-size: 16px; font-weight: 600;">{{ img.caption }}</h6>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- NSS Happenings Slider Section -->
+{% if nss_happenings %}
+<section class="rts-campus-section rts-section-padding py-5" style="background: #fdfdfd; border-top: 1px solid #f3f4f6;">
+    <div class="container py-4">
+        <div class="row mb-5 justify-content-center">
+            <div class="col-lg-8 text-center">
+                <span class="text-uppercase fw-bold" style="color: #B71A34; font-size: 13px; letter-spacing: 1.5px;">Camps, Rallies & Initiatives</span>
+                <h2 class="fw-bold mt-2" style="font-size: 36px; font-family: 'Outfit', sans-serif; color: #1f2937;">NSS Activities, Camps & Rallies</h2>
+                <div class="mx-auto mt-3" style="height: 3px; width: 60px; background-color: #E61013; border-radius: 2px;"></div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="rts__testimonial--active swiper swiper-data" data-swiper='{"slidesPerView":3,"loop":true,"speed":1000,"pagination":{"el":".rts__pagination","clickable":true},"autoplay":{"delay":5000},"breakpoints":{"320":{"slidesPerView":1},"575":{"slidesPerView":1.5},"768":{"slidesPerView":2},"991":{"slidesPerView":2.2},"1201":{"slidesPerView":3}}}'>
+                    <div class="swiper-wrapper">
+                        {% for happening in nss_happenings %}
+                        <div class="swiper-slide p-3">
+                            <div class="rts__research--single shadow-sm" style="background: white; border-radius: 12px; overflow: hidden; border: 1px solid #f3f4f6; height: 100%; display: flex; flex-direction: column; transition: all 0.3s ease;">
+                                <div class="rts__research--single--thumb" style="height: 200px; overflow: hidden; position: relative;">
+                                    <a href="{% url 'core:happening_detail' happening.id %}">
+                                        <img src="{{ happening.get_image }}" alt="{{ happening.title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                    </a>
+                                </div>
+                                <div class="rts__research--single--meta" style="padding: 24px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                                    <div>
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="item-description text-uppercase fw-bold" style="font-size: 12px; color: #B71A34;">{{ happening.category|default:"NSS Activity" }}</span>
+                                            {% if happening.date %}
+                                            <span class="text-muted" style="font-size: 12px;">{{ happening.date|date:"M d, Y" }}</span>
+                                            {% endif %}
+                                        </div>
+                                        <a class="rts__research--single--meta--title fw-bold text-dark" href="{% url 'core:happening_detail' happening.id %}" style="font-size: 18px; line-height: 1.4; text-decoration: none; display: block; margin-bottom: 12px; transition: color 0.2s;">
+                                            {{ happening.title }}
+                                        </a>
+                                    </div>
+                                    <div class="mt-3">
+                                        <a href="{% url 'core:happening_detail' happening.id %}" class="rts-nbg-btn btn-arrow fw-bold" style="font-size: 14px; color: #E61013; text-decoration: none; display: inline-flex; align-items: center;">
+                                            Read More <i class="fa-solid fa-arrow-right ms-2" style="font-size: 12px;"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <!-- Swiper Pagination -->
+                    <div class="rts__pagination mt-4 text-center"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Style blocks for NSS elements -->
+<style>
+    @keyframes nss-spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    .w-100 {
+        max-width: 450px;
+    }
+    .nss-activity-card {
+        min-height: 300px;
+    }
+    .nss-activity-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08) !important;
+    }
+    .nss-gallery-card {
+        aspect-ratio: auto !important;
+        height: 300px !important;
+    }
+    .nss-gallery-card:hover .gallery-img {
+        transform: scale(1.1);
+    }
+    .nss-gallery-card:hover .gallery-overlay {
+        opacity: 1 !important;
+    }
+    .rts__research--single--meta {
+        min-height: 300px;
+    }
+    .rts__research--single:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08) !important;
+    }
+</style>
+
+{% endblock %}

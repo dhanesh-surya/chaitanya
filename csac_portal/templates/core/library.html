@@ -1,0 +1,467 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Library - Chaitanya Science and Arts College{% endblock %}
+
+{% block extra_css %}
+<style>
+  :root {
+    --lib-red: #B71A34;
+    --lib-dark: #1a1a2e;
+    --lib-bg-alt: #fcfcfc;
+  }
+
+  .lib-card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+    border: 1px solid rgba(0,0,0,0.06);
+    padding: 30px;
+    height: 100%;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .lib-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(183, 26, 52, 0.05);
+    border-color: rgba(183, 26, 52, 0.15);
+  }
+
+  .lib-badge {
+    background: rgba(183, 26, 52, 0.08);
+    color: var(--lib-red);
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-size: 13px;
+    display: inline-block;
+    margin-bottom: 15px;
+  }
+
+  .lib-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+    border: 1px solid rgba(0,0,0,0.05);
+    margin-bottom: 30px;
+  }
+  .lib-table th {
+    background-color: var(--lib-red);
+    color: #fff;
+    font-weight: 600;
+    padding: 16px 20px;
+    text-align: left;
+    font-size: 15px;
+  }
+  .lib-table td {
+    padding: 14px 20px;
+    border-bottom: 1px solid #f0f0f0;
+    color: #444;
+    font-size: 15px;
+  }
+  .lib-table tr:last-child td {
+    border-bottom: none;
+  }
+  .lib-table tr:hover {
+    background-color: rgba(183, 26, 52, 0.01);
+  }
+  .lib-table a {
+    color: var(--lib-red);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+  .lib-table a:hover {
+    color: #890C25;
+    text-decoration: underline;
+  }
+
+  .section-accent-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+    position: relative;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+  }
+  .section-accent-title::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 50px;
+    height: 3px;
+    background-color: var(--lib-red);
+    border-radius: 3px;
+  }
+
+  .service-list {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 25px;
+  }
+  .service-list li {
+    position: relative;
+    padding-left: 28px;
+    margin-bottom: 12px;
+    color: #555;
+    font-size: 15px;
+  }
+  .service-list li::before {
+    content: "\f00c";
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    position: absolute;
+    left: 0;
+    top: 2px;
+    color: var(--lib-red);
+    font-size: 14px;
+  }
+
+  .btn-lib-submit {
+    background-color: var(--lib-red);
+    border-color: var(--lib-red);
+    color: white;
+    font-weight: 600;
+    padding: 12px 25px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+  }
+  .btn-lib-submit:hover {
+    background-color: #890C25;
+    border-color: #890C25;
+    color: white;
+    box-shadow: 0 4px 12px rgba(183, 26, 52, 0.15);
+  }
+
+  .form-control:focus {
+    border-color: var(--lib-red);
+    box-shadow: 0 0 0 0.25rem rgba(183, 26, 52, 0.25);
+  }
+
+  .lib-slider-container {
+    position: relative;
+    max-width: 600px;
+    width: 100%;
+  }
+  .lib-slider-container .w-100,
+  .overflow-hidden img.w-100 {
+    max-width: 600px !important;
+    width: 100% !important;
+  }
+  .lib-slider-container .swiper-button-next,
+  .lib-slider-container .swiper-button-prev {
+    width: 32px !important;
+    height: 32px !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    color: #B71A34 !important;
+    border-radius: 50% !important;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1) !important;
+    transition: all 0.3s ease !important;
+    margin-top: -16px !important;
+  }
+  .lib-slider-container .swiper-button-next::after,
+  .lib-slider-container .swiper-button-prev::after {
+    font-size: 11px !important;
+    font-weight: bold !important;
+  }
+  .lib-slider-container .swiper-button-next:hover,
+  .lib-slider-container .swiper-button-prev:hover {
+    background: #B71A34 !important;
+    color: #ffffff !important;
+  }
+  .lib-slider-container .swiper-pagination-bullet-active {
+    background: #B71A34 !important;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Breadcrumb Section -->
+<section class="rts-breadcrumb breadcrumb-height breadcumb-bg" style="{% with bcimg=breadcrumb_images.students_library %}{% if bcimg %}background-image: url('{{ bcimg }}');{% endif %}{% endwith %}">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb-content text-center">
+                    <h2 class="section-title text-white">{{ breadcrumb }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Library Overview -->
+<section class="py-5" style="background: #fff;">
+    <div class="container py-4">
+        {% if messages %}
+        <div class="row mb-4">
+            <div class="col-12">
+                {% for message in messages %}
+                <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="row align-items-center g-5">
+            <!-- Text Content -->
+            <div class="col-lg-6">
+                <span class="lib-badge">Est. 2001</span>
+                <h2 class="fw-bold mb-4" style="color: var(--lib-red); font-size: 32px; line-height: 1.25;">
+                    {{ settings.page_intro_title }}
+                </h2>
+                <p class="text-secondary lh-lg fs-5 mb-0" style="text-align: justify;">
+                    {{ settings.page_intro }}
+                </p>
+            </div>
+            
+            <!-- Library Feature Image -->
+            <div class="col-lg-6">
+                <div class="position-relative" style="max-width: 600px; margin: 0 auto; width: 100%;">
+                    <div class="overflow-hidden shadow-sm" style="border-radius: 20px; border: 8px solid #fdfdfd; box-shadow: 0 10px 30px rgba(0,0,0,0.05) !important; max-width: 600px; width: 100%;">
+                        {% if settings.images.all %}
+                            {% if settings.images.all|length > 1 %}
+                                <!-- Swiper for multiple images -->
+                                <div class="lib-slider-container">
+                                    <div class="swiper" id="lib-swiper">
+                                        <div class="swiper-wrapper">
+                                            {% for img in settings.images.all %}
+                                                <div class="swiper-slide">
+                                                    <div class="position-relative" style="height: 380px; max-width: 600px; width: 100%;">
+                                                        <img src="{{ img.get_image }}" alt="{{ img.caption|default:settings.page_intro_title }}" class="img-fluid w-100" style="height: 380px; object-fit: cover; max-width: 600px; display: block;">
+                                                        {% if img.caption %}
+                                                            <span style="position: absolute; bottom: 12px; left: 12px; background: rgba(183, 26, 52, 0.9); color: #ffffff; padding: 4px 12px; border-radius: 50px; font-size: 11px; font-weight: 700; z-index: 10; border: 1px solid rgba(255, 255, 255, 0.2); max-width: calc(100% - 24px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ img.caption }}</span>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                        <!-- Swiper Controls -->
+                                        <div class="swiper-pagination" id="lib-pagination"></div>
+                                        <div class="swiper-button-next" id="lib-next"></div>
+                                        <div class="swiper-button-prev" id="lib-prev"></div>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <!-- Single Image from gallery -->
+                                {% with img=settings.images.all.0 %}
+                                    <div class="position-relative" style="height: 380px;">
+                                        <img src="{{ img.get_image }}" alt="{{ img.caption|default:settings.page_intro_title }}" class="img-fluid w-100" style="height: 380px; object-fit: cover; max-width: 600px; display: block;">
+                                        {% if img.caption %}
+                                            <span style="position: absolute; bottom: 12px; left: 12px; background: rgba(183, 26, 52, 0.9); color: #ffffff; padding: 4px 12px; border-radius: 50px; font-size: 11px; font-weight: 700; z-index: 10; border: 1px solid rgba(255, 255, 255, 0.2); max-width: calc(100% - 24px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ img.caption }}</span>
+                                        {% endif %}
+                                    </div>
+                                {% endwith %}
+                            {% endif %}
+                        {% else %}
+                            <!-- Fallback to settings.get_image -->
+                            <img src="{{ settings.get_image }}" alt="{{ settings.page_intro_title }}" class="img-fluid w-100" style="height: 380px; object-fit: cover; max-width: 600px; display: block;">
+                        {% endif %}
+                    </div>
+                    <!-- Decorative accents -->
+                    <div class="position-absolute" style="background: var(--lib-red); width: 80px; height: 80px; border-radius: 50%; opacity: 0.05; bottom: -20px; right: -20px; z-index: -1;"></div>
+                    <div class="position-absolute" style="background: var(--lib-red); width: 120px; height: 120px; border-radius: 20px; opacity: 0.04; top: -30px; left: -30px; z-index: -1; transform: rotate(15deg);"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- About & Future Plan Detail Cards -->
+<section class="py-5" style="background: var(--lib-bg-alt);">
+    <div class="container py-3">
+        <div class="row g-4">
+            <!-- About Library -->
+            <div class="col-lg-6">
+                <div class="lib-card">
+                    <h3 class="section-accent-title">{{ settings.about_library_title }}</h3>
+                    <p class="text-secondary lh-lg mb-0" style="text-align: justify; font-size: 15.5px;">
+                        {{ settings.about_library_text }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Future Plan -->
+            <div class="col-lg-6">
+                <div class="lib-card">
+                    <h3 class="section-accent-title">{{ settings.future_plan_title }}</h3>
+                    <p class="text-secondary lh-lg mb-0" style="text-align: justify; font-size: 15.5px;">
+                        {{ settings.future_plan_text }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Services & Suggestion Form -->
+<section class="py-5" style="background: #fff;">
+    <div class="container py-4">
+        <div class="row g-5">
+            <!-- Services Info -->
+            <div class="col-lg-6">
+                <h3 class="section-accent-title">Library Services</h3>
+                
+                <h5 class="fw-bold text-dark mt-4 mb-3">Sections:</h5>
+                <ul class="service-list">
+                    {% for sec in sections %}
+                    <li>{{ sec }}</li>
+                    {% empty %}
+                    <li>Reference Section</li>
+                    <li>Circulation Section</li>
+                    <li>Periodical Section</li>
+                    {% endfor %}
+                </ul>
+
+                <h5 class="fw-bold text-dark mb-2">About the Library:</h5>
+                <p class="text-secondary lh-lg mb-4" style="font-size: 15px;">
+                    {{ settings.about_services_text }}
+                </p>
+
+                <h5 class="fw-bold text-dark mb-2">New Book Suggestions:</h5>
+                <p class="text-secondary lh-lg mb-0" style="font-size: 15px;">
+                    {{ settings.new_suggestion_text }}
+                </p>
+            </div>
+
+            <!-- Book Suggestion Form Card -->
+            <div class="col-lg-6">
+                <div class="lib-card" style="border-top: 4px solid var(--lib-red);">
+                    <h4 class="fw-bold text-dark mb-3">Recommend a Book</h4>
+                    <p class="text-muted small mb-4">Help us strengthen our library collection by suggesting new titles.</p>
+                    
+                    <form method="post" action="{% url 'core:library' %}">
+                        {% csrf_token %}
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-secondary small">Book Title *</label>
+                                {{ form.book_title }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-secondary small">Author *</label>
+                                {{ form.author }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-secondary small">Your Name *</label>
+                                {{ form.recommended_by }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-secondary small">Email Address *</label>
+                                {{ form.email }}
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold text-secondary small">Reason for Recommendation</label>
+                                {{ form.reason }}
+                            </div>
+                            <div class="col-12 mt-4 text-end">
+                                <button type="submit" class="btn btn-lib-submit">
+                                    <i class="fa-solid fa-paper-plane me-2"></i> Submit Recommendation
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Data Tables -->
+<section class="py-5" style="background: var(--lib-bg-alt);">
+    <div class="container py-4">
+        <div class="row g-5">
+            <!-- Book Categories -->
+            <div class="col-lg-5">
+                <h3 class="fw-bold mb-4" style="color: var(--lib-red); font-size: 24px;">Library Book Categories</h3>
+                <div class="table-responsive">
+                    <table class="lib-table">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th style="text-align: right; width: 140px;">No. of Books</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cat in categories %}
+                            <tr>
+                                <td class="fw-semibold">{{ cat.category_name }}</td>
+                                <td style="text-align: right; font-weight: bold; color: var(--lib-red);">{{ cat.num_books }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="2" class="text-center text-muted">No categories available</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Learning Resources -->
+            <div class="col-lg-7">
+                <h3 class="fw-bold mb-4" style="color: var(--lib-red); font-size: 24px;">Digital Learning Resources</h3>
+                <div class="table-responsive">
+                    <table class="lib-table">
+                        <thead>
+                            <tr>
+                                <th>Portal Name</th>
+                                <th>Website Link</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for res in resources %}
+                            <tr>
+                                <td class="fw-semibold">{{ res.name }}</td>
+                                <td>
+                                    <a href="{{ res.website_url }}" target="_blank">
+                                        <i class="fa-solid fa-arrow-up-right-from-square me-1 small"></i> Visit Portal
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="2" class="text-center text-muted">No learning resources available</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  $(document).ready(function() {
+    if (typeof Swiper !== 'undefined' && document.getElementById('lib-swiper')) {
+      new Swiper('#lib-swiper', {
+        slidesPerView: 1,
+        loop: true,
+        speed: 600,
+        autoplay: {
+          delay: 4000,
+          disableOnInteraction: false,
+          pauseOnMouseEnter: true
+        },
+        navigation: {
+          nextEl: '#lib-next',
+          prevEl: '#lib-prev',
+        },
+        pagination: {
+          el: '#lib-pagination',
+          clickable: true,
+        }
+      });
+    }
+  });
+</script>
+{% endblock %}

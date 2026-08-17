@@ -1,0 +1,101 @@
+﻿{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!-- Breadcrumb Section -->
+<section class="rts-breadcrumb breadcrumb-height breadcumb-bg" style="{% with bcimg=breadcrumb_images.notices %}{% if bcimg %}background-image: url('{{ bcimg }}');{% endif %}{% endwith %}">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb-content">
+                    <h2 class="section-title">{{ breadcrumb }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Notices Section -->
+<section class="rts-section-padding py-5">
+    <div class="container">
+
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2 class="fw-bold" style="color: #E61013;">Notices &amp; Announcements</h2>
+                <p class="text-muted">Stay up to date with the latest notifications from the college.</p>
+            </div>
+        </div>
+
+        <!-- Tab Controls -->
+        <div class="rts-tab mb-4">
+            <ul class="nav nav-pills pb--30" id="pills-tab" role="tablist" style="border-bottom: 2px solid #eee; gap: 10px;">
+                <li class="nav-item" role="presentation">
+                    <button aria-controls="pills-home" aria-selected="true" class="nav-link active fw-semibold" data-bs-target="#pills-home" data-bs-toggle="pill" id="pills-home-tab" role="tab" type="button" style="border-radius: 5px; padding: 10px 20px;">
+                        Latest Notices
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button aria-controls="pills-Exam" aria-selected="false" class="nav-link fw-semibold" data-bs-target="#pills-Exam" data-bs-toggle="pill" id="pills-Exam-tab" role="tab" type="button" style="border-radius: 5px; padding: 10px 20px;">
+                        Exam Notices
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button aria-controls="pills-Admission" aria-selected="false" class="nav-link fw-semibold" data-bs-target="#pills-Admission" data-bs-toggle="pill" id="pills-Admission-tab" role="tab" type="button" style="border-radius: 5px; padding: 10px 20px;">
+                        Admission Notices
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button aria-controls="pills-Students" aria-selected="false" class="nav-link fw-semibold" data-bs-target="#pills-Students" data-bs-toggle="pill" id="pills-Students-tab" role="tab" type="button" style="border-radius: 5px; padding: 10px 20px;">
+                        Student Corner
+                    </button>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="pills-tabContent">
+            <!-- Latest Notices Tab -->
+            <div aria-labelledby="pills-home-tab" class="tab-pane fade show active" id="pills-home" role="tabpanel" tabindex="0">
+                {% include "core/includes/notice_table.html" with notices_list=latest_notices show_category=True %}
+            </div>
+
+            <!-- Exam Notices Tab -->
+            <div aria-labelledby="pills-Exam-tab" class="tab-pane fade" id="pills-Exam" role="tabpanel" tabindex="0">
+                {% include "core/includes/notice_table.html" with notices_list=exam_notices show_category=False %}
+            </div>
+
+            <!-- Admission Notices Tab -->
+            <div aria-labelledby="pills-Admission-tab" class="tab-pane fade" id="pills-Admission" role="tabpanel" tabindex="0">
+                {% include "core/includes/notice_table.html" with notices_list=admission_notices show_category=False %}
+            </div>
+
+            <!-- Student Notices Tab -->
+            <div aria-labelledby="pills-Students-tab" class="tab-pane fade" id="pills-Students" role="tabpanel" tabindex="0">
+                {% include "core/includes/notice_table.html" with notices_list=student_notices show_category=False %}
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- Custom Styling for Pills -->
+<style>
+    .nav-pills .nav-link {
+        color: #333;
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        transition: all 0.2s ease-in-out;
+    }
+    .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+        color: #fff !important;
+        background-color: #E61013 !important;
+        border-color: #E61013 !important;
+    }
+    .nav-pills .nav-link:hover:not(.active) {
+        background-color: #e9ecef;
+        border-color: #ced4da;
+    }
+</style>
+
+{% endblock %}

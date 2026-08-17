@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    .uploader-card {
+        border-radius: 12px;
+        border: none;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        background: #ffffff;
+    }
+    .form-label-custom {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 6px;
+        display: block;
+    }
+</style>
+
+<section class="rts-breadcrumb breadcrumb-height breadcumb-bg" style="{% with bcimg=breadcrumb_images.staff_nonteaching %}{% if bcimg %}background-image: url('{{ bcimg }}');{% endif %}{% endwith %}">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb-content">
+                    <h2 class="section-title">{{ page_title }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container my-5">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+        <p class="text-muted mb-0">Add and manage non-teaching staff shown on the public directory page.</p>
+        <a href="{% url 'core:staff_nonteaching' %}" class="btn btn-outline-secondary btn-sm rounded-pill">
+            <i class="fas fa-arrow-left me-1"></i>View Public Page
+        </a>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="card uploader-card">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h5 class="fw-bold mb-0 text-danger"><i class="fas fa-user-plus me-2"></i>Add Staff Member</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label class="form-label-custom" for="{{ form.name.id_for_label }}">Name</label>
+                            {{ form.name }}
+                            {{ form.name.errors }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label-custom" for="{{ form.designation.id_for_label }}">Designation</label>
+                            {{ form.designation }}
+                            {{ form.designation.errors }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label-custom" for="{{ form.department_section.id_for_label }}">Department / Section</label>
+                            {{ form.department_section }}
+                            {{ form.department_section.errors }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label-custom" for="{{ form.qualification.id_for_label }}">Qualification</label>
+                            {{ form.qualification }}
+                            {{ form.qualification.errors }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label-custom" for="{{ form.contact.id_for_label }}">Contact</label>
+                            {{ form.contact }}
+                            {{ form.contact.errors }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label-custom" for="{{ form.order.id_for_label }}">Display Order</label>
+                            {{ form.order }}
+                            <small class="text-muted">Lower numbers appear first.</small>
+                            {{ form.order.errors }}
+                        </div>
+
+                        <div class="mb-4 form-check">
+                            {{ form.is_active }}
+                            <label class="form-check-label" for="{{ form.is_active.id_for_label }}">Show on public page</label>
+                            {{ form.is_active.errors }}
+                        </div>
+
+                        <button type="submit" class="btn btn-danger w-100 rounded-pill py-2 fw-bold" style="background-color: #E61013; border: none;">
+                            <i class="fas fa-plus me-2"></i>Add Staff Member
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card uploader-card">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h5 class="fw-bold mb-0 text-danger"><i class="fas fa-users me-2"></i>Staff Directory ({{ staff_members|length }})</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table align-middle table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Designation</th>
+                                    <th scope="col">Department</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col" class="text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for member in staff_members %}
+                                <tr>
+                                    <td>{{ member.order }}</td>
+                                    <td>
+                                        <div class="fw-bold text-dark">{{ member.name }}</div>
+                                        {% if member.contact %}
+                                        <small class="text-muted">{{ member.contact }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ member.designation }}</td>
+                                    <td>{{ member.department_section }}</td>
+                                    <td>
+                                        {% if member.is_active %}
+                                        <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">Hidden</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center text-nowrap">
+                                        <a href="{% url 'core:edit_nonteaching_staff_member' member.pk %}" class="btn btn-sm btn-outline-primary rounded-pill px-3 me-1">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <form method="post" action="{% url 'core:delete_nonteaching_staff_member' member.pk %}" class="d-inline" onsubmit="return confirm('Delete {{ member.name }}?');">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-5 text-muted">
+                                        <i class="fas fa-users fa-2x mb-2 d-block text-secondary"></i>
+                                        No staff members added yet. Use the form to add the first entry.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

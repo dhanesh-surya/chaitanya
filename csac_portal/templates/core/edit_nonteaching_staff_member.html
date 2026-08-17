@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    .edit-container {
+        max-width: 700px;
+        margin: 40px auto;
+    }
+    .card-edit {
+        border-radius: 12px;
+        border: none;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+    .form-label-custom {
+        font-weight: 600;
+        color: #333;
+        margin-top: 15px;
+        display: block;
+    }
+    .btn-save {
+        background-color: #E61013;
+        color: white;
+        font-weight: 600;
+        padding: 10px 30px;
+        border-radius: 30px;
+        border: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(230, 16, 19, 0.3);
+    }
+    .btn-save:hover {
+        background-color: #c90e10;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(230, 16, 19, 0.4);
+    }
+    .btn-cancel {
+        background-color: #6c757d;
+        color: white;
+        font-weight: 600;
+        padding: 10px 30px;
+        border-radius: 30px;
+        border: none;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    .btn-cancel:hover {
+        background-color: #5a6268;
+        color: white;
+        transform: translateY(-2px);
+    }
+</style>
+
+<section class="rts-breadcrumb breadcrumb-height breadcumb-bg" style="{% with bcimg=breadcrumb_images.staff_nonteaching %}{% if bcimg %}background-image: url('{{ bcimg }}');{% endif %}{% endwith %}">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb-content">
+                    <h2 class="section-title">{{ page_title }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container edit-container">
+    <div class="card card-edit">
+        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+            <h4 class="fw-bold mb-0" style="color: #E61013;"><i class="fas fa-user-edit me-2"></i>Edit {{ member.name }}</h4>
+            <a href="{% url 'core:manage_nonteaching_staff' %}" class="btn btn-outline-secondary btn-sm rounded-pill"><i class="fas fa-arrow-left me-1"></i>Back to Manage</a>
+        </div>
+        <div class="card-body p-4">
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label class="form-label-custom" for="{{ form.name.id_for_label }}">Name</label>
+                    {{ form.name }}
+                    {{ form.name.errors }}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label-custom" for="{{ form.designation.id_for_label }}">Designation</label>
+                    {{ form.designation }}
+                    {{ form.designation.errors }}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label-custom" for="{{ form.department_section.id_for_label }}">Department / Section</label>
+                    {{ form.department_section }}
+                    {{ form.department_section.errors }}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label-custom" for="{{ form.qualification.id_for_label }}">Qualification</label>
+                    {{ form.qualification }}
+                    {{ form.qualification.errors }}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label-custom" for="{{ form.contact.id_for_label }}">Contact</label>
+                    {{ form.contact }}
+                    {{ form.contact.errors }}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label-custom" for="{{ form.order.id_for_label }}">Display Order</label>
+                    {{ form.order }}
+                    {{ form.order.errors }}
+                </div>
+
+                <div class="mb-4 form-check">
+                    {{ form.is_active }}
+                    <label class="form-check-label" for="{{ form.is_active.id_for_label }}">Show on public page</label>
+                    {{ form.is_active.errors }}
+                </div>
+
+                <div class="d-flex justify-content-end gap-3 pt-3 border-top">
+                    <a href="{% url 'core:manage_nonteaching_staff' %}" class="btn-cancel">Cancel</a>
+                    <button type="submit" class="btn-save"><i class="fas fa-save me-2"></i>Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

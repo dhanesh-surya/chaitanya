@@ -1,0 +1,85 @@
+﻿{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!-- Breadcrumb Section -->
+<section class="rts-breadcrumb breadcrumb-height breadcumb-bg" style="{% with bcimg=breadcrumb_images.academics_calendar %}{% if bcimg %}background-image: url('{{ bcimg }}');{% endif %}{% endwith %}">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb-content">
+                    <h2 class="section-title">{{ breadcrumb }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Academic Calendar Section -->
+<section class="rts-section-padding py-5">
+    <div class="container">
+
+        <div class="row mb-5">
+            <div class="col-12 text-center">
+                <h2 class="fw-bold" style="color: #E61013;">Academic Calendar</h2>
+                <hr style="border-color:#E61013;border-width:3px;width:60px;opacity:1;margin:auto;">
+                <p class="text-muted mt-3">Stay up to date with the schedule of classes, exams, holidays, and other institutional events.</p>
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                {% if calendars %}
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead style="background-color: #E61013; color: white;">
+                                    <tr>
+                                        <th class="ps-4" style="width: 80px;">#</th>
+                                        <th>Academic Year</th>
+                                        <th>Calendar Title</th>
+                                        <th class="text-center" style="width: 200px;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for cal in calendars %}
+                                    <tr>
+                                        <td class="ps-4 fw-bold text-muted">{{ forloop.counter }}</td>
+                                        <td><span class="badge bg-secondary px-3 py-2 fw-semibold">{{ cal.academic_year }}</span></td>
+                                        <strong><td class="fw-bold text-dark">{{ cal.title }}</td></strong>
+                                        <td class="text-center">
+                                            {% if cal.document %}
+                                                <a href="{{ cal.document.url }}" class="btn btn-sm btn-danger px-3 py-2 me-2" download>
+                                                    <i class="fas fa-download me-1"></i> Download
+                                                </a>
+                                            {% elif cal.document_url %}
+                                                <a href="{{ cal.document_url }}" class="btn btn-sm btn-outline-danger px-3 py-2" target="_blank">
+                                                    <i class="fas fa-external-link-alt me-1"></i> View External
+                                                </a>
+                                            {% else %}
+                                                <span class="text-muted small">Not Available</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="alert alert-secondary text-center py-4 border-0 shadow-sm">
+                    <i class="fas fa-calendar-times fa-3x mb-3 text-muted"></i>
+                    <h5 class="fw-bold">No Calendars Available</h5>
+                    <p class="text-muted mb-0">The academic calendar is currently being prepared and will be uploaded soon.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}

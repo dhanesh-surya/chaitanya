@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<section class="rts-breadcrumb breadcrumb-height breadcumb-bg" style="{% with bcimg=breadcrumb_images.feedback_student %}{% if bcimg %}background-image: url('{{ bcimg }}');{% endif %}{% endwith %}">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb-content">
+                    <h2 class="section-title">{% if lang == 'hi' %}धन्यवाद{% else %}Thank You{% endif %}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="rts-section-padding py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+
+                <div class="card border-0 shadow-lg" style="border-top: 5px solid #E61013 !important;">
+                    <div class="card-body p-4 p-md-5 text-center">
+
+                        <div class="mb-3" style="font-size: 3rem; color: #16a34a;">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+
+                        <h3 class="fw-bold mb-3" style="color: #E61013;">
+                            {% if lang == 'hi' %}प्रतिक्रिया के लिए धन्यवाद!{% else %}Thank You for Your Feedback!{% endif %}
+                        </h3>
+
+                        <p class="text-muted mb-2">
+                            {% if lang == 'hi' %}प्रिय{% else %}Dear{% endif %}
+                            <strong>{{ response_obj.name }}</strong>,
+                        </p>
+
+                        <div class="alert border-0 mb-4 text-start" style="background: #fff5f5; color: #4b5563; white-space: pre-line;">{{ confirmation_message }}</div>
+
+                        <div class="p-4 mb-4 rounded-3" style="background: linear-gradient(135deg, #fff7ed 0%, #fff5f5 100%); border: 1px dashed #E61013;">
+                            <div class="mb-2" style="font-size: 2.2rem; color: #C9A227;">
+                                <i class="fas fa-certificate"></i>
+                            </div>
+                            <h5 class="fw-bold mb-2">
+                                {% if lang == 'hi' %}सहभागिता प्रमाण पत्र{% else %}Participation Certificate{% endif %}
+                            </h5>
+                            <p class="text-muted small mb-3">
+                                {% if lang == 'hi' %}
+                                    आपकी प्रतिक्रिया सफलतापूर्वक जमा हो गई है। नीचे दिए गए बटन से अपना प्रमाण पत्र डाउनलोड करें।
+                                {% else %}
+                                    Your feedback has been submitted successfully. Download your official participation certificate below.
+                                {% endif %}
+                            </p>
+                            <p class="small text-muted mb-3">
+                                <strong>{% if lang == 'hi' %}प्रमाण पत्र संख्या{% else %}Certificate No{% endif %}:</strong>
+                                {{ certificate_number }}
+                            </p>
+                            <a href="{{ certificate_url }}" target="_blank" rel="noopener"
+                               class="btn text-white fw-bold px-4 py-2"
+                               style="background-color: #E61013;">
+                                <i class="fas fa-file-pdf me-2"></i>
+                                {% if lang == 'hi' %}प्रमाण पत्र डाउनलोड / देखें{% else %}Download / View Certificate (PDF){% endif %}
+                            </a>
+                        </div>
+
+                        <div class="d-flex flex-wrap gap-2 justify-content-center">
+                            <a href="{% url 'feedback:event_feedback' campaign.slug %}?lang={{ lang }}"
+                               class="btn btn-outline-secondary btn-sm">
+                                {% if lang == 'hi' %}फॉर्म पर वापस{% else %}Back to form{% endif %}
+                            </a>
+                            <a href="{% url 'feedback:event_feedback_list' %}"
+                               class="btn btn-outline-secondary btn-sm">
+                                {% if lang == 'hi' %}सभी कार्यक्रम{% else %}All event forms{% endif %}
+                            </a>
+                            <a href="{% url 'core:home' %}"
+                               class="btn btn-outline-secondary btn-sm">
+                                {% if lang == 'hi' %}होम{% else %}Home{% endif %}
+                            </a>
+                        </div>
+
+                        {% if copy.tagline %}
+                            <p class="text-center text-muted small mt-4 mb-0">
+                                {{ copy.institution_line }} · {{ copy.tagline }}
+                            </p>
+                        {% endif %}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

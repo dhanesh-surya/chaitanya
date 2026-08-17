@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Sitemap - Chaitanya Science and Arts College{% endblock %}
+
+{% block extra_css %}
+<style>
+  :root {
+    --site-red: #B71A34;
+    --site-dark: #111827;
+    --site-bg-alt: #f9fafb;
+  }
+
+  .sitemap-section {
+    padding: 60px 0;
+    background-color: var(--site-bg-alt);
+  }
+
+  .sitemap-card {
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+    border: 1px solid rgba(0,0,0,0.06);
+    padding: 30px;
+    height: 100%;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  }
+  .sitemap-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(183, 26, 52, 0.06);
+    border-color: rgba(183, 26, 52, 0.18);
+  }
+
+  .sitemap-card-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--site-dark);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 12px;
+  }
+  .sitemap-card-title i {
+    color: var(--site-red);
+    font-size: 22px;
+  }
+
+  .sitemap-list {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 0;
+  }
+  .sitemap-list li {
+    margin-bottom: 12px;
+  }
+  .sitemap-list li:last-child {
+    margin-bottom: 0;
+  }
+  .sitemap-list a {
+    color: #4b5563;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: color 0.2s, transform 0.2s;
+  }
+  .sitemap-list a::before {
+    content: "\f105";
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    color: #9ca3af;
+    font-size: 14px;
+    transition: color 0.2s, transform 0.2s;
+  }
+  .sitemap-list a:hover {
+    color: var(--site-red);
+    transform: translateX(4px);
+  }
+  .sitemap-list a:hover::before {
+    color: var(--site-red);
+    transform: translateX(2px);
+  }
+
+  .dept-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  @media (max-width: 576px) {
+    .dept-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Breadcrumb Section -->
+<section class="rts-breadcrumb breadcrumb-height breadcumb-bg" style="{% with bcimg=breadcrumb_images.custom_page %}{% if bcimg %}background-image: url('{{ bcimg }}');{% endif %}{% endwith %}">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb-content text-center">
+                    <h2 class="section-title text-white">{{ breadcrumb }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Sitemap Directory Section -->
+<section class="sitemap-section">
+    <div class="container">
+        <div class="row g-4">
+            
+            <!-- Category 1: Main Pages -->
+            <div class="col-lg-4 col-md-6">
+                <div class="sitemap-card">
+                    <h4 class="sitemap-card-title">
+                        <i class="fa-solid fa-house"></i> Main Portals
+                    </h4>
+                    <ul class="sitemap-list">
+                        <li><a href="{% url 'core:home' %}">Home Page</a></li>
+                        <li><a href="{% url 'core:about' %}">About College</a></li>
+                        <li><a href="{% url 'core:recognition' %}">Achievements &amp; Recognitions</a></li>
+                        <li><a href="{% url 'core:infrastructure' %}">Campus Infrastructure</a></li>
+                        <li><a href="{% url 'core:products' %}">Official merchandise / Products</a></li>
+                        <li><a href="{% url 'core:happenings' %}">Recent Happenings &amp; Events</a></li>
+                        <li><a href="{% url 'core:notices' %}">Notice Board</a></li>
+                        <li><a href="{% url 'core:contact' %}">Contact Us</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Category 2: Student Corner -->
+            <div class="col-lg-4 col-md-6">
+                <div class="sitemap-card">
+                    <h4 class="sitemap-card-title">
+                        <i class="fa-solid fa-graduation-cap"></i> Student Corner
+                    </h4>
+                    <ul class="sitemap-list">
+                        <li><a href="{% url 'students:admission' %}">Admission Procedure</a></li>
+                        <li><a href="{% url 'students:online_admission' %}">Online Admission Forms</a></li>
+                        <li><a href="{% url 'students:fee_structure' %}">Fee Structure</a></li>
+                        <li><a href="{% url 'students:scholarship' %}">Scholarship Schemes</a></li>
+                        <li><a href="{% url 'students:library' %}">College Library</a></li>
+                        <li><a href="{% url 'students:alumni' %}">Alumni Portal</a></li>
+                        <li><a href="{% url 'students:merit_list' %}">Merit Lists</a></li>
+                        <li><a href="https://chaitanyapamgarh.onlineexamforms.com/student.aspx" target="_blank">Online Student Exam Login</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Category 3: Institutional & UGC -->
+            <div class="col-lg-4 col-md-6">
+                <div class="sitemap-card">
+                    <h4 class="sitemap-card-title">
+                        <i class="fa-solid fa-building-columns"></i> Institutional &amp; Regulatory
+                    </h4>
+                    <ul class="sitemap-list">
+                        <li><a href="{% url 'core:ugc' %}">University Grants Commission (UGC)</a></li>
+                        <li><a href="{% url 'core:nep' %}">National Education Policy (NEP) 2020</a></li>
+                        <li><a href="{% url 'core:sports' %}">Sports &amp; Athletics Portal</a></li>
+                        <li><a href="{% url 'core:co_po' %}">Course &amp; Program Outcomes (CO-PO)</a></li>
+                        <li><a href="{% url 'core:policies' %}">College Policies &amp; Guidelines</a></li>
+                        <li><a href="{% url 'core:committees' %}">Committees &amp; Cells</a></li>
+                        <li><a href="{% url 'core:staff_teaching' %}">Teaching Faculty Directory</a></li>
+                        <li><a href="{% url 'core:staff_nonteaching' %}">Non-Teaching Staff Directory</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Category 4: NAAC & IQAC -->
+            <div class="col-lg-4 col-md-6">
+                <div class="sitemap-card">
+                    <h4 class="sitemap-card-title">
+                        <i class="fa-solid fa-award"></i> NAAC &amp; Quality Cells
+                    </h4>
+                    <ul class="sitemap-list">
+                        <li><a href="{% url 'naac:naac_home' %}">NAAC Home</a></li>
+                        <li><a href="{% url 'naac:iqac' %}">Internal Quality Assurance Cell (IQAC)</a></li>
+                        <li><a href="{% url 'naac:iiqa' %}">Institutional Information for Quality Assessment (IIQA)</a></li>
+                        <li><a href="{% url 'naac:ssr' %}">Self Study Report (SSR)</a></li>
+                        <li><a href="{% url 'naac:dvv' %}">Data Validation and Verification (DVV)</a></li>
+                        <li><a href="{% url 'naac:atr' %}">Action Taken Report (ATR)</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Category 5: Feedback & Grievances -->
+            <div class="col-lg-4 col-md-6">
+                <div class="sitemap-card">
+                    <h4 class="sitemap-card-title">
+                        <i class="fa-solid fa-comments-question"></i> Feedback &amp; Grievance Redressal
+                    </h4>
+                    <ul class="sitemap-list">
+                        <li><a href="{% url 'feedback:student_feedback' %}">Student Feedback Form</a></li>
+                        <li><a href="{% url 'feedback:parent_feedback' %}">Parent Feedback Form</a></li>
+                        <li><a href="{% url 'feedback:faculty_feedback' %}">Faculty Feedback Form</a></li>
+                        <li><a href="{% url 'feedback:alumni_feedback' %}">Alumni Feedback Form</a></li>
+                        <li><a href="{% url 'feedback:event_feedback_list' %}">Event Feedback Forms</a></li>
+                        <li><a href="{% url 'feedback:event_feedback' 'admission-fest-2026' %}">Admission Fest 2026 Feedback</a></li>
+                        <li><a href="{% url 'grievances:anti_ragging' %}">Anti-Ragging Committee Details</a></li>
+                        <li><a href="{% url 'grievances:icc' %}">Internal Complaints Committee (ICC)</a></li>
+                        <li><a href="{% url 'grievances:redressal' %}">Grievance Redressal Committee</a></li>
+                        <li><a href="{% url 'grievances:submit_grievance' %}">Submit an Online Grievance</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Category 6: Gallery & Media -->
+            <div class="col-lg-4 col-md-6">
+                <div class="sitemap-card">
+                    <h4 class="sitemap-card-title">
+                        <i class="fa-solid fa-photo-film"></i> Media &amp; Galleries
+                    </h4>
+                    <ul class="sitemap-list">
+                        <li><a href="{% url 'gallery:image_gallery' %}">Campus Image Gallery</a></li>
+                        <li><a href="{% url 'gallery:video_gallery' %}">Campus Video Tour Gallery</a></li>
+                        <li><a href="{% url 'gallery:news_gallery' %}">Press &amp; News Clippings Gallery</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Category 7: Academic Departments -->
+            <div class="col-lg-12">
+                <div class="sitemap-card">
+                    <h4 class="sitemap-card-title">
+                        <i class="fa-solid fa-book-open"></i> Academic Departments Directory
+                    </h4>
+                    <div class="row">
+                        <!-- Arts streams -->
+                        <div class="col-md-6 mb-4 mb-md-0">
+                            <h5 class="fw-bold mb-3 text-secondary" style="font-size: 16px;"><i class="fa-solid fa-palette me-2"></i> Faculty of Arts</h5>
+                            <div class="dept-grid">
+                                <div><a href="{% url 'academics:department_detail' 'hindi' %}" class="d-inline-flex py-1 text-decoration-none text-secondary" style="font-size:14.5px;">Hindi Department</a></div>
+                                <div><a href="{% url 'academics:department_detail' 'english' %}" class="d-inline-flex py-1 text-decoration-none text-secondary" style="font-size:14.5px;">English Department</a></div>
+                                <div><a href="{% url 'academics:department_detail' 'sociology' %}" class="d-inline-flex py-1 text-decoration-none text-secondary" style="font-size:14.5px;">Sociology Department</a></div>
+                                <div><a href="{% url 'academics:department_detail' 'geography' %}" class="d-inline-flex py-1 text-decoration-none text-secondary" style="font-size:14.5px;">Geography Department</a></div>
+                                <div><a href="{% url 'academics:department_detail' 'social-work' %}" class="d-inline-flex py-1 text-decoration-none text-secondary" style="font-size:14.5px;">Social Work Department</a></div>
+                                <div><a href="{% url 'academics:department_detail' 'political-science' %}" class="d-inline-flex py-1 text-decoration-none text-secondary" style="font-size:14.5px;">Political Science</a></div>
+                                <div><a href="{% url 'academics:department_detail' 'history' %}" class="d-inline-flex py-1 text-decoration-none text-secondary" style="font-size:14.5px;">History Department</a></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Science streams -->
+                        <div class="col-md-6">
+                            <h5 class="fw-bold mb-3 text-secondary" style="font-size: 16px;"><i class="fa-solid fa-microscope me-2"></i> Faculty of Science</h5>
+                            <div class="dept-grid">
+                                <div><a href="{% url 'academics:department_detail' 'zoology' %}" class="d-inline-flex py-1 text-decoration-none text-secondary" style="font-size:14.5px;">Zoology Department</a></div>
+                                <div><a href="{% url 'academics:department_detail' 'physics' %}" class="d-inline-flex py-1 text-decoration-none text-secondary" style="font-size:14.5px;">Physics Department</a></div>
+                                <div><a href="{% url 'academics:department_detail' 'chemistry' %}" class="d-inline-flex py-1 text-decoration-none text-secondary" style="font-size:14.5px;">Chemistry Department</a></div>
+                                <div><a href="{% url 'academics:department_detail' 'mathematics' %}" class="d-inline-flex py-1 text-decoration-none text-secondary" style="font-size:14.5px;">Mathematics Department</a></div>
+                                <div><a href="{% url 'academics:department_detail' 'botany' %}" class="d-inline-flex py-1 text-decoration-none text-secondary" style="font-size:14.5px;">Botany Department</a></div>
+                                <div><a href="{% url 'academics:department_detail' 'forestry' %}" class="d-inline-flex py-1 text-decoration-none text-secondary" style="font-size:14.5px;">Forestry Department</a></div>
+                                <div><a href="{% url 'academics:department_detail' 'computer-science' %}" class="d-inline-flex py-1 text-decoration-none text-secondary" style="font-size:14.5px;">Computer Science</a></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+{% endblock %}

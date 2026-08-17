@@ -1,0 +1,287 @@
+﻿{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    #dept-banner-swiper, .department-banner {
+        height: 400px !important;
+        width: 100%;
+        margin: 0 auto;
+    }
+    #dept-banner-swiper .swiper-slide {
+        height: 400px !important;
+    }
+    .swiper-slide img {
+        transition: transform 1.2s ease-in-out;
+        object-fit: cover;
+    }
+    .swiper-slide-active img {
+        transform: scale(1.03);
+    }
+    .w-100 {
+        max-width: 1280px;
+    }
+    @media (max-width: 768px) {
+        #dept-banner-swiper, .department-banner {
+            height: 250px !important;
+        }
+        #dept-banner-swiper .swiper-slide {
+            height: 250px !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Breadcrumb Section -->
+<section class="rts-breadcrumb breadcrumb-height breadcumb-bg" style="{% with bcimg=breadcrumb_images.academics_dept_detail %}{% if bcimg %}background-image: url('{{ bcimg }}');{% endif %}{% endwith %}">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb-content">
+                    <h2 class="section-title">{{ breadcrumb }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="rts-section-padding py-5">
+    <div class="container">
+
+        <!-- Department Banner -->
+        {% if dept.banners.all %}
+        <div class="row mb-5">
+            <div class="col-12 position-relative">
+                <div class="swiper swiper-data rounded shadow-sm overflow-hidden" 
+                     id="dept-banner-swiper"
+                     data-swiper='{"slidesPerView":1,"loop":{{ dept.banners.count|yesno:"true,false" }},"speed":1000,"autoplay":{"delay":5000,"disableOnInteraction":false},"navigation":{"nextEl":"#dept-next","prevEl":"#dept-prev"}}'>
+                    <div class="swiper-wrapper">
+                        {% for banner in dept.banners.all %}
+                        <div class="swiper-slide position-relative">
+                            <img src="{{ banner.image.url }}" alt="{{ dept.name }} - Banner {{ forloop.counter }}" class="w-100 h-100" style="object-fit: cover;">
+                            {% if banner.caption %}
+                            <div class="position-absolute bottom-0 start-0 w-100 p-4" style="background: linear-gradient(transparent, rgba(0, 0, 0, 0.85)); z-index: 2;">
+                                <h5 class="text-white mb-0 fw-semibold" style="font-family: 'Roboto Slab', serif; letter-spacing: 0.5px;">{{ banner.caption }}</h5>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% if dept.banners.count > 1 %}
+                    <!-- Navigation Buttons -->
+                    <button id="dept-prev" class="slider__btn position-absolute top-50 start-0 translate-middle-y ms-3 border-0 rounded-circle d-flex align-items-center justify-content-center" 
+                            style="width: 44px; height: 44px; background: rgba(0, 0, 0, 0.5); color: #fff; z-index: 10; cursor: pointer; transition: all 0.3s;"
+                            onmouseover="this.style.background='#E61013'" onmouseout="this.style.background='rgba(0,0,0,0.5)'">
+                        <i class="fa-light fa-arrow-left"></i>
+                    </button>
+                    <button id="dept-next" class="slider__btn position-absolute top-50 end-0 translate-middle-y me-3 border-0 rounded-circle d-flex align-items-center justify-content-center" 
+                            style="width: 44px; height: 44px; background: rgba(0, 0, 0, 0.5); color: #fff; z-index: 10; cursor: pointer; transition: all 0.3s;"
+                            onmouseover="this.style.background='#E61013'" onmouseout="this.style.background='rgba(0,0,0,0.5)'">
+                        <i class="fa-light fa-arrow-right"></i>
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% elif dept.get_image %}
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="department-banner rounded overflow-hidden shadow-sm" style="height: 400px;">
+                    <img src="{{ dept.get_image }}" alt="{{ dept.name }}" class="w-100 h-100" style="object-fit: cover;">
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Title & Description -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="d-flex align-items-center mb-3">
+                    <span class="badge me-3 text-white py-2 px-3 fw-bold" style="background-color: #E61013;">{{ dept.get_category_display }}</span>
+                    <h2 class="fw-bold mb-0" style="color: #E61013;">Department of {{ dept.name }}</h2>
+                </div>
+                <hr style="border-color:#E61013;border-width:3px;width:60px;opacity:1;">
+                <div class="text-muted lh-lg fs-6 mt-4">
+                    {{ dept.description|safe|linebreaks }}
+                </div>
+            </div>
+        </div>
+
+        <!-- HOD Section -->
+        {% if dept.hod_name %}
+        <div class="row mb-5">
+            <div class="col-12">
+                <h4 class="fw-bold mb-4 pb-2 border-bottom" style="border-color: #E61013 !important; color: #E61013;">
+                    <i class="fas fa-user-tie me-2"></i>Head of Department (HOD)
+                </h4>
+                <div class="card border-0 shadow-sm bg-light">
+                    <div class="card-body p-4 p-md-5">
+                        <div class="row align-items-center g-4">
+                            <div class="col-md-3 text-center">
+                                {% if dept.hod_photo %}
+                                    <img src="{{ dept.hod_photo.url }}" alt="{{ dept.hod_name }}" class="rounded shadow-sm img-fluid" style="max-width: 180px; border: 3px solid #E61013;">
+                                {% else %}
+                                    <div class="rounded shadow-sm bg-secondary d-flex align-items-center justify-content-center mx-auto" style="width: 150px; height: 180px; border: 3px solid #E61013;">
+                                        <i class="fas fa-user fa-4x text-white"></i>
+                                    </div>
+                                {% endif %}
+                                <h5 class="fw-bold mt-3 mb-1 text-dark">{{ dept.hod_name }}</h5>
+                                <p class="text-muted small mb-0">HOD, Department of {{ dept.name }}</p>
+                            </div>
+                            <div class="col-md-9 border-start ps-md-4">
+                                <h6 class="fw-bold text-dark mb-3"><i class="fas fa-quote-left me-2 text-danger"></i> HOD Message</h6>
+                                <p class="text-muted lh-lg mb-0 italic">{{ dept.hod_message|linebreaks }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Faculty Grid -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <h4 class="fw-bold mb-4 pb-2 border-bottom" style="border-color: #E61013 !important; color: #E61013;">
+                    <i class="fas fa-users me-2"></i>Faculty Members
+                </h4>
+                {% if faculty %}
+                <div class="row g-4">
+                    {% for member in faculty %}
+                    <div class="col-sm-6 col-md-4 col-lg-3">
+                        <div class="card h-100 border-0 shadow-sm text-center">
+                            <div class="card-body py-4">
+                                {% if member.photo %}
+                                    <img src="{{ member.photo.url }}" alt="{{ member.name }}" class="rounded-circle mb-3 border border-3" style="width: 100px; height: 100px; object-fit: cover; border-color: #E61013 !important;">
+                                {% else %}
+                                    <div class="rounded-circle mb-3 mx-auto bg-light border border-3 d-flex align-items-center justify-content-center" style="width: 100px; height: 100px; border-color: #E61013 !important;">
+                                        <i class="fas fa-user fa-2x text-secondary"></i>
+                                    </div>
+                                {% endif %}
+                                <h6 class="fw-bold text-dark mb-1">{{ member.name }}</h6>
+                                <p class="text-danger small fw-semibold mb-2">{{ member.designation }}</p>
+                                <p class="text-muted small mb-0">{{ member.qualification }}</p>
+                                {% if member.specialization %}
+                                    <p class="text-muted small mb-0 italic">Spec: {{ member.specialization }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="alert alert-secondary border-0 shadow-sm">No faculty details registered for this department.</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Programs & Syllabus -->
+        <div class="row g-4 mb-5">
+            <!-- Programs offered -->
+            <div class="col-lg-7">
+                <h4 class="fw-bold mb-4 pb-2 border-bottom" style="border-color: #E61013 !important; color: #E61013;">
+                    <i class="fas fa-graduation-cap me-2"></i>Programs Offered
+                </h4>
+                {% if programs %}
+                <div class="table-responsive shadow-sm rounded border bg-white">
+                    <table class="table table-bordered table-hover align-middle mb-0">
+                        <thead class="table-danger text-dark">
+                            <tr>
+                                <th>Program Name</th>
+                                <th>Duration</th>
+                                <th>Eligibility</th>
+                                <th>Seats</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for prog in programs %}
+                            <tr>
+                                <strong><td>{{ prog.name }}</td></strong>
+                                <td>{{ prog.duration|default:"-" }}</td>
+                                <td class="small">{{ prog.eligibility }}</td>
+                                <td>{{ prog.seats }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-secondary border-0 shadow-sm">No programs listed for this department.</div>
+                {% endif %}
+            </div>
+
+            <!-- Syllabus Download -->
+            <div class="col-lg-5">
+                <h4 class="fw-bold mb-4 pb-2 border-bottom" style="border-color: #E61013 !important; color: #E61013;">
+                    <i class="fas fa-file-pdf me-2"></i>Syllabus &amp; Curriculum
+                </h4>
+                {% if syllabi %}
+                <div class="list-group shadow-sm border bg-white rounded">
+                    {% for syllabus in syllabi %}
+                    <a href="{{ syllabus.document.url }}" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between p-3" download>
+                        <div>
+                            <h6 class="fw-bold mb-1 text-dark"><i class="fas fa-file-pdf text-danger me-2"></i> {{ syllabus.title }}</h6>
+                            <small class="text-muted">Academic Year: {{ syllabus.academic_year }}</small>
+                        </div>
+                        <span class="btn btn-sm btn-danger px-3 py-1"><i class="fas fa-download"></i></span>
+                    </a>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="alert alert-secondary border-0 shadow-sm">No syllabus uploads available yet.</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Department Happenings & Events -->
+        {% if happenings %}
+        <div class="row mt-5 mb-5">
+            <div class="col-12">
+                <h4 class="fw-bold mb-4 pb-2 border-bottom" style="border-color: #E61013 !important; color: #E61013;">
+                    <i class="fas fa-calendar-alt me-2"></i>Department Events &amp; Happenings
+                </h4>
+                <div class="row g-4">
+                    {% for happening in happenings %}
+                    <div class="col-md-6 col-lg-4 d-flex">
+                        <div class="card w-100 border-0 shadow-sm overflow-hidden d-flex flex-column" style="border-radius: 8px; transition: transform 0.3s ease, box-shadow 0.3s ease; border: 1px solid #eee !important;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.1)'" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.05)'">
+                            {% if happening.get_image %}
+                            <div style="height: 200px; overflow: hidden;">
+                                <a href="{% url 'core:happening_detail' happening.id %}">
+                                    <img src="{{ happening.get_image }}" alt="{{ happening.title }}" class="w-100 h-100" style="object-fit: cover; transition: transform 0.5s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                                </a>
+                            </div>
+                            {% endif %}
+                            <div class="card-body p-4 d-flex flex-column justify-content-between flex-grow-1">
+                                <div>
+                                    {% if happening.category %}
+                                    <p class="mb-2 fw-semibold" style="font-size: 14px; color: #B71A34;">{{ happening.category }}</p>
+                                    {% endif %}
+                                    <h5 class="card-title fw-bold mb-3" style="font-size: 18px; line-height: 1.4;">
+                                        <a href="{% url 'core:happening_detail' happening.id %}" class="text-dark text-decoration-none" style="transition: color 0.2s;" onmouseover="this.style.color='#E61013'" onmouseout="this.style.color='#212529'">{{ happening.title }}</a>
+                                    </h5>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top" style="border-color: #eee !important;">
+                                    {% if happening.date %}
+                                    <span class="text-muted small"><i class="far fa-calendar-alt me-1"></i> {{ happening.date|date:"M. d, Y" }}</span>
+                                    {% else %}
+                                    <span></span>
+                                    {% endif %}
+                                    <a href="{% url 'core:happening_detail' happening.id %}" class="fw-semibold text-decoration-none d-flex align-items-center" style="font-size: 14px; color: #E61013;">
+                                        Know More <i class="fa-sharp fa-regular fa-arrow-right ms-2" style="font-size: 11px;"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,110 @@
+﻿{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!-- Breadcrumb Section -->
+<section class="rts-breadcrumb breadcrumb-height breadcumb-bg" style="{% with bcimg=breadcrumb_images.students_merit_list %}{% if bcimg %}background-image: url('{{ bcimg }}');{% endif %}{% endwith %}">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb-content">
+                    <h2 class="section-title">{{ breadcrumb }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Merit List Section -->
+<section class="rts-section-padding py-5">
+    <div class="container">
+
+        <div class="row mb-5">
+            <div class="col-12 text-center">
+                <h2 class="fw-bold" style="color: #E61013;">University Merit &amp; Medals List</h2>
+                <hr style="border-color:#E61013;border-width:3px;width:60px;opacity:1;margin:auto;">
+                <p class="text-muted mt-3">Honoring our academic toppers who have secured university ranks and medals, bringing pride to our college.</p>
+            </div>
+        </div>
+
+        <!-- Medal Legends -->
+        <div class="row mb-4">
+            <div class="col-12 d-flex flex-wrap justify-content-center gap-3">
+                <span class="badge border text-dark fs-6 px-3 py-2" style="background-color: #FFD700;"><i class="fas fa-medal me-1"></i> Gold Medal (🥇)</span>
+                <span class="badge border text-dark fs-6 px-3 py-2" style="background-color: #C0C0C0;"><i class="fas fa-medal me-1"></i> Silver Medal (🥈)</span>
+                <span class="badge border text-white fs-6 px-3 py-2" style="background-color: #CD7F32;"><i class="fas fa-medal me-1"></i> Bronze Medal (🥉)</span>
+                <span class="badge border bg-secondary text-white fs-6 px-3 py-2"><i class="fas fa-award me-1"></i> University Rank (🏅)</span>
+            </div>
+        </div>
+
+        <!-- Merit List Poster Image Option -->
+        {% if merit_settings and merit_settings.show_poster and merit_settings.get_poster_image %}
+        <div class="row justify-content-center mb-5">
+            <div class="col-12 text-center">
+                <div class="merit-poster-container" style="max-width: 800px; margin: 0 auto; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid #e5e7eb;">
+                    <img src="{{ merit_settings.get_poster_image }}" alt="University Merit List Poster" style="width: 100%; max-width: 800px; height: auto; display: block; margin: 0 auto;">
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                {% if merit_list %}
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover align-middle mb-0">
+                                <thead class="table-danger text-dark">
+                                    <tr>
+                                        <th class="text-center" style="width: 80px;">#</th>
+                                        <th>Student Name</th>
+                                        <th>Subject / Discipline</th>
+                                        <th>Academic Year</th>
+                                        <th>Medal / Rank Status</th>
+                                        <th class="text-center" style="width: 120px;">Rank Achieved</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for merit in merit_list %}
+                                    <tr>
+                                        <td class="text-center fw-bold text-muted">{{ forloop.counter }}</td>
+                                        <strong><td class="fw-bold text-dark">{{ merit.student_name }}</td></strong>
+                                        <td>{{ merit.subject }}</td>
+                                        <td>{{ merit.year }}</td>
+                                        <td>
+                                            {% if merit.medal_type == 'gold' %}
+                                                🥇 <span class="fw-semibold text-warning-emphasis">Gold Medalist</span>
+                                            {% elif merit.medal_type == 'silver' %}
+                                                🥈 <span class="fw-semibold text-secondary">Silver Medalist</span>
+                                            {% elif merit.medal_type == 'bronze' %}
+                                                🥉 <span class="fw-semibold text-danger">Bronze Medalist</span>
+                                            {% else %}
+                                                🏅 <span class="fw-semibold text-muted">University Rank Holder</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="fw-bold text-center text-danger">
+                                            {% if merit.rank %}Rank {{ merit.rank }}{% else %}-{% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="alert alert-secondary text-center py-5 border-0 shadow-sm">
+                    <i class="fas fa-award fa-3x mb-3 text-muted"></i>
+                    <h5 class="fw-bold">No Merit Records Found</h5>
+                    <p class="text-muted mb-0">Academic merit lists will be published following university announcement.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}

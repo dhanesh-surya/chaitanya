@@ -1,0 +1,31 @@
+{% extends "admin/change_list.html" %}
+{% load i18n %}
+
+{% block object-tools-items %}
+  <li>
+    <a href="{{ export_excel_url }}" class="addlink" style="background:#217346;border-radius:4px;">
+      ⬇ Export as Excel
+    </a>
+  </li>
+  <li>
+    <a href="{{ export_pdf_url }}" class="addlink" style="background:#E61013;border-radius:4px;">
+      ⬇ Export as PDF
+    </a>
+  </li>
+  {{ block.super }}
+{% endblock %}
+
+{% block content %}
+  <div style="margin: 0 0 12px 0; padding: 10px 14px; background: #fff5f5; border-left: 4px solid #E61013; border-radius: 4px;">
+    <strong>Export all responses</strong>
+    (respects current filters / search) —
+    <a href="{{ export_excel_url }}" style="margin-left:8px; font-weight:600; color:#217346;">Excel (.xlsx)</a>
+    <span style="color:#999;"> · </span>
+    <a href="{{ export_pdf_url }}" style="font-weight:600; color:#E61013;">PDF</a>
+    <br>
+    <span style="color:#666; font-size:12px;">
+      Tip: select rows and use the action dropdown for “Export selected as Excel/PDF”.
+    </span>
+  </div>
+  {{ block.super }}
+{% endblock %}

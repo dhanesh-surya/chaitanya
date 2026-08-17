@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!-- Breadcrumb Section -->
+<section class="rts-breadcrumb breadcrumb-height breadcumb-bg" style="{% with bcimg=breadcrumb_images.students_syllabus %}{% if bcimg %}background-image: url('{{ bcimg }}');{% endif %}{% endwith %}">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb-content">
+                    <h2 class="section-title">{{ breadcrumb }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Syllabus Section -->
+<section class="rts-section-padding py-5">
+    <div class="container">
+
+        <div class="row mb-5">
+            <div class="col-12 text-center">
+                <h2 class="fw-bold" style="color: #E61013;">Syllabus</h2>
+                <hr style="border-color:#E61013;border-width:3px;width:60px;opacity:1;margin:auto;">
+                <p class="text-muted mt-3">Download the syllabus documents for various programs offered by the college.</p>
+            </div>
+        </div>
+
+        {% if syllabi %}
+        <div class="row">
+            <div class="col-12">
+                <div class="table-responsive shadow-sm border bg-white rounded">
+                    <table class="table table-bordered table-hover align-middle mb-0">
+                        <thead class="table-danger text-dark">
+                            <tr>
+                                <th style="width: 80px;">Sr. No.</th>
+                                <th>Program</th>
+                                <th style="width: 160px;" class="text-center">Syllabus Document</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in syllabi %}
+                            <tr>
+                                <td class="text-center">{{ forloop.counter }}</td>
+                                <td class="fw-bold">{{ item.title }}</td>
+                                <td class="text-center">
+                                    {% if item.get_document %}
+                                    <a href="{{ item.get_document }}" target="_blank" title="Download {{ item.title }} Syllabus">
+                                        <i class="fa-solid fa-file-pdf" style="font-size:30px;color:#890C25"></i>
+                                    </a>
+                                    {% else %}
+                                    <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-secondary text-center py-5 border-0 shadow-sm">
+            <i class="fas fa-book fa-3x mb-3 text-muted"></i>
+            <h5 class="fw-bold">No Syllabus Available</h5>
+            <p class="text-muted mb-0">Syllabus documents for the current academic session will be uploaded soon.</p>
+        </div>
+        {% endif %}
+
+    </div>
+</section>
+
+{% endblock %}

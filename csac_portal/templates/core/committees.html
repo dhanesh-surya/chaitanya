@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .committees-section {
+        padding: 60px 0 100px 0;
+        background-color: #f8f9fa;
+    }
+    .committee-card {
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+        border: 1px solid #edf2f7;
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        position: relative;
+    }
+    .committee-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 30px rgba(230, 16, 19, 0.1);
+        border-color: #f3a6a8;
+    }
+    .committee-card-header {
+        padding: 24px;
+        position: relative;
+        background: linear-gradient(135deg, rgba(230, 16, 19, 0.02) 0%, rgba(230, 16, 19, 0.05) 100%);
+        border-bottom: 1px solid #edf2f7;
+    }
+    .committee-icon-wrapper {
+        width: 50px;
+        height: 50px;
+        background-color: #E61013;
+        color: #ffffff;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        margin-bottom: 16px;
+        box-shadow: 0 4px 12px rgba(230, 16, 19, 0.2);
+    }
+    .committee-title {
+        font-weight: 700;
+        font-size: 1.65rem;
+        color: #2d3748;
+        line-height: 1.4;
+        margin-bottom: 0;
+    }
+    .committee-card-body {
+        padding: 24px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    .committee-description {
+        color: #718096;
+        font-size: 1.2rem;
+        line-height: 1.6;
+        margin-bottom: 20px;
+    }
+    .committee-meta-list {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 24px 0;
+        font-size: 1.15rem;
+    }
+    .committee-meta-item {
+        display: flex;
+        align-items: center;
+        color: #4a5568;
+        margin-bottom: 10px;
+    }
+    .committee-meta-item:last-child {
+        margin-bottom: 0;
+    }
+    .committee-meta-item i {
+        color: #E61013;
+        width: 20px;
+        font-size: 18px;
+        margin-right: 10px;
+    }
+    .committee-btn {
+        width: 100%;
+        border-radius: 25px;
+        padding: 10px 20px;
+        font-weight: 600;
+        font-size: 1.15rem;
+        letter-spacing: 0.3px;
+        border: 2px solid #E61013;
+        background-color: transparent;
+        color: #E61013;
+        transition: all 0.2s ease;
+        text-align: center;
+        display: block;
+        margin-top: auto;
+    }
+    .committee-btn:hover {
+        background-color: #E61013;
+        color: #ffffff;
+        box-shadow: 0 4px 15px rgba(230, 16, 19, 0.2);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb Section -->
+<section class="rts-breadcrumb breadcrumb-height breadcumb-bg" style="{% with bcimg=breadcrumb_images.committees %}{% if bcimg %}background-image: url('{{ bcimg }}');{% endif %}{% endwith %}">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb-content">
+                    <h2 class="section-title">{{ breadcrumb }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Committees List Section -->
+<section class="committees-section">
+    <div class="container">
+        
+        <div class="row mb-5">
+            <div class="col-12 text-center">
+                <h3 class="fw-bold mb-3" style="color: #E61013; font-size: 36px;">Institutional Committees</h3>
+                <p class="text-muted fs-6">Click on any committee below to view details, member lists, activities, and gallery.</p>
+                <div class="mx-auto" style="width: 80px; height: 3px; background-color: #E61013;"></div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            {% for committee in committees %}
+            <div class="col-md-6 col-lg-4">
+                <div class="committee-card">
+                    <div class="committee-card-header">
+                        <div class="committee-icon-wrapper">
+                            {% if "Discipline" in committee.name %}
+                                <i class="fas fa-shield-alt"></i>
+                            {% elif "Gender" in committee.name or "Sexual" in committee.name %}
+                                <i class="fas fa-venus-mars"></i>
+                            {% elif "Anti-Ragging" in committee.name %}
+                                <i class="fas fa-user-slash"></i>
+                            {% elif "Complain" in committee.name or "Redressal" in committee.name %}
+                                <i class="fas fa-exclamation-circle"></i>
+                            {% elif "Computer" in committee.name %}
+                                <i class="fas fa-laptop-code"></i>
+                            {% elif "Maintenance" in committee.name %}
+                                <i class="fas fa-tools"></i>
+                            {% elif "Scholarship" in committee.name %}
+                                <i class="fas fa-graduation-cap"></i>
+                            {% elif "Library" in committee.name %}
+                                <i class="fas fa-book"></i>
+                            {% elif "Purchase" in committee.name %}
+                                <i class="fas fa-shopping-cart"></i>
+                            {% elif "RTI" in committee.name %}
+                                <i class="fas fa-info-circle"></i>
+                            {% elif "Admission" in committee.name %}
+                                <i class="fas fa-user-plus"></i>
+                            {% elif "Counseling" in committee.name or "Placement" in committee.name %}
+                                <i class="fas fa-briefcase"></i>
+                            {% elif "Health" in committee.name %}
+                                <i class="fas fa-heartbeat"></i>
+                            {% elif "Alumni" in committee.name %}
+                                <i class="fas fa-user-graduate"></i>
+                            {% elif "Games" in committee.name or "Sports" in committee.name %}
+                                <i class="fas fa-trophy"></i>
+                            {% elif "Magazine" in committee.name %}
+                                <i class="fas fa-feather-alt"></i>
+                            {% elif "Culture" in committee.name %}
+                                <i class="fas fa-theater-masks"></i>
+                            {% else %}
+                                <i class="fas fa-users"></i>
+                            {% endif %}
+                        </div>
+                        <h4 class="committee-title">{{ committee.name }}</h4>
+                    </div>
+                    
+                    <div class="committee-card-body">
+                        <p class="committee-description">
+                            {% if committee.description %}
+                                {{ committee.description|truncatewords:20 }}
+                            {% else %}
+                                Official institutional committee managing operations at Chaitanya College.
+                            {% endif %}
+                        </p>
+                        
+                        <ul class="committee-meta-list">
+                            <li class="committee-meta-item">
+                                <i class="fas fa-users"></i>
+                                <span>Total Members: <strong>{{ committee.members.count }}</strong></span>
+                            </li>
+                            <li class="committee-meta-item">
+                                <i class="fas fa-user-tie"></i>
+                                <span>
+                                    Coordinator: 
+                                    <strong>
+                                        {% for member in committee.members.all %}
+                                            {% if "coordinator" in member.role_in_committee.lower %}
+                                                {{ member.name }}
+                                            {% endif %}
+                                        {% empty %}
+                                            None Assigned
+                                        {% endfor %}
+                                    </strong>
+                                </span>
+                            </li>
+                        </ul>
+                        
+                        <a href="{% url 'core:committee_detail' committee.slug %}" class="committee-btn">
+                            View Details <i class="fas fa-arrow-right ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center py-5">
+                <div class="alert alert-info d-inline-block">No committees listed at this time.</div>
+            </div>
+            {% endfor %}
+        </div>
+
+    </div>
+</section>
+{% endblock %}

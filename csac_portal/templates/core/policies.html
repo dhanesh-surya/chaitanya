@@ -1,0 +1,91 @@
+﻿{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!-- Breadcrumb Section -->
+<section class="rts-breadcrumb breadcrumb-height breadcumb-bg" style="{% with bcimg=breadcrumb_images.policies %}{% if bcimg %}background-image: url('{{ bcimg }}');{% endif %}{% endwith %}">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb-content">
+                    <h2 class="section-title">{{ breadcrumb }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Policies Section -->
+<section class="rts-section-padding py-5">
+    <div class="container">
+
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2 class="fw-bold" style="color: #E61013;">Policies &amp; Documents</h2>
+                <p class="text-muted">Download or view the institutional policies listed below.</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover mb-0 align-middle">
+                                <thead class="text-white" style="background-color: #E61013;">
+                                    <tr>
+                                        <th scope="col" style="width: 60px;">#</th>
+                                        <th scope="col">Policy Title</th>
+                                        <th scope="col" style="width: 160px;" class="text-center">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for policy in policies %}
+                                    <tr>
+                                        <td class="text-center fw-semibold">{{ forloop.counter }}</td>
+                                        <td>
+                                            <i class="fas fa-file-alt me-2 text-secondary"></i>
+                                            {{ policy.title }}
+                                        </td>
+                                        <td class="text-center">
+                                            {% if policy.document %}
+                                                <a href="{{ policy.document.url }}"
+                                                   target="_blank"
+                                                   class="btn text-white fw-bold px-4 py-2 text-decoration-none"
+                                                   style="background-color: #E61013; font-size: 15px; border-radius: 6px; text-decoration: none;"
+                                                   title="View {{ policy.title }}">
+                                                    <i class="fas fa-eye me-2"></i> View
+                                                </a>
+                                            {% elif policy.document_url %}
+                                                <a href="{{ policy.document_url }}"
+                                                   target="_blank"
+                                                   class="btn text-white fw-bold px-4 py-2 text-decoration-none"
+                                                   style="background-color: #E61013; font-size: 15px; border-radius: 6px; text-decoration: none;"
+                                                   title="View {{ policy.title }}">
+                                                    <i class="fas fa-external-link-alt me-2"></i> View
+                                                </a>
+                                            {% else %}
+                                                <span class="text-muted small">Not available</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="3" class="text-center text-muted py-4">
+                                            <i class="fas fa-folder-open me-2"></i> No policies have been uploaded yet.
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}

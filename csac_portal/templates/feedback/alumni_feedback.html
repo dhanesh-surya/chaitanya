@@ -1,0 +1,143 @@
+﻿{% extends "base.html" %}
+{% load static %}
+
+{% block block_title %}{{ page_title }} - Chaitanya Degree College{% endblock %}
+
+{% block content %}
+
+<!-- Breadcrumb Section -->
+<section class="rts-breadcrumb breadcrumb-height breadcumb-bg" style="{% with bcimg=breadcrumb_images.feedback_alumni %}{% if bcimg %}background-image: url('{{ bcimg }}');{% endif %}{% endwith %}">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb-content">
+                    <h2 class="section-title">{{ breadcrumb }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Feedback Form Section -->
+<section class="rts-section-padding py-5">
+    <div class="container">
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+
+                <!-- Alert Messages -->
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-success alert-dismissible fade show shadow-sm mb-4" role="alert">
+                            <i class="fas fa-check-circle me-2"></i> {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <!-- Form Card -->
+                <div class="card border-0 shadow-lg" style="border-top: 5px solid #E61013 !important;">
+                    <div class="card-body p-4 p-md-5">
+                        
+                        <div class="text-center mb-5">
+                            <h3 class="fw-bold mb-2" style="color: #E61013;">{{ page_title }}</h3>
+                            <p class="text-muted small">Stay connected with your alma mater. Let us know how your college experience helped shape your career path.</p>
+                        </div>
+
+                        <form method="post" class="needs-validation" novalidate>
+                            {% csrf_token %}
+
+                            <!-- Details in grid -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold text-dark">{{ form.alumni_name.label }}</label>
+                                        {{ form.alumni_name }}
+                                        <div class="text-danger small">{{ form.alumni_name.errors }}</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold text-dark">{{ form.batch_year.label }}</label>
+                                        {{ form.batch_year }}
+                                        <div class="text-danger small">{{ form.batch_year.errors }}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold text-dark">{{ form.program.label }}</label>
+                                        {{ form.program }}
+                                        <div class="text-danger small">{{ form.program.errors }}</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold text-dark">{{ form.current_status.label }}</label>
+                                        {{ form.current_status }}
+                                        <div class="text-danger small">{{ form.current_status.errors }}</div>
+                                        <small class="text-muted d-block mt-1">e.g. Employed at XYZ Corp / Pursuing PG</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Ratings segment -->
+                            <h5 class="fw-bold border-bottom pb-2 mb-4 mt-5" style="color: #E61013;"><i class="fas fa-star-half-alt me-2"></i> Rating Grid (1 = Poor, 5 = Excellent)</h5>
+                            
+                            <div class="mb-3 row align-items-center border-bottom py-2">
+                                <label class="col-sm-8 col-form-label fw-semibold text-dark">{{ form.teaching_quality.label }}</label>
+                                <div class="col-sm-4">
+                                    {{ form.teaching_quality }}
+                                    <div class="text-danger small">{{ form.teaching_quality.errors }}</div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3 row align-items-center border-bottom py-2">
+                                <label class="col-sm-8 col-form-label fw-semibold text-dark">{{ form.campus_experience.label }}</label>
+                                <div class="col-sm-4">
+                                    {{ form.campus_experience }}
+                                    <div class="text-danger small">{{ form.campus_experience.errors }}</div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3 row align-items-center border-bottom py-2">
+                                <label class="col-sm-8 col-form-label fw-semibold text-dark">{{ form.career_support.label }}</label>
+                                <div class="col-sm-4">
+                                    {{ form.career_support }}
+                                    <div class="text-danger small">{{ form.career_support.errors }}</div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3 row align-items-center border-bottom py-2 mb-4">
+                                <label class="col-sm-8 col-form-label fw-semibold text-dark">{{ form.overall_experience.label }}</label>
+                                <div class="col-sm-4">
+                                    {{ form.overall_experience }}
+                                    <div class="text-danger small">{{ form.overall_experience.errors }}</div>
+                                </div>
+                            </div>
+
+                            <!-- Suggestions -->
+                            <div class="mb-5 mt-4">
+                                <label class="form-label fw-semibold text-dark">{{ form.suggestions.label }}</label>
+                                {{ form.suggestions }}
+                                <div class="text-danger small">{{ form.suggestions.errors }}</div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <button type="submit" class="btn text-white w-100 fw-bold py-3" style="background-color: #E61013;">
+                                <i class="fas fa-paper-plane me-2"></i>Submit Feedback
+                            </button>
+
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,496 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Recent Happenings - Chaitanya Science and Arts College{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb area -->
+<div class="rts-breadcrumb-area breadcrumb-bg" style="background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url({% static 'assets/images/banner/breadcrumb.jpg' %}); padding: 60px 0; background-size: cover; background-position: center;">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="breadcrumb-inner text-center">
+          <h1 class="title" style="color: white; font-size: 32px; line-height: 1.3; margin-bottom: 0;">Recent Happenings</h1>
+          <ul class="list-unstyled d-flex justify-content-center gap-2 mt-2" style="color: rgba(255,255,255,0.8); margin-bottom: 0;">
+            <li><a href="{% url 'core:home' %}" style="color: white;">Home</a></li>
+            <li>/</li>
+            <li>Recent Happenings</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Happenings Grid Section -->
+<div class="rts-campus-section rts-section-padding">
+  <div class="container">
+    <div class="row">
+      <div class="rts-section rt-center mb--45">
+        <h3 class="rts-section-title">Recent Happenings</h3>
+      </div>
+    </div>
+
+    <!-- Search Bar + Filter Toggle -->
+    <div class="row mb-4 justify-content-center">
+      <div class="col-lg-8">
+        <div style="display: flex; gap: 10px; align-items: stretch;">
+          <form id="happenings-search-form" class="search-bar-form" method="GET" action="{% url 'core:happenings' %}" style="flex: 1; max-width: 100%;">
+            <input type="text" name="q" placeholder="Search happenings by title or category..." value="{{ query }}"/>
+            <!-- Carry filter params through search -->
+            {% if selected_category %}<input type="hidden" name="category" value="{{ selected_category }}">{% endif %}
+            {% if selected_year %}<input type="hidden" name="year" value="{{ selected_year }}">{% endif %}
+            {% if selected_month %}<input type="hidden" name="month" value="{{ selected_month }}">{% endif %}
+            <button type="submit"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
+          </form>
+          <!-- Filter Toggle Button -->
+          <button id="hap-filter-toggle" type="button" aria-label="Toggle Filters" title="Filter happenings">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+            <span>Filters</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Filter Tags (shown when any filter is active) -->
+    {% if selected_category or selected_year or selected_month %}
+    <div class="row mb-3 justify-content-center">
+      <div class="col-lg-8">
+        <div class="hap-active-filters">
+          <span class="hap-active-label">Active Filters:</span>
+          {% if selected_category %}
+          <a href="?{% if query %}q={{ query }}&{% endif %}{% if selected_year %}year={{ selected_year }}&{% endif %}{% if selected_month %}month={{ selected_month }}{% endif %}" class="hap-filter-tag">
+            {{ selected_category }}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </a>
+          {% endif %}
+          {% if selected_year %}
+          <a href="?{% if query %}q={{ query }}&{% endif %}{% if selected_category %}category={{ selected_category }}&{% endif %}{% if selected_month %}month={{ selected_month }}{% endif %}" class="hap-filter-tag">
+            {{ selected_year }}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </a>
+          {% endif %}
+          {% if selected_month %}
+          <a href="?{% if query %}q={{ query }}&{% endif %}{% if selected_category %}category={{ selected_category }}&{% endif %}{% if selected_year %}year={{ selected_year }}{% endif %}" class="hap-filter-tag">
+            {% for mval, mname in month_choices %}{% if mval|stringformat:"s" == selected_month %}{{ mname }}{% endif %}{% endfor %}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </a>
+          {% endif %}
+          <a href="?{% if query %}q={{ query }}{% endif %}" class="hap-filter-clear">Clear All</a>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Collapsible Filter Panel -->
+    <div id="hap-filter-panel" class="row justify-content-center" style="display: none;">
+      <div class="col-lg-10">
+        <div class="hap-filter-card">
+          <form id="hap-filter-form" method="GET" action="{% url 'core:happenings' %}">
+            {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
+
+            <div class="hap-filter-row">
+              <!-- Category Filter -->
+              <div class="hap-filter-group">
+                <label class="hap-filter-label" for="id_category">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+                  Category
+                </label>
+                <div class="hap-select-wrapper">
+                  <select name="category" id="id_category" class="hap-filter-select">
+                    <option value="">All Categories</option>
+                    {% for cat in all_categories %}
+                    <option value="{{ cat }}" {% if selected_category == cat %}selected{% endif %}>{{ cat }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+
+              <!-- Year Filter -->
+              <div class="hap-filter-group">
+                <label class="hap-filter-label" for="id_year">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  Year
+                </label>
+                <div class="hap-select-wrapper">
+                  <select name="year" id="id_year" class="hap-filter-select">
+                    <option value="">All Years</option>
+                    {% for yr in all_years %}
+                    <option value="{{ yr }}" {% if selected_year == yr|stringformat:'s' %}selected{% endif %}>{{ yr }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+
+              <!-- Month Filter -->
+              <div class="hap-filter-group">
+                <label class="hap-filter-label" for="id_month">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  Month
+                </label>
+                <div class="hap-select-wrapper">
+                  <select name="month" id="id_month" class="hap-filter-select">
+                    <option value="">All Months</option>
+                    {% for mval, mname in month_choices %}
+                    <option value="{{ mval }}" {% if selected_month == mval|stringformat:'s' %}selected{% endif %}>{{ mname }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+
+              <!-- Filter Actions -->
+              <div class="hap-filter-actions">
+                <a href="?{% if query %}q={{ query }}{% endif %}" class="hap-filter-reset-btn">Reset</a>
+                <button type="submit" class="hap-filter-apply-btn">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  Apply
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Happenings Grid -->
+    <div class="row g-5" style="display: flex; flex-wrap: wrap;">
+      {% for happening in page_obj %}
+      <!-- single item -->
+      <div class="col-lg-4 col-md-6 col-sm-6 mb-4" style="display: flex;">
+        <div class="single-item" style="height: 100%; display: flex; flex-direction: column; width: 100%; border: 1px solid #eee; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); background: white;">
+          <div class="single-item__content" style="flex: 1; display: flex; flex-direction: column;">
+            {% if happening.get_image %}
+            <div class="single-item__image" style="height: 200px; overflow: hidden;">
+              <a href="{% url 'core:happening_detail' happening.id %}"><img alt="{{ happening.title }}" src="{{ happening.get_image }}" style="width: 100%; height: 100%; object-fit: cover;"/></a>
+            </div>
+            {% endif %}
+            <div class="single-item__meta" style="padding: 20px; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                {% if happening.category %}
+                <p class="item-description" style="font-size: 15px; color: #B71A34; font-weight: 600; margin-bottom: 5px;">{{ happening.category }}</p>
+                {% endif %}
+                <h5 class="item-title" style="margin-bottom: 10px; line-height: 1.4; font-size: 18px;">
+                  <a href="{% url 'core:happening_detail' happening.id %}" style="color: #333; text-decoration: none; font-weight: 700;">{{ happening.title }}</a>
+                </h5>
+              </div>
+              <div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center;">
+                {% if happening.date %}
+                <em><p class="item-description" style="font-size: 14px; color: #777; margin-bottom: 0;">{{ happening.date|date:"M. d, Y" }}</p></em>
+                {% else %}
+                <span></span>
+                {% endif %}
+                <a class="rts-nbg-btn btn-arrow" href="{% url 'core:happening_detail' happening.id %}" style="font-size: 14px; color: #E61013; font-weight: 600;">Know More<span><i class="fa-sharp fa-regular fa-arrow-right" style="font-size: 11px; margin-left: 4px;"></i></span></a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div class="col-12 text-center py-5">
+        <div style="padding: 40px 20px;">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5" style="margin-bottom: 16px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <p style="color: #6b7280; font-size: 16px; margin: 0;">No happenings found matching your filters.</p>
+          <a href="{% url 'core:happenings' %}" style="display: inline-block; margin-top: 12px; color: #B71A34; font-weight: 600; font-size: 14px;">Clear all filters →</a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="row mt-5">
+      <div class="col-12">
+        <nav aria-label="Page navigation">
+          <ul class="pagination justify-content-center gap-2" style="border: none;">
+            
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+              <a class="page-link" href="?page=1{% if query %}&q={{ query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_month %}&month={{ selected_month }}{% endif %}" aria-label="First" style="border-radius: 4px; color: #E61013; border: 1px solid #ddd; background: white;">
+                <span aria-hidden="true">&laquo;&laquo; First</span>
+              </a>
+            </li>
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_month %}&month={{ selected_month }}{% endif %}" aria-label="Previous" style="border-radius: 4px; color: #E61013; border: 1px solid #ddd; background: white;">
+                <span aria-hidden="true">&laquo; Prev</span>
+              </a>
+            </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+              {% if page_obj.number == num %}
+              <li class="page-item active"><span class="page-link" style="background-color: #E61013; border-color: #E61013; border-radius: 4px; color: white;">{{ num }}</span></li>
+              {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+              <li class="page-item"><a class="page-link" href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_month %}&month={{ selected_month }}{% endif %}" style="border-radius: 4px; color: #E61013; border: 1px solid #ddd; background: white;">{{ num }}</a></li>
+              {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_month %}&month={{ selected_month }}{% endif %}" aria-label="Next" style="border-radius: 4px; color: #E61013; border: 1px solid #ddd; background: white;">
+                <span aria-hidden="true">Next &raquo;</span>
+              </a>
+            </li>
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if query %}&q={{ query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_month %}&month={{ selected_month }}{% endif %}" aria-label="Last" style="border-radius: 4px; color: #E61013; border: 1px solid #ddd; background: white;">
+                <span aria-hidden="true">Last &raquo;&raquo;</span>
+              </a>
+            </li>
+            {% endif %}
+
+          </ul>
+        </nav>
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+
+<!-- Filter Panel Styles & Script -->
+<style>
+  /* Filter Toggle Button */
+  #hap-filter-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0 20px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    color: #374151;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  #hap-filter-toggle:hover {
+    border-color: #B71A34;
+    color: #B71A34;
+    background: rgba(183, 26, 52, 0.04);
+  }
+  #hap-filter-toggle.hap-toggle--open {
+    background: #B71A34;
+    color: #fff;
+    border-color: #B71A34;
+  }
+  #hap-filter-toggle.hap-toggle--open svg { stroke: #fff; }
+
+  /* Filter Card */
+  .hap-filter-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 24px 28px 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    animation: hapFilterSlideIn 0.3s ease forwards;
+  }
+  @keyframes hapFilterSlideIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Filter Row Layout */
+  .hap-filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: flex-end;
+  }
+
+  /* Filter Groups */
+  .hap-filter-row .hap-filter-group {
+    flex: 1;
+    min-width: 180px;
+    margin-bottom: 0;
+  }
+
+  .hap-filter-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #374151;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 10px;
+  }
+  .hap-filter-label svg { color: #6b7280; }
+
+  /* Select wrapper */
+  .hap-select-wrapper {
+    position: relative;
+    width: 100%;
+  }
+
+  /* Select dropdown */
+  .hap-filter-select {
+    width: 100%;
+    padding: 10px 38px 10px 14px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    background-color: #f9fafb;
+    color: #374151;
+    font-size: 14px;
+    font-weight: 500;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 16px;
+  }
+  .hap-filter-select:hover {
+    border-color: #B71A34;
+    background-color: #ffffff;
+  }
+  .hap-filter-select:focus {
+    border-color: #B71A34;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(183, 26, 52, 0.12);
+  }
+
+  /* Filter Actions */
+  .hap-filter-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .hap-filter-reset-btn {
+    font-size: 13px;
+    font-weight: 600;
+    color: #6b7280;
+    text-decoration: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    transition: all 0.2s;
+  }
+  .hap-filter-reset-btn:hover {
+    background: #f3f4f6;
+    color: #374151;
+  }
+  .hap-filter-apply-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, #B71A34, #e8325a);
+    color: #fff;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s;
+    box-shadow: 0 3px 10px rgba(183, 26, 52, 0.2);
+  }
+  .hap-filter-apply-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(183, 26, 52, 0.35);
+  }
+
+  /* Active Filter Tags */
+  .hap-active-filters {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .hap-active-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #6b7280;
+  }
+  .hap-filter-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px;
+    border-radius: 50px;
+    background: rgba(183, 26, 52, 0.08);
+    color: #B71A34;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    border: 1px solid rgba(183, 26, 52, 0.15);
+    transition: all 0.2s;
+  }
+  .hap-filter-tag:hover {
+    background: rgba(183, 26, 52, 0.15);
+    color: #91111f;
+  }
+  .hap-filter-tag svg { opacity: 0.6; }
+  .hap-filter-tag:hover svg { opacity: 1; }
+  .hap-filter-clear {
+    font-size: 12px;
+    font-weight: 600;
+    color: #9ca3af;
+    text-decoration: none;
+    margin-left: 4px;
+    transition: color 0.2s;
+  }
+  .hap-filter-clear:hover { color: #E61013; }
+
+  @media (max-width: 991px) {
+    .hap-filter-row {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 15px;
+    }
+    .hap-filter-row .hap-filter-group {
+      width: 100%;
+      min-width: 100%;
+    }
+    .hap-filter-actions {
+      width: 100%;
+      justify-content: flex-end;
+      margin-top: 10px;
+      padding-top: 15px;
+      border-top: 1px solid #f3f4f6;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .hap-filter-card { padding: 18px 16px 14px; }
+    #hap-filter-toggle span { display: none; }
+    #hap-filter-toggle { padding: 0 14px; }
+  }
+</style>
+
+<script>
+(function() {
+  document.addEventListener("DOMContentLoaded", function() {
+    // Toggle filter panel
+    var toggleBtn = document.getElementById("hap-filter-toggle");
+    var panel = document.getElementById("hap-filter-panel");
+    if (!toggleBtn || !panel) return;
+
+    // Auto-open if any filter is active
+    var hasActiveFilter = {% if selected_category or selected_year or selected_month %}true{% else %}false{% endif %};
+    if (hasActiveFilter) {
+      panel.style.display = "";
+      toggleBtn.classList.add("hap-toggle--open");
+    }
+
+    toggleBtn.addEventListener("click", function() {
+      var isOpen = panel.style.display !== "none";
+      if (isOpen) {
+        panel.style.display = "none";
+        toggleBtn.classList.remove("hap-toggle--open");
+      } else {
+        panel.style.display = "";
+        toggleBtn.classList.add("hap-toggle--open");
+      }
+    });
+  });
+})();
+</script>
+{% endblock %}
+

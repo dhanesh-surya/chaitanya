@@ -1,0 +1,138 @@
+﻿{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!-- Breadcrumb Section -->
+<section class="rts-breadcrumb breadcrumb-height breadcumb-bg" style="{% with bcimg=breadcrumb_images.feedback_faculty %}{% if bcimg %}background-image: url('{{ bcimg }}');{% endif %}{% endwith %}">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb-content">
+                    <h2 class="section-title">{{ breadcrumb }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Feedback Form Section -->
+<section class="rts-section-padding py-5">
+    <div class="container">
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+
+                <!-- Alert Messages -->
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-success alert-dismissible fade show shadow-sm mb-4" role="alert">
+                            <i class="fas fa-check-circle me-2"></i> {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <!-- Form Card -->
+                <div class="card border-0 shadow-lg" style="border-top: 5px solid #E61013 !important;">
+                    <div class="card-body p-4 p-md-5">
+                        
+                        <div class="text-center mb-5">
+                            <h3 class="fw-bold mb-2" style="color: #E61013;">{{ page_title }}</h3>
+                            <p class="text-muted small">We appreciate our faculty's contribution. Your suggestions help optimize the research and learning ecosystem.</p>
+                        </div>
+
+                        <form method="post" class="needs-validation" novalidate>
+                            {% csrf_token %}
+
+                            <!-- Details in grid -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold text-dark">{{ form.faculty_name.label }}</label>
+                                        {{ form.faculty_name }}
+                                        <div class="text-danger small">{{ form.faculty_name.errors }}</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold text-dark">{{ form.department.label }}</label>
+                                        {{ form.department }}
+                                        <div class="text-danger small">{{ form.department.errors }}</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold text-dark">{{ form.academic_year.label }}</label>
+                                        {{ form.academic_year }}
+                                        <div class="text-danger small">{{ form.academic_year.errors }}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Ratings segment -->
+                            <h5 class="fw-bold border-bottom pb-2 mb-4 mt-5" style="color: #E61013;"><i class="fas fa-star-half-alt me-2"></i> Rating Grid (1 = Poor, 5 = Excellent)</h5>
+                            
+                            <div class="mb-3 row align-items-center border-bottom py-2">
+                                <label class="col-sm-8 col-form-label fw-semibold text-dark">{{ form.infrastructure.label }}</label>
+                                <div class="col-sm-4">
+                                    {{ form.infrastructure }}
+                                    <div class="text-danger small">{{ form.infrastructure.errors }}</div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3 row align-items-center border-bottom py-2">
+                                <label class="col-sm-8 col-form-label fw-semibold text-dark">{{ form.admin_support.label }}</label>
+                                <div class="col-sm-4">
+                                    {{ form.admin_support }}
+                                    <div class="text-danger small">{{ form.admin_support.errors }}</div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3 row align-items-center border-bottom py-2">
+                                <label class="col-sm-8 col-form-label fw-semibold text-dark">{{ form.research_support.label }}</label>
+                                <div class="col-sm-4">
+                                    {{ form.research_support }}
+                                    <div class="text-danger small">{{ form.research_support.errors }}</div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3 row align-items-center border-bottom py-2">
+                                <label class="col-sm-8 col-form-label fw-semibold text-dark">{{ form.work_environment.label }}</label>
+                                <div class="col-sm-4">
+                                    {{ form.work_environment }}
+                                    <div class="text-danger small">{{ form.work_environment.errors }}</div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3 row align-items-center border-bottom py-2 mb-4">
+                                <label class="col-sm-8 col-form-label fw-semibold text-dark">{{ form.overall_satisfaction.label }}</label>
+                                <div class="col-sm-4">
+                                    {{ form.overall_satisfaction }}
+                                    <div class="text-danger small">{{ form.overall_satisfaction.errors }}</div>
+                                </div>
+                            </div>
+
+                            <!-- Suggestions -->
+                            <div class="mb-5 mt-4">
+                                <label class="form-label fw-semibold text-dark">{{ form.suggestions.label }}</label>
+                                {{ form.suggestions }}
+                                <div class="text-danger small">{{ form.suggestions.errors }}</div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <button type="submit" class="btn text-white w-100 fw-bold py-3" style="background-color: #E61013;">
+                                <i class="fas fa-paper-plane me-2"></i>Submit Feedback
+                            </button>
+
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}

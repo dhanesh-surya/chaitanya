@@ -1,0 +1,168 @@
+﻿{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!-- Breadcrumb Section -->
+<section class="rts-breadcrumb breadcrumb-height breadcumb-bg" style="{% with bcimg=breadcrumb_images.contact %}{% if bcimg %}background-image: url('{{ bcimg }}');{% endif %}{% endwith %}">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb-content">
+                    <h2 class="section-title">{{ breadcrumb }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Section -->
+<section class="rts-section-padding py-5">
+    <div class="container">
+
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2 class="fw-bold" style="color: #E61013;">Contact Us</h2>
+                <p class="text-muted">We'd love to hear from you. Reach out using the form or visit us at our campus.</p>
+            </div>
+        </div>
+
+        <div class="row g-5">
+
+            <!-- Left: Contact Info + Map -->
+            <div class="col-lg-5">
+                <div class="mb-4">
+                    <h5 class="fw-bold mb-3" style="color: #E61013;">
+                        <i class="fas fa-map-marker-alt me-2"></i> Our Address
+                    </h5>
+                    {% if settings.address_line1 %}
+                        <p class="text-muted mb-1">{{ settings.address_line1 }}</p>
+                    {% endif %}
+                    {% if settings.address_line2 %}
+                        <p class="text-muted mb-0">{{ settings.address_line2 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="mb-4">
+                    <h5 class="fw-bold mb-3" style="color: #E61013;">
+                        <i class="fas fa-phone-alt me-2"></i> Phone
+                    </h5>
+                    {% if settings.phone %}
+                        <a href="tel:{{ settings.phone }}" class="text-muted text-decoration-none">
+                            {{ settings.phone }}
+                        </a>
+                    {% else %}
+                        <p class="text-muted mb-0">—</p>
+                    {% endif %}
+                </div>
+
+                <div class="mb-4">
+                    <h5 class="fw-bold mb-3" style="color: #E61013;">
+                        <i class="fas fa-envelope me-2"></i> Email
+                    </h5>
+                    {% if settings.email %}
+                        <a href="mailto:{{ settings.email }}" class="text-muted text-decoration-none">
+                            {{ settings.email }}
+                        </a>
+                    {% else %}
+                        <p class="text-muted mb-0">—</p>
+                    {% endif %}
+                </div>
+
+                <!-- Google Maps Embed -->
+                {% if settings.google_maps_embed %}
+                <div class="mt-4 rounded overflow-hidden shadow-sm">
+                    <div class="ratio ratio-4x3">
+                        {{ settings.google_maps_embed|safe }}
+                    </div>
+                </div>
+                {% else %}
+                <div class="bg-light rounded d-flex align-items-center justify-content-center shadow-sm"
+                     style="height: 280px;">
+                    <div class="text-center text-muted">
+                        <i class="fas fa-map fa-3x mb-2 d-block" style="opacity: 0.3;"></i>
+                        <small>Map not available</small>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Right: Contact Form -->
+            <div class="col-lg-7">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header text-white fw-bold fs-5" style="background-color: #E61013;">
+                        <i class="fas fa-paper-plane me-2"></i> Send Us a Message
+                    </div>
+                    <div class="card-body p-4">
+                        <form method="post" action="{% url 'core:contact' %}" novalidate>
+                            {% csrf_token %}
+                            <div class="mb-4">
+                                <label for="contactName" class="form-label fw-semibold">
+                                    Full Name <span class="text-danger">*</span>
+                                </label>
+                                <input type="text"
+                                       class="form-control"
+                                       id="contactName"
+                                       name="name"
+                                       placeholder="Enter your full name"
+                                       required>
+                            </div>
+                            <div class="mb-4">
+                                <label for="contactEmail" class="form-label fw-semibold">
+                                    Email Address <span class="text-danger">*</span>
+                                </label>
+                                <input type="email"
+                                       class="form-control"
+                                       id="contactEmail"
+                                       name="email"
+                                       placeholder="Enter your email address"
+                                       required>
+                            </div>
+                            <div class="mb-4">
+                                <label for="contactPhone" class="form-label fw-semibold">
+                                    Phone Number
+                                </label>
+                                <input type="tel"
+                                       class="form-control"
+                                       id="contactPhone"
+                                       name="phone"
+                                       placeholder="Enter your phone number">
+                            </div>
+                            <div class="mb-4">
+                                <label for="contactSubject" class="form-label fw-semibold">
+                                    Subject
+                                </label>
+                                <input type="text"
+                                       class="form-control"
+                                       id="contactSubject"
+                                       name="subject"
+                                       placeholder="Subject of your message">
+                            </div>
+                            <div class="mb-4">
+                                <label for="contactMessage" class="form-label fw-semibold">
+                                    Message <span class="text-danger">*</span>
+                                </label>
+                                <textarea class="form-control"
+                                          id="contactMessage"
+                                          name="message"
+                                          rows="5"
+                                          placeholder="Write your message here..."
+                                          required></textarea>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit"
+                                        class="btn btn-lg text-white fw-semibold"
+                                        style="background-color: #E61013;">
+                                    <i class="fas fa-paper-plane me-2"></i> Send Message
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+{% endblock %}

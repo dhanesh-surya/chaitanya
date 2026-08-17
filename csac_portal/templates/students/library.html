@@ -1,0 +1,208 @@
+﻿{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!-- Breadcrumb Section -->
+<section class="rts-breadcrumb breadcrumb-height breadcumb-bg" style="{% with bcimg=breadcrumb_images.students_library %}{% if bcimg %}background-image: url('{{ bcimg }}');{% endif %}{% endwith %}">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb-content">
+                    <h2 class="section-title">{{ breadcrumb }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Library Section -->
+<section class="rts-section-padding py-5">
+    <div class="container">
+
+        <!-- Intro / Statistics -->
+        <div class="row g-4 mb-5 text-center">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm py-4" style="border-bottom: 4px solid #E61013 !important;">
+                    <div class="card-body">
+                        <div class="mb-3 text-danger fs-1"><i class="fas fa-book"></i></div>
+                        <h2 class="display-6 fw-bold text-dark mb-1">{{ lib_info.total_books|default:"5,000+" }}</h2>
+                        <h6 class="fw-semibold text-muted mb-0">Total Books &amp; Volumes</h6>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm py-4" style="border-bottom: 4px solid #E61013 !important;">
+                    <div class="card-body">
+                        <div class="mb-3 text-danger fs-1"><i class="fas fa-newspaper"></i></div>
+                        <h2 class="display-6 fw-bold text-dark mb-1">{{ lib_info.total_journals|default:"50+" }}</h2>
+                        <h6 class="fw-semibold text-muted mb-0">Journals &amp; Periodicals</h6>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm py-4" style="border-bottom: 4px solid #E61013 !important;">
+                    <div class="card-body">
+                        <div class="mb-3 text-danger fs-1"><i class="fas fa-laptop"></i></div>
+                        <h2 class="display-6 fw-bold text-dark mb-1">{{ lib_info.total_digital|default:"1,000+" }}</h2>
+                        <h6 class="fw-semibold text-muted mb-0">Digital Resources &amp; E-Books</h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Description and Timings -->
+        <div class="row g-5 mb-5">
+            <div class="col-lg-8">
+                <h4 class="fw-bold mb-4" style="color: #E61013;"><i class="fas fa-info-circle me-2"></i> About the Central Library</h4>
+                <div class="text-muted lh-lg fs-6">
+                    {% if lib_info.description %}
+                        {{ lib_info.description|safe|linebreaks }}
+                    {% else %}
+                        <p>The Central Library of Chaitanya Science and Arts College serves as a knowledge resource center. It supports the educational and research goals of the college by providing access to physical and digital library resources. The library has a spacious reading room and a dedicated computing center for accessing e-journals and databases.</p>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header text-white fw-bold py-3" style="background-color: #E61013;">
+                        <i class="fas fa-clock me-2"></i> Library Timings
+                    </div>
+                    <div class="card-body bg-light text-muted lh-lg">
+                        {% if lib_info.timing %}
+                            {{ lib_info.timing|linebreaks }}
+                        {% else %}
+                            <ul class="list-unstyled mb-0">
+                                <li><strong>Monday - Friday:</strong> 8:30 AM – 5:30 PM</li>
+                                <li><strong>Saturday:</strong> 9:00 AM – 1:30 PM</li>
+                                <li><strong>Sunday &amp; Holidays:</strong> Closed</li>
+                            </ul>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Catalog Tabs -->
+        <div class="row">
+            <div class="col-12">
+                <h4 class="fw-bold mb-4" style="color: #E61013;"><i class="fas fa-search me-2"></i> Library Catalog &amp; Resources</h4>
+                
+                <!-- Nav tabs -->
+                <ul class="nav nav-tabs border-bottom mb-4" id="libraryTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active fw-bold text-dark px-4 py-3" id="books-tab" data-bs-toggle="tab" data-bs-target="#books-pane" type="button" role="tab" aria-controls="books-pane" aria-selected="true">
+                            Books
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-bold text-dark px-4 py-3" id="journals-tab" data-bs-toggle="tab" data-bs-target="#journals-pane" type="button" role="tab" aria-controls="journals-pane" aria-selected="false">
+                            Journals
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-bold text-dark px-4 py-3" id="digital-tab" data-bs-toggle="tab" data-bs-target="#digital-pane" type="button" role="tab" aria-controls="digital-pane" aria-selected="false">
+                            Digital Resources
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Tab content -->
+                <div class="tab-content bg-white p-4 rounded shadow-sm border" id="libraryTabsContent">
+                    
+                    <!-- Books pane -->
+                    <div class="tab-pane fade show active" id="books-pane" role="tabpanel" aria-labelledby="books-tab">
+                        {% if books %}
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Book Title</th>
+                                        <th>Author</th>
+                                        <th>Subject Area</th>
+                                        <th>ISBN / Reference</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for book in books %}
+                                    <tr>
+                                        <strong><td class="fw-bold">{{ book.title }}</td></strong>
+                                        <td>{{ book.author|default:"-" }}</td>
+                                        <td>{{ book.subject|default:"General" }}</td>
+                                        <td class="small">{{ book.isbn|default:"-" }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-secondary border-0 mb-0">No books catalog entries listed in the database.</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Journals pane -->
+                    <div class="tab-pane fade" id="journals-pane" role="tabpanel" aria-labelledby="journals-tab">
+                        {% if journals %}
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Journal Title</th>
+                                        <th>Subject Area</th>
+                                        <th>ISBN / ISSN</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for journal in journals %}
+                                    <tr>
+                                        <strong><td class="fw-bold">{{ journal.title }}</td></strong>
+                                        <td>{{ journal.subject|default:"General" }}</td>
+                                        <td class="small">{{ journal.isbn|default:"-" }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-secondary border-0 mb-0">No journals listed in the database.</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Digital resources pane -->
+                    <div class="tab-pane fade" id="digital-pane" role="tabpanel" aria-labelledby="digital-tab">
+                        {% if digital %}
+                        <div class="list-group">
+                            {% for resource in digital %}
+                            <div class="list-group-item d-flex align-items-center justify-content-between p-3">
+                                <div>
+                                    <h6 class="fw-bold mb-1 text-dark"><i class="fas fa-external-link-alt text-primary me-2"></i> {{ resource.title }}</h6>
+                                    <small class="text-muted">Type: Digital Access Link | Subject: {{ resource.subject|default:"General" }}</small>
+                                </div>
+                                {% if resource.link %}
+                                    <a href="{{ resource.link }}" class="btn btn-sm btn-outline-danger px-3" target="_blank">Access Resource</a>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="alert alert-secondary border-0 mb-0">No digital resources/e-links configured in the database.</div>
+                        {% endif %}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- Custom tab styling -->
+<style>
+    .nav-tabs .nav-link.active {
+        border-color: #E61013 #E61013 #fff !important;
+        border-top: 3px solid #E61013 !important;
+        color: #E61013 !important;
+    }
+</style>
+
+{% endblock %}

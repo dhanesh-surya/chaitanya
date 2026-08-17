@@ -1,0 +1,33 @@
+# Virtual environments
+.venv/
+venv/
+**/venv/
+**/.venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Databases & Backups
+*.bak
+*.old
+*.sqlite3-journal
+csac_portal/db.sqlite3
+csac_portal/db.sqlite3.bak
+csac_portal/db.sqlite3.old
+csac_portal/db.sqlite3.prod.bak
+
+# Django Collected Static Files
+csac_portal/staticfiles/
+
+# Django Media Uploads
+csac_portal/media/
+
+# Scraped websites & CDN caches
+chaitanyacg.ac.in/
+fonts.googleapis.com/
+fonts.gstatic.com/
+html.themewant.com/
+i.postimg.cc/
+unpkg.com/

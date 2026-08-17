@@ -1,0 +1,83 @@
+﻿{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!-- Breadcrumb Section -->
+<section class="rts-breadcrumb breadcrumb-height breadcumb-bg" style="{% with bcimg=breadcrumb_images.naac_ssr %}{% if bcimg %}background-image: url('{{ bcimg }}');{% endif %}{% endwith %}">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb-content">
+                    <h2 class="section-title">{{ breadcrumb }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SSR Section -->
+<section class="rts-section-padding py-5">
+    <div class="container">
+
+        <div class="row mb-5">
+            <div class="col-12">
+                <h2 class="fw-bold mb-3" style="color: #E61013;">Self Study Report (SSR)</h2>
+                <p class="text-muted lh-lg fs-6">
+                    The Self Study Report (SSR) is a comprehensive document that presents an overview of the institution's features, achievements, strengths, and areas of growth. It is submitted to NAAC for detailed evaluation by the peer team.
+                </p>
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                {% if docs %}
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-danger text-dark">
+                                    <tr>
+                                        <th class="ps-4" style="width: 80px;">#</th>
+                                        <th>Document Title</th>
+                                        <th>Date Uploaded</th>
+                                        <th class="text-center" style="width: 180px;">Download</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for doc in docs %}
+                                    <tr>
+                                        <td class="ps-4 fw-bold text-muted">{{ forloop.counter }}</td>
+                                        <strong><td class="fw-bold text-dark">
+                                            {{ doc.title }}
+                                            {% if doc.description %}
+                                                <p class="text-muted small fw-normal mb-0 mt-1">{{ doc.description }}</p>
+                                            {% endif %}
+                                        </td></strong>
+                                        <td>{{ doc.uploaded_at|date:"d M Y" }}</td>
+                                        <td class="text-center">
+                                            <a href="{{ doc.get_file }}" class="btn btn-sm btn-danger px-3 py-2" download>
+                                                <i class="fas fa-download me-1"></i> Download PDF
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="alert alert-secondary text-center py-5 border-0 shadow-sm">
+                    <i class="fas fa-file-alt fa-3x mb-3 text-muted"></i>
+                    <h5 class="fw-bold">No SSR Documents Uploaded</h5>
+                    <p class="text-muted mb-0">The Self Study Reports will be displayed here once compiled.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}

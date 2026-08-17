@@ -1,0 +1,64 @@
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover mb-0 align-middle">
+                <thead class="text-white" style="background-color: #E61013;">
+                    <tr>
+                        <th scope="col" style="width: 60px;" class="text-center">#</th>
+                        <th scope="col" style="width: 130px;">Date</th>
+                        <th scope="col">Notice Title</th>
+                        <th scope="col" style="width: 170px;" class="text-center">Download / View</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for notice in notices_list %}
+                    <tr {% if not notice.is_active %}class="text-muted"{% endif %}>
+                        <td class="text-center fw-semibold">{{ forloop.counter }}</td>
+                        <td class="text-nowrap">
+                            <i class="fas fa-calendar-alt me-1" style="color: #E61013;"></i>
+                            {{ notice.published_date|date:"d M Y" }}
+                        </td>
+                        <td>
+                            {{ notice.title }}
+                            {% if show_category %}
+                                <span class="badge text-white ms-2" style="background-color: #B71A34; font-size: 0.75rem;">{{ notice.get_category_display }}</span>
+                            {% endif %}
+                            {% if not notice.is_active %}
+                                <span class="badge bg-secondary ms-2">Archived</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            {% if notice.document %}
+                                <a href="{{ notice.document.url }}"
+                                   target="_blank"
+                                   class="btn text-white"
+                                   style="background-color: #E61013; font-size: 15px; font-weight: 600; padding: 6px 16px; text-decoration: none !important;"
+                                   title="Download Notice">
+                                    <i class="fas fa-download me-1"></i> Download
+                                </a>
+                            {% elif notice.document_url %}
+                                <a href="{{ notice.document_url }}"
+                                   target="_blank"
+                                   class="btn text-white"
+                                   style="background-color: #E61013; font-size: 15px; font-weight: 600; padding: 6px 16px; text-decoration: none !important;"
+                                   title="View Notice">
+                                    <i class="fas fa-external-link-alt me-1"></i> View
+                                </a>
+                            {% else %}
+                                <span class="text-muted small">—</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-5">
+                            <i class="fas fa-bell-slash fa-2x mb-3 d-block" style="opacity: 0.3;"></i>
+                            No notices have been published in this category at this time.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,1890 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Chaitanya Science and Arts College, Pamgarh - Home{% endblock %}
+
+{% block extra_css %}
+<style>
+  .home-leadership-card {
+    border: 1px solid rgba(183, 26, 52, 0.1);
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+    background: linear-gradient(180deg, #ffffff 0%, #fcfcfd 100%);
+  }
+  .leadership-message-block {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 22px;
+    padding: 18px 18px 18px 16px;
+    background: #f8fafc;
+    border: 1px solid #e8edf3;
+    border-radius: 14px;
+  }
+  .leadership-message-icon {
+    flex-shrink: 0;
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #B71A34 0%, #8f1429 100%);
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    box-shadow: 0 8px 18px rgba(183, 26, 52, 0.22);
+  }
+  .leadership-message-text {
+    flex: 1;
+    color: #334155;
+    font-size: 15px;
+    line-height: 1.75;
+    font-style: italic;
+    text-align: justify;
+  }
+  .home-leadership-nameplate {
+    margin-top: 8px;
+    padding-top: 18px;
+    border-top: 1px dashed #e5e7eb;
+  }
+
+  .home-leadership-nameplate .title {
+    font-size: 14px;
+    color: #6b7280;
+    margin-bottom: 8px;
+  }
+  .home-leadership-nameplate .organization {
+    font-size: 13px;
+    color: #9ca3af;
+    margin-bottom: 0;
+  }
+  @media (max-width: 767px) {
+    .leadership-message-block {
+      gap: 12px;
+      padding: 14px;
+    }
+    .leadership-message-icon {
+      width: 40px;
+      height: 40px;
+      font-size: 16px;
+    }
+    .leadership-message-text {
+      font-size: 14px;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Banner -->
+<div class="banner v__5">
+  <div class="banner__left__side__content">
+    <div class="banner__left__side__content__social">
+      <span>Follow-</span>
+      <a href="https://www.facebook.com/ChaitanyaPamgarh/"><i class="fa-brands fa-facebook"></i></a>
+      <a href="https://www.youtube.com/@ChaitanyaCollegePamgarh"><i class="fa-brands fa-youtube"></i></a>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="banner__content">
+            <div class="banner__content__top">
+              <div class="banner__content__left">
+                <h5 class="banner__sub__heading"><img alt="" src="{% static 'assets/images/icon/e-cap-small.svg' %}"/>Knowledge Meets Innovation</h5>
+                <h1 class="banner__heading__title">Explore Boundless Opportunities</h1>
+              </div>
+              <div class="banner__content__right">
+                <p class="banner__description__text"></p>
+                <p style="text-align:justify">Welcome to Chaitanya Science and Arts College, where academic excellence converges with a vibrant community spirit to shape the leaders of tomorrow.</p>
+                <a class="rts-nbg-btn btn-arrow" href="{% url 'academics:programs' %}">View Our Programs<span><i class="fa-sharp fa-regular fa-arrow-right"></i> </span></a>
+              </div>
+            </div>
+            <div class="banner__content__bottom">
+              <div class="banner__content__bottom__right o-hidden">
+                {% if banners %}
+                <div class="swiper swiper-data" data-swiper='{"slidesPerView":1,"effect":"fade","loop":true,"speed":1000,"navigation":{"nextEl":".rts__next","prevEl":".rts__prev"},"autoplay":{"delay":"3000"}}'>
+                  <div class="swiper-wrapper">
+                    {% for slide in banners %}
+                    <div class="swiper-slide">
+                      <div class="banner__content__slide__item">
+                        <p class="caption" style="text-align:center">{{ slide.caption }}</p>
+                        <img alt="{{ slide.caption }}" src="{{ slide.get_image }}" class="fixed-height-image"/>
+                      </div>
+                    </div>
+                    {% endfor %}
+                  </div>
+                </div>
+                {% else %}
+                <div class="swiper swiper-data" data-swiper='{"slidesPerView":1,"effect":"fade","loop":true,"speed":1000,"navigation":{"nextEl":".rts__next","prevEl":".rts__prev"},"autoplay":{"delay":"3000"}}'>
+                  <div class="swiper-wrapper">
+                    <div class="swiper-slide">
+                      <div class="banner__content__slide__item">
+                        <p class="caption">25 Year of Excellence</p>
+                        <img alt="25 Year of Excellence" src="/media/banner/25%E0%A4%B5_%E0%A4%B0%E0%A4%9C%E0%A4%A4_%E0%A4%9C%E0%A4%AF%E0%A4%A4_2.jpg" class="fixed-height-image"/>
+                      </div>
+                    </div>
+                    <div class="swiper-slide">
+                      <div class="banner__content__slide__item">
+                        <p class="caption">NAAC GRADE A AWARD</p>
+                        <img alt="NAAC GRADE A AWARD" src="/media/banner/CHAITANYA_SCIENCE_AND_ARTS_COLLEGE_1.png" class="fixed-height-image"/>
+                      </div>
+                    </div>
+                    <div class="swiper-slide">
+                      <div class="banner__content__slide__item">
+                        <p class="caption">college building</p>
+                        <img alt="college building" src="/media/banner/College_Building.png" class="fixed-height-image"/>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {% endif %}
+                <div class="rts__slider--arrow v__2">
+                  <div class="slider__btn rts__prev"><i class="fa-light fa-arrow-left"></i></div>
+                  <div class="slider__btn rts__next"><i class="fa-light fa-arrow-right"></i></div>
+                </div>
+              </div>
+            </div>
+          </div>
+    </div>
+  </div>
+</div>
+
+<!-- About + Accreditation Logos -->
+<div class="about rts-section-padding v__5">
+  <div class="container rts__pt50">
+    <div class="row justify-content-center align-items-center mb-4">
+      {% for logo in logos %}
+      <div class="col-xl-2 col-lg-2 col-md-3 col-4 text-center mb-3">
+        <a href="{{ logo.link|default:'#' }}" target="_blank">
+          <img alt="{{ logo.name }}" class="img-fluid" src="{{ logo.get_image }}" style="max-height:140px;"/>
+        </a>
+      </div>
+      {% empty %}
+      <div class="col-xl-2 col-lg-2 col-md-3 col-4 text-center mb-3"><img alt="NAAC" class="img-fluid" src="https://i.postimg.cc/k5Z5snNv/csac-naac.png" style="max-height:140px;"/></div>
+      <div class="col-xl-2 col-lg-2 col-md-3 col-4 text-center mb-3"><img alt="AICTE" class="img-fluid" src="https://i.postimg.cc/qR528VqP/aicte.png" style="max-height:140px;"/></div>
+      <div class="col-xl-2 col-lg-2 col-md-3 col-4 text-center mb-3"><img alt="NSS" class="img-fluid" src="https://i.postimg.cc/wMRL2fs7/nss.png" style="max-height:140px;"/></div>
+      <div class="col-xl-2 col-lg-2 col-md-3 col-4 text-center mb-3"><img alt="NCC" class="img-fluid" src="https://i.postimg.cc/Dz5rwbTy/ncc.png" style="max-height:140px;"/></div>
+      <div class="col-xl-2 col-lg-2 col-md-3 col-4 text-center mb-3"><img alt="IIC" class="img-fluid" src="https://i.postimg.cc/zXBXsbdF/iic-chaitanya.png" style="max-height:140px;"/></div>
+      <div class="col-xl-2 col-lg-2 col-md-3 col-4 text-center mb-3"><img alt="ISO" class="img-fluid" src="https://i.postimg.cc/500wYN45/iso.png" style="max-height:140px;"/></div>
+      {% endfor %}
+    </div>
+    <!-- Stats -->
+    <div class="row justify-content-center">
+      <div class="col-lg-12">
+        <div class="stats-card-grid">
+          {% for stat in stats %}
+          <div class="stat-card-item">
+            <h2 class="stat-card-number">{{ stat.value }}</h2>
+            <p class="stat-card-label">{{ stat.label }}</p>
+          </div>
+          {% empty %}
+          <div class="stat-card-item">
+            <h2 class="stat-card-number">18+</h2>
+            <p class="stat-card-label">Courses on Arts, Science, Commerce &amp; Management</p>
+          </div>
+          <div class="stat-card-item">
+            <h2 class="stat-card-number">8000+</h2>
+            <p class="stat-card-label">Students filled with joy</p>
+          </div>
+          <div class="stat-card-item">
+            <h2 class="stat-card-number">50+</h2>
+            <p class="stat-card-label">Faculty &amp; Staff</p>
+          </div>
+          <div class="stat-card-item">
+            <h2 class="stat-card-number">25+</h2>
+            <p class="stat-card-label">Years of Excellence</p>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- About Section -->
+<section class="rts-application-procedure rts-section-padding">
+  <div class="container">
+    <div class="row justify-content-sm-center">
+      <div class="col-lg-12 col-sm-11">
+        <div class="rts-section mb--40 rt-between">
+          <h2 class="rts-section-title w-300">About Us</h2>
+          <p class="w-700" style="text-align:justify;color:black">Chaitanya Science and Arts College, established in 2001 in Pamgarh, Chhattisgarh, offers multidisciplinary undergraduate and postgraduate programs in sciences, humanities, commerce, and management to educate rural students. The college focuses on providing quality education and a conducive learning environment while developing critical thinking and leadership skills. The campus features modern infrastructure, including playgrounds, gardens, and a modern auditorium.</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="row justify-content-sm-center justify-content-md-start g-5">
+      {% for card in quick_link_cards %}
+      <div class="col-lg-4 col-md-6 col-sm-11" style="display:grid">
+        <a href="{{ card.get_absolute_url }}">
+          <div class="single-procedure" style="
+              background-color: {{ card.bg_color|default:'#ffffff' }} !important;
+              position: relative;
+              overflow: hidden;
+              z-index: 1;
+          ">
+            <!-- Background Image for smooth zoom hover -->
+            {% if card.bg_image %}
+            <img class="card-bg-img" src="{{ card.bg_image.url }}" alt="" style="
+                position: absolute;
+                top: 0; left: 0; width: 100%; height: 100%;
+                object-fit: cover;
+                z-index: 0;
+                transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            " />
+            {% endif %}
+
+            <!-- Semi-transparent color overlay -->
+            {% if card.bg_image or card.overlay_opacity > 0 %}
+            <div class="card-overlay" style="
+                position: absolute;
+                top: 0; left: 0; width: 100%; height: 100%;
+                background-color: {{ card.overlay_color|default:'#000000' }};
+                opacity: {{ card.overlay_opacity|default:0.0 }};
+                z-index: 1;
+                pointer-events: none;
+            "></div>
+            {% endif %}
+            
+            <!-- Card content wrapper -->
+            <div class="card-content-wrap" style="position: relative; z-index: 2;">
+              <div class="rt-clip-serial rt-clip-text" style="color: {% if card.bg_image or card.bg_color != '#ffffff' %}rgba(255,255,255,0.35){% else %}#B71A34{% endif %} !important;">{{ forloop.counter|stringformat:"02d" }}</div>
+              <div class="icon">
+                {% if card.fa_icon %}
+                  <i class="fa-solid {{ card.fa_icon }}" style="font-size: 32px; color: {% if card.bg_image or card.bg_color != '#ffffff' %}#ffffff{% else %}#B71A34{% endif %} !important; transition: all 0.3s ease;"></i>
+                {% else %}
+                  <img alt="{{ card.title }}" src="{{ card.get_icon }}" style="{% if card.bg_image or card.bg_color != '#ffffff' %}filter: brightness(0) invert(1);{% endif %}">
+                {% endif %}
+              </div><br>
+              <h2 style="color: {% if card.bg_image or card.bg_color != '#ffffff' %}#ffffff{% else %}#111827{% endif %} !important;">{{ card.title }}</h2>
+            </div>
+          </div>
+        </a>
+      </div>
+      {% empty %}
+      <div class="col-12 text-center py-5">
+        <p class="text-muted">No quick links available.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- Social Schemes Section -->
+<div class="container mt-5 mb-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-12 text-center mb-4">
+      <h2 class="section-title">Our Social Impact Initiatives</h2>
+      <p class="section-subtitle">Rooted in Purpose, Growing with Compassion: Transforming Communities One Initiative at a Time.</p>
+    </div>
+    {% for scheme in social_schemes %}
+    <div class="col-md-4 mb-4">
+      <a href="{{ scheme.link|default:'#' }}" style="text-decoration: none; color: inherit;">
+        <div class="rts__research--single h-100" style="border: 1px solid rgb(255, 38, 38); padding: 12px;">
+          <div class="rts__research--single--thumb mb-2">
+            <img alt="{{ scheme.title }}" class="img-fluid" src="{{ scheme.get_image }}" style="height: 200px; width: 100%; object-fit: cover;"/>
+          </div>
+          <div class="rts__research--single--meta">
+            <p style="font-size:15px; color:#B71A34; margin-bottom: 5px;">{{ scheme.category }}</p>
+            <h4 class="rts__research--single--meta--title" style="margin-bottom: 8px;">{{ scheme.title }}</h4>
+            <p class="rts__research--single--meta--excerpt" style="margin-bottom: 0;">{{ scheme.description }}</p>
+          </div>
+        </div>
+      </a>
+    </div>
+    {% empty %}
+    <div class="col-md-4 mb-4">
+      <a href="#" style="text-decoration: none; color: inherit;">
+        <div class="rts__research--single h-100" style="border: 1px solid rgb(255, 38, 38); padding: 12px;">
+          <div class="rts__research--single--thumb mb-2">
+            <img alt="Beti Bachao Beti Padhao" class="img-fluid" src="https://chaitanyafiles01.s3.amazonaws.com/socialSchemes/beti_bachao.jpeg" style="height: 200px; width: 100%; object-fit: cover;"/>
+          </div>
+          <div class="rts__research--single--meta">
+            <p style="font-size:15px; color:#B71A34; margin-bottom: 5px;">Women Education</p>
+            <h4 class="rts__research--single--meta--title" style="margin-bottom: 8px;">Beti Bachao Beti Padhao</h4>
+            <p class="rts__research--single--meta--excerpt" style="margin-bottom: 0;">A national mission to empower the girl child through protection, education, and equal opportunities — ensuring her survival, safety, and success.</p>
+          </div>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-4 mb-4">
+      <a href="#" style="text-decoration: none; color: inherit;">
+        <div class="rts__research--single h-100" style="border: 1px solid rgb(255, 38, 38); padding: 12px;">
+          <div class="rts__research--single--thumb mb-2">
+            <img alt="National Service Scheme" class="img-fluid" src="https://chaitanyafiles01.s3.amazonaws.com/socialSchemes/nss.png" style="height: 200px; width: 100%; object-fit: cover;"/>
+          </div>
+          <div class="rts__research--single--meta">
+            <p style="font-size:15px; color:#B71A34; margin-bottom: 5px;">NSS</p>
+            <h4 class="rts__research--single--meta--title" style="margin-bottom: 8px;">National Service Scheme</h4>
+            <p class="rts__research--single--meta--excerpt" style="margin-bottom: 0;">NSS stands for National Service Scheme. It is a Government of India initiative under the Ministry of Youth Affairs & Sports aimed at developing the personality and character of student youth through voluntary community service</p>
+          </div>
+        </div>
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Messages Section -->
+<section class="feedback rts-section-padding">
+  <div class="container">
+    <div class="row g-4">
+      {% if director_member or chairman_member %}
+        <div class="col-lg-6">
+          {% with member=director_member|default:chairman_member %}
+            {% include 'core/includes/leadership_card.html' with member=member show_edit=True modern_home=True %}
+          {% endwith %}
+        </div>
+      {% else %}
+        <div class="col-lg-6">
+          <div class="card feedback-card h-100 home-leadership-card" style="padding:12px;">
+            <div class="card-body">
+              <div class="card-text" style="padding:5px;">
+                <div class="leadership-message-block">
+                  <div class="leadership-message-icon" aria-hidden="true">
+                    <i class="fa-solid fa-quote-left"></i>
+                  </div>
+                  <div class="leadership-message-text">Welcome to Chaitanya Science and Arts College, where our mission is to empower rural youth, especially those from economically disadvantaged backgrounds, with high-quality education. We are dedicated to fostering academic excellence, personal growth, and social responsibility in our students. Together, we aim to build a brighter future for individuals and the community.</div>
+                </div>
+                <div class="nameplate-container home-leadership-nameplate">
+                  <img alt="Mr Veerendra Tiwari" class="nameplate-img" src="https://chaitanyafiles01.s3.amazonaws.com/directorImages/DSC_0086.JPG"/>
+                  <div class="name-template">
+                    <h5 class="name leadership-name">Mr Veerendra Tiwari</h5>
+                    <p class="title">Founder and Chairman, Governing Board</p>
+                    <p class="organization">Chaitanya Science and Arts College</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+      {% if principal_member %}
+        <div class="col-lg-6">
+          {% include 'core/includes/leadership_card.html' with member=principal_member show_edit=True modern_home=True %}
+        </div>
+      {% else %}
+        <div class="col-lg-6">
+          <div class="card feedback-card h-100 home-leadership-card" style="padding:12px;">
+            <div class="card-body">
+              <div class="card-text" style="padding:5px;">
+                <div class="leadership-message-block">
+                  <div class="leadership-message-icon" aria-hidden="true">
+                    <i class="fa-solid fa-quote-left"></i>
+                  </div>
+                  <div class="leadership-message-text">Welcome to Chaitanya Science and Arts College, where we provide high-quality education to empower rural youth and foster academic and personal growth. Our goal is to help students achieve excellence and contribute positively to society. We are committed to nurturing innovation, critical thinking, and leadership skills in every student.</div>
+                </div>
+                <div class="nameplate-container home-leadership-nameplate">
+                  <img alt="Dr Vinod Kumar Gupta" class="nameplate-img" src="https://chaitanyafiles01.s3.amazonaws.com/aboutImages/vkgupta.png"/>
+                  <div class="name-template">
+                    <h5 class="name leadership-name">Dr Vinod Kumar Gupta</h5>
+                    <p class="title">Principal</p>
+                    <p class="organization">Chaitanya Science and Arts College</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<!-- Upcoming Events and Notice Board -->
+<section class="rts-notice rts-section-padding" style="background:#f8f9fa;">
+  <div class="container">
+    <div class="row gy-5 gy-lg-0 justify-content-md-center">
+      <div class="col-md-11 col-lg-7">
+        <div class="rts-event-section" style="position: relative;">
+          <!-- Header with Nav Buttons -->
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px;">
+            <h4 class="rts-section-title" style="margin: 0;">Upcoming Events</h4>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <button id="evt-prev" aria-label="Previous Event" style="width: 36px; height: 36px; border-radius: 50%; background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.08); color: #111827; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.25s; box-shadow: 0 2px 4px rgba(0,0,0,0.04);" onmouseover="this.style.background='#B71A34';this.style.borderColor='#B71A34';this.style.color='#fff';" onmouseout="this.style.background='rgba(0,0,0,0.04)';this.style.borderColor='rgba(0,0,0,0.08)';this.style.color='#111827';">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+              </button>
+              <button id="evt-next" aria-label="Next Event" style="width: 36px; height: 36px; border-radius: 50%; background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.08); color: #111827; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.25s; box-shadow: 0 2px 4px rgba(0,0,0,0.04);" onmouseover="this.style.background='#B71A34';this.style.borderColor='#B71A34';this.style.color='#fff';" onmouseout="this.style.background='rgba(0,0,0,0.04)';this.style.borderColor='rgba(0,0,0,0.08)';this.style.color='#111827';">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Swiper Container -->
+          <div id="events-swiper" class="swiper" style="overflow: hidden; width: 100%; min-width: 0; padding-bottom: 15px;">
+            <div class="swiper-wrapper">
+              {% for event in events %}
+              <div class="swiper-slide" style="width: 300px; flex-shrink: 0; box-sizing: border-box;">
+                <a href="{% url 'core:event_detail' event.id %}" style="text-decoration: none; display: block; height: 100%;">
+                  <div class="event-card-premium" style="
+                    background: #ffffff;
+                    border: 1px solid #e5e7eb;
+                    border-radius: 12px;
+                    overflow: hidden;
+                    display: flex;
+                    flex-direction: column;
+                    height: 100%;
+                    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+                    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+                  " onmouseover="this.style.transform='translateY(-6px)'; this.style.boxShadow='0 12px 20px rgba(0, 0, 0, 0.08)'; this.style.borderColor='rgba(183, 26, 52, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)'; this.style.borderColor='#e5e7eb';">
+                    
+                    <!-- Brochure/Poster (Exactly 300px X 200px) -->
+                    <div style="position: relative; width: 300px; height: 200px; overflow: hidden; background: #f3f4f6; flex-shrink: 0;">
+                      <img src="{{ event.get_image }}" alt="{{ event.title }}" style="width: 300px; height: 200px; object-fit: cover; display: block; transition: transform 0.4s ease;" onmouseover="this.style.transform='scale(1.05)';" onmouseout="this.style.transform='scale(1)';">
+                    </div>
+
+                    <!-- Textual Info -->
+                    <div style="padding: 16px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                      <div>
+                        <h5 class="event-title" style="
+                          font-size: 15px;
+                          font-weight: 700;
+                          color: #111827;
+                          margin: 0 0 12px 0;
+                          line-height: 1.4;
+                          display: -webkit-box;
+                          -webkit-line-clamp: 2;
+                          -webkit-box-orient: vertical;
+                          overflow: hidden;
+                          height: 42px;
+                        ">{{ event.title }}</h5>
+                      </div>
+                      
+                      <div class="event-meta" style="font-size: 13px; color: #4b5563; display: flex; flex-direction: column; gap: 6px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                          <span style="color: #B71A34; width: 16px; display: inline-flex; justify-content: center;"><i class="fal fa-calendar"></i></span>
+                          <span style="color: #4b5563;">{{ event.date|date:"F d, Y" }}</span>
+                        </div>
+                        {% if event.time %}
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                          <span style="color: #B71A34; width: 16px; display: inline-flex; justify-content: center;"><i class="fal fa-clock"></i></span>
+                          <span style="color: #4b5563;">{{ event.time }}</span>
+                        </div>
+                        {% endif %}
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                          <span style="color: #B71A34; width: 16px; display: inline-flex; justify-content: center;"><i class="fal fa-map-marker-alt"></i></span>
+                          <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 230px; color: #4b5563;">{{ event.location }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              </div>
+              {% empty %}
+              <div class="swiper-slide" style="width: 300px; flex-shrink: 0; box-sizing: border-box;">
+                <div class="event-card-premium" style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; height: 100%; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+                  <div style="width: 300px; height: 200px; background: #f3f4f6; display: flex; align-items: center; justify-content: center;">
+                    <span style="color: #9ca3af; font-size: 40px;">📅</span>
+                  </div>
+                  <div style="padding: 16px; text-align: center;">
+                    <h5 style="font-size: 15px; color: #6b7280; margin: 0;">No upcoming events.</h5>
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          
+          <!-- Pagination for events -->
+          <div id="events-pagination" style="display: flex; justify-content: center; gap: 6px; margin-top: 15px;"></div>
+        </div>
+      </div>
+
+      <style>
+        #events-swiper { min-width: 0 !important; width: 100% !important; overflow: hidden !important; }
+        #events-swiper .swiper-wrapper { display: flex !important; }
+        #events-swiper .swiper-slide { width: 300px !important; flex-shrink: 0; box-sizing: border-box; }
+      </style>
+
+      <script>
+        (function() {
+          var evtSwiper = null;
+
+          function buildEvtSwiper() {
+            var el = document.getElementById('events-swiper');
+            if (!el || typeof Swiper === 'undefined') return;
+            if (evtSwiper) { evtSwiper.destroy(true, true); evtSwiper = null; }
+            evtSwiper = new Swiper(el, {
+              slidesPerView: 'auto',
+              spaceBetween: 20,
+              loop: true,
+              speed: 800,
+              autoplay: { delay: 4000, disableOnInteraction: false, pauseOnMouseEnter: true },
+              navigation: { prevEl: '#evt-prev', nextEl: '#evt-next' },
+              on: { init: syncEvtDots, slideChange: syncEvtDots }
+            });
+            buildEvtDots(el.querySelectorAll('.swiper-slide:not(.swiper-slide-duplicate)').length);
+          }
+
+          function buildEvtDots(n) {
+            var pg = document.getElementById('events-pagination');
+            if (!pg) return;
+            pg.innerHTML = '';
+            for (var i = 0; i < n; i++) {
+              var d = document.createElement('button');
+              d.style.cssText = 'width:8px;height:8px;border-radius:50%;border:none;cursor:pointer;padding:0;transition:all .3s;background:rgba(0,0,0,0.15);flex-shrink:0;';
+              d.setAttribute('data-i', i);
+              d.addEventListener('click', (function(idx){ return function(){ if(evtSwiper) evtSwiper.slideToLoop(idx); }; })(i));
+              pg.appendChild(d);
+            }
+            syncEvtDots();
+          }
+
+          function syncEvtDots() {
+            if (!evtSwiper) return;
+            var pg = document.getElementById('events-pagination');
+            if (!pg) return;
+            var dots = pg.querySelectorAll('button');
+            var ri = evtSwiper.realIndex;
+            dots.forEach(function(d, i) {
+              if (i === ri) { d.style.background='#B71A34'; d.style.width='24px'; d.style.borderRadius='4px'; }
+              else          { d.style.background='rgba(0,0,0,0.15)'; d.style.width='8px'; d.style.borderRadius='50%'; }
+            });
+          }
+
+          window.addEventListener('load', buildEvtSwiper);
+        })();
+      </script>
+      
+      <div class="col-md-11 col-lg-5">
+        <div class="rts-notice-section">
+          <div class="rts-section rt-between pb--25 rts-border-bottom-2">
+            <h4 class="rts-section-title">Notice Board</h4>
+            <a class="rts-arrow" href="{% url 'core:notices' %}">View All
+              <span><i class="fa-sharp fa-regular fa-arrow-right"></i></span>
+            </a>
+          </div>
+          <div class="rts-tab">
+            <ul class="nav nav-pills pb--30" id="pills-tab" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button aria-controls="pills-home" aria-selected="true" class="nav-link active" data-bs-target="#pills-home" data-bs-toggle="pill" id="pills-home-tab" role="tab" type="button">Latest</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button aria-controls="pills-Exam" aria-selected="false" class="nav-link" data-bs-target="#pills-Exam" data-bs-toggle="pill" id="pills-Exam-tab" role="tab" type="button">Exam</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button aria-controls="pills-Admission" aria-selected="false" class="nav-link" data-bs-target="#pills-Admission" data-bs-toggle="pill" id="pills-Admission-tab" role="tab" type="button">Admission</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button aria-controls="pills-Students" aria-selected="false" class="nav-link" data-bs-target="#pills-Students" data-bs-toggle="pill" id="pills-Students-tab" role="tab" type="button">Students</button>
+              </li>
+            </ul>
+            <div class="tab-content" id="pills-tabContent">
+              <div aria-labelledby="pills-home-tab" class="tab-pane fade show active" id="pills-home" role="tabpanel" tabindex="0">
+                <ul class="list-unstyled notice-content-box">
+                  {% for notice in latest_notices %}
+                  <li class="single-notice">
+                    <div class="single-notice-item">
+                      <div class="notice-date" style="background: #E61013; color: #fff !important; padding: 6px 12px; border-radius: 6px; text-align: center; font-size: 13px; font-weight: bold; min-width: 95px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; height: 36px; box-shadow: 0 2px 4px rgba(0,0,0,0.08);">
+                        {{ notice.published_date|date:"d/m/Y" }}
+                      </div>
+                      <div class="notice-content">
+                        <p>
+                          {% if notice.document %}<a href="{{ notice.document.url }}" target="_blank">{% elif notice.document_url %}<a href="{{ notice.document_url }}" target="_blank">{% else %}<a href="#">{% endif %}
+                            {{ notice.title }}
+                          </a>
+                        </p>
+                      </div>
+                    </div>
+                  </li>
+                  {% empty %}
+                  <li class="p-3 text-muted">No notices in this category</li>
+                  {% endfor %}
+                </ul>
+              </div>
+              <div aria-labelledby="pills-Exam-tab" class="tab-pane fade" id="pills-Exam" role="tabpanel" tabindex="0">
+                <ul class="list-unstyled notice-content-box">
+                  {% for notice in exam_notices %}
+                  <li class="single-notice">
+                    <div class="single-notice-item">
+                      <div class="notice-date" style="background: #E61013; color: #fff !important; padding: 6px 12px; border-radius: 6px; text-align: center; font-size: 13px; font-weight: bold; min-width: 95px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; height: 36px; box-shadow: 0 2px 4px rgba(0,0,0,0.08);">
+                        {{ notice.published_date|date:"d/m/Y" }}
+                      </div>
+                      <div class="notice-content">
+                        <p>
+                          {% if notice.document %}<a href="{{ notice.document.url }}" target="_blank">{% elif notice.document_url %}<a href="{{ notice.document_url }}" target="_blank">{% else %}<a href="#">{% endif %}
+                            {{ notice.title }}
+                          </a>
+                        </p>
+                      </div>
+                    </div>
+                  </li>
+                  {% empty %}
+                  <li class="p-3 text-muted">No notices in this category</li>
+                  {% endfor %}
+                </ul>
+              </div>
+              <div aria-labelledby="pills-Admission-tab" class="tab-pane fade" id="pills-Admission" role="tabpanel" tabindex="0">
+                <ul class="list-unstyled notice-content-box">
+                  {% for notice in admission_notices %}
+                  <li class="single-notice">
+                    <div class="single-notice-item">
+                      <div class="notice-date" style="background: #E61013; color: #fff !important; padding: 6px 12px; border-radius: 6px; text-align: center; font-size: 13px; font-weight: bold; min-width: 95px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; height: 36px; box-shadow: 0 2px 4px rgba(0,0,0,0.08);">
+                        {{ notice.published_date|date:"d/m/Y" }}
+                      </div>
+                      <div class="notice-content">
+                        <p>
+                          {% if notice.document %}<a href="{{ notice.document.url }}" target="_blank">{% elif notice.document_url %}<a href="{{ notice.document_url }}" target="_blank">{% else %}<a href="#">{% endif %}
+                            {{ notice.title }}
+                          </a>
+                        </p>
+                      </div>
+                    </div>
+                  </li>
+                  {% empty %}
+                  <li class="p-3 text-muted">No notices in this category</li>
+                  {% endfor %}
+                </ul>
+              </div>
+              <div aria-labelledby="pills-Students-tab" class="tab-pane fade" id="pills-Students" role="tabpanel" tabindex="0">
+                <ul class="list-unstyled notice-content-box">
+                  {% for notice in student_notices %}
+                  <li class="single-notice">
+                    <div class="single-notice-item">
+                      <div class="notice-date" style="background: #E61013; color: #fff !important; padding: 6px 12px; border-radius: 6px; text-align: center; font-size: 13px; font-weight: bold; min-width: 95px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; height: 36px; box-shadow: 0 2px 4px rgba(0,0,0,0.08);">
+                        {{ notice.published_date|date:"d/m/Y" }}
+                      </div>
+                      <div class="notice-content">
+                        <p>
+                          {% if notice.document %}<a href="{{ notice.document.url }}" target="_blank">{% elif notice.document_url %}<a href="{{ notice.document_url }}" target="_blank">{% else %}<a href="#">{% endif %}
+                            {{ notice.title }}
+                          </a>
+                        </p>
+                      </div>
+                    </div>
+                  </li>
+                  {% empty %}
+                  <li class="p-3 text-muted">No notices in this category</li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Campus Video Section -->
+<div class="rts-campus rts-campus-bg v_2">
+  <div class="container">
+    <div class="row g-40 align-items-center">
+      <div class="col-lg-6">
+        <div class="rts-left-section">
+          <h2 class="section-title">Our Campus <span>Cleaner, Greener & Sustainable</span></h2>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="rts-right-section rt-relative">
+          {% if campus_media %}
+            {% if campus_media|length > 1 %}
+              <!-- Swiper for multiple campus media items -->
+              <div class="swiper campus-media-swiper" style="overflow: hidden; border-radius: 12px; position: relative;">
+                <div class="swiper-wrapper">
+                  {% for item in campus_media %}
+                    <div class="swiper-slide">
+                      <div class="campus-video" style="position: relative; cursor: pointer;">
+                        <img alt="{{ item.title }}" src="{{ item.get_image }}" style="width: 100%; height: 380px; object-fit: cover; border-radius: 12px; display: block;"/>
+                        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 40%, rgba(0,0,0,0.5) 100%); border-radius: 12px; pointer-events: none;"></div>
+                        <h4 style="position: absolute; bottom: 20px; left: 20px; color: white; margin: 0; font-size: 20px; font-weight: bold; font-family: 'Roboto Slab', serif; z-index: 10; text-shadow: 1px 1px 4px rgba(0,0,0,0.6);">{{ item.title }}</h4>
+                        {% if item.media_type == 'video' %}
+                          <a class="video-play popup-video" href="{{ item.video_url }}" style="z-index: 15;">
+                            <img alt="" class="round" src="{% static 'assets/images/icon/play-round.svg' %}"/>
+                            <img alt="" class="play-icon" src="{% static 'assets/images/icon/play-icon.svg' %}"/>
+                          </a>
+                        {% else %}
+                          <a class="video-play popup-image" href="{{ item.get_image }}" style="z-index: 15;">
+                          </a>
+                        {% endif %}
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+                <!-- Pagination / Navigation inside slider -->
+                <div class="swiper-pagination campus-swiper-pagination" id="campus-pagination" style="bottom: 15px; z-index: 20;"></div>
+                <div class="swiper-button-next campus-swiper-next" id="campus-next" style="z-index: 20;"></div>
+                <div class="swiper-button-prev campus-swiper-prev" id="campus-prev" style="z-index: 20;"></div>
+              </div>
+            {% else %}
+              <!-- Single Item layout -->
+              {% with item=campus_media.0 %}
+                <div class="campus-video" style="position: relative; cursor: pointer;">
+                  <img alt="{{ item.title }}" src="{{ item.get_image }}" style="width: 100%; height: 380px; object-fit: cover; border-radius: 12px; display: block;"/>
+                  <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 40%, rgba(0,0,0,0.5) 100%); border-radius: 12px; pointer-events: none;"></div>
+                  <h4 style="position: absolute; bottom: 20px; left: 20px; color: white; margin: 0; font-size: 20px; font-weight: bold; font-family: 'Roboto Slab', serif; z-index: 10; text-shadow: 1px 1px 4px rgba(0,0,0,0.6);">{{ item.title }}</h4>
+                  {% if item.media_type == 'video' %}
+                    <a class="video-play popup-video" href="{{ item.video_url }}" style="z-index: 15;">
+                      <img alt="" class="round" src="{% static 'assets/images/icon/play-round.svg' %}"/>
+                      <img alt="" class="play-icon" src="{% static 'assets/images/icon/play-icon.svg' %}"/>
+                    </a>
+                  {% else %}
+                    <a class="video-play popup-image" href="{{ item.get_image }}" style="z-index: 15;">
+                    </a>
+                  {% endif %}
+                </div>
+              {% endwith %}
+            {% endif %}
+          {% else %}
+            <!-- Fallback static layout -->
+            <div class="campus-video" style="position: relative; cursor: pointer;">
+              <img alt="campus images" src="{% static 'assets/images/chaitanya_video.jpg' %}" style="width: 100%; height: 380px; object-fit: cover; border-radius: 12px; display: block;"/>
+              <a class="video-play popup-video" href="https://www.youtube.com/watch?v=NwbCZVm1exI">
+                <img alt="" class="round" src="{% static 'assets/images/icon/play-round.svg' %}"/>
+                <img alt="" class="play-icon" src="{% static 'assets/images/icon/play-icon.svg' %}"/>
+              </a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Premium Stats Section Redesign */
+  .stats-card-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    padding: 30px;
+    gap: 20px;
+    margin-top: 20px;
+  }
+  
+  .stat-card-item {
+    text-align: center;
+    padding: 20px;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    background: transparent;
+    position: relative;
+  }
+  
+  /* Desktop vertical dividers */
+  .stat-card-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: -10px;
+    top: 20%;
+    height: 60%;
+    width: 1px;
+    background: #e5e7eb;
+  }
+  
+  .stat-card-item:hover {
+    transform: translateY(-4px);
+    background: rgba(183, 26, 52, 0.03);
+  }
+  
+  .stat-card-number {
+    font-size: clamp(28px, 4vw, 44px);
+    font-weight: 800;
+    color: #B71A34;
+    margin-bottom: 8px;
+    line-height: 1.1;
+    font-family: 'Roboto Slab', serif;
+  }
+  
+  .stat-card-label {
+    font-size: 14px;
+    color: #4b5563;
+    font-weight: 600;
+    margin: 0;
+    line-height: 1.4;
+  }
+  
+  /* Responsive states */
+  @media screen and (max-width: 992px) {
+    .stats-card-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      padding: 0;
+      background: transparent;
+      box-shadow: none;
+      border: none;
+      margin-top: 15px;
+    }
+    .stat-card-item:not(:last-child)::after {
+      display: none; /* Hide vertical dividers on multi-row grid */
+    }
+    /* Highlight card style for mobile/tablet */
+    .stat-card-item {
+      background: #ffffff;
+      border: 1px solid rgba(183, 26, 52, 0.1);
+      border-top: 4px solid #B71A34;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(183, 26, 52, 0.04);
+      padding: 20px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .stat-card-item:hover, .stat-card-item:active {
+      background: #ffffff;
+      border-color: rgba(183, 26, 52, 0.25);
+      box-shadow: 0 12px 24px rgba(183, 26, 52, 0.08);
+      transform: translateY(-3px);
+    }
+    .stat-card-number {
+      font-size: clamp(24px, 5vw, 36px);
+      margin-bottom: 6px;
+    }
+    .stat-card-label {
+      font-size: clamp(12px, 3.2vw, 13.5px);
+      line-height: 1.35;
+    }
+  }
+  
+  @media screen and (max-width: 480px) {
+    .stats-card-grid {
+      grid-template-columns: repeat(2, 1fr); /* 2 columns on mobile too */
+      gap: 12px;
+      padding: 0;
+    }
+    .stat-card-item {
+      padding: 16px 8px;
+      border-top-width: 3.5px;
+    }
+    .stat-card-number {
+      font-size: 26px;
+      margin-bottom: 4px;
+    }
+    .stat-card-label {
+      font-size: 11px;
+      font-weight: 500;
+      line-height: 1.35;
+    }
+  }
+
+  .campus-media-swiper .swiper-button-next,
+  .campus-media-swiper .swiper-button-prev {
+    position: absolute !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: 44px !important;
+    height: 44px !important;
+    background: rgba(183, 26, 52, 0.85) !important;
+    border-radius: 50% !important;
+    color: #ffffff !important;
+    margin-top: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 25 !important;
+    transition: all 0.3s ease !important;
+    border: none !important;
+  }
+  .campus-media-swiper .swiper-button-prev {
+    left: 15px !important;
+    right: auto !important;
+  }
+  .campus-media-swiper .swiper-button-next {
+    right: 15px !important;
+    left: auto !important;
+  }
+  .campus-media-swiper .swiper-button-next::after,
+  .campus-media-swiper .swiper-button-prev::after {
+    font-size: 16px !important;
+    font-weight: bold !important;
+    color: #ffffff !important;
+    display: block !important;
+  }
+  .campus-media-swiper .swiper-button-next:hover,
+  .campus-media-swiper .swiper-button-prev:hover {
+    background: #B71A34 !important;
+    transform: translateY(-50%) scale(1.1) !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3) !important;
+  }
+  .campus-media-swiper .swiper-pagination {
+    bottom: 15px !important;
+    z-index: 25 !important;
+    width: 100% !important;
+    text-align: center !important;
+  }
+  .campus-media-swiper .swiper-pagination-bullet {
+    background: rgba(255, 255, 255, 0.6) !important;
+    opacity: 1 !important;
+    width: 8px !important;
+    height: 8px !important;
+    margin: 0 4px !important;
+    transition: all 0.3s ease !important;
+  }
+  .campus-media-swiper .swiper-pagination-bullet-active {
+    background: #B71A34 !important;
+    width: 20px !important;
+    border-radius: 4px !important;
+  }
+  @media only screen and (max-width: 768px) {
+    .campus-media-swiper .swiper-button-next,
+    .campus-media-swiper .swiper-button-prev {
+      width: 32px !important;
+      height: 32px !important;
+    }
+    .campus-media-swiper .swiper-button-next::after,
+    .campus-media-swiper .swiper-button-prev::after {
+      font-size: 12px !important;
+    }
+  }
+</style>
+
+<!-- Campus Swiper script moved to extra_js block at the end of file -->
+
+<!-- Recent Happenings Section – Premium Redesign -->
+<section id="recent-happenings-section" style="
+  background: #ffffff;
+  padding: 80px 0 60px;
+  position: relative;
+  overflow: hidden;
+  border-top: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+">
+  <!-- Decorative blobs -->
+  <div style="position:absolute;top:-80px;right:-80px;width:320px;height:320px;background:rgba(183,26,52,0.08);border-radius:50%;filter:blur(60px);pointer-events:none;"></div>
+  <div style="position:absolute;bottom:-60px;left:-60px;width:260px;height:260px;background:rgba(48,43,99,0.05);border-radius:50%;filter:blur(50px);pointer-events:none;"></div>
+
+  <div class="container" style="position:relative;z-index:2;">
+
+    <!-- Header row -->
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:48px;">
+      <div>
+        <span style="display:inline-flex;align-items:center;gap:8px;background:rgba(183,26,52,0.1);border:1px solid rgba(183,26,52,0.3);border-radius:50px;padding:6px 18px;font-size:13px;font-weight:600;color:#B71A34;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:14px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          Knowledge Base
+        </span>
+        <h2 style="font-size:clamp(28px,4vw,44px);font-weight:800;color:#111827;margin:0;line-height:1.15;">
+          Recent <span style="background:linear-gradient(90deg,#B71A34,#ff6b8a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Happenings</span>
+        </h2>
+        <p style="color:#4b5563;font-size:15px;margin:12px 0 0;max-width:500px;line-height:1.7;">
+          Dive into the vast array of activities at our college, spanning across 18+ specializations.
+        </p>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;flex-shrink:0;">
+        <button id="hap-prev" aria-label="Previous" style="width:46px;height:46px;border-radius:50%;background:rgba(0,0,0,0.04);border:1px solid rgba(0,0,0,0.08);color:#111827;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .25s;" onmouseover="this.style.background='#B71A34';this.style.borderColor='#B71A34';this.style.color='#fff';" onmouseout="this.style.background='rgba(0,0,0,0.04)';this.style.borderColor='rgba(0,0,0,0.08)';this.style.color='#111827';">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button id="hap-next" aria-label="Next" style="width:46px;height:46px;border-radius:50%;background:rgba(0,0,0,0.04);border:1px solid rgba(0,0,0,0.08);color:#111827;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .25s;" onmouseover="this.style.background='#B71A34';this.style.borderColor='#B71A34';this.style.color='#fff';" onmouseout="this.style.background='rgba(0,0,0,0.04)';this.style.borderColor='rgba(0,0,0,0.08)';this.style.color='#111827';">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <a href="{% url 'core:happenings' %}" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#B71A34,#e8325a);color:#fff;padding:11px 24px;border-radius:50px;font-size:14px;font-weight:600;text-decoration:none;white-space:nowrap;transition:all .25s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 24px rgba(183,26,52,0.3)';" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='none';">
+          View All <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- Swiper -->
+    <div id="happenings-swiper" class="swiper" style="overflow:hidden;width:100%;min-width:0;">
+      <div class="swiper-wrapper">
+        {% for happening in happenings %}
+        <div class="swiper-slide" style="width:300px;flex-shrink:0;box-sizing:border-box;">
+          <a href="{% url 'core:happening_detail' happening.id %}" style="display:block;border-radius:16px;overflow:hidden;background:#ffffff;border:1px solid #e5e7eb;text-decoration:none;transition:transform .3s,box-shadow .3s,border-color .3s;" onmouseover="this.style.transform='translateY(-8px)';this.style.boxShadow='0 20px 50px rgba(0,0,0,0.08)';this.style.borderColor='rgba(183,26,52,0.6)';" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='none';this.style.borderColor='#e5e7eb';">
+            <div style="position:relative;width:300px;height:200px;overflow:hidden;">
+              <img src="{{ happening.get_image }}" alt="{{ happening.title }}" style="width:300px;height:200px;object-fit:cover;display:block;transition:transform .4s;" onmouseover="this.style.transform='scale(1.07)';" onmouseout="this.style.transform='scale(1)';">
+              {% if happening.category %}
+              <span style="position:absolute;top:12px;left:12px;background:#B71A34;color:#fff;font-size:11px;font-weight:700;padding:4px 12px;border-radius:50px;letter-spacing:.8px;text-transform:uppercase;">{{ happening.category }}</span>
+              {% endif %}
+            </div>
+            <div style="padding:18px 16px 20px;">
+              <p style="color:#111827;font-size:15px;font-weight:700;line-height:1.5;margin:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{{ happening.title }}</p>
+              {% if happening.date %}
+              <span style="display:inline-flex;align-items:center;gap:5px;margin-top:10px;color:#6b7280;font-size:12px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                {{ happening.date|date:"M d, Y" }}
+              </span>
+              {% endif %}
+              <div style="margin-top:12px;">
+                <span style="display:inline-flex;align-items:center;gap:5px;color:#B71A34;font-size:13px;font-weight:600;">
+                  Know More <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                </span>
+              </div>
+            </div>
+          </a>
+        </div>
+        {% empty %}
+        <!-- Fallback static slides if DB is empty -->
+        {% for item in "1234"|make_list %}
+        <div class="swiper-slide" style="width:300px;flex-shrink:0;box-sizing:border-box;">
+          <div style="border-radius:16px;overflow:hidden;background:#ffffff;border:1px solid #e5e7eb;">
+            <div style="width:300px;height:200px;background:#f3f4f6;display:flex;align-items:center;justify-content:center;">
+              <span style="color:#9ca3af;font-size:40px;">📸</span>
+            </div>
+            <div style="padding:18px 16px 20px;">
+              <p style="color:#6b7280;font-size:14px;margin:0;">No events available</p>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Custom dot pagination -->
+    <div id="happenings-pagination" style="display:flex;justify-content:center;gap:8px;margin-top:32px;"></div>
+  </div>
+</section>
+
+<style>
+  #happenings-swiper { min-width:0!important; width:100%!important; overflow:hidden!important; }
+  #happenings-swiper .swiper-wrapper { display:flex!important; }
+  #happenings-swiper .swiper-slide { width:300px!important; flex-shrink:0; box-sizing:border-box; }
+</style>
+
+<script>
+  (function() {
+    var hapSwiper = null;
+
+    function buildHapSwiper() {
+      var el = document.getElementById('happenings-swiper');
+      if (!el || typeof Swiper === 'undefined') return;
+      if (hapSwiper) { hapSwiper.destroy(true, true); hapSwiper = null; }
+      hapSwiper = new Swiper(el, {
+        slidesPerView: 'auto',
+        spaceBetween: 24,
+        loop: true,
+        speed: 700,
+        autoplay: { delay: 3000, disableOnInteraction: false, pauseOnMouseEnter: true },
+        navigation: { prevEl: '#hap-prev', nextEl: '#hap-next' },
+        on: { init: syncDots, slideChange: syncDots }
+      });
+      buildDots(el.querySelectorAll('.swiper-slide:not(.swiper-slide-duplicate)').length);
+    }
+
+    function buildDots(n) {
+      var pg = document.getElementById('happenings-pagination');
+      if (!pg) return;
+      pg.innerHTML = '';
+      for (var i = 0; i < n; i++) {
+        var d = document.createElement('button');
+        d.style.cssText = 'width:8px;height:8px;border-radius:50%;border:none;cursor:pointer;padding:0;transition:all .3s;background:rgba(0,0,0,0.15);flex-shrink:0;';
+        d.setAttribute('data-i', i);
+        d.addEventListener('click', (function(idx){ return function(){ if(hapSwiper) hapSwiper.slideToLoop(idx); }; })(i));
+        pg.appendChild(d);
+      }
+      syncDots();
+    }
+
+    function syncDots() {
+      if (!hapSwiper) return;
+      var pg = document.getElementById('happenings-pagination');
+      if (!pg) return;
+      var dots = pg.querySelectorAll('button');
+      var ri = hapSwiper.realIndex;
+      dots.forEach(function(d, i) {
+        if (i === ri) { d.style.background='#B71A34'; d.style.width='24px'; d.style.borderRadius='4px'; }
+        else          { d.style.background='rgba(0,0,0,0.15)'; d.style.width='8px'; d.style.borderRadius='50%'; }
+      });
+    }
+
+    window.addEventListener('load', buildHapSwiper);
+  })();
+</script>
+
+<!-- Testimonials Section -->
+<section class="feedback rts-section-padding">
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-12">
+        <div class="rts__section--wrapper v__9">
+          <h2 class="rts__section--title">Our Students Feedback</h2>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="rts__testimonial--active swiper swiper-data" data-swiper='{"slidesPerView":3,"loop":true,"speed":1000,"pagination":{"el":".rts__pagination","clickable":true},"autoplay":{"delay":"7000"},"breakpoints":{"320":{"slidesPerView":1},"575":{"slidesPerView":1.5},"768":{"slidesPerView":2},"991":{"slidesPerView":2.2},"1201":{"slidesPerView":3}}}'>
+          <div class="swiper-wrapper">
+            {% for testimonial in testimonials %}
+            <div class="swiper-slide">
+              <div class="rts__single--testimonial" style="height:350px;">
+                <div class="rts__rating--star">
+                  {% for i in "12345"|make_list %}
+                    {% if testimonial.rating >= forloop.counter %}
+                      <i class="fa-sharp fa-solid fa-star"></i>
+                    {% endif %}
+                  {% endfor %}
+                </div>
+                <p class="rts__single--testimonial--text">{{ testimonial.text }}</p>
+                <div class="rts__single--testimonial--author">
+                  <div class="rts__single--testimonial--author--meta">
+                    {% if testimonial.photo or testimonial.photo_url %}
+                    <div class="rts__author--img">
+                      <img alt="author" src="{{ testimonial.get_photo }}" style="width:60px; height:60px; object-fit:cover; border-radius:50%;"/>
+                    </div>
+                    {% endif %}
+                    <div class="rts__author--info">
+                      <h5 class="mb-0">{{ testimonial.student_name }}</h5>
+                      <span class="designation">{{ testimonial.program }}</span>
+                    </div>
+                  </div>
+                  <div class="rts__single--testimonial--quote">
+                    <img alt="quote" src="{% static 'assets/images/testimonial/quote.svg' %}"/>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% empty %}
+            <!-- Fallbacks -->
+            <div class="swiper-slide">
+              <div class="rts__single--testimonial" style="height:350px;">
+                <div class="rts__rating--star">
+                  <i class="fa-sharp fa-solid fa-star"></i><i class="fa-sharp fa-solid fa-star"></i><i class="fa-sharp fa-solid fa-star"></i><i class="fa-sharp fa-solid fa-star"></i><i class="fa-sharp fa-solid fa-star"></i>
+                </div>
+                <p class="rts__single--testimonial--text">My M.Sc. in Zoology was exceptional, offering in-depth learning, fieldwork experience, and outstanding mentorship. Truly a life-changing journey!</p>
+                <div class="rts__single--testimonial--author">
+                  <div class="rts__single--testimonial--author--meta">
+                    <div class="rts__author--img">
+                      <img alt="author" src="https://chaitanyafiles01.s3.amazonaws.com/testimonials/IMG-20240726-WA0010.jpg" style="width:60px;"/>
+                    </div>
+                    <div class="rts__author--info">
+                      <h5 class="mb-0">Rani Gauraha</h5>
+                      <span class="designation">M.Sc. Zoology (2022-23)</span>
+                    </div>
+                  </div>
+                  <div class="rts__single--testimonial--quote">
+                    <img alt="quote" src="{% static 'assets/images/testimonial/quote.svg' %}"/>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="swiper-slide">
+              <div class="rts__single--testimonial" style="height:350px;">
+                <div class="rts__rating--star">
+                  <i class="fa-sharp fa-solid fa-star"></i><i class="fa-sharp fa-solid fa-star"></i><i class="fa-sharp fa-solid fa-star"></i><i class="fa-sharp fa-solid fa-star"></i><i class="fa-sharp fa-solid fa-star"></i>
+                </div>
+                <p class="rts__single--testimonial--text">Completing my B.Sc in Biology was transformative, providing hands-on experience, deep knowledge, and inspiring a passion for research. Highly recommended!</p>
+                <div class="rts__single--testimonial--author">
+                  <div class="rts__single--testimonial--author--meta">
+                    <div class="rts__author--img">
+                      <img alt="author" src="https://chaitanyafiles01.s3.amazonaws.com/testimonials/IMG-20240726-WA0011.jpg" style="width:60px;"/>
+                    </div>
+                    <div class="rts__author--info">
+                      <h5 class="mb-0">Nidhi Devdas</h5>
+                      <span class="designation">B.Sc. Bio (2022-23)</span>
+                    </div>
+                  </div>
+                  <div class="rts__single--testimonial--quote">
+                    <img alt="quote" src="{% static 'assets/images/testimonial/quote.svg' %}"/>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="swiper-slide">
+              <div class="rts__single--testimonial" style="height:350px;">
+                <div class="rts__rating--star">
+                  <i class="fa-sharp fa-solid fa-star"></i><i class="fa-sharp fa-solid fa-star"></i><i class="fa-sharp fa-solid fa-star"></i><i class="fa-sharp fa-solid fa-star"></i><i class="fa-sharp fa-solid fa-star"></i>
+                </div>
+                <p class="rts__single--testimonial--text">The supportive faculty and dynamic learning environment helped me build confidence and expertise in social work practice.</p>
+                <div class="rts__single--testimonial--author">
+                  <div class="rts__single--testimonial--author--meta">
+                    <div class="rts__author--img">
+                      <img alt="author" src="https://chaitanyafiles01.s3.amazonaws.com/testimonials/Jharna_MSW.jpg" style="width:60px;"/>
+                    </div>
+                    <div class="rts__author--info">
+                      <h5 class="mb-0">Jharna Sahu</h5>
+                      <span class="designation">MSW (2022-23)</span>
+                    </div>
+                  </div>
+                  <div class="rts__single--testimonial--quote">
+                    <img alt="quote" src="{% static 'assets/images/testimonial/quote.svg' %}"/>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          <div class="rts__pagination v__1"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Career Guidance Form Section -->
+<section class="rts-application-area rts-section-padding v_2 v__3">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-sm-12">
+        <div class="rts__section--wrapper v__11 rt-center">
+          <h6 class="rts__section--subheading"><img alt="" src="{% static 'assets/images/icon/e-cap-small.svg' %}"/>Admission</h6>
+          <h2 class="rts__section--title mb-0">Get Career Guidance</h2>
+        </div>
+      </div>
+    </div>
+    
+    <div class="row justify-content-center">
+      <div class="col-lg-12">
+        <div class="rts-admission-form-image">
+          <img alt="" src="{% static 'assets/images/feature/admission.jpg' %}"/>
+        </div>
+      </div>
+      <div class="col-lg-10">
+        <div class="rts-application-form">
+          <div class="rts-application-form-content v__3">
+            <h5 class="heading-title mb--25">Contact Us Form</h5>
+            
+            <form class="rts-form" method="POST" action="{% url 'core:home' %}">
+              {% csrf_token %}
+              <div class="rts-input rt-flex">
+                <div class="single-input">
+                  {{ form.fname }}
+                  {% if form.fname.errors %}
+                    <div class="text-danger small mt-1">{{ form.fname.errors|striptags }}</div>
+                  {% endif %}
+                </div>
+                <div class="single-input">
+                  {{ form.lname }}
+                  {% if form.lname.errors %}
+                    <div class="text-danger small mt-1">{{ form.lname.errors|striptags }}</div>
+                  {% endif %}
+                </div>
+                <div class="single-input">
+                  {{ form.email }}
+                  {% if form.email.errors %}
+                    <div class="text-danger small mt-1">{{ form.email.errors|striptags }}</div>
+                  {% endif %}
+                </div>
+                <div class="single-input">
+                  {{ form.phone }}
+                  {% if form.phone.errors %}
+                    <div class="text-danger small mt-1">{{ form.phone.errors|striptags }}</div>
+                  {% endif %}
+                </div>
+              </div>
+              <div class="rts-input w-full">
+                <div class="single-input mt-4">
+                  {{ form.msg }}
+                  {% if form.msg.errors %}
+                    <div class="text-danger small mt-1">{{ form.msg.errors|striptags }}</div>
+                  {% endif %}
+                </div>
+              </div>
+              <button class="rts-theme-btn rts-nbg-btn btn-arrow v2 full-btn mt-4" type="submit">
+                Get Career Guidance
+                <span><i class="fa-sharp fa-regular fa-arrow-right"></i></span>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% if active_popups %}
+<!-- Multi-Announcement Popup Hub -->
+<div id="homepage-announcement-modal" class="announcement-modal-overlay" style="display: none;">
+  <div class="announcement-modal-wrapper">
+    <div class="announcement-modal-card">
+
+      <!-- Close button — always visible -->
+      <button class="announcement-modal-close-btn" aria-label="Close Announcements">&times;</button>
+
+      <!-- ======== LIST VIEW ======== -->
+      <div id="popup-list-view" class="popup-view popup-view--active">
+        <div class="popup-list-header">
+          <div class="popup-list-header-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#B71A34" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          </div>
+          <span class="popup-list-badge">{{ active_popups|length }}</span>
+          <h3 class="popup-list-title">Announcements</h3>
+        </div>
+        <ul class="popup-list-items">
+          {% for popup in active_popups %}
+          <li class="popup-list-item" data-popup-id="{{ popup.id }}">
+            <div class="popup-list-item-icon">
+              {% if popup.get_image %}
+              <img src="{{ popup.get_image }}" alt="" class="popup-list-thumb">
+              {% else %}
+              <div class="popup-list-thumb-placeholder">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+              </div>
+              {% endif %}
+            </div>
+            <div class="popup-list-item-text">
+              <span class="popup-list-item-title">{{ popup.title }}</span>
+              <span class="popup-list-item-date">{{ popup.updated_at|date:"M d, Y" }}</span>
+            </div>
+            <div class="popup-list-item-arrow">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <!-- ======== DETAIL VIEWS (one per popup, hidden initially) ======== -->
+      {% for popup in active_popups %}
+      <div id="popup-detail-{{ popup.id }}" class="popup-view popup-detail-view">
+        <!-- Back button to list -->
+        <button class="popup-back-btn" aria-label="Back to list">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+          <span>All Announcements</span>
+        </button>
+
+        <div class="announcement-modal-body {% if popup.get_image %}has-image{% else %}no-image{% endif %}">
+          {% if popup.get_image %}
+          <div class="announcement-modal-image-col">
+            <img src="{{ popup.get_image }}" alt="{{ popup.title }}" class="announcement-modal-img">
+          </div>
+          {% endif %}
+
+          <div class="announcement-modal-content-col">
+            <div class="announcement-modal-header">
+              <h3 class="announcement-modal-title">{{ popup.title }}</h3>
+            </div>
+            {% if popup.text %}
+            <div class="announcement-modal-text">
+              {{ popup.text|safe }}
+            </div>
+            {% endif %}
+            <div class="announcement-modal-footer">
+              {% if popup.link %}
+              <a href="{{ popup.link }}" class="announcement-cta-btn">
+                {{ popup.link_text|default:"Learn More" }}
+                <span><i class="fa-sharp fa-regular fa-arrow-right"></i></span>
+              </a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+
+    </div>
+  </div>
+</div>
+
+<style>
+  /* ===== Modal Overlay ===== */
+  .announcement-modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 10000;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    background: rgba(17, 24, 39, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    padding: 20px;
+  }
+  .announcement-modal-overlay.show { opacity: 1; }
+
+  /* ===== Modal Card ===== */
+  .announcement-modal-wrapper {
+    width: 100%;
+    max-width: 800px;
+  }
+  .announcement-modal-card {
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    position: relative;
+    overflow: hidden;
+    max-height: 88vh;
+    transform: scale(0.85) translateY(30px);
+    opacity: 0;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease;
+    width: 100%;
+  }
+  .announcement-modal-overlay.show .announcement-modal-card {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+
+  /* ===== Close Button ===== */
+  .announcement-modal-close-btn {
+    position: absolute;
+    top: 14px; right: 14px;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: rgba(17, 24, 39, 0.07);
+    border: none;
+    font-size: 22px;
+    color: #6b7280;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.25s ease;
+    z-index: 20;
+    line-height: 1;
+  }
+  .announcement-modal-close-btn:hover {
+    background: #E61013;
+    color: #ffffff;
+    transform: rotate(90deg);
+  }
+
+  /* ===== View Transitions ===== */
+  .popup-view {
+    display: none;
+    opacity: 0;
+    transform: translateX(20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+  .popup-view--active {
+    display: block;
+    opacity: 1;
+    transform: translateX(0);
+  }
+  .popup-view--exit-left {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  .popup-view--enter-right {
+    transform: translateX(20px);
+  }
+
+  /* ===== LIST VIEW ===== */
+  .popup-list-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 28px 28px 0 28px;
+    margin-bottom: 6px;
+  }
+  .popup-list-header-icon {
+    width: 48px; height: 48px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, rgba(183, 26, 52, 0.08), rgba(183, 26, 52, 0.15));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .popup-list-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: #111827;
+    margin: 0;
+    flex-grow: 1;
+    font-family: 'Roboto Slab', serif;
+  }
+  .popup-list-badge {
+    background: linear-gradient(135deg, #E61013, #b71a34);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    min-width: 26px; height: 26px;
+    border-radius: 50px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 8px;
+    flex-shrink: 0;
+  }
+
+  /* ===== List Items ===== */
+  .popup-list-items {
+    list-style: none;
+    margin: 0;
+    padding: 12px 16px 16px 16px;
+    max-height: calc(88vh - 120px);
+    overflow-y: auto;
+  }
+  .popup-list-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    margin-bottom: 4px;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+  }
+  .popup-list-item:hover {
+    background: #f8f9fa;
+    border-color: rgba(183, 26, 52, 0.12);
+  }
+  .popup-list-item:active {
+    transform: scale(0.98);
+  }
+
+  /* Thumbnail */
+  .popup-list-item-icon {
+    width: 52px; height: 52px;
+    border-radius: 12px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .popup-list-thumb {
+    width: 52px; height: 52px;
+    object-fit: cover;
+    display: block;
+  }
+  .popup-list-thumb-placeholder {
+    width: 52px; height: 52px;
+    background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+  }
+
+  /* Text */
+  .popup-list-item-text {
+    flex-grow: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .popup-list-item-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #111827;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .popup-list-item-date {
+    font-size: 12px;
+    color: #9ca3af;
+    font-weight: 500;
+  }
+
+  /* Arrow */
+  .popup-list-item-arrow {
+    flex-shrink: 0;
+    color: #d1d5db;
+    transition: color 0.2s, transform 0.2s;
+  }
+  .popup-list-item:hover .popup-list-item-arrow {
+    color: #B71A34;
+    transform: translateX(3px);
+  }
+
+  /* Scrollbar for list */
+  .popup-list-items::-webkit-scrollbar { width: 5px; }
+  .popup-list-items::-webkit-scrollbar-track { background: transparent; }
+  .popup-list-items::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 10px; }
+  .popup-list-items::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
+
+  /* ===== BACK BUTTON ===== */
+  .popup-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    color: #6b7280;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 20px 28px 10px 28px;
+    transition: color 0.2s;
+  }
+  .popup-back-btn:hover {
+    color: #B71A34;
+  }
+  .popup-back-btn svg { transition: transform 0.2s; }
+  .popup-back-btn:hover svg { transform: translateX(-3px); }
+
+  /* ===== DETAIL VIEW ===== */
+  .popup-detail-view {
+    overflow-y: auto;
+    max-height: 88vh;
+  }
+
+  /* Image section */
+  .announcement-modal-body {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .announcement-modal-image-col {
+    width: 100%;
+    background: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 18px;
+  }
+  .announcement-modal-img {
+    width: 100%;
+    height: auto;
+    max-height: 55vh;
+    object-fit: contain;
+    display: block;
+    border-radius: 10px;
+  }
+
+  /* Content section */
+  .announcement-modal-content-col {
+    padding: 22px 28px 28px;
+    display: flex;
+    flex-direction: column;
+  }
+  .announcement-modal-body.no-image .announcement-modal-content-col {
+    padding: 20px 28px 28px;
+  }
+
+  /* Title */
+  .announcement-modal-title {
+    font-size: clamp(18px, 3vw, 22px);
+    font-weight: 800;
+    color: #111827;
+    margin: 0 0 14px 0;
+    line-height: 1.3;
+    font-family: 'Roboto Slab', serif;
+    position: relative;
+    padding-bottom: 12px;
+  }
+  .announcement-modal-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 60px; height: 3px;
+    background: #E61013;
+    border-radius: 2px;
+  }
+
+  /* Rich Text */
+  .announcement-modal-text {
+    color: #4b5563;
+    font-size: 14px;
+    line-height: 1.65;
+    margin-bottom: 20px;
+    max-height: 200px;
+    overflow-y: auto;
+    padding-right: 8px;
+  }
+  .announcement-modal-text::-webkit-scrollbar { width: 5px; }
+  .announcement-modal-text::-webkit-scrollbar-track { background: #f3f4f6; border-radius: 10px; }
+  .announcement-modal-text::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+  /* Action Buttons */
+  .announcement-modal-footer {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .announcement-cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #E61013, #b71a34);
+    color: #ffffff !important;
+    padding: 11px 22px;
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none !important;
+    box-shadow: 0 4px 12px rgba(230, 16, 19, 0.25);
+    transition: all 0.3s ease;
+  }
+  .announcement-cta-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(230, 16, 19, 0.4);
+    background: linear-gradient(135deg, #f01e22, #c7203d);
+  }
+  .announcement-cta-btn span i { transition: transform 0.3s ease; }
+  .announcement-cta-btn:hover span i { transform: translateX(4px); }
+
+  /* Detail view scrollbar */
+  .popup-detail-view::-webkit-scrollbar { width: 5px; }
+  .popup-detail-view::-webkit-scrollbar-track { background: transparent; }
+  .popup-detail-view::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 10px; }
+
+  /* ===== Responsive ===== */
+  @media (max-width: 640px) {
+    .announcement-modal-wrapper { max-width: 100%; }
+    .popup-list-header { padding: 22px 18px 0 18px; }
+    .popup-list-items { padding: 10px 10px 14px 10px; }
+    .popup-list-item { padding: 12px; gap: 10px; }
+    .popup-list-item-icon { width: 44px; height: 44px; border-radius: 10px; }
+    .popup-list-thumb { width: 44px; height: 44px; }
+    .popup-list-thumb-placeholder { width: 44px; height: 44px; }
+    .popup-list-title { font-size: 18px; }
+    .popup-back-btn { padding: 16px 18px 8px 18px; }
+    .announcement-modal-image-col { padding: 0 12px; }
+    .announcement-modal-img { max-height: 45vh; }
+    .announcement-modal-content-col { padding: 16px 18px 22px; }
+    .announcement-modal-body.no-image .announcement-modal-content-col { padding: 12px 18px 22px; }
+    .announcement-modal-text { max-height: 140px; margin-bottom: 14px; }
+  }
+</style>
+
+<script>
+  (function() {
+    document.addEventListener("DOMContentLoaded", function() {
+      var modal = document.getElementById("homepage-announcement-modal");
+      if (!modal) return;
+
+      // Session check — use a combined key for all active popup IDs
+      var popupIds = [];
+      {% for popup in active_popups %}
+      popupIds.push("{{ popup.id }}");
+      {% endfor %}
+
+      var showOnce = {% if active_popups.0.show_once_per_session %}true{% else %}false{% endif %};
+      var sessionKey = "csac_popups_shown_" + popupIds.sort().join("_");
+
+      // Clear old single-popup session keys (from previous code)
+      for (var i = 0; i < sessionStorage.length; i++) {
+        var key = sessionStorage.key(i);
+        if (key && key.indexOf("csac_popup_shown_") === 0) {
+          sessionStorage.removeItem(key);
+        }
+      }
+
+      if (showOnce && sessionStorage.getItem(sessionKey)) {
+        return;
+      }
+
+      // Show the modal after a brief delay
+      setTimeout(function() {
+        modal.style.display = "flex";
+        setTimeout(function() {
+          modal.classList.add("show");
+        }, 50);
+
+        if (showOnce) {
+          sessionStorage.setItem(sessionKey, "true");
+        }
+      }, 800);
+
+      // ====== View Navigation ======
+      var listView = document.getElementById("popup-list-view");
+      var allDetailViews = modal.querySelectorAll(".popup-detail-view");
+
+      // Show a specific view with animation
+      function showView(targetView, direction) {
+        // Hide all views
+        var allViews = modal.querySelectorAll(".popup-view");
+        allViews.forEach(function(v) {
+          v.classList.remove("popup-view--active");
+          v.style.display = "none";
+        });
+
+        // Show target
+        targetView.style.display = "block";
+        targetView.style.opacity = "0";
+        targetView.style.transform = direction === "right" ? "translateX(20px)" : "translateX(-20px)";
+
+        // Force reflow for animation
+        targetView.offsetHeight;
+
+        targetView.classList.add("popup-view--active");
+        targetView.style.opacity = "1";
+        targetView.style.transform = "translateX(0)";
+      }
+
+      // List item clicks → open detail
+      var listItems = modal.querySelectorAll(".popup-list-item");
+      listItems.forEach(function(item) {
+        item.addEventListener("click", function() {
+          var popupId = this.getAttribute("data-popup-id");
+          var detailView = document.getElementById("popup-detail-" + popupId);
+          if (detailView) {
+            showView(detailView, "right");
+            detailView.scrollTop = 0;
+          }
+        });
+      });
+
+      // Back buttons → return to list
+      var backBtns = modal.querySelectorAll(".popup-back-btn");
+      backBtns.forEach(function(btn) {
+        btn.addEventListener("click", function() {
+          showView(listView, "left");
+        });
+      });
+
+      // ====== Close Modal ======
+      function closeModal() {
+        modal.classList.remove("show");
+        setTimeout(function() {
+          modal.style.display = "none";
+          // Reset to list view for next open
+          showView(listView, "left");
+        }, 400);
+      }
+
+      var closeBtn = modal.querySelector(".announcement-modal-close-btn");
+      if (closeBtn) closeBtn.addEventListener("click", closeModal);
+
+      modal.addEventListener("click", function(e) {
+        if (e.target === modal) closeModal();
+      });
+
+      document.addEventListener("keydown", function(e) {
+        if (e.key === "Escape" && modal.style.display === "flex") closeModal();
+      });
+
+      // If only 1 popup, auto-open its detail directly
+      if (popupIds.length === 1) {
+        var singleDetail = document.getElementById("popup-detail-" + popupIds[0]);
+        if (singleDetail) {
+          // Hide the back button since there's only one
+          var backBtn = singleDetail.querySelector(".popup-back-btn");
+          if (backBtn) backBtn.style.display = "none";
+          showView(singleDetail, "right");
+        }
+      }
+    });
+  })();
+</script>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  $(document).ready(function() {
+    // Initialize Campus Media Swiper if element exists and Swiper is loaded
+    if (typeof Swiper !== 'undefined' && document.querySelector('.campus-media-swiper')) {
+      new Swiper('.campus-media-swiper', {
+        slidesPerView: 1,
+        loop: true,
+        speed: 800,
+        autoplay: { delay: 5000, disableOnInteraction: false, pauseOnMouseEnter: true },
+        navigation: {
+          nextEl: '#campus-next',
+          prevEl: '#campus-prev',
+        },
+        pagination: {
+          el: '#campus-pagination',
+          clickable: true,
+        }
+      });
+    }
+
+    // Initialize Campus Lightbox Popups
+    if (typeof $.fn.magnificPopup !== 'undefined') {
+      $('.popup-image').magnificPopup({
+        type: 'image',
+        closeOnContentClick: true,
+        mainClass: 'mfp-img-mobile',
+        image: {
+          verticalFit: true
+        }
+      });
+    }
+
+    // Make the entire campus video container clickable to open in full screen
+    $('.campus-video').on('click', function(e) {
+      var link = $(this).find('.popup-video, .popup-image');
+      if (link.length) {
+        if (!$(e.target).closest('.popup-video, .popup-image').length) {
+          e.preventDefault();
+          link[0].click(); // Triggers browser native click on the anchor tag
+        }
+      }
+    });
+  });
+</script>
+{% endblock %}

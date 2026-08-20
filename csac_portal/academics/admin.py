@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (
     Department, DepartmentFaculty, DepartmentActivity, Program, ProgramType,
-    COPOMapping, Syllabus, AcademicCalendar, DepartmentBanner,
+    COPOMapping, Syllabus, AcademicCalendar, DepartmentBanner, DepartmentLink,
 )
 from .forms import DepartmentFacultyForm, DepartmentForm, DepartmentBannerForm, ProgramForm, ProgramTypeForm
 
@@ -26,6 +26,12 @@ class DepartmentActivityInline(admin.TabularInline):
     fields = ('title', 'description', 'image', 'date')
 
 
+class DepartmentLinkInline(admin.TabularInline):
+    model = DepartmentLink
+    extra = 1
+    fields = ('title', 'url', 'image', 'order')
+
+
 @admin.register(Department)
 class DepartmentAdmin(admin.ModelAdmin):
     form = DepartmentForm
@@ -34,9 +40,9 @@ class DepartmentAdmin(admin.ModelAdmin):
     list_editable = ('order',)
     prepopulated_fields = {'slug': ('name',)}
     search_fields = ('name', 'hod_name')
-    inlines = [DepartmentBannerInline, DepartmentFacultyInline, DepartmentActivityInline]
+    inlines = [DepartmentBannerInline, DepartmentFacultyInline, DepartmentActivityInline, DepartmentLinkInline]
     fieldsets = (
-        ('Basic Info', {'fields': ('name', 'slug', 'category', 'established_year', 'order')}),
+        ('Basic Info', {'fields': ('name', 'slug', 'category', 'established_year', 'external_links_heading', 'order')}),
         ('HOD', {'fields': ('hod_name', 'hod_photo', 'hod_message')}),
         ('Description', {'fields': ('description',)}),
         ('Banner', {'fields': ('banner_image', 'banner_image_url')}),
@@ -96,3 +102,11 @@ class AcademicCalendarAdmin(admin.ModelAdmin):
     list_display = ('title', 'academic_year', 'is_active')
     list_filter = ('academic_year', 'is_active')
     list_editable = ('is_active',)
+
+
+@admin.register(DepartmentLink)
+class DepartmentLinkAdmin(admin.ModelAdmin):
+    list_display = ('title', 'department', 'url', 'order')
+    list_filter = ('department',)
+    list_editable = ('order',)
+    search_fields = ('title', 'url')

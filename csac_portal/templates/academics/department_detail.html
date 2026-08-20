@@ -281,6 +281,49 @@
         </div>
         {% endif %}
 
+        <!-- Department External Links -->
+        {% if dept.links.all %}
+        <div class="row mt-5 mb-5">
+            <div class="col-12">
+                <h4 class="fw-bold mb-4 pb-2 border-bottom" style="border-color: #E61013 !important; color: #E61013;">
+                    <i class="fas fa-link me-2"></i>{{ dept.external_links_heading|default:"Other External Links" }}
+                </h4>
+                <div class="row g-4">
+                    {% for link in dept.links.all %}
+                    <div class="col-md-6 col-lg-3 d-flex">
+                        <div class="card w-100 border-0 shadow-sm overflow-hidden d-flex flex-column" style="border-radius: 8px; transition: transform 0.3s ease, box-shadow 0.3s ease; border: 1px solid #eee !important;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.1)'" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.05)'">
+                            {% if link.image %}
+                            <div style="height: 140px; overflow: hidden;">
+                                <a href="{{ link.url }}" target="_blank">
+                                    <img src="{{ link.image.url }}" alt="{{ link.title }}" class="w-100 h-100" style="object-fit: cover; transition: transform 0.5s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                                </a>
+                            </div>
+                            {% else %}
+                            <div class="d-flex align-items-center justify-content-center bg-light" style="height: 140px; border-bottom: 1px solid #eee;">
+                                <a href="{{ link.url }}" target="_blank" class="text-center text-decoration-none">
+                                    <img src="{{ link.get_favicon_url }}" alt="Favicon" style="width: 48px; height: 48px; object-fit: contain; padding: 4px; border: 1px solid #ddd; border-radius: 8px; background: white;">
+                                </a>
+                            </div>
+                            {% endif %}
+                            <div class="card-body p-4 d-flex flex-column justify-content-between flex-grow-1">
+                                <h6 class="card-title fw-bold mb-3" style="font-size: 16px; line-height: 1.4;">
+                                    <a href="{{ link.url }}" target="_blank" class="text-dark text-decoration-none" style="transition: color 0.2s;" onmouseover="this.style.color='#E61013'" onmouseout="this.style.color='#212529'">{{ link.title }}</a>
+                                </h6>
+                                <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top" style="border-color: #eee !important;">
+                                    <span class="text-muted small" style="font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;">{{ link.url }}</span>
+                                    <a href="{{ link.url }}" target="_blank" class="fw-semibold text-decoration-none d-flex align-items-center" style="font-size: 13px; color: #E61013;">
+                                        Visit <i class="fa-sharp fa-regular fa-arrow-up-right-from-square ms-2" style="font-size: 10px;"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
     </div>
 </section>
 

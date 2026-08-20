@@ -19,6 +19,12 @@ class Department(models.Model):
     banner_image_url = models.URLField(blank=True)
     established_year = models.IntegerField(blank=True, null=True)
     order = models.PositiveIntegerField(default=0)
+    external_links_heading = models.CharField(
+        max_length=200,
+        default="Other External Links",
+        blank=True,
+        help_text="Heading for the external links section on the department page"
+    )
 
     class Meta:
         ordering = ['order', 'name']
@@ -186,3 +192,35 @@ class AcademicCalendar(models.Model):
 
     def __str__(self):
         return f"{self.title} ({self.academic_year})"
+
+
+class DepartmentLink(models.Model):
+    department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='links')
+    title = models.CharField(max_length=200)
+    url = models.URLField(verbose_name="URL")
+    image = models.ImageField(
+        upload_to='dept/links/',
+        blank=True,
+        null=True,
+        help_text="Upload a cover image for this link card. If left blank, the website favicon will be resolved."
+    )
+    order = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['order', '-created_at']
+        verbose_name = "Department Link"
+        verbose_name_plural = "Department Links"
+
+    def __str__(self):
+        return f"{self.title} ({self.department.name})"
+
+    def get_favicon_url(self):
+        """Resolves the favicon URL based on the URL domain."""
+        from urllib.parse import urlparse
+        try:
+            parsed_url = urlparse(self.url)
+            domain = parsed_url.netloc
+            return f"https://www.google.com/s2/favicons?sz=128&domain={domain}"
+        except Exception:
+            return "https://www.google.com/s2/favicons?sz=128&domain=github.com"

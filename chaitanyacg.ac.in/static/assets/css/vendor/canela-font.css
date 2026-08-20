@@ -1,0 +1,66 @@
+
+@font-face {
+    font-family: 'Canela trial';
+    src: url('../../fonts/Canela-Bold.eot');
+    src: url('../../fonts/Canela-Bold.eot%3F') format('embedded-opentype'),
+        url('../../fonts/Canela-Bold.woff2') format('woff2'),
+        url('../../fonts/Canela-Bold.woff') format('woff');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Canela trial';
+    src: url('https://html.themewant.com/unipix/assets/fonts/Canela-MediumItalic.eot');
+    src: url('https://html.themewant.com/unipix/assets/fonts/Canela-MediumItalic.eot?') format('embedded-opentype'),
+        url('https://html.themewant.com/unipix/assets/fonts/Canela-MediumItalic.woff2') format('woff2'),
+        url('https://html.themewant.com/unipix/assets/fonts/Canela-MediumItalic.woff') format('woff');
+    font-weight: 500;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Canela trial';
+    src: url('https://html.themewant.com/unipix/assets/fonts/Canela-RegularItalic.eot');
+    src: url('https://html.themewant.com/unipix/assets/fonts/Canela-RegularItalic.eot?') format('embedded-opentype'),
+        url('https://html.themewant.com/unipix/assets/fonts/Canela-RegularItalic.woff2') format('woff2'),
+        url('https://html.themewant.com/unipix/assets/fonts/Canela-RegularItalic.woff') format('woff');
+    font-weight: normal;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Canela trial';
+    src: url('https://html.themewant.com/unipix/assets/fonts/Canela-BoldItalic.eot');
+    src: url('https://html.themewant.com/unipix/assets/fonts/Canela-BoldItalic.eot?') format('embedded-opentype'),
+        url('https://html.themewant.com/unipix/assets/fonts/Canela-BoldItalic.woff2') format('woff2'),
+        url('https://html.themewant.com/unipix/assets/fonts/Canela-BoldItalic.woff') format('woff');
+    font-weight: bold;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Canela trial';
+    src: url('../../fonts/Canela-Medium.eot');
+    src: url('../../fonts/Canela-Medium.eot%3F') format('embedded-opentype'),
+        url('../../fonts/Canela-Medium.woff2') format('woff2'),
+        url('../../fonts/Canela-Medium.woff') format('woff');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Canela trial';
+    src: url('../../fonts/Canela-Regular.eot');
+    src: url('../../fonts/Canela-Regular.eot%3F') format('embedded-opentype'),
+        url('../../fonts/Canela-Regular.woff2') format('woff2'),
+        url('../../fonts/Canela-Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}

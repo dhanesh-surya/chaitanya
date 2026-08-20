@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 {% load static %}
 
 {% block extra_css %}
@@ -220,7 +220,7 @@
                 {% if syllabi %}
                 <div class="list-group shadow-sm border bg-white rounded">
                     {% for syllabus in syllabi %}
-                    <a href="{{ syllabus.document.url }}" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between p-3" download>
+                    <a href="{{ syllabus.get_document }}" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between p-3" download>
                         <div>
                             <h6 class="fw-bold mb-1 text-dark"><i class="fas fa-file-pdf text-danger me-2"></i> {{ syllabus.title }}</h6>
                             <small class="text-muted">Academic Year: {{ syllabus.academic_year }}</small>

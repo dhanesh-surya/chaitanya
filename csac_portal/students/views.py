@@ -99,9 +99,11 @@ def merit_list(request):
 
 
 def syllabus(request):
-    syllabi = Syllabus.objects.select_related('department', 'program').all()
+    nep_syllabi = Syllabus.objects.filter(is_nep_2020=True).select_related('department', 'program').order_by('order', '-uploaded_at')
+    other_syllabi = Syllabus.objects.filter(is_nep_2020=False).select_related('department', 'program').order_by('order', '-uploaded_at')
     context = {
-        'syllabi': syllabi,
+        'nep_syllabi': nep_syllabi,
+        'other_syllabi': other_syllabi,
         'page_title': 'Syllabus',
         'breadcrumb': 'Syllabus',
     }

@@ -85,9 +85,9 @@ class COPOMappingAdmin(admin.ModelAdmin):
 
 @admin.register(Syllabus)
 class SyllabusAdmin(admin.ModelAdmin):
-    list_display = ('title', 'department', 'program', 'academic_year', 'order', 'uploaded_at')
-    list_filter = ('department', 'academic_year')
-    list_editable = ('order',)
+    list_display = ('title', 'department', 'program', 'academic_year', 'is_nep_2020', 'order', 'uploaded_at')
+    list_filter = ('is_nep_2020', 'department', 'academic_year')
+    list_editable = ('is_nep_2020', 'order')
     search_fields = ('title',)
 
 

@@ -156,6 +156,7 @@ class Syllabus(models.Model):
     document = models.FileField(upload_to='syllabus/', blank=True)
     document_url = models.URLField(blank=True, help_text="External URL for the syllabus document (used if no local file is uploaded)")
     academic_year = models.CharField(max_length=10, blank=True)
+    is_nep_2020 = models.BooleanField(default=False, verbose_name="Is NEP-2020 Syllabus")
     order = models.PositiveIntegerField(default=0)
     uploaded_at = models.DateTimeField(auto_now_add=True)
 

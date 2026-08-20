@@ -28,20 +28,24 @@
             </div>
         </div>
 
-        {% if syllabi %}
-        <div class="row">
+        {% if nep_syllabi or other_syllabi %}
+
+        <!-- NEP-2020 Syllabus Section -->
+        {% if nep_syllabi %}
+        <div class="row mt-4">
             <div class="col-12">
-                <div class="table-responsive shadow-sm border bg-white rounded">
+                <h3 class="fw-bold mb-3" style="color: #890C25; font-size: 24px;">NEP-2020 Syllabus</h3>
+                <div class="table-responsive shadow-sm border bg-white rounded mb-5">
                     <table class="table table-bordered table-hover align-middle mb-0">
                         <thead class="table-danger text-dark">
                             <tr>
-                                <th style="width: 80px;">Sr. No.</th>
-                                <th>Program</th>
+                                <th style="width: 80px;" class="text-center">Sr. No.</th>
+                                <th>Program / Subject</th>
                                 <th style="width: 160px;" class="text-center">Syllabus Document</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for item in syllabi %}
+                            {% for item in nep_syllabi %}
                             <tr>
                                 <td class="text-center">{{ forloop.counter }}</td>
                                 <td class="fw-bold">{{ item.title }}</td>
@@ -61,6 +65,45 @@
                 </div>
             </div>
         </div>
+        {% endif %}
+
+        <!-- Other / General Syllabus Section -->
+        {% if other_syllabi %}
+        <div class="row mt-4">
+            <div class="col-12">
+                <h3 class="fw-bold mb-3" style="color: #333; font-size: 24px;">General Syllabus</h3>
+                <div class="table-responsive shadow-sm border bg-white rounded mb-5">
+                    <table class="table table-bordered table-hover align-middle mb-0">
+                        <thead class="table-secondary text-dark">
+                            <tr>
+                                <th style="width: 80px;" class="text-center">Sr. No.</th>
+                                <th>Program / Subject</th>
+                                <th style="width: 160px;" class="text-center">Syllabus Document</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in other_syllabi %}
+                            <tr>
+                                <td class="text-center">{{ forloop.counter }}</td>
+                                <td class="fw-bold">{{ item.title }}</td>
+                                <td class="text-center">
+                                    {% if item.get_document %}
+                                    <a href="{{ item.get_document }}" target="_blank" title="Download {{ item.title }} Syllabus">
+                                        <i class="fa-solid fa-file-pdf" style="font-size:30px;color:#890C25"></i>
+                                    </a>
+                                    {% else %}
+                                    <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
         {% else %}
         <div class="alert alert-secondary text-center py-5 border-0 shadow-sm">
             <i class="fas fa-book fa-3x mb-3 text-muted"></i>

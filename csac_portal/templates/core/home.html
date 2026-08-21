@@ -1285,89 +1285,147 @@
       <button class="announcement-modal-close-btn" aria-label="Close Announcements">&times;</button>
 
       <!-- ======== LIST VIEW ======== -->
-      <div id="popup-list-view" class="popup-view popup-view--active" style="overflow-y: auto; max-height: 75vh;">
-        
-        <!-- Announcements Section -->
-        {% if active_popups %}
-        <div class="popup-list-header">
-          <div class="popup-list-header-icon">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#B71A34" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-          </div>
-          <span class="popup-list-badge">{{ active_popups|length }}</span>
-          <h3 class="popup-list-title">Announcements</h3>
-        </div>
-        <ul class="popup-list-items">
-          {% for popup in active_popups %}
-          <li class="popup-list-item" data-popup-id="popup-{{ popup.id }}">
-            <div class="popup-list-item-icon">
-              {% if popup.get_image %}
-              <img src="{{ popup.get_image }}" alt="" class="popup-list-thumb">
-              {% else %}
-              <div class="popup-list-thumb-placeholder">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      <div id="popup-list-view" class="popup-view popup-view--active" style="overflow: hidden; max-height: 80vh;">
+        <div class="popup-cols-container" style="display: flex; gap: 0; min-height: 420px; align-items: stretch;">
+          
+          <!-- Column 1: Announcements -->
+          <div class="popup-col popup-col-announcements" style="flex: 1; border-right: 1px solid #f3f4f6; padding-bottom: 16px; overflow-y: auto; max-height: 78vh;">
+            <div class="popup-list-header" style="padding-top: 20px;">
+              <div class="popup-list-header-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#B71A34" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
               </div>
-              {% endif %}
+              <span class="popup-list-badge">{{ active_popups|length }}</span>
+              <h3 class="popup-list-title" style="font-size: 18px;">Announcements</h3>
             </div>
-            <div class="popup-list-item-text">
-              <span class="popup-list-item-title">{{ popup.title }}</span>
-              <span class="popup-list-item-date">{{ popup.updated_at|date:"M d, Y" }}</span>
-            </div>
-            <div class="popup-list-item-arrow">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
-            </div>
-          </li>
-          {% endfor %}
-        </ul>
-        {% endif %}
-
-        <!-- Highlights Section -->
-        {% if active_highlights %}
-        <div class="popup-list-header {% if active_popups %}mt-4 pt-3 border-top{% endif %}" style="{% if active_popups %}border-color: #f3f4f6 !important;{% endif %}">
-          <div class="popup-list-header-icon">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#B71A34" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          </div>
-          <span class="popup-list-badge">{{ active_highlights|length }}</span>
-          <h3 class="popup-list-title">{{ site_settings.homepage_highlights_heading|default:"Highlights" }}</h3>
-        </div>
-        <ul class="popup-list-items">
-          {% for hl in active_highlights %}
-          <li class="popup-list-item" data-popup-id="hl-{{ hl.id }}">
-            <div class="popup-list-item-icon">
-              {% if hl.gallery_type == 'video' %}
-              <div class="position-relative d-inline-block">
-                {% if hl.get_video_thumbnail %}
-                <img src="{{ hl.get_video_thumbnail }}" alt="" class="popup-list-thumb">
-                {% else %}
-                <div class="popup-list-thumb-placeholder bg-light d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; border-radius: 8px;">
-                  <i class="fas fa-video text-muted"></i>
+            {% if active_popups %}
+            <ul class="popup-list-items" style="max-height: 58vh; overflow-y: auto; padding: 12px 14px 14px 14px;">
+              {% for popup in active_popups %}
+              <li class="popup-list-item" data-popup-id="popup-{{ popup.id }}" style="padding: 10px 12px; border-radius: 12px; margin-bottom: 6px;">
+                <div class="popup-list-item-icon" style="width: 44px; height: 44px;">
+                  {% if popup.get_image %}
+                  <img src="{{ popup.get_image }}" alt="" class="popup-list-thumb" style="width: 44px; height: 44px;">
+                  {% else %}
+                  <div class="popup-list-thumb-placeholder" style="width: 44px; height: 44px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                  </div>
+                  {% endif %}
                 </div>
-                {% endif %}
-                <span class="position-absolute top-50 start-50 translate-middle d-flex align-items-center justify-content-center bg-danger rounded-circle text-white shadow-sm" style="width: 22px; height: 22px; font-size: 9px; z-index: 5;">
-                  <i class="fas fa-play"></i>
-                </span>
-              </div>
-              {% elif hl.get_image %}
-              <img src="{{ hl.get_image }}" alt="" class="popup-list-thumb">
-              {% else %}
-              <div class="popup-list-thumb-placeholder">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-              </div>
-              {% endif %}
-            </div>
-            <div class="popup-list-item-text">
-              <span class="popup-list-item-title" style="font-weight: bold; font-size: 15px;">{{ hl.title }}</span>
-              {% if hl.highlight_subtitle %}
-              <span class="popup-list-item-date" style="color: #6b7280; font-size: 12px; font-weight: normal; margin-top: 2px;">{{ hl.highlight_subtitle }}</span>
-              {% endif %}
-            </div>
-            <div class="popup-list-item-arrow">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
-            </div>
-          </li>
-          {% endfor %}
-        </ul>
-        {% endif %}
+                <div class="popup-list-item-text">
+                  <span class="popup-list-item-title" style="font-size: 14px; font-weight: 700; line-height: 1.3;">{{ popup.title }}</span>
+                  <span class="popup-list-item-date" style="font-size: 11px;">{{ popup.updated_at|date:"M d, Y" }}</span>
+                </div>
+                <div class="popup-list-item-arrow">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+              </li>
+              {% endfor %}
+            </ul>
+            {% else %}
+            <div class="text-center text-muted py-5" style="font-size: 13px;">No active announcements.</div>
+            {% endif %}
+          </div>
 
+          <!-- Column 2: Highlights -->
+          <div class="popup-col popup-col-highlights" style="flex: 1; padding-bottom: 16px; display: flex; flex-direction: column; max-height: 78vh;">
+            <div class="popup-list-header" style="padding-top: 20px;">
+              <div class="popup-list-header-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#B71A34" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              </div>
+              <span class="popup-list-badge">{{ active_highlights|length }}</span>
+              <h3 class="popup-list-title" style="font-size: 18px;">{{ site_settings.homepage_highlights_heading|default:"Highlights" }}</h3>
+            </div>
+
+            {% if active_highlights %}
+            <!-- Carousel Container -->
+            <div class="popup-highlights-carousel-wrapper" style="position: relative; flex-grow: 1; display: flex; align-items: center; justify-content: center; padding: 10px 32px 24px 32px; overflow: hidden; height: 100%;">
+              
+              <!-- Left Arrow -->
+              <button class="popup-carousel-btn prev-btn" aria-label="Previous Highlight" style="position: absolute; left: 8px; z-index: 10; background: rgba(255,255,255,0.9); border: 1px solid #ddd; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #333; box-shadow: 0 2px 6px rgba(0,0,0,0.12); transition: all 0.2s;" onmouseover="this.style.background='#B71A34'; this.style.color='white'; this.style.borderColor='#B71A34';" onmouseout="this.style.background='rgba(255,255,255,0.9)'; this.style.color='#333'; this.style.borderColor='#ddd';">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+              </button>
+
+              <!-- Carousel Slide Track -->
+              <div class="popup-carousel-track-container" style="width: 100%; height: 100%; overflow: hidden; border-radius: 16px;">
+                <div class="popup-carousel-track" style="display: flex; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); height: 100%; width: 100%;">
+                  
+                  {% for hl in active_highlights %}
+                  <!-- Slide -->
+                  <div class="popup-carousel-slide" style="flex: 0 0 100%; width: 100%; display: flex; flex-direction: column; justify-content: stretch; height: 100%; padding: 0 2px;">
+                    <div class="popup-list-item" data-popup-id="hl-{{ hl.id }}" style="display: flex; flex-direction: column; align-items: stretch; gap: 0; padding: 0; border: 1px solid #e5e7eb; border-radius: 16px; overflow: hidden; background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.03); height: 100%; margin-bottom: 0;">
+                      
+                      <!-- Image / Video Cover -->
+                      <div class="position-relative" style="height: 160px; overflow: hidden; background: #f3f4f6; flex-shrink: 0; display: flex; align-items: center; justify-content: center; width: 100%;">
+                        {% if hl.gallery_type == 'video' %}
+                          {% if hl.get_video_thumbnail %}
+                            <img src="{{ hl.get_video_thumbnail }}" alt="{{ hl.title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                          {% else %}
+                            <div class="bg-light d-flex align-items-center justify-content-center w-100 h-100">
+                              <i class="fas fa-video fa-2x text-muted"></i>
+                            </div>
+                          {% endif %}
+                          <!-- Red Play Button Overlay -->
+                          <span class="position-absolute top-50 start-50 translate-middle d-flex align-items-center justify-content-center bg-danger rounded-circle text-white shadow-sm" style="width: 40px; height: 40px; font-size: 14px; z-index: 5; background-color: #E61013 !important;">
+                            <i class="fas fa-play"></i>
+                          </span>
+                        {% else %}
+                          {% if hl.get_image %}
+                            <img src="{{ hl.get_image }}" alt="{{ hl.title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                          {% else %}
+                            <div class="bg-light d-flex align-items-center justify-content-center w-100 h-100">
+                              <i class="fas fa-image fa-2x text-muted"></i>
+                            </div>
+                          {% endif %}
+                        {% endif %}
+                      </div>
+
+                      <!-- Caption Info (Bold Attention Fonts & Light Subtitle) -->
+                      <div class="p-3 d-flex flex-column justify-content-between flex-grow-1" style="text-align: left; background: #ffffff;">
+                        <div style="margin-bottom: 8px;">
+                          <h5 class="fw-bold text-dark mb-2" style="font-family: 'Poppins', 'Roboto Slab', sans-serif; font-weight: 800; font-size: 14px; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-top: 0;">
+                            {{ hl.title }}
+                          </h5>
+                          {% if hl.highlight_subtitle %}
+                          <p class="text-muted small mb-0" style="font-weight: 400; color: #6b7280; font-size: 11px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3;">
+                            {{ hl.highlight_subtitle }}
+                          </p>
+                          {% endif %}
+                        </div>
+                        
+                        <div class="d-flex align-items-center justify-content-between pt-2 border-top" style="border-color: #f3f4f6 !important; font-size: 10.5px;">
+                          <span class="text-muted"><i class="far fa-clock me-1"></i>{% if hl.date %}{{ hl.date|date:"M d, Y" }}{% else %}Highlight{% endif %}</span>
+                          <span class="fw-semibold text-danger d-inline-flex align-items-center" style="color: #E61013;">
+                            {% if hl.gallery_type == 'video' %}Play Video{% else %}View Image{% endif %} 
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-left: 2px;"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                          </span>
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+                  {% endfor %}
+
+                </div>
+              </div>
+
+              <!-- Right Arrow -->
+              <button class="popup-carousel-btn next-btn" aria-label="Next Highlight" style="position: absolute; right: 8px; z-index: 10; background: rgba(255,255,255,0.9); border: 1px solid #ddd; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #333; box-shadow: 0 2px 6px rgba(0,0,0,0.12); transition: all 0.2s;" onmouseover="this.style.background='#B71A34'; this.style.color='white'; this.style.borderColor='#B71A34';" onmouseout="this.style.background='rgba(255,255,255,0.9)'; this.style.color='#333'; this.style.borderColor='#ddd';">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 6 15 12 9 18"/></svg>
+              </button>
+
+              <!-- Indicators Dot Indicators -->
+              <div class="popup-carousel-indicators" style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); display: flex; gap: 5px; z-index: 10;">
+                {% for hl in active_highlights %}
+                <span class="carousel-dot {% if forloop.first %}active{% endif %}" data-slide-index="{{ forloop.counter0 }}" style="width: 6px; height: 6px; border-radius: 50%; background: #d1d5db; cursor: pointer; transition: all 0.25s ease;"></span>
+                {% endfor %}
+              </div>
+
+            </div>
+            {% else %}
+            <div class="text-center text-muted py-5" style="font-size: 13px; flex-grow: 1; display: flex; align-items: center; justify-content: center;">No active highlights.</div>
+            {% endif %}
+          </div>
+
+        </div>
       </div>
 
       <!-- ======== DETAIL VIEWS (one per popup, hidden initially) ======== -->
@@ -1487,7 +1545,24 @@
   /* ===== Modal Card ===== */
   .announcement-modal-wrapper {
     width: 100%;
-    max-width: 800px;
+    max-width: 940px;
+  }
+  .carousel-dot.active {
+    background: #E61013 !important;
+    transform: scale(1.3);
+  }
+  @media (max-width: 768px) {
+    .popup-cols-container {
+      flex-direction: column !important;
+    }
+    .popup-col-announcements {
+      border-right: none !important;
+      border-bottom: 1px solid #e5e7eb !important;
+      max-height: 40vh !important;
+    }
+    .popup-col-highlights {
+      max-height: 48vh !important;
+    }
   }
   .announcement-modal-card {
     background: #ffffff;
@@ -1876,6 +1951,82 @@
 
       // ====== View Navigation ======
       var listView = document.getElementById("popup-list-view");
+
+      // ====== Carousel Navigation ======
+      (function() {
+        var track = modal.querySelector(".popup-carousel-track");
+        var slides = modal.querySelectorAll(".popup-carousel-slide");
+        var dots = modal.querySelectorAll(".carousel-dot");
+        var prevBtn = modal.querySelector(".prev-btn");
+        var nextBtn = modal.querySelector(".next-btn");
+        if (!track || slides.length === 0) return;
+
+        var currentIndex = 0;
+        var autoPlayInterval = null;
+
+        function updateCarousel(index) {
+          if (index < 0) index = slides.length - 1;
+          if (index >= slides.length) index = 0;
+          currentIndex = index;
+
+          track.style.transform = "translateX(-" + (currentIndex * 100) + "%)";
+          
+          dots.forEach(function(dot, i) {
+            if (i === currentIndex) {
+              dot.classList.add("active");
+            } else {
+              dot.classList.remove("active");
+            }
+          });
+        }
+
+        function startAutoPlay() {
+          if (autoPlayInterval) clearInterval(autoPlayInterval);
+          autoPlayInterval = setInterval(function() {
+            updateCarousel(currentIndex + 1);
+          }, 5000);
+        }
+
+        function stopAutoPlay() {
+          if (autoPlayInterval) clearInterval(autoPlayInterval);
+        }
+
+        if (prevBtn) {
+          prevBtn.addEventListener("click", function(e) {
+            e.stopPropagation();
+            updateCarousel(currentIndex - 1);
+            startAutoPlay(); // Reset timer on click
+          });
+        }
+
+        if (nextBtn) {
+          nextBtn.addEventListener("click", function(e) {
+            e.stopPropagation();
+            updateCarousel(currentIndex + 1);
+            startAutoPlay(); // Reset timer on click
+          });
+        }
+
+        dots.forEach(function(dot) {
+          dot.addEventListener("click", function(e) {
+            e.stopPropagation();
+            var index = parseInt(this.getAttribute("data-slide-index"));
+            updateCarousel(index);
+            startAutoPlay(); // Reset timer on click
+          });
+        });
+
+        // Initialize active state on first dot
+        updateCarousel(0);
+        startAutoPlay();
+
+        // Pause on hover
+        var container = modal.querySelector(".popup-col-highlights");
+        if (container) {
+          container.addEventListener("mouseenter", stopAutoPlay);
+          container.addEventListener("mouseleave", startAutoPlay);
+        }
+      })();
 
       // Show a specific view with animation
       function showView(targetView, direction) {

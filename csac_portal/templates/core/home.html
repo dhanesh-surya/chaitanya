@@ -1335,7 +1335,13 @@
             <div class="popup-list-item-icon">
               {% if hl.gallery_type == 'video' %}
               <div class="position-relative d-inline-block">
+                {% if hl.get_video_thumbnail %}
                 <img src="{{ hl.get_video_thumbnail }}" alt="" class="popup-list-thumb">
+                {% else %}
+                <div class="popup-list-thumb-placeholder bg-light d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; border-radius: 8px;">
+                  <i class="fas fa-video text-muted"></i>
+                </div>
+                {% endif %}
                 <span class="position-absolute top-50 start-50 translate-middle d-flex align-items-center justify-content-center bg-danger rounded-circle text-white shadow-sm" style="width: 22px; height: 22px; font-size: 9px; z-index: 5;">
                   <i class="fas fa-play"></i>
                 </span>
@@ -1417,6 +1423,12 @@
               {% if hl.video_url %}
                 <div class="ratio ratio-16x9 rounded overflow-hidden shadow-sm" style="background: #000; min-height: 250px;">
                   <iframe src="" data-src="{{ hl.get_embed_url }}" title="{{ hl.title }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen class="youtube-iframe-hl" style="width: 100%; height: 100%;"></iframe>
+                </div>
+                <!-- YouTube Fallback Link Button -->
+                <div class="text-center mt-3">
+                  <a href="{{ hl.video_url }}" target="_blank" class="btn btn-sm btn-danger px-3 py-2 fw-semibold d-inline-flex align-items-center" style="background-color: #E61013; border: none; font-size: 13px; border-radius: 6px; color: white;">
+                    <i class="fab fa-youtube me-2" style="font-size: 16px;"></i> Watch directly on YouTube
+                  </a>
                 </div>
               {% endif %}
             {% else %}

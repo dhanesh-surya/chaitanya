@@ -73,6 +73,12 @@ class GalleryItem(models.Model):
         return self.image_url
 
     def get_video_thumbnail(self):
+        # 1. Check if the admin uploaded a custom cover/thumbnail image
+        custom_image = self.get_image()
+        if custom_image:
+            return custom_image
+
+        # 2. Fallback to automatic YouTube thumbnail
         if self.gallery_type == 'video' and self.video_url:
             import re
             patterns = [
@@ -85,7 +91,7 @@ class GalleryItem(models.Model):
                 match = re.search(pattern, self.video_url)
                 if match:
                     return f"https://img.youtube.com/vi/{match.group(1)}/hqdefault.jpg"
-        return self.get_image()
+        return ""
 
     def get_embed_url(self):
         """Extracts YouTube ID and builds embed URL with autoplay."""

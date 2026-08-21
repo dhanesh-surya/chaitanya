@@ -8,7 +8,7 @@ class GalleryItemForm(forms.ModelForm):
         fields = [
             'category', 'gallery_type', 'title', 'description', 
             'image', 'image_url', 'video_url', 'news_source', 
-            'date', 'order', 'is_active'
+            'date', 'order', 'is_active', 'is_homepage_highlight', 'highlight_subtitle'
         ]
         widgets = {
             'date': forms.DateInput(attrs={'type': 'date'}),

@@ -58,6 +58,12 @@ class SiteSettings(models.Model):
     # Header Image Layout fields
     use_image_header = models.BooleanField(default=False, verbose_name="Use Image Header", help_text="Check this to display the custom header image banner instead of the default text and logos.")
     header_image = models.ImageField(upload_to='headers/', blank=True, null=True, verbose_name="Header Image (Banner)", help_text="Upload a custom header image banner. This will replace the text header and logos if 'Use Image Header' is checked.")
+    homepage_highlights_heading = models.CharField(
+        max_length=200,
+        default="Highlights",
+        blank=True,
+        help_text="Custom heading for the highlights section inside the popup modal (defaults to 'Highlights')"
+    )
 
     class Meta:
         verbose_name = "Site Settings"

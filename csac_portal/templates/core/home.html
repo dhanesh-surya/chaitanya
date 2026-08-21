@@ -1275,7 +1275,7 @@
   </div>
 </section>
 
-{% if active_popups %}
+{% if active_popups or active_highlights %}
 <!-- Multi-Announcement Popup Hub -->
 <div id="homepage-announcement-modal" class="announcement-modal-overlay" style="display: none;">
   <div class="announcement-modal-wrapper">
@@ -1285,7 +1285,10 @@
       <button class="announcement-modal-close-btn" aria-label="Close Announcements">&times;</button>
 
       <!-- ======== LIST VIEW ======== -->
-      <div id="popup-list-view" class="popup-view popup-view--active">
+      <div id="popup-list-view" class="popup-view popup-view--active" style="overflow-y: auto; max-height: 75vh;">
+        
+        <!-- Announcements Section -->
+        {% if active_popups %}
         <div class="popup-list-header">
           <div class="popup-list-header-icon">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#B71A34" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
@@ -1295,7 +1298,7 @@
         </div>
         <ul class="popup-list-items">
           {% for popup in active_popups %}
-          <li class="popup-list-item" data-popup-id="{{ popup.id }}">
+          <li class="popup-list-item" data-popup-id="popup-{{ popup.id }}">
             <div class="popup-list-item-icon">
               {% if popup.get_image %}
               <img src="{{ popup.get_image }}" alt="" class="popup-list-thumb">
@@ -1315,11 +1318,55 @@
           </li>
           {% endfor %}
         </ul>
+        {% endif %}
+
+        <!-- Highlights Section -->
+        {% if active_highlights %}
+        <div class="popup-list-header {% if active_popups %}mt-4 pt-3 border-top{% endif %}" style="{% if active_popups %}border-color: #f3f4f6 !important;{% endif %}">
+          <div class="popup-list-header-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#B71A34" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+          <span class="popup-list-badge">{{ active_highlights|length }}</span>
+          <h3 class="popup-list-title">{{ site_settings.homepage_highlights_heading|default:"Highlights" }}</h3>
+        </div>
+        <ul class="popup-list-items">
+          {% for hl in active_highlights %}
+          <li class="popup-list-item" data-popup-id="hl-{{ hl.id }}">
+            <div class="popup-list-item-icon">
+              {% if hl.gallery_type == 'video' %}
+              <div class="position-relative d-inline-block">
+                <img src="{{ hl.get_video_thumbnail }}" alt="" class="popup-list-thumb">
+                <span class="position-absolute top-50 start-50 translate-middle d-flex align-items-center justify-content-center bg-danger rounded-circle text-white shadow-sm" style="width: 22px; height: 22px; font-size: 9px; z-index: 5;">
+                  <i class="fas fa-play"></i>
+                </span>
+              </div>
+              {% elif hl.get_image %}
+              <img src="{{ hl.get_image }}" alt="" class="popup-list-thumb">
+              {% else %}
+              <div class="popup-list-thumb-placeholder">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              </div>
+              {% endif %}
+            </div>
+            <div class="popup-list-item-text">
+              <span class="popup-list-item-title" style="font-weight: bold; font-size: 15px;">{{ hl.title }}</span>
+              {% if hl.highlight_subtitle %}
+              <span class="popup-list-item-date" style="color: #6b7280; font-size: 12px; font-weight: normal; margin-top: 2px;">{{ hl.highlight_subtitle }}</span>
+              {% endif %}
+            </div>
+            <div class="popup-list-item-arrow">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+
       </div>
 
       <!-- ======== DETAIL VIEWS (one per popup, hidden initially) ======== -->
       {% for popup in active_popups %}
-      <div id="popup-detail-{{ popup.id }}" class="popup-view popup-detail-view">
+      <div id="popup-detail-popup-{{ popup.id }}" class="popup-view popup-detail-view">
         <!-- Back button to list -->
         <button class="popup-back-btn" aria-label="Back to list">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
@@ -1350,6 +1397,53 @@
               </a>
               {% endif %}
             </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+
+      <!-- ======== HIGHLIGHT DETAIL VIEWS ======== -->
+      {% for hl in active_highlights %}
+      <div id="popup-detail-hl-{{ hl.id }}" class="popup-view popup-detail-view">
+        <!-- Back button to list -->
+        <button class="popup-back-btn" aria-label="Back to list">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+          <span>All Highlights</span>
+        </button>
+
+        <div class="announcement-modal-body has-image">
+          <div class="announcement-modal-image-col" style="flex: 1.2;">
+            {% if hl.gallery_type == 'video' %}
+              {% if hl.video_url %}
+                <div class="ratio ratio-16x9 rounded overflow-hidden shadow-sm" style="background: #000; min-height: 250px;">
+                  <iframe src="" data-src="{{ hl.get_embed_url }}" title="{{ hl.title }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen class="youtube-iframe-hl" style="width: 100%; height: 100%;"></iframe>
+                </div>
+              {% endif %}
+            {% else %}
+              {% if hl.get_image %}
+                <img src="{{ hl.get_image }}" alt="{{ hl.title }}" class="announcement-modal-img" style="border-radius: 12px; max-height: 50vh; object-fit: contain;">
+              {% endif %}
+            {% endif %}
+          </div>
+
+          <div class="announcement-modal-content-col" style="flex: 0.8;">
+            <div class="announcement-modal-header">
+              <!-- Bold Attention Font Title -->
+              <h3 class="announcement-modal-title" style="font-family: 'Poppins', 'Montserrat', sans-serif; font-weight: 800; font-size: 24px; color: #111827; line-height: 1.3;">
+                {{ hl.title }}
+              </h3>
+              <!-- Smaller Light Color Subtitle -->
+              {% if hl.highlight_subtitle %}
+              <div class="mt-2" style="font-size: 14px; font-weight: 400; color: #6b7280; line-height: 1.4;">
+                {{ hl.highlight_subtitle }}
+              </div>
+              {% endif %}
+            </div>
+            {% if hl.description %}
+            <div class="announcement-modal-text mt-3" style="font-size: 14px; line-height: 1.6; color: #4b5563; max-height: 200px; overflow-y: auto;">
+              {{ hl.description|linebreaks }}
+            </div>
+            {% endif %}
           </div>
         </div>
       </div>
@@ -1725,13 +1819,16 @@
       var modal = document.getElementById("homepage-announcement-modal");
       if (!modal) return;
 
-      // Session check — use a combined key for all active popup IDs
+      // Session check — use a combined key for all active popup and highlight IDs
       var popupIds = [];
       {% for popup in active_popups %}
-      popupIds.push("{{ popup.id }}");
+      popupIds.push("popup_{{ popup.id }}");
+      {% endfor %}
+      {% for hl in active_highlights %}
+      popupIds.push("hl_{{ hl.id }}");
       {% endfor %}
 
-      var showOnce = {% if active_popups.0.show_once_per_session %}true{% else %}false{% endif %};
+      var showOnce = {% if active_popups.0.show_once_per_session or active_highlights.0.is_homepage_highlight %}true{% else %}false{% endif %};
       var sessionKey = "csac_popups_shown_" + popupIds.sort().join("_");
 
       // Clear old single-popup session keys (from previous code)
@@ -1760,7 +1857,6 @@
 
       // ====== View Navigation ======
       var listView = document.getElementById("popup-list-view");
-      var allDetailViews = modal.querySelectorAll(".popup-detail-view");
 
       // Show a specific view with animation
       function showView(targetView, direction) {
@@ -1784,6 +1880,14 @@
         targetView.style.transform = "translateX(0)";
       }
 
+      // Stop any playing video when returning to list or closing
+      function stopVideos() {
+        var iframes = modal.querySelectorAll(".youtube-iframe-hl");
+        iframes.forEach(function(iframe) {
+          iframe.setAttribute("src", "");
+        });
+      }
+
       // List item clicks → open detail
       var listItems = modal.querySelectorAll(".popup-list-item");
       listItems.forEach(function(item) {
@@ -1791,6 +1895,11 @@
           var popupId = this.getAttribute("data-popup-id");
           var detailView = document.getElementById("popup-detail-" + popupId);
           if (detailView) {
+            // Lazy load YouTube iframe if present
+            var iframe = detailView.querySelector(".youtube-iframe-hl");
+            if (iframe && iframe.getAttribute("data-src")) {
+              iframe.setAttribute("src", iframe.getAttribute("data-src"));
+            }
             showView(detailView, "right");
             detailView.scrollTop = 0;
           }
@@ -1801,6 +1910,7 @@
       var backBtns = modal.querySelectorAll(".popup-back-btn");
       backBtns.forEach(function(btn) {
         btn.addEventListener("click", function() {
+          stopVideos();
           showView(listView, "left");
         });
       });
@@ -1810,6 +1920,7 @@
         modal.classList.remove("show");
         setTimeout(function() {
           modal.style.display = "none";
+          stopVideos();
           // Reset to list view for next open
           showView(listView, "left");
         }, 400);
@@ -1828,8 +1939,19 @@
 
       // If only 1 popup, auto-open its detail directly
       if (popupIds.length === 1) {
-        var singleDetail = document.getElementById("popup-detail-" + popupIds[0]);
+        var singleId = "";
+        {% if active_popups %}
+        singleId = "popup-{{ active_popups.0.id }}";
+        {% elif active_highlights %}
+        singleId = "hl-{{ active_highlights.0.id }}";
+        {% endif %}
+        var singleDetail = document.getElementById("popup-detail-" + singleId);
         if (singleDetail) {
+          // Lazy load YouTube iframe if present
+          var iframe = singleDetail.querySelector(".youtube-iframe-hl");
+          if (iframe && iframe.getAttribute("data-src")) {
+            iframe.setAttribute("src", iframe.getAttribute("data-src"));
+          }
           // Hide the back button since there's only one
           var backBtn = singleDetail.querySelector(".popup-back-btn");
           if (backBtn) backBtn.style.display = "none";

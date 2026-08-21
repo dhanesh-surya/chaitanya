@@ -14,6 +14,7 @@ from .models import (
     MenuItem
 )
 from .forms import CareerGuidanceForm, ProductInquiryForm, ProductReviewForm, MenuItemForm
+from gallery.models import GalleryItem
 
 
 def home(request):
@@ -38,6 +39,7 @@ def home(request):
 
     # Query active homepage popup announcements (all active ones)
     active_popups = PopupAnnouncement.objects.filter(is_active=True)
+    active_highlights = GalleryItem.objects.filter(is_active=True, is_homepage_highlight=True).order_by('order', '-date')
 
     # Query leadership messages
     principal = Leadership.objects.filter(role='principal').first()
@@ -76,6 +78,7 @@ def home(request):
         'form': form,
         'page_title': 'Home',
         'active_popups': active_popups,
+        'active_highlights': active_highlights,
         'campus_media': campus_media,
     }
     return render(request, 'core/home.html', context)

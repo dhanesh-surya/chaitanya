@@ -48,6 +48,17 @@ class GalleryItem(models.Model):
     date = models.DateField(blank=True, null=True)
     order = models.PositiveIntegerField(default=0)
     is_active = models.BooleanField(default=True)
+    is_homepage_highlight = models.BooleanField(
+        default=False,
+        verbose_name="Is Homepage Highlight",
+        help_text="Check to display this gallery item in the homepage popup highlights section."
+    )
+    highlight_subtitle = models.CharField(
+        max_length=250,
+        blank=True,
+        verbose_name="Highlight Subtitle",
+        help_text="Optional subtitle/caption details for the homepage highlight popup."
+    )
 
     class Meta:
         ordering = ['order', '-date']
@@ -75,3 +86,19 @@ class GalleryItem(models.Model):
                 if match:
                     return f"https://img.youtube.com/vi/{match.group(1)}/hqdefault.jpg"
         return self.get_image()
+
+    def get_embed_url(self):
+        """Extracts YouTube ID and builds embed URL with autoplay."""
+        if self.gallery_type == 'video' and self.video_url:
+            import re
+            patterns = [
+                r'v=([a-zA-Z0-9_-]{11})',
+                r'shorts/([a-zA-Z0-9_-]{11})',
+                r'youtu\.be/([a-zA-Z0-9_-]{11})',
+                r'embed/([a-zA-Z0-9_-]{11})',
+            ]
+            for pattern in patterns:
+                match = re.search(pattern, self.video_url)
+                if match:
+                    return f"https://www.youtube.com/embed/{match.group(1)}?autoplay=1"
+        return ""

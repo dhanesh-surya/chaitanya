@@ -67,6 +67,11 @@ class SiteSettingsAdmin(admin.ModelAdmin):
                 'header_image',
             )
         }),
+        ('Popup Highlights Settings', {
+            'fields': (
+                'homepage_highlights_heading',
+            )
+        }),
         ('Contact Settings', {
             'fields': (
                 'address_line1',

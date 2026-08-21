@@ -9,26 +9,26 @@ from .forms import DepartmentFacultyForm, DepartmentForm, DepartmentBannerForm, 
 class DepartmentBannerInline(admin.TabularInline):
     model = DepartmentBanner
     form = DepartmentBannerForm
-    extra = 1
+    extra = 0
     fields = ('image', 'caption', 'order')
 
 
 class DepartmentFacultyInline(admin.TabularInline):
     model = DepartmentFaculty
     form = DepartmentFacultyForm
-    extra = 1
+    extra = 0
     fields = ('name', 'designation', 'qualification', 'specialization', 'photo', 'order')
 
 
 class DepartmentActivityInline(admin.TabularInline):
     model = DepartmentActivity
-    extra = 1
+    extra = 0
     fields = ('title', 'description', 'image', 'date')
 
 
 class DepartmentLinkInline(admin.TabularInline):
     model = DepartmentLink
-    extra = 1
+    extra = 0
     fields = ('title', 'url', 'image', 'order')
 
 

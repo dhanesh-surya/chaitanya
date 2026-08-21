@@ -1840,7 +1840,14 @@
       popupIds.push("hl_{{ hl.id }}");
       {% endfor %}
 
-      var showOnce = {% if active_popups.0.show_once_per_session or active_highlights.0.is_homepage_highlight %}true{% else %}false{% endif %};
+      var showOnce = true;
+      {% if active_popups %}
+        {% for popup in active_popups %}
+          {% if not popup.show_once_per_session %}
+            showOnce = false;
+          {% endif %}
+        {% endfor %}
+      {% endif %}
       var sessionKey = "csac_popups_shown_" + popupIds.sort().join("_");
 
       // Clear old single-popup session keys (from previous code)

@@ -1,0 +1,292 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="portal-page portal-page--wide">
+    <div class="portal-main">
+        <div class="page-header page-header--admin">
+            <h2 class="page-title"><i class="fas fa-tachometer-alt"></i> Admin Dashboard</h2>
+            <nav class="page-actions page-actions--toolbar" aria-label="Admin navigation">
+                {% include 'partials/admin_nav_actions.html' with active_page='dashboard' %}
+                {% include 'partials/admin_nav_logout.html' %}
+            </nav>
+        </div>
+
+        <div class="stat-grid">
+            <div class="stat-card">
+                <h3>{{ stats.total_admissions }}</h3>
+                <p>Total Admissions</p>
+            </div>
+            <div class="stat-card">
+                <h3>{{ stats.submitted }}</h3>
+                <p>Submitted</p>
+            </div>
+            <div class="stat-card">
+                <h3>{{ stats.pending }}</h3>
+                <p>Pending</p>
+            </div>
+            <div class="stat-card">
+                <h3>{{ stats.approved }}</h3>
+                <p>Approved</p>
+            </div>
+            <div class="stat-card">
+                <h3>{{ stats.rejected }}</h3>
+                <p>Rejected</p>
+            </div>
+            <div class="stat-card">
+                <h3>{{ stats.students }}</h3>
+                <p>Students</p>
+            </div>
+            <a href="{% if show_verified %}{% url 'admin_dashboard' %}{% else %}{% url 'admin_dashboard' %}?show_verified=1#verified-students{% endif %}"
+               class="stat-card stat-card--link{% if show_verified %} is-active{% endif %}"
+               title="{% if show_verified %}Hide verified students by program{% else %}View verified students by program{% endif %}">
+                <h3>{{ stats.verified_students }}</h3>
+                <p>Verified Students</p>
+                <span class="stat-card__hint">{% if show_verified %}Click to hide{% else %}Click for details{% endif %}</span>
+            </a>
+        </div>
+
+        {% if show_verified %}
+        <section class="verified-programs-panel" id="verified-students">
+            <div class="verified-programs-panel__header">
+                <h3 class="section-title">Verified Students — Program Wise</h3>
+                <p class="field-hint">{{ stats.verified_students }} verified student(s) across {{ verified_by_program|length }} program(s)</p>
+            </div>
+
+            {% if verified_by_program %}
+            {% for group in verified_by_program %}
+            <div class="verified-program-block">
+                <h4 class="verified-program-block__title">
+                    {{ group.program }}
+                    <span class="badge badge-info">{{ group.count }}</span>
+                </h4>
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Reg No</th>
+                                <th>Name</th>
+                                <th>Contact</th>
+                                <th>Course</th>
+                                <th>Application</th>
+                                <th>Registered</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for s in group.students %}
+                            <tr>
+                                <td><strong>{{ s.registration_no }}</strong></td>
+                                <td>{{ s.full_name }}</td>
+                                <td>
+                                    <div>{{ s.email|default:"—" }}</div>
+                                    <small class="text-muted">{{ s.mobile|default:"—" }}</small>
+                                </td>
+                                <td>{{ s.course_name|default:"—" }}</td>
+                                <td>
+                                    {% if s.latest_admission %}
+                                    <span class="badge {% if s.latest_admission.status == 'Submitted' %}badge-success{% elif s.latest_admission.status == 'Approved' %}badge-info{% elif s.latest_admission.status == 'Rejected' %}badge-danger{% else %}badge-warning{% endif %}">
+                                        {{ s.latest_admission.status }}
+                                    </span>
+                                    {% if s.latest_admission.application_no %}
+                                    <div><small>{{ s.latest_admission.application_no }}</small></div>
+                                    {% endif %}
+                                    {% else %}
+                                    <span class="text-muted">No application</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if s.created_date %}
+                                    {{ s.created_date|date:"d M Y" }}
+                                    {% else %}
+                                    —
+                                    {% endif %}
+                                </td>
+                                <td class="action-cell">
+                                    {% if s.latest_admission and s.latest_admission.application_no %}
+                                    <a href="{% url 'admin_print_application' s.latest_admission.application_no %}" target="_blank"
+                                       class="btn btn-sm btn-secondary" title="View application form">
+                                        <i class="fas fa-file-alt"></i> View Form
+                                    </a>
+                                    {% else %}
+                                    <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <p class="text-muted">No verified students yet.</p>
+            {% endif %}
+        </section>
+        {% endif %}
+
+        <h3 class="section-title">Recent Applications</h3>
+
+        <form method="post" action="{% url 'bulk_update_admission_status' %}" id="bulkActionForm" class="bulk-action-bar" hidden>
+            {% csrf_token %}
+            <span class="bulk-action-bar__count" id="bulkSelectedCount">0 selected</span>
+            <select name="status" id="bulkStatusSelect" class="portal-input" disabled aria-label="Bulk status action">
+                <option value="">Choose action...</option>
+                <option value="Approved">Approve selected</option>
+                <option value="Rejected">Reject selected</option>
+                <option value="Pending">Mark as Pending</option>
+                <option value="Draft">Unverify selected (Allow Edit)</option>
+            </select>
+            <button type="submit" class="btn btn-secondary btn-sm" id="bulkApplyBtn" disabled>
+                <i class="fas fa-check-double" aria-hidden="true"></i> Apply
+            </button>
+        </form>
+
+        <div class="table-wrap">
+            <table class="data-table" id="recentApplicationsTable">
+                <thead>
+                    <tr>
+                        <th class="col-select">
+                            <label class="table-checkbox" title="Select all">
+                                <input type="checkbox" id="selectAllRows" aria-label="Select all applications">
+                            </label>
+                        </th>
+                        <th>App No</th>
+                        <th>Name</th>
+                        <th>Reg No</th>
+                        <th>Program</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in recent %}
+                    <tr>
+                        <td class="col-select">
+                            <label class="table-checkbox">
+                                <input type="checkbox" class="row-select" value="{{ a.pk }}" aria-label="Select {{ a.full_name }}">
+                            </label>
+                        </td>
+                        <td>{{ a.application_no|default:"—" }}</td>
+                        <td>{{ a.full_name }}</td>
+                        <td>{{ a.reg_no }}</td>
+                        <td>{{ a.program_type|default:"—" }}</td>
+                        <td>
+                            {% if a.status == 'Approved' %}
+                            <span class="badge badge-success">{{ a.status }}</span>
+                            {% elif a.status == 'Rejected' %}
+                            <span class="badge badge-danger">{{ a.status }}</span>
+                            {% elif a.status == 'Submitted' %}
+                            <span class="badge badge-info">{{ a.status }}</span>
+                            {% else %}
+                            <span class="badge badge-warning">{{ a.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <form method="post" action="{% url 'update_admission_status' a.pk %}" class="inline-form">
+                                {% csrf_token %}
+                                <select name="status" onchange="this.form.submit()">
+                                    <option value="">Change...</option>
+                                    <option value="Approved">Approve</option>
+                                    <option value="Rejected">Reject</option>
+                                    <option value="Pending">Pending</option>
+                                    <option value="Draft">Unverify (Allow Edit)</option>
+                                </select>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr class="empty-row">
+                        <td colspan="7">No applications yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    const table = document.getElementById('recentApplicationsTable');
+    const bulkForm = document.getElementById('bulkActionForm');
+    const selectAll = document.getElementById('selectAllRows');
+    const bulkCount = document.getElementById('bulkSelectedCount');
+    const bulkStatus = document.getElementById('bulkStatusSelect');
+    const bulkApplyBtn = document.getElementById('bulkApplyBtn');
+
+    if (!table || !bulkForm) {
+        return;
+    }
+
+    const rowChecks = () => Array.from(table.querySelectorAll('.row-select'));
+
+    function selectedRows() {
+        return rowChecks().filter((cb) => cb.checked);
+    }
+
+    function syncBulkControls() {
+        const selected = selectedRows();
+        const count = selected.length;
+        const hasSelection = count > 0;
+
+        bulkForm.hidden = !hasSelection;
+        bulkCount.textContent = count + (count === 1 ? ' application selected' : ' applications selected');
+        bulkStatus.disabled = !hasSelection;
+        bulkApplyBtn.disabled = !hasSelection || !bulkStatus.value;
+
+        if (selectAll) {
+            const allRows = rowChecks();
+            selectAll.indeterminate = count > 0 && count < allRows.length;
+            selectAll.checked = allRows.length > 0 && count === allRows.length;
+        }
+    }
+
+    if (selectAll) {
+        selectAll.addEventListener('change', function () {
+            const checked = selectAll.checked;
+            rowChecks().forEach((cb) => {
+                cb.checked = checked;
+            });
+            syncBulkControls();
+        });
+    }
+
+    table.addEventListener('change', function (event) {
+        if (event.target.classList.contains('row-select')) {
+            syncBulkControls();
+        }
+    });
+
+    bulkStatus.addEventListener('change', syncBulkControls);
+
+    bulkForm.addEventListener('submit', function (event) {
+        const selected = selectedRows();
+        if (!selected.length || !bulkStatus.value) {
+            event.preventDefault();
+            return;
+        }
+
+        const actionLabel = bulkStatus.options[bulkStatus.selectedIndex].text;
+        if (!window.confirm('Apply "' + actionLabel + '" to ' + selected.length + ' selected application(s)?')) {
+            event.preventDefault();
+            return;
+        }
+
+        bulkForm.querySelectorAll('input[name="admission_ids"]').forEach((input) => input.remove());
+        selected.forEach((cb) => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'admission_ids';
+            input.value = cb.value;
+            bulkForm.appendChild(input);
+        });
+    });
+
+    syncBulkControls();
+})();
+</script>
+{% endblock %}

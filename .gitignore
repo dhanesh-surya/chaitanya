@@ -14,3 +14,4 @@ __pycache__/
 csac_portal/db.sqlite3.bak
 csac_portal/db.sqlite3.old
 csac_portal/db.sqlite3.prod.bak
+ccpadm/db.sqlite3

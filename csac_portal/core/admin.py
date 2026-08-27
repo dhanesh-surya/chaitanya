@@ -270,11 +270,12 @@ class HappeningImageInline(admin.TabularInline):
 
 @admin.register(Happening)
 class HappeningAdmin(admin.ModelAdmin):
-    list_display = ('title', 'category', 'department', 'date', 'order', 'is_sports_activity')
-    list_editable = ('order', 'is_sports_activity')
+    list_display = ('title', 'category', 'department', 'date', 'order', 'is_homepage_highlight', 'is_sports_activity')
+    list_editable = ('order', 'is_homepage_highlight', 'is_sports_activity')
     search_fields = ('title', 'category')
-    list_filter = ('date', 'category', 'department', 'is_sports_activity')
+    list_filter = ('is_homepage_highlight', 'date', 'category', 'department', 'is_sports_activity')
     inlines = [HappeningImageInline]
+
 
 
 @admin.register(QuickLinkCard)

@@ -464,6 +464,17 @@ class Happening(models.Model):
     is_nss_activity = models.BooleanField(default=False, verbose_name="Is NSS Activity", help_text="Check if this event/happening is part of NSS activities and should appear in the NSS page slider")
     is_iic_activity = models.BooleanField(default=False, verbose_name="Is IIC Activity", help_text="Check if this event/happening is part of IIC activities and should appear in the IIC page slider")
     is_sports_activity = models.BooleanField(default=False, verbose_name="Is Sports Activity", help_text="Check if this event/happening is a sports activity and should appear in the Sports page")
+    is_homepage_highlight = models.BooleanField(
+        default=False,
+        verbose_name="Is Homepage Highlight",
+        help_text="Check to display this happening in the homepage popup highlights section."
+    )
+    highlight_subtitle = models.CharField(
+        max_length=250,
+        blank=True,
+        verbose_name="Highlight Subtitle",
+        help_text="Optional subtitle for the homepage highlight popup (defaults to category if empty)."
+    )
 
     class Meta:
         ordering = ['order', '-date']
@@ -474,6 +485,11 @@ class Happening(models.Model):
 
     def get_image(self):
         return self.image.url if self.image else self.image_url
+
+    @property
+    def unique_hl_id(self):
+        return f"h-{self.id}"
+
 
 
 class HappeningImage(models.Model):

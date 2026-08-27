@@ -1327,98 +1327,102 @@
 
           <!-- Column 2: Highlights -->
           <div class="popup-col popup-col-highlights" style="flex: 1; padding-bottom: 16px; display: flex; flex-direction: column; max-height: 78vh;">
-            <div class="popup-list-header" style="padding-top: 20px;">
+            <div class="popup-list-header" style="padding-top: 20px; flex-wrap: wrap; gap: 8px;">
               <div class="popup-list-header-icon">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#B71A34" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
               </div>
               <span class="popup-list-badge">{{ active_highlights|length }}</span>
-              <h3 class="popup-list-title" style="font-size: 18px;">{{ site_settings.homepage_highlights_heading|default:"Highlights" }}</h3>
+              <h3 class="popup-list-title" style="font-size: 18px; flex-grow: 1;">{{ site_settings.homepage_highlights_heading|default:"Highlights" }}</h3>
+              {% if user.is_staff %}
+              <a href="/admin/core/happening/" target="_blank" title="Manage Happenings" style="display:inline-flex;align-items:center;gap:5px;background:linear-gradient(135deg,#B71A34,#e8325a);color:#fff;padding:5px 11px;border-radius:50px;font-size:11px;font-weight:700;text-decoration:none;white-space:nowrap;flex-shrink:0;transition:all .2s;box-shadow:0 2px 8px rgba(183,26,52,0.25);" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 14px rgba(183,26,52,0.40)';" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(183,26,52,0.25)';">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                Manage
+              </a>
+              {% endif %}
             </div>
 
             {% if active_highlights %}
-            <!-- Carousel Container -->
-            <div class="popup-highlights-carousel-wrapper" style="position: relative; flex-grow: 1; display: flex; align-items: center; justify-content: center; padding: 10px 32px 24px 32px; overflow: hidden; height: 100%;">
-              
-              <!-- Left Arrow -->
-              <button class="popup-carousel-btn prev-btn" aria-label="Previous Highlight" style="position: absolute; left: 8px; z-index: 10; background: rgba(255,255,255,0.9); border: 1px solid #ddd; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #333; box-shadow: 0 2px 6px rgba(0,0,0,0.12); transition: all 0.2s;" onmouseover="this.style.background='#B71A34'; this.style.color='white'; this.style.borderColor='#B71A34';" onmouseout="this.style.background='rgba(255,255,255,0.9)'; this.style.color='#333'; this.style.borderColor='#ddd';">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
-              </button>
+            <!-- Marquee Scroll Container -->
+            <div class="popup-highlights-marquee-outer" id="hlMarqueeOuter" style="flex-grow:1;overflow:hidden;position:relative;margin:10px 14px 10px 14px;min-height:0;">
+              <!-- Top fade -->
+              <div style="position:absolute;top:0;left:0;right:0;height:22px;background:linear-gradient(to bottom,#fff,rgba(255,255,255,0));z-index:5;pointer-events:none;"></div>
+              <!-- Bottom fade -->
+              <div style="position:absolute;bottom:0;left:0;right:0;height:22px;background:linear-gradient(to top,#fff,rgba(255,255,255,0));z-index:5;pointer-events:none;"></div>
 
-              <!-- Carousel Slide Track -->
-              <div class="popup-carousel-track-container" style="width: 100%; height: 100%; overflow: hidden; border-radius: 16px;">
-                <div class="popup-carousel-track" style="display: flex; transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1); height: 100%; width: 100%;">
-                  
-                  {% for hl in active_highlights %}
-                  <!-- Slide -->
-                  <div class="popup-carousel-slide" style="flex: 0 0 100%; width: 100%; display: flex; flex-direction: column; justify-content: stretch; height: 100%; padding: 0 2px;">
-                    <div class="popup-list-item" data-popup-id="hl-{{ hl.id }}" style="display: flex; flex-direction: column; align-items: stretch; gap: 0; padding: 0; border: 1px solid #e5e7eb; border-radius: 16px; overflow: hidden; background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.03); height: 100%; margin-bottom: 0;">
-                      
-                      <!-- Image / Video Cover -->
-                      <div class="position-relative" style="height: 160px; overflow: hidden; background: #f3f4f6; flex-shrink: 0; display: flex; align-items: center; justify-content: center; width: 100%;">
-                        {% if hl.gallery_type == 'video' %}
-                          {% if hl.get_video_thumbnail %}
-                            <img src="{{ hl.get_video_thumbnail }}" alt="{{ hl.title }}" style="width: 100%; height: 100%; object-fit: cover;">
-                          {% else %}
-                            <div class="bg-light d-flex align-items-center justify-content-center w-100 h-100">
-                              <i class="fas fa-video fa-2x text-muted"></i>
-                            </div>
-                          {% endif %}
-                          <!-- Red Play Button Overlay -->
-                          <span class="position-absolute top-50 start-50 translate-middle d-flex align-items-center justify-content-center bg-danger rounded-circle text-white shadow-sm" style="width: 40px; height: 40px; font-size: 14px; z-index: 5; background-color: #E61013 !important;">
-                            <i class="fas fa-play"></i>
-                          </span>
-                        {% else %}
-                          {% if hl.get_image %}
-                            <img src="{{ hl.get_image }}" alt="{{ hl.title }}" style="width: 100%; height: 100%; object-fit: cover;">
-                          {% else %}
-                            <div class="bg-light d-flex align-items-center justify-content-center w-100 h-100">
-                              <i class="fas fa-image fa-2x text-muted"></i>
-                            </div>
-                          {% endif %}
-                        {% endif %}
-                      </div>
-
-                      <!-- Caption Info (Bold Attention Fonts & Light Subtitle) -->
-                      <div class="p-3 d-flex flex-column justify-content-between flex-grow-1" style="text-align: left; background: #ffffff;">
-                        <div style="margin-bottom: 8px;">
-                          <h5 class="fw-bold text-dark mb-2" style="font-family: 'Poppins', 'Roboto Slab', sans-serif; font-weight: 800; font-size: 14px; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-top: 0;">
-                            {{ hl.title }}
-                          </h5>
-                          {% if hl.highlight_subtitle %}
-                          <p class="text-muted small mb-0" style="font-weight: 400; color: #6b7280; font-size: 11px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3;">
-                            {{ hl.highlight_subtitle }}
-                          </p>
-                          {% endif %}
-                        </div>
-                        
-                        <div class="d-flex align-items-center justify-content-between pt-2 border-top" style="border-color: #f3f4f6 !important; font-size: 10.5px;">
-                          <span class="text-muted"><i class="far fa-clock me-1"></i>{% if hl.date %}{{ hl.date|date:"M d, Y" }}{% else %}Highlight{% endif %}</span>
-                          <span class="fw-semibold text-danger d-inline-flex align-items-center" style="color: #E61013;">
-                            {% if hl.gallery_type == 'video' %}Play Video{% else %}View Image{% endif %} 
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-left: 2px;"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-                          </span>
-                        </div>
-                      </div>
-
-                    </div>
-                  </div>
-                  {% endfor %}
-
-                </div>
-              </div>
-
-              <!-- Right Arrow -->
-              <button class="popup-carousel-btn next-btn" aria-label="Next Highlight" style="position: absolute; right: 8px; z-index: 10; background: rgba(255,255,255,0.9); border: 1px solid #ddd; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #333; box-shadow: 0 2px 6px rgba(0,0,0,0.12); transition: all 0.2s;" onmouseover="this.style.background='#B71A34'; this.style.color='white'; this.style.borderColor='#B71A34';" onmouseout="this.style.background='rgba(255,255,255,0.9)'; this.style.color='#333'; this.style.borderColor='#ddd';">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 6 15 12 9 18"/></svg>
-              </button>
-
-              <!-- Indicators Dot Indicators -->
-              <div class="popup-carousel-indicators" style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); display: flex; gap: 5px; z-index: 10;">
+              <div class="popup-highlights-marquee-track" id="hlMarqueeTrack" style="display:flex;flex-direction:column;gap:8px;will-change:transform;">
                 {% for hl in active_highlights %}
-                <span class="carousel-dot {% if forloop.first %}active{% endif %}" data-slide-index="{{ forloop.counter0 }}" style="width: 6px; height: 6px; border-radius: 50%; background: #d1d5db; cursor: pointer; transition: all 0.25s ease;"></span>
+                <div class="hl-marquee-card popup-list-item" data-popup-id="hl-{{ hl.unique_hl_id }}"
+                     style="display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:12px;border:1px solid #e5e7eb;background:#fff;cursor:pointer;transition:border-color 0.2s,background 0.2s,transform 0.2s;flex-shrink:0;">
+                  <!-- Thumbnail -->
+                  <div style="width:54px;height:54px;border-radius:9px;overflow:hidden;flex-shrink:0;background:#f3f4f6;position:relative;">
+                    {% if hl.gallery_type == 'video' %}
+                      {% if hl.get_video_thumbnail %}
+                        <img src="{{ hl.get_video_thumbnail }}" alt="{{ hl.title }}" style="width:54px;height:54px;object-fit:cover;display:block;">
+                      {% else %}
+                        <div style="width:54px;height:54px;display:flex;align-items:center;justify-content:center;"><i class="fas fa-video text-muted"></i></div>
+                      {% endif %}
+                      <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;"><span style="width:20px;height:20px;background:#E61013;border-radius:50%;display:flex;align-items:center;justify-content:center;"><i class="fas fa-play" style="font-size:7px;color:#fff;margin-left:1px;"></i></span></span>
+                    {% else %}
+                      {% if hl.get_image %}
+                        <img src="{{ hl.get_image }}" alt="{{ hl.title }}" style="width:54px;height:54px;object-fit:cover;display:block;">
+                      {% else %}
+                        <div style="width:54px;height:54px;display:flex;align-items:center;justify-content:center;"><i class="fas fa-image text-muted"></i></div>
+                      {% endif %}
+                    {% endif %}
+                  </div>
+                  <!-- Text -->
+                  <div style="flex-grow:1;min-width:0;">
+                    <div style="font-size:12.5px;font-weight:700;color:#111827;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{{ hl.title }}</div>
+                    {% if hl.highlight_subtitle %}
+                    <div style="font-size:10.5px;color:#6b7280;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ hl.highlight_subtitle }}</div>
+                    {% elif hl.category %}
+                    <div style="font-size:10.5px;color:#6b7280;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ hl.category }}</div>
+                    {% endif %}
+                    <div style="font-size:10px;color:#9ca3af;margin-top:3px;"><i class="far fa-clock" style="margin-right:3px;"></i>{% if hl.date %}{{ hl.date|date:"M d, Y" }}{% else %}Highlight{% endif %}</div>
+                  </div>
+                  <!-- Arrow -->
+                  <div style="flex-shrink:0;color:#d1d5db;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+                  </div>
+                </div>
                 {% endfor %}
-              </div>
 
+                <!-- Duplicate set for seamless infinite scroll -->
+                {% for hl in active_highlights %}
+                <div class="hl-marquee-card popup-list-item" data-popup-id="hl-{{ hl.unique_hl_id }}"
+                     style="display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:12px;border:1px solid #e5e7eb;background:#fff;cursor:pointer;transition:border-color 0.2s,background 0.2s,transform 0.2s;flex-shrink:0;">
+                  <div style="width:54px;height:54px;border-radius:9px;overflow:hidden;flex-shrink:0;background:#f3f4f6;position:relative;">
+                    {% if hl.gallery_type == 'video' %}
+                      {% if hl.get_video_thumbnail %}
+                        <img src="{{ hl.get_video_thumbnail }}" alt="{{ hl.title }}" style="width:54px;height:54px;object-fit:cover;display:block;">
+                      {% else %}
+                        <div style="width:54px;height:54px;display:flex;align-items:center;justify-content:center;"><i class="fas fa-video text-muted"></i></div>
+                      {% endif %}
+                      <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;"><span style="width:20px;height:20px;background:#E61013;border-radius:50%;display:flex;align-items:center;justify-content:center;"><i class="fas fa-play" style="font-size:7px;color:#fff;margin-left:1px;"></i></span></span>
+                    {% else %}
+                      {% if hl.get_image %}
+                        <img src="{{ hl.get_image }}" alt="{{ hl.title }}" style="width:54px;height:54px;object-fit:cover;display:block;">
+                      {% else %}
+                        <div style="width:54px;height:54px;display:flex;align-items:center;justify-content:center;"><i class="fas fa-image text-muted"></i></div>
+                      {% endif %}
+                    {% endif %}
+                  </div>
+                  <div style="flex-grow:1;min-width:0;">
+                    <div style="font-size:12.5px;font-weight:700;color:#111827;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{{ hl.title }}</div>
+                    {% if hl.highlight_subtitle %}
+                    <div style="font-size:10.5px;color:#6b7280;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ hl.highlight_subtitle }}</div>
+                    {% elif hl.category %}
+                    <div style="font-size:10.5px;color:#6b7280;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ hl.category }}</div>
+                    {% endif %}
+                    <div style="font-size:10px;color:#9ca3af;margin-top:3px;"><i class="far fa-clock" style="margin-right:3px;"></i>{% if hl.date %}{{ hl.date|date:"M d, Y" }}{% else %}Highlight{% endif %}</div>
+                  </div>
+                  <div style="flex-shrink:0;color:#d1d5db;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+                  </div>
+                </div>
+                {% endfor %}
+
+              </div>
             </div>
             {% else %}
             <div class="text-center text-muted py-5" style="font-size: 13px; flex-grow: 1; display: flex; align-items: center; justify-content: center;">No active highlights.</div>
@@ -1468,7 +1472,8 @@
 
       <!-- ======== HIGHLIGHT DETAIL VIEWS ======== -->
       {% for hl in active_highlights %}
-      <div id="popup-detail-hl-{{ hl.id }}" class="popup-view popup-detail-view">
+      <div id="popup-detail-hl-{{ hl.unique_hl_id }}" class="popup-view popup-detail-view">
+
         <!-- Back button to list -->
         <button class="popup-back-btn" aria-label="Back to list">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
@@ -1480,8 +1485,9 @@
             {% if hl.gallery_type == 'video' %}
               {% if hl.video_url %}
                 <div class="ratio ratio-16x9 rounded overflow-hidden shadow-sm" style="background: #000; min-height: 250px;">
-                  <iframe src="" data-src="{{ hl.get_embed_url }}" title="{{ hl.title }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen class="youtube-iframe-hl" style="width: 100%; height: 100%;"></iframe>
+                  <iframe src="" data-src="{{ hl.get_embed_url }}" title="{{ hl.title }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen class="youtube-iframe-hl" style="width: 100%; height: 100%;"></iframe>
                 </div>
+
                 <!-- YouTube Fallback Link Button -->
                 <div class="text-center mt-3">
                   <a href="{{ hl.video_url }}" target="_blank" class="btn btn-sm btn-danger px-3 py-2 fw-semibold d-inline-flex align-items-center" style="background-color: #E61013; border: none; font-size: 13px; border-radius: 6px; color: white;">
@@ -1510,10 +1516,11 @@
               {% endif %}
             </div>
             {% if hl.description %}
-            <div class="announcement-modal-text mt-3" style="font-size: 14px; line-height: 1.6; color: #4b5563; max-height: 200px; overflow-y: auto;">
-              {{ hl.description|linebreaks }}
+            <div class="announcement-modal-text mt-3" style="font-size: 14px; line-height: 1.6; color: #4b5563; max-height: 300px; overflow-y: auto;">
+              {{ hl.description|safe }}
             </div>
             {% endif %}
+
           </div>
         </div>
       </div>
@@ -1542,15 +1549,29 @@
   }
   .announcement-modal-overlay.show { opacity: 1; }
 
-  /* ===== Modal Card ===== */
-  .announcement-modal-wrapper {
-    width: 100%;
-    max-width: 940px;
+  /* ===== Highlights Marquee ===== */
+  @keyframes hlMarqueeScroll {
+    0%   { transform: translateY(0); }
+    100% { transform: translateY(-50%); }
   }
-  .carousel-dot.active {
-    background: #E61013 !important;
-    transform: scale(1.3);
+  .popup-highlights-marquee-track {
+    animation: hlMarqueeScroll 20s linear infinite;
   }
+  .popup-highlights-marquee-outer:hover .popup-highlights-marquee-track,
+  .popup-highlights-marquee-outer:focus-within .popup-highlights-marquee-track {
+    animation-play-state: paused;
+  }
+  .hl-marquee-card:hover {
+    border-color: rgba(183,26,52,0.4) !important;
+    background: #fdf6f7 !important;
+    transform: translateX(3px) !important;
+  }
+  .hl-marquee-card:hover > div:last-child {
+    color: #B71A34 !important;
+    transform: translateX(3px);
+  }
+
+
   @media (max-width: 768px) {
     .popup-cols-container {
       flex-direction: column !important;
@@ -1563,6 +1584,11 @@
     .popup-col-highlights {
       max-height: 48vh !important;
     }
+  }
+  /* ===== Modal Card ===== */
+  .announcement-modal-wrapper {
+    width: 100%;
+    max-width: 940px;
   }
   .announcement-modal-card {
     background: #ffffff;
@@ -1912,8 +1938,9 @@
       popupIds.push("popup_{{ popup.id }}");
       {% endfor %}
       {% for hl in active_highlights %}
-      popupIds.push("hl_{{ hl.id }}");
+      popupIds.push("hl_{{ hl.unique_hl_id }}");
       {% endfor %}
+
 
       var showOnce = true;
       {% if active_popups %}
@@ -1952,80 +1979,19 @@
       // ====== View Navigation ======
       var listView = document.getElementById("popup-list-view");
 
-      // ====== Carousel Navigation ======
+      // ====== Highlights Marquee Setup ======
       (function() {
-        var track = modal.querySelector(".popup-carousel-track");
-        var slides = modal.querySelectorAll(".popup-carousel-slide");
-        var dots = modal.querySelectorAll(".carousel-dot");
-        var prevBtn = modal.querySelector(".prev-btn");
-        var nextBtn = modal.querySelector(".next-btn");
-        if (!track || slides.length === 0) return;
+        var outer = document.getElementById('hlMarqueeOuter');
+        var track = document.getElementById('hlMarqueeTrack');
+        if (!outer || !track) return;
 
-        var currentIndex = 0;
-        var autoPlayInterval = null;
-
-        function updateCarousel(index) {
-          if (index < 0) index = slides.length - 1;
-          if (index >= slides.length) index = 0;
-          currentIndex = index;
-
-          track.style.transform = "translateX(-" + (currentIndex * 100) + "%)";
-          
-          dots.forEach(function(dot, i) {
-            if (i === currentIndex) {
-              dot.classList.add("active");
-            } else {
-              dot.classList.remove("active");
-            }
-          });
-        }
-
-        function startAutoPlay() {
-          if (autoPlayInterval) clearInterval(autoPlayInterval);
-          autoPlayInterval = setInterval(function() {
-            updateCarousel(currentIndex + 1);
-          }, 4000);
-        }
-
-        function stopAutoPlay() {
-          if (autoPlayInterval) clearInterval(autoPlayInterval);
-        }
-
-        if (prevBtn) {
-          prevBtn.addEventListener("click", function(e) {
-            e.stopPropagation();
-            updateCarousel(currentIndex - 1);
-            startAutoPlay(); // Reset timer on click
-          });
-        }
-
-        if (nextBtn) {
-          nextBtn.addEventListener("click", function(e) {
-            e.stopPropagation();
-            updateCarousel(currentIndex + 1);
-            startAutoPlay(); // Reset timer on click
-          });
-        }
-
-        dots.forEach(function(dot) {
-          dot.addEventListener("click", function(e) {
-            e.stopPropagation();
-            var index = parseInt(this.getAttribute("data-slide-index"));
-            updateCarousel(index);
-            startAutoPlay(); // Reset timer on click
-          });
-        });
-
-        // Initialize active state on first dot
-        updateCarousel(0);
-        startAutoPlay();
-
-        // Pause on hover
-        var container = modal.querySelector(".popup-col-highlights");
-        if (container) {
-          container.addEventListener("mouseenter", stopAutoPlay);
-          container.addEventListener("mouseleave", startAutoPlay);
-        }
+        // Adjust speed proportionally to number of cards (more cards = slower per-card but same total)
+        var cards = track.querySelectorAll('.hl-marquee-card');
+        var half = Math.floor(cards.length / 2); // original set size (before duplicate)
+        if (half < 1) half = 1;
+        // 20s base for 1 card; scale with card count so scroll feels consistent
+        var duration = Math.max(10, half * 5);
+        track.style.animationDuration = duration + 's';
       })();
 
       // Show a specific view with animation
@@ -2113,7 +2079,8 @@
         {% if active_popups %}
         singleId = "popup-{{ active_popups.0.id }}";
         {% elif active_highlights %}
-        singleId = "hl-{{ active_highlights.0.id }}";
+        singleId = "hl-{{ active_highlights.0.unique_hl_id }}";
+
         {% endif %}
         var singleDetail = document.getElementById("popup-detail-" + singleId);
         if (singleDetail) {

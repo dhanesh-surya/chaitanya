@@ -72,6 +72,11 @@ class GalleryItem(models.Model):
             return self.image.url
         return self.image_url
 
+    @property
+    def unique_hl_id(self):
+        return f"g-{self.id}"
+
+
     def get_video_thumbnail(self):
         # 1. Check if the admin uploaded a custom cover/thumbnail image
         custom_image = self.get_image()
@@ -106,5 +111,7 @@ class GalleryItem(models.Model):
             for pattern in patterns:
                 match = re.search(pattern, self.video_url)
                 if match:
-                    return f"https://www.youtube.com/embed/{match.group(1)}?autoplay=1"
+                    return f"https://www.youtube-nocookie.com/embed/{match.group(1)}?rel=0&enablejsapi=1"
         return ""
+
+

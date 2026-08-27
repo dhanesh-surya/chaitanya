@@ -3,6 +3,8 @@ from collections import OrderedDict
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib import messages
 from django.db import models
+from django.utils import timezone
+
 from .models import (
     BannerSlide, AccreditationLogo, StatCounter, CollegeInfo,
     Leadership, Committee, Policy, Achievement, Notice, ImportantLink,
@@ -39,7 +41,12 @@ def home(request):
 
     # Query active homepage popup announcements (all active ones)
     active_popups = PopupAnnouncement.objects.filter(is_active=True)
-    active_highlights = GalleryItem.objects.filter(is_active=True, is_homepage_highlight=True).order_by('order', '-date')
+    gallery_hl = list(GalleryItem.objects.filter(is_active=True, is_homepage_highlight=True))
+    happening_hl = list(Happening.objects.filter(is_homepage_highlight=True))
+    active_highlights = sorted(
+        gallery_hl + happening_hl,
+        key=lambda item: (getattr(item, 'order', 0), getattr(item, 'date', None) or timezone.now().date())
+    )
 
     # Query leadership messages
     principal = Leadership.objects.filter(role='principal').first()

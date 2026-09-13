@@ -13,5 +13,6 @@ urlpatterns = [
     path('gallery/', include('gallery.urls', namespace='gallery')),
     path('feedback/', include('feedback.urls', namespace='feedback')),
     path('pages/', include('custom_pages.urls', namespace='custom_pages')),
+    path('library/', include('library.urls', namespace='library')),
     path('ckeditor5/', include('django_ckeditor_5.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -10,6 +10,7 @@ DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 ALLOWED_HOSTS = [
     'chaitanyacg.ac.in',
     'www.chaitanyacg.ac.in',
+    '44.205.17.26',
     '13.48.131.55',
     'localhost',
     '127.0.0.1',
@@ -38,6 +39,7 @@ INSTALLED_APPS = [
     'gallery',
     'feedback',
     'custom_pages',
+    'library',
 ]
 
 MIDDLEWARE = [
@@ -114,6 +116,10 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# Allow large file uploads (event images, banners, documents) — must match nginx client_max_body_size
+DATA_UPLOAD_MAX_MEMORY_SIZE = 20 * 1024 * 1024   # 20 MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 20 * 1024 * 1024   # 20 MB
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Crispy Forms
@@ -179,6 +185,7 @@ CKEDITOR_5_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
 
 # Security settings for production
 if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SECURE_SSL_REDIRECT = os.environ.get('DJANGO_SECURE_SSL_REDIRECT', 'True') == 'True'
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True

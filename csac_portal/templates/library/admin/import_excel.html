@@ -1,0 +1,139 @@
+{% extends "library/base_library.html" %}
+
+{% block library_content %}
+<div class="card lib-card p-4 mb-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h4 class="h5 fw-bold mb-1 text-dark">
+        <i class="fas fa-file-excel text-success me-2"></i> Batch Book Importer (Excel / CSV)
+      </h4>
+      <p class="text-muted small mb-0">Upload your existing college library book circulation sheets for automated validation and catalogue insertion</p>
+    </div>
+  </div>
+
+  <!-- Upload Form -->
+  <div class="p-4 border rounded-2 bg-light mb-4">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="row align-items-end g-3">
+        <div class="col-md-8">
+          <label class="form-label small fw-bold text-dark">Select Excel (.xlsx, .xls) or CSV (.csv) File:</label>
+          <input type="file" name="excel_file" class="form-control" accept=".xlsx,.xls,.csv" required>
+        </div>
+        <div class="col-md-4">
+          <button type="submit" class="btn btn-primary w-100 fw-bold py-2 text-nowrap">
+            <i class="fas fa-search me-1"></i> Upload &amp; Validate Data
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Column Guidelines Collapse / Alert -->
+  <div class="alert alert-info small mb-4">
+    <div class="fw-bold mb-1"><i class="fas fa-info-circle me-1"></i> Supported Excel Column Headers (Case-insensitive):</div>
+    <div><strong>Required:</strong> Accession Number (or <code>Acc No</code>, <code>Barcode</code>), Book Title (or <code>Title</code>), Author (or <code>Authors</code>, <code>Writer</code>).</div>
+    <div><strong>Optional:</strong> Publisher, Edition, Year, Subject, Category, Department, Rack Location, ISBN, Price, Pages.</div>
+  </div>
+
+  {% if preview_data %}
+    <!-- Validation Result Summary -->
+    <div class="border rounded-2 p-4 bg-white mb-4">
+      <h5 class="fw-bold mb-3 text-dark">
+        <i class="fas fa-clipboard-check text-primary me-2"></i> Data Verification Result: {{ preview_data.file_name }}
+      </h5>
+
+      <div class="row g-3 text-center mb-4">
+        <div class="col-md-4">
+          <div class="p-3 border rounded bg-light">
+            <div class="text-muted small fw-bold">TOTAL ROWS READ</div>
+            <h3 class="fw-bold mb-0 text-dark">{{ preview_data.total_rows }}</h3>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="p-3 border rounded bg-success bg-opacity-10">
+            <div class="text-success small fw-bold">VALID &amp; READY TO IMPORT</div>
+            <h3 class="fw-bold mb-0 text-success">{{ preview_data.valid_count }}</h3>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="p-3 border rounded bg-danger bg-opacity-10">
+            <div class="text-danger small fw-bold">ERRORS / DUPLICATES</div>
+            <h3 class="fw-bold mb-0 text-danger">{{ preview_data.error_count }}</h3>
+          </div>
+        </div>
+      </div>
+
+      {% if preview_data.error_count > 0 %}
+        <h6 class="fw-bold text-danger mb-2"><i class="fas fa-times-circle me-1"></i> Flagged Errors (Rows will be skipped):</h6>
+        <div class="table-responsive mb-4" style="max-height: 250px; overflow-y: auto;">
+          <table class="table table-sm table-bordered small">
+            <thead class="table-light">
+              <tr>
+                <th>Row #</th>
+                <th>Accession No</th>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Validation Issue</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for err in preview_data.sample_errors %}
+                <tr class="table-danger text-dark">
+                  <td>{{ err.row_num }}</td>
+                  <td><code>{{ err.accession_number|default:"[Missing]" }}</code></td>
+                  <td>{{ err.title|default:"[Missing]" }}</td>
+                  <td>{{ err.author|default:"[Missing]" }}</td>
+                  <td><strong>{{ err.reasons }}</strong></td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% endif %}
+
+      {% if preview_data.valid_count > 0 %}
+        <h6 class="fw-bold text-success mb-2"><i class="fas fa-check-circle me-1"></i> Preview of Valid Records (First 10):</h6>
+        <div class="table-responsive mb-4" style="max-height: 250px; overflow-y: auto;">
+          <table class="table table-sm table-bordered small">
+            <thead class="table-light">
+              <tr>
+                <th>Row #</th>
+                <th>Accession No</th>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Publisher</th>
+                <th>Rack</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in preview_data.sample_valid %}
+                <tr>
+                  <td>{{ row.row_num|default:forloop.counter }}</td>
+                  <td><code>{{ row.accession_number }}</code></td>
+                  <td>{{ row.title }}</td>
+                  <td>{{ row.author }}</td>
+                  <td>{{ row.publisher|default:"&mdash;" }}</td>
+                  <td>{{ row.rack_location|default:"General" }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <form action="{% url 'library:admin_import_commit' %}" method="post">
+          {% csrf_token %}
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="text-muted small">
+              Clicking below will atomically insert all <strong>{{ preview_data.valid_count }}</strong> verified copies into the database.
+            </span>
+            <button type="submit" class="btn btn-success fw-bold px-4 py-2 text-nowrap" onclick="return confirm('Commit validated books to library database now?');">
+              <i class="fas fa-database me-1"></i> Confirm &amp; Import {{ preview_data.valid_count }} Books
+            </button>
+          </div>
+        </form>
+      {% endif %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

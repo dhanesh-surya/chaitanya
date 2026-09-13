@@ -1,0 +1,68 @@
+{% extends "library/base_library.html" %}
+
+{% block library_content %}
+<div class="card lib-card p-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h4 class="h5 fw-bold mb-1 text-dark">
+        <i class="fas fa-shield-alt text-primary me-2"></i> Library Circulation Audit Trail
+      </h4>
+      <p class="text-muted small mb-0">Immutable chronological log of all book issuances, approvals, returns, and inventory modifications</p>
+    </div>
+  </div>
+
+  <!-- Filter Bar -->
+  <form method="get" class="row g-2 mb-4">
+    <div class="col-md-5">
+      <input type="text" name="q" class="form-control form-control-sm" placeholder="Search by Reference ID (e.g. LIB-REQ-..., TXN-..., or Acc No)..." value="{{ search_q }}">
+    </div>
+    <div class="col-md-4">
+      <select name="action" class="form-select form-select-sm">
+        <option value="">All Action Types</option>
+        {% for code, label in action_choices %}
+          <option value="{{ code }}" {% if selected_action == code %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-3 d-flex gap-2">
+      <button type="submit" class="btn btn-sm btn-primary w-100 fw-bold">Filter</button>
+      {% if search_q or selected_action %}
+        <a href="{% url 'library:admin_audit' %}" class="btn btn-sm btn-outline-secondary">Clear</a>
+      {% endif %}
+    </div>
+  </form>
+
+  {% if logs %}
+    <div class="table-responsive">
+      <table class="table table-sm table-hover align-middle mb-0 small">
+        <thead class="table-light">
+          <tr>
+            <th>Timestamp</th>
+            <th>Action</th>
+            <th>Reference ID</th>
+            <th>Actor (User)</th>
+            <th>IP Address</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for l in logs %}
+            <tr>
+              <td class="text-muted">{{ l.timestamp|date:"d M Y, h:i A" }}</td>
+              <td><span class="badge bg-light text-dark border">{{ l.get_action_display }}</span></td>
+              <td><code>{{ l.reference_id }}</code></td>
+              <td><strong>{{ l.user.username|default:"System" }}</strong></td>
+              <td class="text-muted">{{ l.ip_address|default:"&mdash;" }}</td>
+              <td>{{ l.description }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="alert alert-light border text-center py-5">
+      <p class="text-muted small mb-0">No audit log entries matching your criteria.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -670,3 +670,102 @@ footer.footer.v__1 {
 .single-procedure:hover .card-bg-img {
     transform: scale(1.08) !important;
 }
+
+/* ==========================================================================
+   UNIFORM BUTTON & SUBMIT STYLES (Non-wrap, Full Padding, Enhanced Font Size)
+   ========================================================================== */
+
+button[type="submit"],
+input[type="submit"],
+.btn-submit,
+.lib-btn-submit,
+.rts-theme-btn,
+.rts-btn {
+    white-space: nowrap !important;
+    word-break: keep-all !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.3px !important;
+    padding: 11px 26px !important;
+    border-radius: 6px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    line-height: 1.4 !important;
+    text-align: center !important;
+    transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+    cursor: pointer !important;
+}
+
+/* Full Width Submits (Cards, Login, Modals) */
+button[type="submit"].w-100,
+input[type="submit"].w-100,
+.w-100.btn-submit,
+.w-100.lib-btn-submit,
+.btn.w-100 {
+    display: flex !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    padding: 12px 24px !important;
+    font-size: 16px !important;
+    white-space: normal !important;
+    word-break: normal !important;
+    overflow: visible !important;
+    text-align: center !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+/* Compact / Table Action Buttons */
+button[type="submit"].btn-sm,
+input[type="submit"].btn-sm,
+.btn-sm.btn-submit,
+.table .btn,
+.lib-card .btn-sm {
+    white-space: nowrap !important;
+    word-break: keep-all !important;
+    padding: 7px 18px !important;
+    font-size: 13.5px !important;
+    font-weight: 600 !important;
+    border-radius: 5px !important;
+}
+
+/* Large Hero Search & Call-to-Action Submits */
+button[type="submit"].btn-lg,
+input[type="submit"].btn-lg,
+.btn-lg.btn-submit {
+    padding: 14px 34px !important;
+    font-size: 16.5px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.4px !important;
+    border-radius: 8px !important;
+}
+
+/* Hover & Active Lift Effects */
+button[type="submit"]:hover,
+input[type="submit"]:hover,
+.btn-submit:hover,
+.lib-btn-submit:hover {
+    transform: translateY(-1.5px) !important;
+    box-shadow: 0 5px 15px rgba(230, 16, 19, 0.25) !important;
+}
+
+button[type="submit"].btn-success:hover,
+input[type="submit"].btn-success:hover {
+    box-shadow: 0 5px 15px rgba(25, 135, 84, 0.25) !important;
+}
+
+button[type="submit"].btn-primary:hover,
+input[type="submit"].btn-primary:hover {
+    box-shadow: 0 5px 15px rgba(13, 110, 253, 0.25) !important;
+}
+
+button[type="submit"]:active,
+input[type="submit"]:active,
+.btn-submit:active {
+    transform: translateY(0) !important;
+}
+

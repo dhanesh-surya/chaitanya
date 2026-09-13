@@ -1,0 +1,393 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+  :root {
+    --lib-primary: #B71A34;
+    --lib-primary-hover: #961228;
+    --lib-dark: #1a1a2e;
+    --lib-light: #f8f9fa;
+    --lib-accent: #f8d7da;
+    --lib-gold: #e5a93c;
+  }
+
+  .lib-header-banner {
+    background: linear-gradient(135deg, var(--lib-dark) 0%, var(--lib-primary) 100%);
+    color: #fff;
+    padding: 35px 0 25px 0;
+    margin-bottom: 25px;
+    border-bottom: 3px solid rgba(255,255,255,0.1);
+  }
+
+  .lib-nav-bar {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    padding: 10px 15px;
+    margin-top: -20px;
+    position: relative;
+    z-index: 10;
+    margin-bottom: 25px;
+    border: 1px solid #eef0f3;
+  }
+
+  .lib-nav-link {
+    font-weight: 600;
+    color: #495057;
+    padding: 8px 16px;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+  }
+  .lib-nav-link:hover, .lib-nav-link.active {
+    background-color: rgba(183, 26, 52, 0.08);
+    color: var(--lib-primary);
+  }
+
+  .lib-card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    border: 1px solid #eef0f3;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .lib-card:hover {
+    box-shadow: 0 8px 25px rgba(0,0,0,0.07);
+  }
+
+  .lib-badge-avail {
+    background-color: #d1e7dd;
+    color: #0f5132;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .lib-badge-issued {
+    background-color: #f8d7da;
+    color: #842029;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .lib-badge-pending {
+    background-color: #fff3cd;
+    color: #664d03;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .lib-btn-primary {
+    background-color: var(--lib-primary);
+    border-color: var(--lib-primary);
+    color: #fff;
+    font-weight: 600;
+  }
+  .lib-btn-primary:hover {
+    background-color: var(--lib-primary-hover);
+    border-color: var(--lib-primary-hover);
+    color: #fff;
+  }
+
+  .lib-kpi-card {
+    border-left: 4px solid var(--lib-primary);
+    border-radius: 8px;
+    padding: 20px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  }
+
+  /* Reset & Ensure All Buttons Display Properly */
+  button,
+  .btn {
+    box-sizing: border-box !important;
+  }
+
+  /* Distinct Button Colors & Backgrounds */
+  .btn.btn-danger,
+  button.btn-danger,
+  input[type="submit"].btn-danger {
+    background-color: #E61013 !important;
+    border-color: #E61013 !important;
+    color: #ffffff !important;
+  }
+  .btn.btn-danger:hover,
+  button.btn-danger:hover,
+  input[type="submit"].btn-danger:hover {
+    background-color: #c90b0e !important;
+    border-color: #c90b0e !important;
+    color: #ffffff !important;
+  }
+
+  .btn.btn-primary,
+  button.btn-primary {
+    background-color: var(--lib-primary) !important;
+    border-color: var(--lib-primary) !important;
+    color: #ffffff !important;
+  }
+  .btn.btn-primary:hover,
+  button.btn-primary:hover {
+    background-color: var(--lib-primary-hover) !important;
+    border-color: var(--lib-primary-hover) !important;
+    color: #ffffff !important;
+  }
+
+  .btn.btn-success,
+  button.btn-success {
+    background-color: #198754 !important;
+    border-color: #198754 !important;
+    color: #ffffff !important;
+  }
+  .btn.btn-success:hover,
+  button.btn-success:hover {
+    background-color: #157347 !important;
+    border-color: #146c43 !important;
+    color: #ffffff !important;
+  }
+
+  .btn.btn-outline-light,
+  button.btn-outline-light {
+    color: #ffffff !important;
+    border-color: #ffffff !important;
+    background-color: transparent !important;
+  }
+  .btn.btn-outline-light:hover,
+  button.btn-outline-light:hover {
+    color: #000000 !important;
+    background-color: #ffffff !important;
+  }
+
+  .btn.btn-outline-danger,
+  button.btn-outline-danger {
+    color: #E61013 !important;
+    border-color: #E61013 !important;
+    background-color: transparent !important;
+  }
+  .btn.btn-outline-danger:hover,
+  button.btn-outline-danger:hover {
+    color: #ffffff !important;
+    background-color: #E61013 !important;
+  }
+
+  /* Uniform Non-Wrap Submit & Action Buttons (matching chaitanyacg.ac.in assets) */
+  button[type="submit"],
+  input[type="submit"],
+  .lib-btn-submit {
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.3px !important;
+    padding: 10px 24px !important;
+    border-radius: 6px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    line-height: 1.4 !important;
+    text-align: center !important;
+    transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+    cursor: pointer !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+  }
+
+  /* Full Width Block Buttons (e.g. Login, Card Actions) */
+  button[type="submit"].w-100,
+  input[type="submit"].w-100,
+  .btn.w-100 {
+    display: flex !important;
+    width: 100% !important;
+    padding: 12px 24px !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    box-sizing: border-box !important;
+    white-space: normal !important;
+    word-break: normal !important;
+    overflow: visible !important;
+    text-align: center !important;
+  }
+
+  /* Search button inside input-groups */
+  .input-group button[type="submit"],
+  .input-group .btn {
+    width: auto !important;
+    padding: 6px 16px !important;
+    white-space: nowrap !important;
+    border-radius: 0 4px 4px 0 !important;
+  }
+
+  /* Compact / Table Action Buttons */
+  button[type="submit"].btn-sm,
+  input[type="submit"].btn-sm,
+  .table .btn,
+  .modal-footer .btn {
+    white-space: nowrap !important;
+    word-break: keep-all !important;
+    padding: 7px 18px !important;
+    font-size: 13.5px !important;
+    font-weight: 600 !important;
+  }
+
+  /* Large Hero Search & Call-to-Action Submits */
+  button[type="submit"].btn-lg,
+  input[type="submit"].btn-lg {
+    padding: 14px 34px !important;
+    font-size: 16.5px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.4px !important;
+  }
+
+  button[type="submit"]:hover,
+  input[type="submit"]:hover {
+    transform: translateY(-1.5px) !important;
+    box-shadow: 0 4px 14px rgba(183, 26, 52, 0.25) !important;
+  }
+
+  button[type="submit"]:active,
+  input[type="submit"]:active {
+    transform: translateY(0) !important;
+  }
+</style>
+{% block library_extra_css %}{% endblock %}
+{% endblock %}
+
+{% block content %}
+<!-- Library Header Banner -->
+<div class="lib-header-banner">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-7">
+        <h2 class="h3 fw-bold mb-1 text-white">
+          <i class="fas fa-book-reader me-2"></i> {{ page_title|default:"Central Digital Library" }}
+        </h2>
+        <p class="mb-0 text-white-50 fs-6">
+          Smt. Urmila Devi Smriti Pustkaalaya &bull; Chaitanya Science &amp; Arts College
+        </p>
+      </div>
+      <div class="col-lg-5 text-lg-end mt-3 mt-lg-0">
+        {% if user.is_authenticated %}
+          {% if user.library_student_profile %}
+            <span class="badge bg-light text-dark me-2 py-2 px-3">
+              <i class="fas fa-user-graduate me-1 text-danger"></i> {{ user.library_student_profile.full_name }} ({{ user.library_student_profile.enrollment_number }})
+            </span>
+          {% elif user.is_staff or user.library_staff_profile %}
+            <span class="badge bg-light text-dark me-2 py-2 px-3">
+              <i class="fas fa-id-badge me-1 text-danger"></i> Staff: {{ user.get_full_name|default:user.username }}
+            </span>
+          {% else %}
+            <span class="badge bg-light text-dark me-2 py-2 px-3">
+              <i class="fas fa-user me-1 text-danger"></i> {{ user.get_full_name|default:user.username }}
+            </span>
+          {% endif %}
+          <a href="{% url 'library:logout' %}" class="btn btn-sm btn-outline-light fw-bold">
+            <i class="fas fa-sign-out-alt me-1"></i> Logout
+          </a>
+        {% else %}
+          <a href="{% url 'library:student_login' %}" class="btn btn-sm btn-light fw-bold text-danger me-2">
+            <i class="fas fa-user-graduate me-1"></i> Student Login
+          </a>
+          <a href="{% url 'library:staff_login' %}" class="btn btn-sm btn-outline-light fw-bold">
+            <i class="fas fa-shield-alt me-1"></i> Staff Desk
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container mb-5">
+  <!-- Library Sub-Navigation Bar -->
+  <div class="lib-nav-bar d-flex flex-wrap align-items-center justify-content-between gap-2">
+    <div class="d-flex flex-wrap gap-1">
+      <a href="{% url 'library:home' %}" class="lib-nav-link">
+        <i class="fas fa-home"></i> Home
+      </a>
+      <a href="{% url 'library:catalogue' %}" class="lib-nav-link">
+        <i class="fas fa-search"></i> Catalogue
+      </a>
+
+      {% if user.is_authenticated and user.library_student_profile %}
+        <span class="text-muted align-self-center px-1">|</span>
+        <a href="{% url 'library:student_dashboard' %}" class="lib-nav-link">
+          <i class="fas fa-th-large"></i> My Library
+        </a>
+        <a href="{% url 'library:my_requests' %}" class="lib-nav-link">
+          <i class="fas fa-clock"></i> My Requests
+        </a>
+        <a href="{% url 'library:my_issued' %}" class="lib-nav-link">
+          <i class="fas fa-book-open"></i> Issued Books
+        </a>
+        <a href="{% url 'library:my_history' %}" class="lib-nav-link">
+          <i class="fas fa-history"></i> History
+        </a>
+      {% endif %}
+
+      {% if user.is_authenticated and user.is_staff or user.library_staff_profile %}
+        <span class="text-muted align-self-center px-1">|</span>
+        <a href="{% url 'library:librarian_dashboard' %}" class="lib-nav-link text-danger">
+          <i class="fas fa-desktop"></i> Circulation Desk
+        </a>
+        <a href="{% url 'library:librarian_requests' %}" class="lib-nav-link">
+          <i class="fas fa-inbox"></i> Requests Queue
+        </a>
+        <a href="{% url 'library:librarian_issue' %}" class="lib-nav-link">
+          <i class="fas fa-hand-holding"></i> Issue Book
+        </a>
+        <a href="{% url 'library:librarian_returns' %}" class="lib-nav-link">
+          <i class="fas fa-undo"></i> Return Desk
+        </a>
+        <a href="{% url 'library:librarian_overdue' %}" class="lib-nav-link">
+          <i class="fas fa-exclamation-triangle"></i> Overdue Monitor
+        </a>
+      {% endif %}
+
+      {% if user.is_authenticated and user.is_superuser or user.is_staff %}
+        <span class="text-muted align-self-center px-1">|</span>
+        <a href="{% url 'library:admin_dashboard' %}" class="lib-nav-link text-primary">
+          <i class="fas fa-cogs"></i> Admin
+        </a>
+        <a href="{% url 'library:admin_import' %}" class="lib-nav-link text-primary">
+          <i class="fas fa-file-excel"></i> Excel Import
+        </a>
+      {% endif %}
+    </div>
+
+    <!-- Quick Search Field in Nav -->
+    <form action="{% url 'library:catalogue' %}" method="get" class="d-flex align-items-center ms-auto" style="min-width: 250px;">
+      <div class="input-group input-group-sm">
+        <input type="text" name="q" class="form-control" placeholder="Search title, author, acc no..." value="{{ request.GET.q }}">
+        <button class="btn btn-danger" type="submit"><i class="fas fa-search"></i></button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Django Messages Alert Area -->
+  {% if messages %}
+    <div class="mb-4">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show shadow-sm" role="alert">
+          {% if message.tags == 'error' %}
+            <i class="fas fa-exclamation-circle me-2"></i>
+          {% elif message.tags == 'success' %}
+            <i class="fas fa-check-circle me-2"></i>
+          {% else %}
+            <i class="fas fa-info-circle me-2"></i>
+          {% endif %}
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- Primary Page Body Block -->
+  {% block library_content %}{% endblock %}
+</div>
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends "library/base_library.html" %}
+
+{% block library_content %}
+<div class="card lib-card p-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h4 class="h5 fw-bold mb-1 text-dark">
+        <i class="fas fa-clock text-warning me-2"></i> My Book Requests
+      </h4>
+      <p class="text-muted small mb-0">Track the status of your online book reservations and review outcomes</p>
+    </div>
+    <a href="{% url 'library:catalogue' %}" class="btn btn-sm btn-danger">
+      <i class="fas fa-plus me-1"></i> New Request
+    </a>
+  </div>
+
+  {% if requests_list %}
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light small">
+          <tr>
+            <th>Request ID</th>
+            <th>Book &amp; Accession</th>
+            <th>Requested Date</th>
+            <th>Status</th>
+            <th>Librarian Notes</th>
+            <th class="text-end">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for req in requests_list %}
+            <tr>
+              <td><code>{{ req.request_number }}</code></td>
+              <td>
+                <div class="fw-bold text-dark">{{ req.book_copy.book.title }}</div>
+                <div class="small text-muted">
+                  Accession: <code>{{ req.book_copy.accession_number }}</code> &bull; Rack: {{ req.book_copy.rack_location|default:"General" }}
+                </div>
+              </td>
+              <td class="small">{{ req.requested_at|date:"d M Y, h:i A" }}</td>
+              <td>
+                {% if req.status == 'PENDING' %}
+                  <span class="badge bg-warning text-dark"><i class="fas fa-hourglass-half me-1"></i> Pending Review</span>
+                {% elif req.status == 'APPROVED' %}
+                  <span class="badge bg-success"><i class="fas fa-check-circle me-1"></i> Approved (Ready for Pickup)</span>
+                  {% if req.expiry_date %}
+                    <div class="small text-muted">Hold until: {{ req.expiry_date|date:"d M Y" }}</div>
+                  {% endif %}
+                {% elif req.status == 'ISSUED' %}
+                  <span class="badge bg-primary"><i class="fas fa-book-reader me-1"></i> Fulfilled / Issued</span>
+                {% elif req.status == 'REJECTED' %}
+                  <span class="badge bg-danger"><i class="fas fa-times-circle me-1"></i> Rejected</span>
+                {% elif req.status == 'CANCELLED' %}
+                  <span class="badge bg-secondary"><i class="fas fa-ban me-1"></i> Cancelled</span>
+                {% else %}
+                  <span class="badge bg-secondary">{{ req.get_status_display }}</span>
+                {% endif %}
+              </td>
+              <td class="small text-muted">
+                {% if req.rejection_reason %}
+                  <span class="text-danger">Reason: {{ req.rejection_reason }}</span>
+                {% elif req.student_remark %}
+                  <span>Note: {{ req.student_remark }}</span>
+                {% else %}
+                  &mdash;
+                {% endif %}
+              </td>
+              <td class="text-end">
+                {% if req.status == 'PENDING' %}
+                  <form action="{% url 'library:cancel_request' req.id %}" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to cancel this request?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-outline-secondary text-nowrap px-3">
+                      <i class="fas fa-times me-1"></i> Cancel Request
+                    </button>
+                  </form>
+                {% elif req.status == 'APPROVED' %}
+                  <span class="small text-success fw-bold">Collect at Desk</span>
+                {% else %}
+                  <span class="small text-muted">&mdash;</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="alert alert-light border text-center py-5">
+      <i class="fas fa-inbox text-muted fs-1 mb-3"></i>
+      <h5>No requests found</h5>
+      <p class="text-muted small">You haven't made any book issue requests yet.</p>
+      <a href="{% url 'library:catalogue' %}" class="btn btn-sm btn-danger">Browse Catalogue</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

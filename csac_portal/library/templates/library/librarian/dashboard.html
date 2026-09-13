@@ -1,0 +1,136 @@
+{% extends "library/base_library.html" %}
+
+{% block library_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h4 class="h4 fw-bold mb-1 text-dark">
+      <i class="fas fa-desktop text-danger me-2"></i> Librarian Circulation Desk
+    </h4>
+    <p class="text-muted small mb-0">Daily counter operations, issue approvals, physical book handoffs, and returns</p>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'library:librarian_issue' %}" class="btn btn-sm btn-danger fw-bold">
+      <i class="fas fa-hand-holding me-1"></i> Quick Issue
+    </a>
+    <a href="{% url 'library:librarian_returns' %}" class="btn btn-sm btn-outline-danger fw-bold">
+      <i class="fas fa-undo me-1"></i> Quick Return
+    </a>
+  </div>
+</div>
+
+<!-- Operational Metric Cards -->
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-lg-4 col-xl-2">
+    <div class="lib-kpi-card" style="border-left-color: #ffc107;">
+      <div class="text-muted small fw-semibold">PENDING REQUESTS</div>
+      <h3 class="fw-bold mb-0 text-dark">{{ pending_requests_count }}</h3>
+      <a href="{% url 'library:librarian_requests' %}?status=PENDING" class="small text-danger text-decoration-none">Review &rarr;</a>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-lg-4 col-xl-2">
+    <div class="lib-kpi-card" style="border-left-color: #198754;">
+      <div class="text-muted small fw-semibold">READY FOR PICKUP</div>
+      <h3 class="fw-bold mb-0 text-dark">{{ approved_requests_count }}</h3>
+      <a href="{% url 'library:librarian_issue' %}" class="small text-success text-decoration-none">Issue Handoff &rarr;</a>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-lg-4 col-xl-2">
+    <div class="lib-kpi-card" style="border-left-color: #0d6efd;">
+      <div class="text-muted small fw-semibold">PENDING RETURNS</div>
+      <h3 class="fw-bold mb-0 text-dark">{{ return_requests_count }}</h3>
+      <a href="{% url 'library:librarian_returns' %}" class="small text-primary text-decoration-none">Confirm &rarr;</a>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-lg-4 col-xl-2">
+    <div class="lib-kpi-card" style="border-left-color: #6f42c1;">
+      <div class="text-muted small fw-semibold">ISSUED TODAY</div>
+      <h3 class="fw-bold mb-0 text-dark">{{ today_issues_count }}</h3>
+      <span class="small text-muted">Daily Volume</span>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-lg-4 col-xl-2">
+    <div class="lib-kpi-card" style="border-left-color: #20c997;">
+      <div class="text-muted small fw-semibold">RETURNED TODAY</div>
+      <h3 class="fw-bold mb-0 text-dark">{{ today_returns_count }}</h3>
+      <span class="small text-muted">Daily Volume</span>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-lg-4 col-xl-2">
+    <div class="lib-kpi-card" style="border-left-color: #dc3545;">
+      <div class="text-muted small fw-semibold">ACTIVE OVERDUE</div>
+      <h3 class="fw-bold mb-0 {% if overdue_count > 0 %}text-danger{% else %}text-dark{% endif %}">{{ overdue_count }}</h3>
+      <a href="{% url 'library:librarian_overdue' %}" class="small text-danger text-decoration-none">View Overdue &rarr;</a>
+    </div>
+  </div>
+</div>
+
+<!-- Pending Requests Queue Preview -->
+<div class="card lib-card p-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="fw-bold mb-0 text-dark">
+      <i class="fas fa-inbox text-warning me-2"></i> Immediate Action: Pending Issue Requests
+    </h5>
+    <a href="{% url 'library:librarian_requests' %}" class="btn btn-sm btn-outline-secondary">
+      View All Queue &rarr;
+    </a>
+  </div>
+
+  {% if recent_requests %}
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light small">
+          <tr>
+            <th>Request ID</th>
+            <th>Student</th>
+            <th>Book Title &amp; Accession</th>
+            <th>Location</th>
+            <th>Quota Check</th>
+            <th class="text-end">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for req in recent_requests %}
+            <tr>
+              <td><code>{{ req.request_number }}</code></td>
+              <td>
+                <div class="fw-bold text-dark">{{ req.student.full_name }}</div>
+                <div class="small text-muted">ID: {{ req.student.enrollment_number }} &bull; Course: {{ req.student.course }}</div>
+              </td>
+              <td>
+                <div class="fw-bold text-dark">{{ req.book_copy.book.title }}</div>
+                <div class="small text-muted">Accession: <code>{{ req.book_copy.accession_number }}</code></div>
+              </td>
+              <td>
+                <span class="badge bg-light text-dark border">
+                  <i class="fas fa-map-marker-alt text-danger me-1"></i> {{ req.book_copy.rack_location|default:"General" }}
+                </span>
+              </td>
+              <td>
+                <span class="small">Issued: {{ req.student.active_issued_count }}/3</span>
+                {% if req.student.has_overdue %}
+                  <span class="badge bg-danger ms-1">Has Overdue</span>
+                {% endif %}
+              </td>
+              <td class="text-end">
+                <a href="{% url 'library:librarian_requests' %}?q={{ req.request_number }}" class="btn btn-sm btn-danger fw-semibold">
+                  Review &amp; Decide
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="alert alert-light border text-center py-4 mb-0">
+      <i class="fas fa-check-circle text-success fs-3 mb-2"></i>
+      <p class="text-muted small mb-0">All student requests are currently up to date!</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

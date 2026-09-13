@@ -1,0 +1,20 @@
+1. To turn off the site (Show 502 Bad Gateway):
+Run these commands to stop the registration portal and prevent it from starting automatically if the server reboots:
+
+bash
+
+
+# Stop the registration portal service
+sudo systemctl stop ccpadm
+# Disable it from starting up automatically on server reboot
+sudo systemctl disable ccpadm
+2. To turn the site back on (Bring it online again):
+Whenever you are ready to bring the registration portal back online, run:
+
+bash
+
+
+# Re-enable the automatic startup on reboot
+sudo systemctl enable ccpadm
+# Start the registration portal service
+sudo systemctl start ccpadm

@@ -1,0 +1,78 @@
+{% extends "library/base_library.html" %}
+
+{% block library_content %}
+<div class="card lib-card p-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+    <div>
+      <h4 class="h5 fw-bold mb-1 text-dark">
+        <i class="fas fa-exclamation-triangle text-danger me-2"></i> Overdue Circulation Monitor
+      </h4>
+      <p class="text-muted small mb-0">Active student loans where current date exceeds the allocated due date</p>
+    </div>
+    <div class="d-flex gap-3">
+      <div class="text-end">
+        <div class="small text-muted fw-bold">TOTAL OVERDUE COPIES</div>
+        <h5 class="fw-bold text-danger mb-0">{{ total_overdue }}</h5>
+      </div>
+      <div class="text-end border-start ps-3">
+        <div class="small text-muted fw-bold">TOTAL UNPAID FINES</div>
+        <h5 class="fw-bold text-danger mb-0">₹{{ total_estimated_fine|floatformat:2 }}</h5>
+      </div>
+    </div>
+  </div>
+
+  {% if records %}
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light small">
+          <tr>
+            <th>Student Details</th>
+            <th>Book Title</th>
+            <th>Accession No</th>
+            <th>Issue Date</th>
+            <th>Due Date</th>
+            <th>Days Overdue</th>
+            <th>Accrued Fine</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in records %}
+            <tr>
+              <td>
+                <div class="fw-bold text-dark">{{ r.txn.student.full_name }}</div>
+                <div class="small text-muted">ID: {{ r.txn.student.enrollment_number }} &bull; {{ r.txn.student.course }}</div>
+                <div class="small text-muted"><i class="fas fa-phone me-1"></i> {{ r.txn.student.mobile }}</div>
+              </td>
+              <td>
+                <div class="fw-bold text-dark">{{ r.txn.book_copy.book.title }}</div>
+                <div class="small text-muted">{{ r.txn.book_copy.book.author }}</div>
+              </td>
+              <td><code>{{ r.txn.book_copy.accession_number }}</code></td>
+              <td class="small">{{ r.txn.issued_at|date:"d M Y" }}</td>
+              <td class="small text-danger fw-bold">{{ r.txn.due_date|date:"d M Y" }}</td>
+              <td>
+                <span class="badge bg-danger">{{ r.overdue_days }} Day{{ r.overdue_days|pluralize }}</span>
+              </td>
+              <td class="fw-bold text-danger">
+                ₹{{ r.fine|floatformat:2 }}
+              </td>
+              <td class="text-end">
+                <a href="{% url 'library:librarian_returns' %}?q={{ r.txn.book_copy.accession_number }}" class="btn btn-sm btn-outline-danger fw-bold">
+                  <i class="fas fa-undo me-1"></i> Process Return
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="alert alert-light border text-center py-5">
+      <i class="fas fa-check-circle text-success fs-1 mb-3"></i>
+      <h5>Zero Overdue Loans</h5>
+      <p class="text-muted small mb-0">All books currently in circulation are within their valid due dates!</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

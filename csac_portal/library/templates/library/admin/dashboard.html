@@ -1,0 +1,116 @@
+{% extends "library/base_library.html" %}
+
+{% block library_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h4 class="h4 fw-bold mb-1 text-dark">
+      <i class="fas fa-cogs text-primary me-2"></i> Central Library Administration
+    </h4>
+    <p class="text-muted small mb-0">System configuration, bulk inventory import, audit logs, and circulation policy management</p>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'library:admin_import' %}" class="btn btn-sm btn-primary fw-bold">
+      <i class="fas fa-file-excel me-1"></i> Import Books (Excel)
+    </a>
+    <a href="{% url 'library:admin_rules' %}" class="btn btn-sm btn-outline-secondary">
+      <i class="fas fa-sliders-h me-1"></i> Circulation Rules
+    </a>
+  </div>
+</div>
+
+<!-- Key System Metrics -->
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-lg-3">
+    <div class="lib-kpi-card" style="border-left-color: #0d6efd;">
+      <div class="text-muted small fw-semibold">TOTAL TITLES</div>
+      <h3 class="fw-bold mb-0 text-dark">{{ total_books }}</h3>
+      <span class="small text-muted">Catalogued</span>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-lg-3">
+    <div class="lib-kpi-card" style="border-left-color: #6610f2;">
+      <div class="text-muted small fw-semibold">PHYSICAL COPIES</div>
+      <h3 class="fw-bold mb-0 text-dark">{{ total_copies }}</h3>
+      <span class="small text-muted">Registered copies</span>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-lg-3">
+    <div class="lib-kpi-card" style="border-left-color: #198754;">
+      <div class="text-muted small fw-semibold">IN CIRCULATION</div>
+      <h3 class="fw-bold mb-0 text-dark">{{ issued_copies }}</h3>
+      <span class="small text-muted">{{ available_copies }} Available on shelf</span>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-lg-3">
+    <div class="lib-kpi-card" style="border-left-color: #fd7e14;">
+      <div class="text-muted small fw-semibold">STUDENT BORROWERS</div>
+      <h3 class="fw-bold mb-0 text-dark">{{ active_students }}</h3>
+      <span class="small text-muted">of {{ total_students }} total registered</span>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <!-- Recent Excel Imports -->
+  <div class="col-lg-6">
+    <div class="card lib-card p-4 h-100">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold mb-0 text-dark">
+          <i class="fas fa-file-excel text-success me-2"></i> Recent Excel Batch Imports
+        </h5>
+        <a href="{% url 'library:admin_import' %}" class="btn btn-sm btn-outline-primary">Import New</a>
+      </div>
+
+      {% if recent_imports %}
+        <div class="list-group list-group-flush small">
+          {% for imp in recent_imports %}
+            <div class="list-group-item px-0 py-2 d-flex justify-content-between align-items-center">
+              <div>
+                <div class="fw-bold text-dark">{{ imp.file_name }}</div>
+                <span class="text-muted">{{ imp.uploaded_at|date:"d M Y, h:i A" }} &bull; By: {{ imp.uploaded_by.username|default:"Admin" }}</span>
+              </div>
+              <div class="text-end">
+                <span class="badge bg-success">{{ imp.valid_rows }} Copies</span>
+                <span class="badge bg-light text-dark border">{{ imp.status }}</span>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="text-muted small mb-0">No past imports recorded yet.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Recent Audit Trail -->
+  <div class="col-lg-6">
+    <div class="card lib-card p-4 h-100">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold mb-0 text-dark">
+          <i class="fas fa-history text-secondary me-2"></i> Recent Audit Trail
+        </h5>
+        <a href="{% url 'library:admin_audit' %}" class="btn btn-sm btn-outline-secondary">View All</a>
+      </div>
+
+      {% if recent_audits %}
+        <div class="list-group list-group-flush small">
+          {% for log in recent_audits %}
+            <div class="list-group-item px-0 py-2">
+              <div class="d-flex justify-content-between">
+                <strong class="text-dark">{{ log.get_action_display }}</strong>
+                <span class="text-muted">{{ log.timestamp|date:"d M, h:i A" }}</span>
+              </div>
+              <div class="text-muted text-truncate">{{ log.description }}</div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="text-muted small mb-0">No audit activity logged yet.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

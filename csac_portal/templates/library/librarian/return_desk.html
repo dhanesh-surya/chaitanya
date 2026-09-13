@@ -1,0 +1,129 @@
+{% extends "library/base_library.html" %}
+
+{% block library_content %}
+<div class="row g-4">
+  <!-- Left Column: Search & Confirm Return -->
+  <div class="col-lg-6">
+    <div class="card lib-card p-4">
+      <h5 class="fw-bold mb-3 text-dark">
+        <i class="fas fa-undo text-danger me-2"></i> Book Return Counter
+      </h5>
+      <p class="text-muted small mb-4">
+        Scan book barcode or search by Accession Number to verify condition, calculate overdue fines, and confirm physical return into inventory.
+      </p>
+
+      <form method="get" class="mb-4">
+        <div class="input-group">
+          <input type="text" name="q" class="form-control" placeholder="Scan Barcode / Enter Accession No (e.g. CS-1002)..." value="{{ query }}" autofocus required>
+          <button class="btn btn-danger" type="submit"><i class="fas fa-search me-1"></i> Check</button>
+        </div>
+      </form>
+
+      {% if target_txn %}
+        <div class="border rounded-2 p-3 bg-light mb-3">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <span class="badge bg-primary">Transaction: {{ target_txn.transaction_number }}</span>
+            <span class="small text-muted">Issued: {{ target_txn.issued_at|date:"d M Y" }}</span>
+          </div>
+
+          <h6 class="fw-bold text-dark mb-1">{{ target_txn.book_copy.book.title }}</h6>
+          <div class="small mb-2">
+            Accession: <code>{{ target_txn.book_copy.accession_number }}</code> &bull; Due Date: 
+            <strong class="{% if target_txn.is_overdue %}text-danger{% else %}text-dark{% endif %}">{{ target_txn.due_date|date:"d M Y" }}</strong>
+          </div>
+          <hr class="my-2">
+          <div class="small"><strong>Borrower:</strong> {{ target_txn.student.full_name }} ({{ target_txn.student.enrollment_number }})</div>
+          <div class="small"><strong>Course:</strong> {{ target_txn.student.course }} | <strong>Phone:</strong> {{ target_txn.student.mobile }}</div>
+
+          {% if overdue_days > 0 %}
+            <div class="alert alert-danger small my-3 py-2">
+              <i class="fas fa-exclamation-triangle me-1"></i> <strong>Overdue by {{ overdue_days }} day{{ overdue_days|pluralize }}:</strong>
+              Accrued fine calculated at ₹{{ settings.fine_per_day }}/day = <strong>₹{{ calculated_fine }}</strong>.
+            </div>
+          {% else %}
+            <div class="alert alert-success small my-3 py-2">
+              <i class="fas fa-check-circle me-1"></i> Book is being returned on time. No overdue fines applicable.
+            </div>
+          {% endif %}
+
+          <form action="{% url 'library:confirm_return' target_txn.id %}" method="post" class="mt-3">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label class="form-label small fw-bold">Physical Condition Verified:</label>
+              <select name="condition" class="form-select form-select-sm">
+                <option value="GOOD">Good / Normal Condition</option>
+                <option value="FAIR">Fair / Minor Wear</option>
+                <option value="DAMAGED">Damaged (Requires Repair / Replacement)</option>
+                <option value="LOST">Lost by Student</option>
+              </select>
+            </div>
+
+            {% if overdue_days > 0 %}
+              <div class="form-check mb-3 small">
+                <input class="form-check-input" type="checkbox" name="waive_fine" id="waiveCheck">
+                <label class="form-check-label text-muted" for="waiveCheck">
+                  Waive Overdue Fine (Special permission / authorized by librarian)
+                </label>
+              </div>
+            {% endif %}
+
+            <div class="mb-3">
+              <label class="form-label small fw-bold">Remarks / Inspection Notes:</label>
+              <input type="text" name="remarks" class="form-control form-control-sm" placeholder="e.g. Returned in good condition at main desk">
+            </div>
+
+            <button type="submit" class="btn btn-success w-100 fw-bold py-2 text-nowrap" onclick="return confirm('Confirm receipt and mark copy as available in catalogue?');">
+              <i class="fas fa-check-circle me-1"></i> Confirm Physical Book Received
+            </button>
+          </form>
+        </div>
+
+      {% elif query %}
+        <div class="alert alert-warning small">
+          <i class="fas fa-exclamation-triangle me-1"></i> No active issued transaction found for "{{ query }}". It may already have been returned.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Right Column: Online Return Requests Queue -->
+  <div class="col-lg-6">
+    <div class="card lib-card p-4">
+      <h5 class="fw-bold mb-3 text-dark">
+        <i class="fas fa-inbox text-warning me-2"></i> Declared Student Return Requests
+      </h5>
+      <p class="text-muted small mb-3">Students who clicked "Request Return" in their dashboard and are bringing the physical book to the counter:</p>
+
+      {% if return_queue %}
+        <div class="list-group list-group-flush">
+          {% for txn in return_queue %}
+            <div class="list-group-item px-0 py-2 d-flex justify-content-between align-items-center">
+              <div>
+                <div class="fw-bold text-dark">{{ txn.book_copy.book.title }}</div>
+                <div class="small text-muted">
+                  Student: {{ txn.student.full_name }} ({{ txn.student.enrollment_number }})
+                </div>
+                <div class="small">
+                  Acc: <code>{{ txn.book_copy.accession_number }}</code> &bull; Due: {{ txn.due_date|date:"d M Y" }}
+                  {% if txn.is_overdue %}
+                    <span class="badge bg-danger ms-1">Overdue</span>
+                  {% endif %}
+                </div>
+              </div>
+              <div>
+                <a href="?q={{ txn.book_copy.accession_number }}" class="btn btn-sm btn-outline-danger fw-bold">
+                  Process Return &rarr;
+                </a>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="alert alert-light border text-center py-4 mb-0">
+          <p class="text-muted small mb-0">No declared student return requests pending counter submission.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

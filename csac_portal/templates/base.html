@@ -287,6 +287,14 @@ mark{background-color:rgb(243,64,64);padding:2px 4px;border-radius:3px;font-weig
                     {% endif %}
                   </li>
                   {% endfor %}
+                  <li class="navigation__menu--item has-child has-arrow">
+                    <a class="navigation__menu--item__link" href="{% url 'library:home' %}"><i class="fas fa-book-reader me-1 text-danger"></i> Library</a>
+                    <ul class="submenu sub__style">
+                      <li><a href="{% url 'library:catalogue' %}">Book Catalogue &amp; Search</a></li>
+                      <li><a href="{% url 'library:student_dashboard' %}">Student Library Portal</a></li>
+                      <li><a href="{% url 'library:librarian_dashboard' %}">Librarian Circulation Desk</a></li>
+                    </ul>
+                  </li>
                 </ul>
               </nav>
             </div>
@@ -476,6 +484,14 @@ mark{background-color:rgb(243,64,64);padding:2px 4px;border-radius:3px;font-weig
           {% endif %}
         </li>
         {% endfor %}
+        <li class="has-droupdown">
+          <a class="main" href="{% url 'library:home' %}"><i class="fas fa-book-reader me-1 text-danger"></i> Library</a>
+          <ul class="submenu mm-collapse">
+            <li><a class="mobile-menu-link" href="{% url 'library:catalogue' %}">Book Catalogue &amp; Search</a></li>
+            <li><a class="mobile-menu-link" href="{% url 'library:student_dashboard' %}">Student Library Portal</a></li>
+            <li><a class="mobile-menu-link" href="{% url 'library:librarian_dashboard' %}">Librarian Circulation Desk</a></li>
+          </ul>
+        </li>
       </ul>
     </nav>
   </div>

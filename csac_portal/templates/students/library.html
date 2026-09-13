@@ -1,5 +1,38 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 {% load static %}
+
+{% block extra_css %}
+<style>
+    .academic-portal-btn {
+        white-space: nowrap !important;
+        word-break: keep-all !important;
+        font-size: 14.5px !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.3px !important;
+        padding: 10px 22px !important;
+        border-radius: 6px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px !important;
+        text-decoration: none !important;
+        transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+    }
+    .academic-portal-btn:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+    }
+    .academic-service-card {
+        border-radius: 10px !important;
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+        background: #ffffff !important;
+    }
+    .academic-service-card:hover {
+        transform: translateY(-4px) !important;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08) !important;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 
@@ -19,6 +52,36 @@
 <!-- Library Section -->
 <section class="rts-section-padding py-5">
     <div class="container">
+
+        <!-- Digital Library Quick Access Header Panel -->
+        <div class="card border-0 shadow-sm rounded-3 p-4 mb-4" style="background: linear-gradient(135deg, #1a1a2e 0%, #2b111e 50%, #B71A34 100%); border-left: 5px solid #E61013 !important;">
+            <div class="row align-items-center g-3">
+                <div class="col-xl-4 text-white">
+                    <span class="badge bg-white text-danger fw-bold px-3 py-1 mb-2 text-uppercase" style="letter-spacing: 0.5px; font-size: 11px;">
+                        <i class="fas fa-university me-1"></i> Digital Circulation System
+                    </span>
+                    <h3 class="h4 fw-bold mb-1 text-white">Library Online Services</h3>
+                    <p class="text-white-50 small mb-0">Direct access to online catalogue search, student circulation accounts, and librarian desk.</p>
+                </div>
+                <div class="col-xl-8">
+                    <div class="d-flex flex-wrap justify-content-xl-end gap-2">
+                        <a href="{% url 'library:home' %}" class="btn btn-light academic-portal-btn text-dark shadow-sm">
+                            <i class="fas fa-book-reader text-danger"></i> Digital Library Home
+                        </a>
+                        <a href="{% url 'library:catalogue' %}" class="btn btn-danger academic-portal-btn text-white shadow-sm" style="background-color: #E61013; border-color: #E61013;">
+                            <i class="fas fa-search"></i> Book Catalogue
+                        </a>
+                        <a href="{% url 'library:student_dashboard' %}" class="btn btn-outline-light academic-portal-btn shadow-sm">
+                            <i class="fas fa-user-graduate text-warning"></i> Student Dashboard
+                        </a>
+                        <a href="{% url 'library:librarian_dashboard' %}" class="btn btn-outline-light academic-portal-btn shadow-sm">
+                            <i class="fas fa-id-badge text-info"></i> Librarian Desk
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
 
         <!-- Intro / Statistics -->
         <div class="row g-4 mb-5 text-center">

@@ -1,0 +1,80 @@
+{% extends "library/base_library.html" %}
+
+{% block library_content %}
+<div class="card lib-card p-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h4 class="h5 fw-bold mb-1 text-dark">
+        <i class="fas fa-chart-line text-primary me-2"></i> Library Circulation Reports &amp; Analytics
+      </h4>
+      <p class="text-muted small mb-0">Overview of all active and completed book lending transactions across the college</p>
+    </div>
+    <div>
+      <a href="?export=csv" class="btn btn-sm btn-success fw-bold">
+        <i class="fas fa-file-csv me-1"></i> Export Circulation Data (CSV)
+      </a>
+    </div>
+  </div>
+
+  {% if transactions %}
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0 small">
+        <thead class="table-light">
+          <tr>
+            <th>Txn No</th>
+            <th>Student</th>
+            <th>Book Title</th>
+            <th>Accession No</th>
+            <th>Issue Date</th>
+            <th>Due Date</th>
+            <th>Return Date</th>
+            <th>Status</th>
+            <th>Fine</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for t in transactions %}
+            <tr>
+              <td><code>{{ t.transaction_number }}</code></td>
+              <td>
+                <div class="fw-bold">{{ t.student.full_name }}</div>
+                <div class="text-muted">{{ t.student.enrollment_number }}</div>
+              </td>
+              <td>
+                <div class="fw-bold text-dark">{{ t.book_copy.book.title }}</div>
+                <div class="text-muted">{{ t.book_copy.book.author }}</div>
+              </td>
+              <td><code>{{ t.book_copy.accession_number }}</code></td>
+              <td>{{ t.issued_at|date:"d M Y" }}</td>
+              <td>{{ t.due_date|date:"d M Y" }}</td>
+              <td>{{ t.returned_at|date:"d M Y"|default:"&mdash;" }}</td>
+              <td>
+                {% if t.status == 'ISSUED' %}
+                  <span class="badge bg-primary">Issued</span>
+                {% elif t.status == 'RETURNED' %}
+                  <span class="badge bg-success">Returned</span>
+                {% elif t.status == 'RETURN_REQUESTED' %}
+                  <span class="badge bg-warning text-dark">Return Declared</span>
+                {% else %}
+                  <span class="badge bg-secondary">{{ t.get_status_display }}</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if t.fine_amount > 0 %}
+                  <span class="text-danger fw-bold">₹{{ t.fine_amount }}</span>
+                {% else %}
+                  <span class="text-muted">₹0</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="alert alert-light border text-center py-5">
+      <p class="text-muted small mb-0">No circulation transactions recorded yet.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

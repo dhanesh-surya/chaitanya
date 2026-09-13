@@ -1,0 +1,186 @@
+{% extends "library/base_library.html" %}
+
+{% block library_content %}
+<div class="row g-4">
+  <!-- Left Column: Search & Filter Sidebar -->
+  <div class="col-lg-3">
+    <div class="card lib-card p-3 mb-4">
+      <h5 class="fw-bold mb-3 text-dark d-flex align-items-center">
+        <i class="fas fa-filter text-danger me-2"></i> Filter Catalogue
+      </h5>
+
+      <form action="{% url 'library:catalogue' %}" method="get">
+        <!-- Search Keyword -->
+        <div class="mb-3">
+          <label class="form-label small fw-bold text-muted">Keyword / Accession</label>
+          <div class="input-group input-group-sm">
+            <input type="text" name="q" class="form-control" placeholder="Title, author, acc no..." value="{{ query }}">
+            {% if query %}
+              <a href="{% url 'library:catalogue' %}" class="btn btn-outline-secondary" title="Clear"><i class="fas fa-times"></i></a>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Availability Toggle -->
+        <div class="mb-3">
+          <label class="form-label small fw-bold text-muted">Availability</label>
+          <select name="availability" class="form-select form-select-sm">
+            <option value="">All Books</option>
+            <option value="available" {% if selected_availability == 'available' %}selected{% endif %}>🟢 Available Copies Only</option>
+          </select>
+        </div>
+
+        <!-- Department Filter -->
+        <div class="mb-3">
+          <label class="form-label small fw-bold text-muted">Department</label>
+          <select name="dept" class="form-select form-select-sm">
+            <option value="">All Departments</option>
+            {% for d in all_departments %}
+              <option value="{{ d.id }}" {% if selected_dept == d.id|stringformat:"s" %}selected{% endif %}>{{ d.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Subject Filter -->
+        <div class="mb-3">
+          <label class="form-label small fw-bold text-muted">Subject</label>
+          <select name="subject" class="form-select form-select-sm">
+            <option value="">All Subjects</option>
+            {% for s in all_subjects %}
+              <option value="{{ s.id }}" {% if selected_subject == s.id|stringformat:"s" %}selected{% endif %}>{{ s.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Category Filter -->
+        <div class="mb-3">
+          <label class="form-label small fw-bold text-muted">Category</label>
+          <select name="category" class="form-select form-select-sm">
+            <option value="">All Categories</option>
+            {% for c in all_categories %}
+              <option value="{{ c.id }}" {% if selected_category == c.id|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Sort by -->
+        <div class="mb-3">
+          <label class="form-label small fw-bold text-muted">Sort By</label>
+          <select name="sort" class="form-select form-select-sm">
+            <option value="-created_at" {% if selected_sort == '-created_at' %}selected{% endif %}>Recently Added</option>
+            <option value="title_asc" {% if selected_sort == 'title_asc' %}selected{% endif %}>Title (A - Z)</option>
+            <option value="title_desc" {% if selected_sort == 'title_desc' %}selected{% endif %}>Title (Z - A)</option>
+            <option value="author" {% if selected_sort == 'author' %}selected{% endif %}>Author Name</option>
+            <option value="year_desc" {% if selected_sort == 'year_desc' %}selected{% endif %}>Publication Year</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-sm btn-danger w-100 fw-bold mb-2">
+          <i class="fas fa-check me-1"></i> Apply Filters
+        </button>
+        <a href="{% url 'library:catalogue' %}" class="btn btn-sm btn-outline-secondary w-100">
+          Reset All
+        </a>
+      </form>
+    </div>
+  </div>
+
+  <!-- Right Column: Results Grid -->
+  <div class="col-lg-9">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <p class="text-muted mb-0 small">
+        Found <strong class="text-dark">{{ books.paginator.count }}</strong> book record{{ books.paginator.count|pluralize }} in catalogue
+        {% if query %}for "<strong>{{ query }}</strong>"{% endif %}
+      </p>
+      <div class="small text-muted">Page {{ books.number }} of {{ books.paginator.num_pages }}</div>
+    </div>
+
+    <div class="row g-3">
+      {% for book in books %}
+        <div class="col-md-6">
+          <div class="card lib-card h-100 p-3 d-flex flex-column justify-content-between">
+            <div>
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <span class="badge bg-light text-dark border small">{{ book.category.name|default:"General" }}</span>
+                {% if book.available_copies_count > 0 %}
+                  <span class="lib-badge-avail"><i class="fas fa-check-circle me-1"></i> {{ book.available_copies_count }} of {{ book.total_copies_count }} Avail</span>
+                {% else %}
+                  <span class="lib-badge-issued"><i class="fas fa-times-circle me-1"></i> {{ book.total_copies_count }} Copies (All Issued)</span>
+                {% endif %}
+              </div>
+
+              <h5 class="fw-bold mb-1">
+                <a href="{% url 'library:book_detail' book.id %}" class="text-dark text-decoration-none hover-red">
+                  {{ book.title }}
+                </a>
+              </h5>
+              <div class="text-muted small mb-2"><i class="fas fa-user-pen me-1"></i> {{ book.author }}</div>
+
+              <div class="small text-secondary mb-3">
+                {% if book.publisher %}<div><span class="text-muted">Publisher:</span> {{ book.publisher.name }}</div>{% endif %}
+                {% if book.edition %}<div><span class="text-muted">Edition:</span> {{ book.edition }}</div>{% endif %}
+                {% if book.department %}<div><span class="text-muted">Dept:</span> {{ book.department.name }}</div>{% endif %}
+                {% if book.isbn %}<div><span class="text-muted">ISBN:</span> {{ book.isbn }}</div>{% endif %}
+              </div>
+            </div>
+
+            <div class="pt-2 border-top d-flex justify-content-between align-items-center">
+              <span class="small text-muted">
+                {% for c in book.copies.all|slice:":2" %}
+                  <code class="small text-dark me-1">#{{ c.accession_number }}</code>
+                {% endfor %}
+                {% if book.copies.count > 2 %}<span class="text-muted">+{{ book.copies.count|add:"-2" }} more</span>{% endif %}
+              </span>
+              <a href="{% url 'library:book_detail' book.id %}" class="btn btn-sm btn-outline-danger fw-bold">
+                View &amp; Request &rarr;
+              </a>
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <div class="col-12">
+          <div class="alert alert-light border text-center py-5">
+            <i class="fas fa-search text-muted fs-1 mb-3"></i>
+            <h5>No books match your search criteria</h5>
+            <p class="text-muted small">Try broadening your search terms or clearing your filters.</p>
+            <a href="{% url 'library:catalogue' %}" class="btn btn-sm btn-danger">View All Books</a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if books.has_other_pages %}
+      <nav class="mt-4">
+        <ul class="pagination pagination-sm justify-content-center">
+          {% if books.has_previous %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ books.previous_page_number }}&q={{ query }}&dept={{ selected_dept }}&subject={{ selected_subject }}&category={{ selected_category }}&availability={{ selected_availability }}&sort={{ selected_sort }}">Previous</a>
+            </li>
+          {% else %}
+            <li class="page-item disabled"><span class="page-link">Previous</span></li>
+          {% endif %}
+
+          {% for num in books.paginator.page_range %}
+            {% if books.number == num %}
+              <li class="page-item active"><span class="page-link bg-danger border-danger">{{ num }}</span></li>
+            {% elif num > books.number|add:'-3' and num < books.number|add:'3' %}
+              <li class="page-item">
+                <a class="page-link text-dark" href="?page={{ num }}&q={{ query }}&dept={{ selected_dept }}&subject={{ selected_subject }}&category={{ selected_category }}&availability={{ selected_availability }}&sort={{ selected_sort }}">{{ num }}</a>
+              </li>
+            {% endif %}
+          {% endfor %}
+
+          {% if books.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ books.next_page_number }}&q={{ query }}&dept={{ selected_dept }}&subject={{ selected_subject }}&category={{ selected_category }}&availability={{ selected_availability }}&sort={{ selected_sort }}">Next</a>
+            </li>
+          {% else %}
+            <li class="page-item disabled"><span class="page-link">Next</span></li>
+          {% endif %}
+        </ul>
+      </nav>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,128 @@
+{% extends "library/base_library.html" %}
+
+{% block library_content %}
+<div class="row g-4">
+  <!-- Left: Issue Search & Handoff Counter -->
+  <div class="col-lg-6">
+    <div class="card lib-card p-4">
+      <h5 class="fw-bold mb-3 text-dark">
+        <i class="fas fa-hand-holding text-danger me-2"></i> Physical Book Issue Counter
+      </h5>
+      <p class="text-muted small mb-4">
+        Scan or enter the Request Number, Accession Number, or Student Enrollment Number to initiate the physical book handover.
+      </p>
+
+      <form method="get" class="mb-4">
+        <div class="input-group">
+          <input type="text" name="q" class="form-control" placeholder="Scan Barcode / Enter Acc No / Req ID / Student ID" value="{{ query }}" autofocus required>
+          <button class="btn btn-danger" type="submit"><i class="fas fa-search me-1"></i> Lookup</button>
+        </div>
+      </form>
+
+      {% if target_request %}
+        <!-- Issue Approved Request Form -->
+        <div class="border rounded-2 p-3 bg-light mb-3">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <span class="badge bg-success">Request: {{ target_request.request_number }}</span>
+            <span class="small text-muted">{{ target_request.requested_at|date:"d M Y" }}</span>
+          </div>
+          <h6 class="fw-bold text-dark mb-1">{{ target_request.book_copy.book.title }}</h6>
+          <div class="small mb-2">Accession: <code>{{ target_request.book_copy.accession_number }}</code> &bull; Location: {{ target_request.book_copy.rack_location|default:"General" }}</div>
+          <hr class="my-2">
+          <div class="small"><strong>Student:</strong> {{ target_request.student.full_name }} ({{ target_request.student.enrollment_number }})</div>
+          <div class="small"><strong>Course:</strong> {{ target_request.student.course }} | <strong>Phone:</strong> {{ target_request.student.mobile }}</div>
+          <div class="small"><strong>Current Loans:</strong> {{ target_request.student.active_issued_count }} of {{ settings.max_books_per_student }}</div>
+
+          <form action="{% url 'library:confirm_issue' %}" method="post" class="mt-3">
+            {% csrf_token %}
+            <input type="hidden" name="request_id" value="{{ target_request.id }}">
+            <div class="mb-3">
+              <label class="form-label small fw-bold">Book Condition at Issue:</label>
+              <select name="condition" class="form-select form-select-sm">
+                <option value="GOOD">Good Condition</option>
+                <option value="NEW">Brand New</option>
+                <option value="FAIR">Fair / Minor Wear</option>
+              </select>
+            </div>
+            <div class="alert alert-info small mb-3">
+              <i class="fas fa-calendar-alt me-1"></i> Loan Period: {{ settings.default_loan_days }} days. Due date will be calculated automatically.
+            </div>
+            <button type="submit" class="btn btn-danger w-100 fw-bold py-2 text-nowrap" onclick="return confirm('Confirm physical handover to student?');">
+              <i class="fas fa-check-circle me-1"></i> Confirm Physical Book Issued
+            </button>
+          </form>
+        </div>
+
+      {% elif target_copy and target_student %}
+        <!-- Direct Walk-in Issue Form -->
+        <div class="border rounded-2 p-3 bg-light mb-3">
+          <span class="badge bg-primary mb-2">Direct Counter Issue</span>
+          <h6 class="fw-bold text-dark mb-1">{{ target_copy.book.title }}</h6>
+          <div class="small mb-2">Accession: <code>{{ target_copy.accession_number }}</code></div>
+          <hr class="my-2">
+          <div class="small"><strong>Student:</strong> {{ target_student.full_name }} ({{ target_student.enrollment_number }})</div>
+          
+          <form action="{% url 'library:confirm_issue' %}" method="post" class="mt-3">
+            {% csrf_token %}
+            <input type="hidden" name="accession_number" value="{{ target_copy.accession_number }}">
+            <input type="hidden" name="enrollment_number" value="{{ target_student.enrollment_number }}">
+            <div class="mb-3">
+              <label class="form-label small fw-bold">Condition:</label>
+              <select name="condition" class="form-select form-select-sm">
+                <option value="GOOD">Good Condition</option>
+                <option value="NEW">Brand New</option>
+                <option value="FAIR">Fair</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-danger w-100 fw-bold py-2 text-nowrap">
+              <i class="fas fa-check-circle me-1"></i> Issue Physical Copy Directly
+            </button>
+          </form>
+        </div>
+
+      {% elif query %}
+        <div class="alert alert-warning small">
+          <i class="fas fa-exclamation-triangle me-1"></i> No matching pending approved request or copy found for "{{ query }}".
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Right: Approved Requests Waiting Pickup Queue -->
+  <div class="col-lg-6">
+    <div class="card lib-card p-4">
+      <h5 class="fw-bold mb-3 text-dark">
+        <i class="fas fa-clock text-success me-2"></i> Approved Reservations Awaiting Collection
+      </h5>
+      <p class="text-muted small mb-3">Books kept on hold at the front desk for students who submitted online requests:</p>
+
+      {% if approved_requests %}
+        <div class="list-group list-group-flush">
+          {% for req in approved_requests %}
+            <div class="list-group-item px-0 py-2 d-flex justify-content-between align-items-center">
+              <div>
+                <div class="fw-bold text-dark">{{ req.book_copy.book.title }}</div>
+                <div class="small text-muted">
+                  Student: {{ req.student.full_name }} ({{ req.student.enrollment_number }})
+                </div>
+                <div class="small">
+                  Acc: <code>{{ req.book_copy.accession_number }}</code> &bull; Shelf: {{ req.book_copy.rack_location|default:"Desk Hold" }}
+                </div>
+              </div>
+              <div>
+                <a href="?q={{ req.request_number }}" class="btn btn-sm btn-outline-success fw-bold">
+                  Select <i class="fas fa-arrow-right ms-1"></i>
+                </a>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="alert alert-light border text-center py-4 mb-0">
+          <p class="text-muted small mb-0">No approved reservations currently awaiting collection.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends "library/base_library.html" %}
+
+{% block library_content %}
+<div class="card lib-card p-4 mb-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h4 class="h5 fw-bold mb-1 text-dark">
+        <i class="fas fa-history text-primary me-2"></i> Borrowing &amp; Return History
+      </h4>
+      <p class="text-muted small mb-0">Archival log of books returned, condition at return, and circulation clearances</p>
+    </div>
+  </div>
+
+  {% if past_records %}
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light small">
+          <tr>
+            <th>Transaction No</th>
+            <th>Book Title</th>
+            <th>Accession No</th>
+            <th>Issue Date</th>
+            <th>Return Date</th>
+            <th>Return Condition</th>
+            <th>Fine</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for txn in past_records %}
+            <tr>
+              <td><code>{{ txn.transaction_number }}</code></td>
+              <td>
+                <div class="fw-bold text-dark">{{ txn.book_copy.book.title }}</div>
+                <div class="small text-muted">{{ txn.book_copy.book.author }}</div>
+              </td>
+              <td><code>{{ txn.book_copy.accession_number }}</code></td>
+              <td class="small">{{ txn.issued_at|date:"d M Y" }}</td>
+              <td class="small">{{ txn.returned_at|date:"d M Y"|default:"&mdash;" }}</td>
+              <td>
+                <span class="badge bg-light text-dark border">{{ txn.condition_at_return|default:"GOOD" }}</span>
+              </td>
+              <td class="small">
+                {% if txn.fine_amount > 0 %}
+                  <span class="text-danger fw-bold">₹{{ txn.fine_amount }}</span>
+                  {% if txn.fine_paid %}
+                    <span class="badge bg-success ms-1">Paid</span>
+                  {% else %}
+                    <span class="badge bg-danger ms-1">Unpaid</span>
+                  {% endif %}
+                {% else %}
+                  <span class="text-muted">₹0.00</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if txn.status == 'RETURNED' %}
+                  <span class="badge bg-success"><i class="fas fa-check me-1"></i> Returned</span>
+                {% elif txn.status == 'LOST' %}
+                  <span class="badge bg-danger">Reported Lost</span>
+                {% elif txn.status == 'DAMAGED' %}
+                  <span class="badge bg-warning text-dark">Damaged</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="alert alert-light border text-center py-5 mb-0">
+      <i class="fas fa-history text-muted fs-1 mb-3"></i>
+      <h5>No past borrowing history</h5>
+      <p class="text-muted small mb-0">You have not returned any books yet.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

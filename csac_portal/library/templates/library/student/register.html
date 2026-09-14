@@ -1,0 +1,116 @@
+﻿{% extends "library/base_library.html" %}
+
+{% block library_content %}
+<div class="row justify-content-center my-4">
+  <div class="col-md-8 col-lg-7">
+    <div class="card lib-card p-4 shadow-sm border-0">
+      <div class="text-center mb-4">
+        <div class="text-danger fs-1 mb-2"><i class="fas fa-user-plus"></i></div>
+        <h4 class="fw-bold text-dark mb-1">Student Library Membership Registration</h4>
+        <p class="text-muted small">Register your account to access library catalog reserves, borrowing status, and digital records.</p>
+        <span class="badge bg-warning text-dark px-3 py-1 fw-semibold">
+          <i class="fas fa-info-circle me-1"></i> Account requires Librarian Desk verification before login
+        </span>
+      </div>
+
+      <form method="post" action="">
+        {% csrf_token %}
+
+        <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">
+          <i class="fas fa-id-card-alt text-danger me-1"></i> Personal &amp; Academic Details
+        </h6>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="form-label small fw-bold text-dark">First Name <span class="text-danger">*</span></label>
+            <input type="text" name="first_name" class="form-control" placeholder="First Name" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small fw-bold text-dark">Last Name</label>
+            <input type="text" name="last_name" class="form-control" placeholder="Last Name">
+          </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="form-label small fw-bold text-dark">College Enrollment No. <span class="text-danger">*</span></label>
+            <input type="text" name="enrollment_number" class="form-control" placeholder="e.g. 2026CS102" required>
+            <div class="form-text small">This will be your primary login ID.</div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small fw-bold text-dark">Father's / Mother's Name</label>
+            <input type="text" name="father_mother_name" class="form-control" placeholder="Parent / Guardian Name">
+          </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="form-label small fw-bold text-dark">Department</label>
+            <select name="department" class="form-select">
+              <option value="">-- Select Department --</option>
+              {% for dept in departments %}
+                <option value="{{ dept.id }}">{{ dept.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small fw-bold text-dark">Course / Class <span class="text-danger">*</span></label>
+            <input type="text" name="course" class="form-control" placeholder="e.g. B.Sc. Computer Science" required>
+          </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-4">
+            <label class="form-label small fw-bold text-dark">Semester / Year</label>
+            <select name="semester" class="form-select">
+              <option value="1">Semester 1</option>
+              <option value="2">Semester 2</option>
+              <option value="3">Semester 3</option>
+              <option value="4">Semester 4</option>
+              <option value="5">Semester 5</option>
+              <option value="6">Semester 6</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small fw-bold text-dark">Academic Session</label>
+            <input type="text" name="academic_year" class="form-control" value="2026-2027">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small fw-bold text-dark">Mobile Number <span class="text-danger">*</span></label>
+            <input type="tel" name="mobile" class="form-control" placeholder="10-digit mobile" required>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label small fw-bold text-dark">Email Address (Optional)</label>
+          <input type="email" name="email" class="form-control" placeholder="student@example.com">
+        </div>
+
+        <h6 class="fw-bold text-dark border-bottom pb-2 mb-3 mt-4">
+          <i class="fas fa-lock text-danger me-1"></i> Security &amp; Login Password
+        </h6>
+
+        <div class="row g-3 mb-4">
+          <div class="col-md-6">
+            <label class="form-label small fw-bold text-dark">Password <span class="text-danger">*</span></label>
+            <input type="password" name="password" class="form-control" placeholder="Minimum 6 characters" minlength="6" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small fw-bold text-dark">Confirm Password <span class="text-danger">*</span></label>
+            <input type="password" name="confirm_password" class="form-control" placeholder="Re-enter password" minlength="6" required>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-danger w-100 fw-bold py-3 mb-3" style="background-color: #E61013 !important; border-color: #E61013 !important; color: #ffffff !important; font-size: 16px; border-radius: 6px;">
+          <i class="fas fa-paper-plane me-2"></i> Submit Registration for Approval
+        </button>
+
+        <div class="text-center small">
+          Already registered and approved? 
+          <a href="{% url 'library:student_login' %}" class="text-danger fw-bold text-decoration-none">Sign In Here &rarr;</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

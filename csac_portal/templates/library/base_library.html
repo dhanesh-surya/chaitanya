@@ -346,12 +346,18 @@
         <a href="{% url 'library:librarian_overdue' %}" class="lib-nav-link">
           <i class="fas fa-exclamation-triangle"></i> Overdue Monitor
         </a>
+        <a href="{% url 'library:librarian_registrations' %}" class="lib-nav-link text-danger">
+          <i class="fas fa-user-check"></i> Approvals
+        </a>
       {% endif %}
 
       {% if user.is_authenticated and user.is_superuser or user.is_staff %}
         <span class="text-muted align-self-center px-1">|</span>
         <a href="{% url 'library:admin_dashboard' %}" class="lib-nav-link text-primary">
           <i class="fas fa-cogs"></i> Admin
+        </a>
+        <a href="{% url 'library:admin_students' %}" class="lib-nav-link text-primary">
+          <i class="fas fa-users"></i> Students
         </a>
         <a href="{% url 'library:admin_import' %}" class="lib-nav-link text-primary">
           <i class="fas fa-file-excel"></i> Excel Import

@@ -1,0 +1,222 @@
+﻿{% extends "library/base_library.html" %}
+
+{% block library_content %}
+<div class="card lib-card p-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+      <h4 class="h5 fw-bold mb-1 text-dark">
+        <i class="fas fa-user-check text-danger me-2"></i> Student Membership Approval Queue
+      </h4>
+      <p class="text-muted small mb-0">Verify student college credentials, assign or review library card numbers, and activate membership accounts.</p>
+    </div>
+
+    <!-- Status Filter Buttons -->
+    <div class="d-flex flex-wrap gap-2">
+      <a href="?status=PENDING_APPROVAL" class="btn btn-sm {% if status_filter == 'PENDING_APPROVAL' %}btn-warning text-dark fw-bold{% else %}btn-outline-secondary{% endif %} position-relative">
+        Pending Approval
+        {% if pending_count > 0 %}
+          <span class="badge bg-danger ms-1">{{ pending_count }}</span>
+        {% endif %}
+      </a>
+      <a href="?status=ACTIVE" class="btn btn-sm {% if status_filter == 'ACTIVE' %}btn-success fw-bold{% else %}btn-outline-secondary{% endif %}">
+        Active Members
+      </a>
+      <a href="?status=REJECTED" class="btn btn-sm {% if status_filter == 'REJECTED' %}btn-danger fw-bold{% else %}btn-outline-secondary{% endif %}">
+        Rejected
+      </a>
+      <a href="?status=ALL" class="btn btn-sm {% if status_filter == 'ALL' %}btn-dark fw-bold{% else %}btn-outline-secondary{% endif %}">
+        All Registrations
+      </a>
+    </div>
+  </div>
+
+  <!-- Search Filter -->
+  <form method="get" class="mb-4">
+    <input type="hidden" name="status" value="{{ status_filter }}">
+    <div class="input-group">
+      <input type="text" name="q" class="form-control" placeholder="Search by Enrollment No, Card ID, Student Name, Course, or Mobile..." value="{{ search_q }}">
+      <button class="btn btn-danger" type="submit"><i class="fas fa-search me-1"></i> Search</button>
+      {% if search_q %}
+        <a href="?status={{ status_filter }}" class="btn btn-outline-secondary">Clear</a>
+      {% endif %}
+    </div>
+  </form>
+
+  {% if profiles %}
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light small">
+          <tr>
+            <th>Enrollment No / Card</th>
+            <th>Student Full Name</th>
+            <th>Department &amp; Course</th>
+            <th>Contact Details</th>
+            <th>Registered At</th>
+            <th>Status</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for profile in profiles %}
+            <tr>
+              <td>
+                <div class="fw-bold text-dark">{{ profile.enrollment_number }}</div>
+                <code class="small text-muted">{{ profile.library_card_number }}</code>
+              </td>
+              <td>
+                <div class="fw-bold text-dark">{{ profile.full_name }}</div>
+                {% if profile.father_mother_name %}
+                  <div class="small text-muted">Parent: {{ profile.father_mother_name }}</div>
+                {% endif %}
+              </td>
+              <td>
+                <div class="text-dark">{{ profile.course }}</div>
+                <div class="small text-muted">{{ profile.department.name|default:"General" }} &bull; Sem {{ profile.semester }}</div>
+              </td>
+              <td>
+                <div><i class="fas fa-phone-alt text-muted me-1 small"></i>{{ profile.mobile }}</div>
+                {% if profile.user.email %}
+                  <div class="small text-muted"><i class="fas fa-envelope text-muted me-1 small"></i>{{ profile.user.email }}</div>
+                {% endif %}
+              </td>
+              <td>
+                <div class="small text-dark">{{ profile.created_at|date:"d M Y" }}</div>
+                <div class="small text-muted">{{ profile.created_at|date:"h:i A" }}</div>
+              </td>
+              <td>
+                {% if profile.status == 'PENDING_APPROVAL' %}
+                  <span class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i> Pending</span>
+                {% elif profile.status == 'ACTIVE' %}
+                  <span class="badge bg-success"><i class="fas fa-check-circle me-1"></i> Active</span>
+                {% elif profile.status == 'REJECTED' %}
+                  <span class="badge bg-danger"><i class="fas fa-times-circle me-1"></i> Rejected</span>
+                {% else %}
+                  <span class="badge bg-secondary">{{ profile.get_status_display }}</span>
+                {% endif %}
+              </td>
+              <td class="text-end">
+                {% if profile.status == 'PENDING_APPROVAL' %}
+                  <div class="d-inline-flex gap-1">
+                    <!-- Approve Button triggers modal -->
+                    <button type="button" class="btn btn-sm btn-success fw-bold text-nowrap px-3" data-bs-toggle="modal" data-bs-target="#approveModal{{ profile.id }}">
+                      <i class="fas fa-check me-1"></i> Approve
+                    </button>
+                    <!-- Reject Button triggers modal -->
+                    <button type="button" class="btn btn-sm btn-outline-danger fw-bold text-nowrap" data-bs-toggle="modal" data-bs-target="#rejectModal{{ profile.id }}">
+                      <i class="fas fa-times me-1"></i> Reject
+                    </button>
+                  </div>
+
+                  <!-- Approve Modal -->
+                  <div class="modal fade text-start" id="approveModal{{ profile.id }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <form method="post" action="{% url 'library:approve_registration' profile.id %}">
+                          {% csrf_token %}
+                          <div class="modal-header bg-light">
+                            <h5 class="modal-title fw-bold text-dark">
+                              <i class="fas fa-check-circle text-success me-2"></i> Approve Membership
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                          </div>
+                          <div class="modal-body">
+                            <p class="mb-3">
+                              Confirm library membership activation for student <strong>{{ profile.full_name }}</strong> ({{ profile.enrollment_number }}).
+                            </p>
+                            <div class="mb-3">
+                              <label class="form-label small fw-bold text-dark">Assigned Library Card Number</label>
+                              <input type="text" name="library_card_number" class="form-control" value="{{ profile.library_card_number }}" required>
+                              <div class="form-text small">You can keep the generated card ID or scan/enter a physical barcode number.</div>
+                            </div>
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary text-nowrap px-3" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-success fw-bold text-nowrap px-4">
+                              <i class="fas fa-check me-1"></i> Confirm &amp; Activate
+                            </button>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Reject Modal -->
+                  <div class="modal fade text-start" id="rejectModal{{ profile.id }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <form method="post" action="{% url 'library:reject_registration' profile.id %}">
+                          {% csrf_token %}
+                          <div class="modal-header bg-light">
+                            <h5 class="modal-title fw-bold text-danger">
+                              <i class="fas fa-times-circle me-2"></i> Reject Registration
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                          </div>
+                          <div class="modal-body">
+                            <p class="mb-3">
+                              Are you sure you want to reject registration for <strong>{{ profile.full_name }}</strong> ({{ profile.enrollment_number }})?
+                            </p>
+                            <div class="mb-3">
+                              <label class="form-label small fw-bold text-dark">Reason for Rejection (Optional)</label>
+                              <textarea name="rejection_reason" class="form-control" rows="3" placeholder="e.g. Invalid enrollment number, fee clearance pending, or duplicate account..."></textarea>
+                            </div>
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary text-nowrap px-3" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-danger fw-bold text-nowrap px-4">
+                              <i class="fas fa-ban me-1"></i> Confirm Rejection
+                            </button>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+
+                {% elif profile.status == 'ACTIVE' %}
+                  <span class="small text-muted"><i class="fas fa-user-check text-success me-1"></i> Verified</span>
+                {% elif profile.status == 'REJECTED' %}
+                  <button type="button" class="btn btn-sm btn-outline-success fw-bold text-nowrap" data-bs-toggle="modal" data-bs-target="#approveModal{{ profile.id }}">
+                    <i class="fas fa-redo me-1"></i> Re-Approve
+                  </button>
+
+                  <!-- Re-Approve Modal -->
+                  <div class="modal fade text-start" id="approveModal{{ profile.id }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <form method="post" action="{% url 'library:approve_registration' profile.id %}">
+                          {% csrf_token %}
+                          <div class="modal-header bg-light">
+                            <h5 class="modal-title fw-bold text-dark">Re-Approve Membership</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                          </div>
+                          <div class="modal-body">
+                            <p>Restore and approve membership for <strong>{{ profile.full_name }}</strong> ({{ profile.enrollment_number }})?</p>
+                            <div class="mb-3">
+                              <label class="form-label small fw-bold">Library Card Number</label>
+                              <input type="text" name="library_card_number" class="form-control" value="{{ profile.library_card_number }}" required>
+                            </div>
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-success fw-bold">Re-Activate Account</button>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="text-center py-5">
+      <div class="text-muted fs-1 mb-2"><i class="fas fa-users-slash"></i></div>
+      <h6 class="fw-bold text-dark">No Student Registrations Found</h6>
+      <p class="text-muted small">No student records match the current filter selection.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -4,11 +4,100 @@ from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from datetime import timedelta
-from library.models import StudentProfile, LibraryRequest, CirculationTransaction, BookCopy
+from django.contrib.auth.models import User
+from academics.models import Department
+from library.models import StudentProfile, LibraryRequest, CirculationTransaction, BookCopy, AuditLog
 from library.decorators import student_required
 from library.services.circulation_service import (
     create_book_request, cancel_book_request, request_book_return
 )
+
+
+def student_register_view(request):
+    if request.user.is_authenticated and hasattr(request.user, 'library_student_profile'):
+        return redirect('library:student_dashboard')
+
+    departments = Department.objects.all().order_by('name')
+
+    if request.method == 'POST':
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
+        enrollment_number = request.POST.get('enrollment_number', '').strip().upper()
+        father_mother_name = request.POST.get('father_mother_name', '').strip()
+        course = request.POST.get('course', '').strip()
+        department_id = request.POST.get('department', '').strip()
+        semester = request.POST.get('semester', '1').strip()
+        academic_year = request.POST.get('academic_year', '2026-2027').strip()
+        mobile = request.POST.get('mobile', '').strip()
+        email = request.POST.get('email', '').strip()
+        password = request.POST.get('password', '').strip()
+        confirm_password = request.POST.get('confirm_password', '').strip()
+
+        # Validations
+        if not enrollment_number or not first_name or not mobile or not password:
+            messages.error(request, "Please fill in all mandatory fields.")
+        elif password != confirm_password:
+            messages.error(request, "Passwords do not match. Please re-enter your password.")
+        elif len(password) < 6:
+            messages.error(request, "Password must be at least 6 characters long.")
+        elif StudentProfile.objects.filter(enrollment_number__iexact=enrollment_number).exists():
+            messages.error(request, f"An account with Enrollment Number '{enrollment_number}' already exists.")
+        else:
+            username = enrollment_number.lower()
+            if User.objects.filter(username__iexact=username).exists():
+                # Avoid collision if username exists
+                username = f"{enrollment_number.lower()}_{mobile[-4:]}"
+
+            # Create User
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                password=password,
+                first_name=first_name,
+                last_name=last_name
+            )
+
+            # Generate unique library card number: LIB-<ENROLLMENT>
+            lib_card = f"LIB-{enrollment_number}"
+            if StudentProfile.objects.filter(library_card_number__iexact=lib_card).exists():
+                lib_card = f"LIB-{enrollment_number}-{user.id}"
+
+            dept_obj = Department.objects.filter(id=department_id).first() if department_id else None
+
+            profile = StudentProfile.objects.create(
+                user=user,
+                enrollment_number=enrollment_number,
+                library_card_number=lib_card,
+                father_mother_name=father_mother_name,
+                course=course,
+                department=dept_obj,
+                semester=int(semester) if semester.isdigit() else 1,
+                academic_year=academic_year,
+                mobile=mobile,
+                status='PENDING_APPROVAL',
+                is_library_eligible=False,
+                registered_online=True
+            )
+
+            AuditLog.objects.create(
+                user=user,
+                action='STUDENT_REGISTERED',
+                reference_id=enrollment_number,
+                description=f"Student {user.get_full_name()} ({enrollment_number}) submitted online library registration.",
+                ip_address=request.META.get('REMOTE_ADDR')
+            )
+
+            messages.success(
+                request,
+                "Registration submitted successfully! Your library membership is currently pending approval by the Librarian Desk. Once verified, you will be able to sign in."
+            )
+            return redirect('library:student_login')
+
+    return render(request, 'library/student/register.html', {
+        'page_title': 'Student Library Registration',
+        'breadcrumb': 'Student Membership Registration',
+        'departments': departments,
+    })
 
 
 def student_login_view(request):
@@ -28,10 +117,32 @@ def student_login_view(request):
 
         if user is not None:
             if hasattr(user, 'library_student_profile'):
-                login(request, user)
-                messages.success(request, f"Welcome back, {user.get_full_name() or user.username}!")
-                next_url = request.GET.get('next') or 'library:student_dashboard'
-                return redirect(next_url)
+                student_profile = user.library_student_profile
+
+                # Enforce approval & eligibility checks
+                if student_profile.status == 'PENDING_APPROVAL':
+                    messages.warning(
+                        request,
+                        "Your registration is currently pending review and approval by the Librarian Desk. Please contact the Library Counter or check back shortly."
+                    )
+                elif student_profile.status == 'REJECTED':
+                    reason = f" Reason: {student_profile.rejection_reason}" if student_profile.rejection_reason else ""
+                    messages.error(
+                        request,
+                        f"Your library membership request was not approved by the librarian.{reason} Please visit the Library Desk."
+                    )
+                elif student_profile.status in ['BLOCKED', 'SUSPENDED']:
+                    messages.error(
+                        request,
+                        "Your library account has been suspended or blocked. Please contact the Library Counter for assistance."
+                    )
+                elif student_profile.status == 'ACTIVE':
+                    login(request, user)
+                    messages.success(request, f"Welcome back, {user.get_full_name() or user.username}!")
+                    next_url = request.GET.get('next') or 'library:student_dashboard'
+                    return redirect(next_url)
+                else:
+                    messages.error(request, f"Your library account status is {student_profile.get_status_display()}. Access is restricted.")
             else:
                 messages.error(request, "This account is not registered as a Student Library Member.")
         else:

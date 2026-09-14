@@ -1,0 +1,147 @@
+﻿{% extends "library/base_library.html" %}
+
+{% block library_content %}
+<div class="card lib-card p-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+      <h4 class="h5 fw-bold mb-1 text-dark">
+        <i class="fas fa-users-cog text-primary me-2"></i> Student Library Members Directory
+      </h4>
+      <p class="text-muted small mb-0">View all registered student borrowers, create new students with passwords, or reset existing passwords.</p>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2">
+      <a href="{% url 'library:admin_add_student' %}" class="btn btn-sm btn-primary fw-bold text-nowrap">
+        <i class="fas fa-user-plus me-1"></i> Add Student Member
+      </a>
+      <a href="?status=ALL" class="btn btn-sm {% if status_filter == 'ALL' %}btn-dark fw-bold{% else %}btn-outline-secondary{% endif %}">
+        All ({{ total_count }})
+      </a>
+      <a href="?status=ACTIVE" class="btn btn-sm {% if status_filter == 'ACTIVE' %}btn-success fw-bold{% else %}btn-outline-secondary{% endif %}">
+        Active ({{ active_count }})
+      </a>
+      <a href="?status=PENDING_APPROVAL" class="btn btn-sm {% if status_filter == 'PENDING_APPROVAL' %}btn-warning text-dark fw-bold{% else %}btn-outline-secondary{% endif %}">
+        Pending ({{ pending_count }})
+      </a>
+    </div>
+  </div>
+
+  <!-- Search Bar -->
+  <form method="get" class="mb-4">
+    <input type="hidden" name="status" value="{{ status_filter }}">
+    <div class="input-group">
+      <input type="text" name="q" class="form-control" placeholder="Search by Enrollment No, Card ID, Name, Course, or Mobile..." value="{{ search_q }}">
+      <button class="btn btn-primary" type="submit"><i class="fas fa-search me-1"></i> Search</button>
+      {% if search_q %}
+        <a href="?status={{ status_filter }}" class="btn btn-outline-secondary">Clear</a>
+      {% endif %}
+    </div>
+  </form>
+
+  {% if students %}
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light small">
+          <tr>
+            <th>Enrollment No / Card</th>
+            <th>Student Name</th>
+            <th>Department / Course</th>
+            <th>Contact Details</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for student in students %}
+            <tr>
+              <td>
+                <div class="fw-bold text-dark">{{ student.enrollment_number }}</div>
+                <code class="small text-muted">{{ student.library_card_number }}</code>
+              </td>
+              <td>
+                <div class="fw-bold text-dark">{{ student.full_name }}</div>
+                <div class="small text-muted">User: @{{ student.user.username }}</div>
+              </td>
+              <td>
+                <div class="text-dark">{{ student.course }}</div>
+                <div class="small text-muted">{{ student.department.name|default:"General" }} &bull; Sem {{ student.semester }}</div>
+              </td>
+              <td>
+                <div><i class="fas fa-phone text-muted me-1 small"></i>{{ student.mobile }}</div>
+                {% if student.user.email %}
+                  <div class="small text-muted"><i class="fas fa-envelope text-muted me-1 small"></i>{{ student.user.email }}</div>
+                {% endif %}
+              </td>
+              <td>
+                {% if student.status == 'ACTIVE' %}
+                  <span class="badge bg-success"><i class="fas fa-check-circle me-1"></i> Active</span>
+                {% elif student.status == 'PENDING_APPROVAL' %}
+                  <span class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i> Pending</span>
+                {% elif student.status == 'REJECTED' %}
+                  <span class="badge bg-danger"><i class="fas fa-times-circle me-1"></i> Rejected</span>
+                {% elif student.status == 'BLOCKED' %}
+                  <span class="badge bg-danger">Blocked</span>
+                {% else %}
+                  <span class="badge bg-secondary">{{ student.get_status_display }}</span>
+                {% endif %}
+              </td>
+              <td>
+                <span class="small text-muted">{{ student.created_at|date:"d M Y" }}</span>
+              </td>
+              <td class="text-end">
+                <!-- Reset Password Button -->
+                <button type="button" class="btn btn-sm btn-outline-secondary text-nowrap" data-bs-toggle="modal" data-bs-target="#resetPwModal{{ student.id }}" title="Reset Password">
+                  <i class="fas fa-key me-1"></i> Password
+                </button>
+
+                <!-- Password Reset Modal -->
+                <div class="modal fade text-start" id="resetPwModal{{ student.id }}" tabindex="-1" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <form method="post" action="{% url 'library:admin_reset_password' student.id %}">
+                        {% csrf_token %}
+                        <div class="modal-header bg-light">
+                          <h5 class="modal-title fw-bold text-dark">
+                            <i class="fas fa-key text-warning me-2"></i> Reset Student Password
+                          </h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                          <p class="mb-3">
+                            Set a new login password for student <strong>{{ student.full_name }}</strong> (Enrollment: <code>{{ student.enrollment_number }}</code>).
+                          </p>
+                          <div class="mb-3">
+                            <label class="form-label small fw-bold text-dark">New Password</label>
+                            <input type="password" name="new_password" class="form-control" placeholder="Minimum 6 characters" minlength="6" required>
+                            <div class="form-text small">Student will be able to sign in immediately using this new password.</div>
+                          </div>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary text-nowrap px-3" data-bs-dismiss="modal">Cancel</button>
+                          <button type="submit" class="btn btn-primary fw-bold text-nowrap px-4">
+                            <i class="fas fa-save me-1"></i> Save New Password
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="text-center py-5">
+      <div class="text-muted fs-1 mb-2"><i class="fas fa-user-friends"></i></div>
+      <h6 class="fw-bold text-dark">No Students Found</h6>
+      <p class="text-muted small mb-3">No student members found matching the search/filter criteria.</p>
+      <a href="{% url 'library:admin_add_student' %}" class="btn btn-sm btn-primary fw-bold">
+        <i class="fas fa-plus me-1"></i> Add First Student Member
+      </a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

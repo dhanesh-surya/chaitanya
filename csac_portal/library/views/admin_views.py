@@ -1,8 +1,11 @@
 import csv
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.contrib.auth.models import User
 from django.http import HttpResponse
 from django.utils import timezone
+from django.db.models import Q
+from academics.models import Department
 from library.models import (
     Book, BookCopy, CirculationTransaction, StudentProfile, LibrarySetting, AuditLog, ExcelImport
 )
@@ -190,3 +193,145 @@ def circulation_reports_view(request):
         'transactions': txns[:100],
     }
     return render(request, 'library/admin/reports.html', context)
+
+
+@library_admin_required
+def admin_students_view(request):
+    status_filter = request.GET.get('status', 'ALL')
+    search_q = request.GET.get('q', '').strip()
+
+    students = StudentProfile.objects.select_related('user', 'department').order_by('-created_at')
+
+    if status_filter != 'ALL':
+        students = students.filter(status=status_filter)
+
+    if search_q:
+        students = students.filter(
+            Q(enrollment_number__icontains=search_q) |
+            Q(library_card_number__icontains=search_q) |
+            Q(user__first_name__icontains=search_q) |
+            Q(user__last_name__icontains=search_q) |
+            Q(user__username__icontains=search_q) |
+            Q(course__icontains=search_q) |
+            Q(mobile__icontains=search_q)
+        )
+
+    context = {
+        'page_title': 'Student Library Members',
+        'breadcrumb': 'Student Management',
+        'students': students[:100],
+        'total_count': StudentProfile.objects.count(),
+        'active_count': StudentProfile.objects.filter(status='ACTIVE').count(),
+        'pending_count': StudentProfile.objects.filter(status='PENDING_APPROVAL').count(),
+        'status_filter': status_filter,
+        'search_q': search_q,
+    }
+    return render(request, 'library/admin/student_list.html', context)
+
+
+@library_admin_required
+def admin_add_student_view(request):
+    departments = Department.objects.all().order_by('name')
+
+    if request.method == 'POST':
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
+        enrollment_number = request.POST.get('enrollment_number', '').strip().upper()
+        library_card_number = request.POST.get('library_card_number', '').strip().upper()
+        father_mother_name = request.POST.get('father_mother_name', '').strip()
+        course = request.POST.get('course', '').strip()
+        department_id = request.POST.get('department', '').strip()
+        semester = request.POST.get('semester', '1').strip()
+        academic_year = request.POST.get('academic_year', '2026-2027').strip()
+        mobile = request.POST.get('mobile', '').strip()
+        email = request.POST.get('email', '').strip()
+        password = request.POST.get('password', '').strip()
+        status = request.POST.get('status', 'ACTIVE')
+
+        if not enrollment_number or not first_name or not password or not mobile:
+            messages.error(request, "Please enter First Name, Enrollment Number, Mobile, and Password.")
+        elif len(password) < 6:
+            messages.error(request, "Password must be at least 6 characters long.")
+        elif StudentProfile.objects.filter(enrollment_number__iexact=enrollment_number).exists():
+            messages.error(request, f"Student with Enrollment Number '{enrollment_number}' already exists.")
+        else:
+            if not library_card_number:
+                library_card_number = f"LIB-{enrollment_number}"
+
+            if StudentProfile.objects.filter(library_card_number__iexact=library_card_number).exists():
+                messages.error(request, f"Library Card Number '{library_card_number}' is already assigned.")
+            else:
+                username = enrollment_number.lower()
+                if User.objects.filter(username__iexact=username).exists():
+                    username = f"{enrollment_number.lower()}_{mobile[-4:]}"
+
+                user = User.objects.create_user(
+                    username=username,
+                    email=email,
+                    password=password,
+                    first_name=first_name,
+                    last_name=last_name
+                )
+
+                dept_obj = Department.objects.filter(id=department_id).first() if department_id else None
+
+                profile = StudentProfile.objects.create(
+                    user=user,
+                    enrollment_number=enrollment_number,
+                    library_card_number=library_card_number,
+                    father_mother_name=father_mother_name,
+                    course=course,
+                    department=dept_obj,
+                    semester=int(semester) if semester.isdigit() else 1,
+                    academic_year=academic_year,
+                    mobile=mobile,
+                    status=status,
+                    is_library_eligible=(status == 'ACTIVE'),
+                    registered_online=False,
+                    approved_by=request.user,
+                    approved_at=timezone.now() if status == 'ACTIVE' else None
+                )
+
+                AuditLog.objects.create(
+                    user=request.user,
+                    action='STUDENT_CREATED',
+                    reference_id=enrollment_number,
+                    description=f"Admin {request.user.username} created student member {user.get_full_name()} ({enrollment_number}) with status {status}.",
+                    ip_address=request.META.get('REMOTE_ADDR')
+                )
+
+                messages.success(request, f"Student Member {profile.full_name} ({enrollment_number}) created successfully! They can now log in using their enrollment number and the assigned password.")
+                return redirect('library:admin_students')
+
+    return render(request, 'library/admin/add_student.html', {
+        'page_title': 'Add New Student Member',
+        'breadcrumb': 'Create Student Account',
+        'departments': departments,
+    })
+
+
+@library_admin_required
+def admin_reset_student_password(request, student_id):
+    if request.method != 'POST':
+        return redirect('library:admin_students')
+
+    student = get_object_or_404(StudentProfile, id=student_id)
+    new_password = request.POST.get('new_password', '').strip()
+
+    if not new_password or len(new_password) < 6:
+        messages.error(request, "New password must be at least 6 characters long.")
+    else:
+        student.user.set_password(new_password)
+        student.user.save()
+
+        AuditLog.objects.create(
+            user=request.user,
+            action='STUDENT_PASSWORD_RESET',
+            reference_id=student.enrollment_number,
+            description=f"Admin {request.user.username} reset password for student {student.full_name} ({student.enrollment_number}).",
+            ip_address=request.META.get('REMOTE_ADDR')
+        )
+        messages.success(request, f"Password for student {student.full_name} ({student.enrollment_number}) has been updated successfully!")
+
+    return redirect('library:admin_students')
+

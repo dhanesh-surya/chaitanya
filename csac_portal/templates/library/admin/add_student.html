@@ -1,0 +1,130 @@
+﻿{% extends "library/base_library.html" %}
+
+{% block library_content %}
+<div class="row justify-content-center my-4">
+  <div class="col-md-9 col-lg-8">
+    <div class="card lib-card p-4 shadow-sm">
+      <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+        <div>
+          <h4 class="fw-bold text-dark mb-1">
+            <i class="fas fa-user-plus text-primary me-2"></i> Register New Student Member
+          </h4>
+          <p class="text-muted small mb-0">Create student account with immediate activation and set an initial login password.</p>
+        </div>
+        <a href="{% url 'library:admin_students' %}" class="btn btn-sm btn-outline-secondary">
+          <i class="fas fa-arrow-left me-1"></i> Back to Student List
+        </a>
+      </div>
+
+      <form method="post" action="">
+        {% csrf_token %}
+
+        <h6 class="fw-bold text-dark mb-3">
+          <i class="fas fa-id-badge text-primary me-1"></i> Student Identification &amp; Credentials
+        </h6>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="form-label small fw-bold text-dark">First Name <span class="text-danger">*</span></label>
+            <input type="text" name="first_name" class="form-control" placeholder="First Name" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small fw-bold text-dark">Last Name</label>
+            <input type="text" name="last_name" class="form-control" placeholder="Last Name">
+          </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="form-label small fw-bold text-dark">Enrollment Number <span class="text-danger">*</span></label>
+            <input type="text" name="enrollment_number" class="form-control" placeholder="e.g. 2026CS102" required>
+            <div class="form-text small">Student will use this number to sign in.</div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small fw-bold text-dark">Library Card Number (Optional)</label>
+            <input type="text" name="library_card_number" class="form-control" placeholder="Leave blank to auto-generate">
+            <div class="form-text small">Defaults to <code>LIB-&lt;Enrollment&gt;</code> if blank.</div>
+          </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="form-label small fw-bold text-dark">Initial Login Password <span class="text-danger">*</span></label>
+            <input type="password" name="password" class="form-control" placeholder="Minimum 6 characters" minlength="6" required>
+            <div class="form-text small">Password student will use at <code>/library/student/login/</code>.</div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small fw-bold text-dark">Account Status</label>
+            <select name="status" class="form-select">
+              <option value="ACTIVE" selected>🟢 Active (Can Login &amp; Borrow Immediately)</option>
+              <option value="PENDING_APPROVAL">🟡 Pending Approval</option>
+              <option value="INACTIVE">⚪ Inactive</option>
+              <option value="BLOCKED">🔴 Blocked</option>
+            </select>
+          </div>
+        </div>
+
+        <h6 class="fw-bold text-dark border-top pt-3 mb-3 mt-4">
+          <i class="fas fa-graduation-cap text-primary me-1"></i> Academic Program &amp; Contact
+        </h6>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="form-label small fw-bold text-dark">Department</label>
+            <select name="department" class="form-select">
+              <option value="">-- Select Department --</option>
+              {% for dept in departments %}
+                <option value="{{ dept.id }}">{{ dept.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small fw-bold text-dark">Course / Degree <span class="text-danger">*</span></label>
+            <input type="text" name="course" class="form-control" placeholder="e.g. B.Sc. Computer Science" required>
+          </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-4">
+            <label class="form-label small fw-bold text-dark">Semester / Year</label>
+            <select name="semester" class="form-select">
+              <option value="1">Semester 1</option>
+              <option value="2">Semester 2</option>
+              <option value="3">Semester 3</option>
+              <option value="4">Semester 4</option>
+              <option value="5">Semester 5</option>
+              <option value="6">Semester 6</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small fw-bold text-dark">Academic Year</label>
+            <input type="text" name="academic_year" class="form-control" value="2026-2027">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small fw-bold text-dark">Father / Mother Name</label>
+            <input type="text" name="father_mother_name" class="form-control" placeholder="Parent / Guardian">
+          </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+          <div class="col-md-6">
+            <label class="form-label small fw-bold text-dark">Mobile Number <span class="text-danger">*</span></label>
+            <input type="tel" name="mobile" class="form-control" placeholder="10-digit mobile" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small fw-bold text-dark">Email Address (Optional)</label>
+            <input type="email" name="email" class="form-control" placeholder="student@example.com">
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 border-top pt-3">
+          <a href="{% url 'library:admin_students' %}" class="btn btn-secondary text-nowrap px-4">Cancel</a>
+          <button type="submit" class="btn btn-primary fw-bold text-nowrap px-4">
+            <i class="fas fa-check me-1"></i> Create Student Member
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

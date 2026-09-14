@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.db.models import Q
 from library.models import (
-    LibraryRequest, CirculationTransaction, BookCopy, StudentProfile, Fine, LibrarySetting
+    LibraryRequest, CirculationTransaction, BookCopy, StudentProfile, Fine, LibrarySetting, AuditLog
 )
 from library.decorators import librarian_required
 from library.services.circulation_service import (
@@ -52,6 +52,7 @@ def librarian_dashboard(request):
     ).select_related('student__user', 'book_copy__book')
     overdue_count = overdue_txns.count()
 
+    pending_registrations_count = StudentProfile.objects.filter(status='PENDING_APPROVAL').count()
     recent_requests = LibraryRequest.objects.filter(status='PENDING').select_related('student__user', 'book_copy__book').order_by('-requested_at')[:5]
 
     context = {
@@ -63,9 +64,102 @@ def librarian_dashboard(request):
         'today_issues_count': today_issues_count,
         'today_returns_count': today_returns_count,
         'overdue_count': overdue_count,
+        'pending_registrations_count': pending_registrations_count,
         'recent_requests': recent_requests,
     }
     return render(request, 'library/librarian/dashboard.html', context)
+
+
+@librarian_required
+def student_registrations_queue(request):
+    status_filter = request.GET.get('status', 'PENDING_APPROVAL')
+    search_q = request.GET.get('q', '').strip()
+
+    profiles = StudentProfile.objects.select_related('user', 'department').order_by('-created_at')
+
+    if status_filter != 'ALL':
+        profiles = profiles.filter(status=status_filter)
+
+    if search_q:
+        profiles = profiles.filter(
+            Q(enrollment_number__icontains=search_q) |
+            Q(library_card_number__icontains=search_q) |
+            Q(user__first_name__icontains=search_q) |
+            Q(user__last_name__icontains=search_q) |
+            Q(user__username__icontains=search_q) |
+            Q(course__icontains=search_q) |
+            Q(mobile__icontains=search_q)
+        )
+
+    pending_count = StudentProfile.objects.filter(status='PENDING_APPROVAL').count()
+
+    context = {
+        'page_title': 'Student Library Registrations',
+        'breadcrumb': 'Membership Approvals',
+        'profiles': profiles[:100],
+        'status_filter': status_filter,
+        'search_q': search_q,
+        'pending_count': pending_count,
+    }
+    return render(request, 'library/librarian/student_registrations.html', context)
+
+
+@librarian_required
+def approve_student_registration(request, student_id):
+    if request.method != 'POST':
+        return redirect('library:librarian_registrations')
+
+    student = get_object_or_404(StudentProfile, id=student_id)
+    card_number = request.POST.get('library_card_number', '').strip() or student.library_card_number
+
+    # Ensure card number uniqueness
+    if StudentProfile.objects.exclude(id=student.id).filter(library_card_number__iexact=card_number).exists():
+        messages.error(request, f"Library Card Number '{card_number}' is already assigned to another student.")
+        return redirect('library:librarian_registrations')
+
+    student.library_card_number = card_number
+    student.status = 'ACTIVE'
+    student.is_library_eligible = True
+    student.approved_by = request.user
+    student.approved_at = timezone.now()
+    student.rejection_reason = ""
+    student.save()
+
+    AuditLog.objects.create(
+        user=request.user,
+        action='STUDENT_APPROVED',
+        reference_id=student.enrollment_number,
+        description=f"Librarian {request.user.username} approved library membership for student {student.full_name} ({student.enrollment_number}). Card No: {student.library_card_number}",
+        ip_address=request.META.get('REMOTE_ADDR')
+    )
+
+    messages.success(request, f"Student {student.full_name} ({student.enrollment_number}) has been approved! They can now log in to the Student Library Portal.")
+    return redirect('library:librarian_registrations')
+
+
+@librarian_required
+def reject_student_registration(request, student_id):
+    if request.method != 'POST':
+        return redirect('library:librarian_registrations')
+
+    student = get_object_or_404(StudentProfile, id=student_id)
+    reason = request.POST.get('rejection_reason', '').strip()
+
+    student.status = 'REJECTED'
+    student.is_library_eligible = False
+    student.rejection_reason = reason
+    student.save()
+
+    AuditLog.objects.create(
+        user=request.user,
+        action='STUDENT_REJECTED',
+        reference_id=student.enrollment_number,
+        description=f"Librarian {request.user.username} rejected membership for student {student.full_name} ({student.enrollment_number}). Reason: {reason}",
+        ip_address=request.META.get('REMOTE_ADDR')
+    )
+
+    messages.warning(request, f"Registration for student {student.full_name} ({student.enrollment_number}) was rejected.")
+    return redirect('library:librarian_registrations')
 
 
 @librarian_required

@@ -44,9 +44,11 @@ class BookCategory(models.Model):
 
 class StudentProfile(models.Model):
     STATUS_CHOICES = [
+        ('PENDING_APPROVAL', 'Pending Approval'),
         ('ACTIVE', 'Active'),
         ('INACTIVE', 'Inactive'),
         ('BLOCKED', 'Blocked'),
+        ('REJECTED', 'Rejected'),
         ('GRADUATED', 'Graduated'),
         ('SUSPENDED', 'Suspended'),
     ]
@@ -63,6 +65,10 @@ class StudentProfile(models.Model):
     photo = models.ImageField(upload_to='library/students/photos/', blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='ACTIVE')
     is_library_eligible = models.BooleanField(default=True)
+    registered_online = models.BooleanField(default=False)
+    approved_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='approved_student_profiles')
+    approved_at = models.DateTimeField(null=True, blank=True)
+    rejection_reason = models.TextField(blank=True)
     remarks = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -347,6 +353,11 @@ class AuditLog(models.Model):
         ('RETURN_REQUESTED', 'Return Requested'),
         ('RETURN_CONFIRMED', 'Return Confirmed'),
         ('STATUS_CHANGED', 'Copy Status Changed'),
+        ('STUDENT_CREATED', 'Student Account Created'),
+        ('STUDENT_REGISTERED', 'Student Self-Registered'),
+        ('STUDENT_APPROVED', 'Student Registration Approved'),
+        ('STUDENT_REJECTED', 'Student Registration Rejected'),
+        ('STUDENT_PASSWORD_RESET', 'Student Password Reset'),
         ('STUDENT_BLOCKED', 'Student Blocked'),
         ('FINE_SETTLED', 'Fine Settled'),
     ]

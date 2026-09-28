@@ -16,6 +16,12 @@
 <link href="{% static 'assets/css/plugins/jquery-ui.css' %}" rel="stylesheet"/>
 <link href="{% static 'assets/css/style04.css' %}" rel="stylesheet"/>
 <link href="{% static 'assets/css/academic_minimal.css' %}" rel="stylesheet"/>
+<!-- Google Fonts for Modern Institutional Typography -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:wght@400;700;900&family=Noto+Serif+Devanagari:wght@600;700;800&family=Noto+Sans+Devanagari:wght@500;600;700&display=swap" rel="stylesheet">
+<!-- Dedicated Header Redesign Stylesheet -->
+<link href="{% static 'assets/css/header_redesign.css' %}" rel="stylesheet"/>
 {% if site_settings %}
   {% if site_settings.college_name_en_google_font_url %}
     <link href="{{ site_settings.college_name_en_google_font_url }}" rel="stylesheet">
@@ -34,15 +40,6 @@
   {% endif %}
 {% endif %}
 <style>
-.navbar-top{display:flex;justify-content:center;align-items:center;height:auto;padding:1px;background-color:#f8f9fa;font-family:"Roboto Slab",serif;letter-spacing:2px}
-.logo img{width:170px;height:110px;padding-right:50px;display:block}
-.content{text-align:center;font-family:"Roboto Slab",serif}
-.title-large{margin:0;font-size:24px;font-weight:bold;font-family:"Roboto Slab",serif;color:#E61013}
-.title-medium{margin:0;font-size:20px;font-family:"Roboto Slab",serif;font-weight:bold;color:black}
-.subheading{margin:0;font-size:16px;color:black;font-family:"Roboto Slab",serif}
-.logos-right{display:flex;gap:10px}
-.logos-right img{height:100px;width:auto}
-.mobile-only{display:none}
 .fixed-height-image{height:auto !important;aspect-ratio:1024/410;object-fit:cover;width:100%}
 .caption{position:absolute;text-align:center;bottom:10px;left:10px;color:white;background-color:rgba(0,0,0,0.5);padding:5px}
 .banner__content__slide__item{position:relative}
@@ -60,7 +57,7 @@ mark{background-color:rgb(243,64,64);padding:2px 4px;border-radius:3px;font-weig
 .leadership-email-simple i{margin-right:5px;font-size:11px;color:#9ca3af}
 .leadership-email-simple a{color:#6b7280;font-size:12px;font-weight:400;text-decoration:none}
 .leadership-email-simple a:hover{text-decoration:underline}
-@media only screen and (max-width:768px){.navbar-top{flex-direction:column;align-items:flex-start;margin:15px 10px}.logo img{display:none}.title-large{font-size:18px}.title-medium{font-size:16px}.subheading{font-size:14px}}
+.mobile-only{display:none}
 @media only screen and (min-width:1201px){.header__right{display:none}}
 @media (max-width:1200px){.mobile-only{display:block}}
 .developer-credit-link {
@@ -141,7 +138,7 @@ mark{background-color:rgb(243,64,64);padding:2px 4px;border-radius:3px;font-weig
 .social-float-bar {
     position: fixed;
     left: 0;
-    top: 250px;
+    bottom: 25px;
     z-index: 9999;
     display: flex;
     flex-direction: column;
@@ -215,7 +212,54 @@ mark{background-color:rgb(243,64,64);padding:2px 4px;border-radius:3px;font-weig
   </a>
 </div>
 
-<!-- College Header Bar -->
+<!-- ==========================================================================
+     SECTION 1: TOP UTILITY BAR
+     ========================================================================== -->
+<div class="csac-top-utility">
+  <div class="container-fluid">
+    <div class="csac-util-row">
+      <div class="csac-util-left">
+        <span class="csac-util-item">
+          <i class="fa-solid fa-location-dot"></i> Pamgarh, Janjgir-Champa (C.G.) – 495554
+        </span>
+        <a href="tel:{% if site_settings and site_settings.phone %}{{ site_settings.phone }}{% else %}+919425540666{% endif %}" class="csac-util-item csac-util-link">
+          <i class="fa-solid fa-phone"></i> {% if site_settings and site_settings.phone %}{{ site_settings.phone }}{% else %}+91-9425540666{% endif %}
+        </a>
+        <a href="mailto:{% if site_settings and site_settings.email %}{{ site_settings.email }}{% else %}chaitanyapamgarh@gmail.com{% endif %}" class="csac-util-item csac-util-link csac-hide-mobile">
+          <i class="fa-solid fa-envelope"></i> {% if site_settings and site_settings.email %}{{ site_settings.email }}{% else %}chaitanyapamgarh@gmail.com{% endif %}
+        </a>
+      </div>
+      <div class="csac-util-right">
+        <div class="csac-portal-pills">
+          <a href="https://chaitanyapamgarh.onlineexamforms.com/student.aspx" target="_blank" rel="noopener noreferrer" class="csac-util-pill csac-pill-maroon">
+            <i class="fa-solid fa-graduation-cap"></i> Student Portal
+          </a>
+          <a href="{% url 'admin:index' %}" target="_blank" rel="noopener noreferrer" class="csac-util-pill">
+            <i class="fa-solid fa-chalkboard-user"></i> Faculty Login
+          </a>
+          <a href="mailto:{% if site_settings and site_settings.email %}{{ site_settings.email }}{% else %}chaitanyapamgarh@gmail.com{% endif %}" class="csac-util-pill csac-hide-mobile">
+            <i class="fa-solid fa-envelope-open-text"></i> Webmail
+          </a>
+        </div>
+        <div class="csac-util-social">
+          <a href="{% if site_settings and site_settings.facebook_url %}{{ site_settings.facebook_url }}{% else %}https://www.facebook.com/ChaitanyaPamgarh/?ref=embed_page#{% endif %}" target="_blank" rel="noopener noreferrer" class="csac-social-btn facebook" title="Facebook" aria-label="Facebook">
+            <i class="fa-brands fa-facebook-f"></i>
+          </a>
+          <a href="{% if site_settings and site_settings.youtube_url %}{{ site_settings.youtube_url }}{% else %}https://www.youtube.com/@ChaitanyaCollegePamgarh{% endif %}" target="_blank" rel="noopener noreferrer" class="csac-social-btn youtube" title="YouTube" aria-label="YouTube">
+            <i class="fa-brands fa-youtube"></i>
+          </a>
+          <a href="{% if site_settings and site_settings.instagram_url %}{{ site_settings.instagram_url }}{% else %}https://www.instagram.com/chaitanya_college_pamgarh/{% endif %}" target="_blank" rel="noopener noreferrer" class="csac-social-btn instagram" title="Instagram" aria-label="Instagram">
+            <i class="fa-brands fa-instagram"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     SECTION 2: MAIN COLLEGE BRANDING
+     ========================================================================== -->
 {% if site_settings and site_settings.use_image_header and site_settings.header_image %}
 <div class="navbar-top-image" style="width: 100%; text-align: center; background-color: #f8f9fa; padding: 0;">
   <a href="{% url 'core:home' %}" style="display: block; width: 100%;">
@@ -223,36 +267,57 @@ mark{background-color:rgb(243,64,64);padding:2px 4px;border-radius:3px;font-weig
   </a>
 </div>
 {% else %}
-<div class="navbar-top">
-  <div class="logo">
-    <img alt="Logo" src="{% if site_settings %}{{ site_settings.get_college_logo }}{% else %}{% static 'assets/csac_pmg.svg' %}{% endif %}"/>
+<div class="csac-main-header">
+  <div class="container-fluid">
+    <div class="csac-branding-row">
+      <!-- LEFT: Official College Crest -->
+      <div class="csac-branding-left">
+        <a href="{% url 'core:home' %}" title="Chaitanya Science and Arts College, Pamgarh">
+          <img alt="Chaitanya Science and Arts College Logo" class="csac-college-logo" src="{% if site_settings %}{{ site_settings.get_college_logo }}{% else %}{% static 'assets/csac_pmg.svg' %}{% endif %}"/>
+        </a>
+      </div>
+      <!-- CENTER: Institutional Typography Hierarchy -->
+      <div class="csac-branding-center">
+        <h2 class="csac-title-hindi">{% if site_settings and site_settings.college_name_hi %}{{ site_settings.college_name_hi }}{% else %}चैतन्य विज्ञान एवं कला महाविद्यालय, पामगढ़{% endif %}</h2>
+        <h1 class="csac-title-english">{% if site_settings and site_settings.college_name_en %}{{ site_settings.college_name_en|upper }}{% else %}CHAITANYA SCIENCE AND ARTS COLLEGE{% endif %}</h1>
+        <p class="csac-location-tag">{% if site_settings and site_settings.address_line1 %}{{ site_settings.address_line1 }}{% else %}PAMGARH, JANJGIR-CHAMPA (C.G.) – 495554{% endif %}</p>
+        <p class="csac-affiliation-line">{% if site_settings and site_settings.address_line2 %}{{ site_settings.address_line2 }}{% else %}Affiliated to Shaheed Nandkumar Patel Vishwavidyalaya, Raigarh, Chhattisgarh, India{% endif %}</p>
+        <div class="csac-autonomous-badge-line">
+          <span>An Autonomous Institution</span>
+          <span class="csac-sep-dot">•</span>
+          <span>Approved by UGC</span>
+          <span class="csac-sep-dot">•</span>
+          <span class="csac-badge-highlight">Accredited with Grade 'A' by NAAC</span>
+        </div>
+      </div>
+      <!-- RIGHT: Recognitions & Affiliations -->
+      <div class="csac-branding-right">
+        <div class="csac-recog-wrapper">
+          <span class="csac-recog-label">Recognitions &amp; Affiliations</span>
+          <div class="csac-recog-logos">
+            <img alt="Accredited Grade A by NAAC" class="csac-recog-logo-img" title="Accredited Grade 'A' by NAAC" src="{% if site_settings %}{{ site_settings.get_logo2 }}{% else %}{% static 'assets/images/logo_naac_a.png' %}{% endif %}"/>
+            <img alt="Viksit Bharat Abhiyan" class="csac-recog-logo-img" title="Viksit Bharat Abhiyan" src="{% if site_settings %}{{ site_settings.get_logo3 }}{% else %}{% static 'assets/images/logo_2.png' %}{% endif %}"/>
+            <img alt="Approved by AICTE" class="csac-recog-logo-img" title="Approved by AICTE" src="{% if site_settings %}{{ site_settings.get_logo4 }}{% else %}{% static 'assets/images/logo_3.png' %}{% endif %}"/>
+            <img alt="Affiliated to Shaheed Nandkumar Patel Vishwavidyalaya" class="csac-recog-logo-img" title="Shaheed Nandkumar Patel Vishwavidyalaya" src="{% if site_settings %}{{ site_settings.get_logo5 }}{% else %}{% static 'assets/images/logo_4.png' %}{% endif %}"/>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
-  <div class="content">
-    {% if site_settings %}
-    <p class="title-large" style="{% if site_settings.college_name_hi_font_family %}font-family: '{{ site_settings.college_name_hi_font_family|escapejs }}', sans-serif;{% endif %} {% if site_settings.college_name_hi_font_size %}font-size: {{ site_settings.college_name_hi_font_size }};{% endif %} {% if site_settings.college_name_hi_font_color %}color: {{ site_settings.college_name_hi_font_color }};{% endif %}">{{ site_settings.college_name_hi }}</p>
-    <p class="title-large" style="{% if site_settings.college_name_en_font_family %}font-family: '{{ site_settings.college_name_en_font_family|escapejs }}', sans-serif;{% endif %} {% if site_settings.college_name_en_font_size %}font-size: {{ site_settings.college_name_en_font_size }};{% endif %} {% if site_settings.college_name_en_font_color %}color: {{ site_settings.college_name_en_font_color }};{% endif %}">{{ site_settings.college_name_en|upper }}</p>
-    <p class="title-medium" style="{% if site_settings.address_line1_font_family %}font-family: '{{ site_settings.address_line1_font_family|escapejs }}', sans-serif;{% endif %} {% if site_settings.address_line1_font_size %}font-size: {{ site_settings.address_line1_font_size }};{% endif %} {% if site_settings.address_line1_font_color %}color: {{ site_settings.address_line1_font_color }};{% endif %}">{{ site_settings.address_line1 }}</p>
-    <p class="subheading" style="{% if site_settings.address_line2_font_family %}font-family: '{{ site_settings.address_line2_font_family|escapejs }}', sans-serif;{% endif %} {% if site_settings.address_line2_font_size %}font-size: {{ site_settings.address_line2_font_size }};{% endif %} {% if site_settings.address_line2_font_color %}color: {{ site_settings.address_line2_font_color }};{% endif %}">{{ site_settings.address_line2 }}</p>
-    <p class="subheading" style="font-weight:bold; {% if site_settings.tagline_font_family %}font-family: '{{ site_settings.tagline_font_family|escapejs }}', sans-serif;{% endif %} {% if site_settings.tagline_font_size %}font-size: {{ site_settings.tagline_font_size }};{% endif %} {% if site_settings.tagline_font_color %}color: {{ site_settings.tagline_font_color }};{% endif %}">{{ site_settings.tagline }}</p>
-    {% else %}
-    <p class="title-large">चैतन्य विज्ञान एवं कला महाविद्यालय, पामगढ़</p>
-    <p class="title-large">CHAITANYA SCIENCE AND ARTS COLLEGE</p>
-    <p class="title-medium">PAMGARH, JANJGIR-CHAMPA (C.G.), 495554</p>
-    <p class="subheading">Affiliated to Shaheed Nandkumar Patel Vishwavidyalaya, Raigarh, Chhattisgarh, India</p>
-    <p class="subheading" style="color:#E61013;font-weight:bold;">An Autonomous College, Approved by UGC &nbsp; Accredited with Grade "A" by NAAC</p>
-    {% endif %}
-  </div>
-  <div class="logos-right">
-    <img alt="NAAC A" src="{% if site_settings %}{{ site_settings.get_logo2 }}{% else %}{% static 'assets/images/logo_naac_a.png' %}{% endif %}"/>
-    <img alt="Logo 1" src="{% if site_settings %}{{ site_settings.get_logo3 }}{% else %}{% static 'assets/images/logo_2.png' %}{% endif %}"/>
-    <img alt="Logo 2" src="{% if site_settings %}{{ site_settings.get_logo4 }}{% else %}{% static 'assets/images/logo_3.png' %}{% endif %}"/>
-    <img alt="Logo 3" src="{% if site_settings %}{{ site_settings.get_logo5 }}{% else %}{% static 'assets/images/logo_4.png' %}{% endif %}"/>
+  <!-- Mobile Recognition Strip (<1200px) -->
+  <div class="csac-mobile-recog-strip">
+    <img alt="Accredited Grade A by NAAC" title="Accredited Grade 'A' by NAAC" src="{% if site_settings %}{{ site_settings.get_logo2 }}{% else %}{% static 'assets/images/logo_naac_a.png' %}{% endif %}"/>
+    <img alt="Viksit Bharat Abhiyan" title="Viksit Bharat Abhiyan" src="{% if site_settings %}{{ site_settings.get_logo3 }}{% else %}{% static 'assets/images/logo_2.png' %}{% endif %}"/>
+    <img alt="Approved by AICTE" title="Approved by AICTE" src="{% if site_settings %}{{ site_settings.get_logo4 }}{% else %}{% static 'assets/images/logo_3.png' %}{% endif %}"/>
+    <img alt="Shaheed Nandkumar Patel Vishwavidyalaya" title="Affiliated to Shaheed Nandkumar Patel Vishwavidyalaya" src="{% if site_settings %}{{ site_settings.get_logo5 }}{% else %}{% static 'assets/images/logo_4.png' %}{% endif %}"/>
   </div>
 </div>
 {% endif %}
 
-<!-- Main Navigation -->
-<header class="header v__5 header__sticky" style="background-color:#E61013;color:white">
+<!-- ==========================================================================
+     SECTION 3: PRIMARY NAVIGATION
+     ========================================================================== -->
+<header class="header v__5 header__sticky" style="background-color:#082B49;color:white">
   <div class="container-fluid" style="justify-content:center;">
     <div class="row">
       <div class="col-xl-12">
@@ -312,27 +377,32 @@ mark{background-color:rgb(243,64,64);padding:2px 4px;border-radius:3px;font-weig
   </div>
 </header>
 
-<!-- Marquee Notices -->
+<!-- ==========================================================================
+     SECTION 4: NEWS / EVENT TICKER
+     ========================================================================== -->
 {% if marquee_notices %}
-<div class="marquee">
-  <div class="single__marque__item" style="height:30px;background-color:black;">
-    <ul class="single__marque__item__list">
+<div class="csac-ticker-bar">
+  <div class="csac-ticker-label">
+    <i class="fa-solid fa-bullhorn"></i> LATEST NOTICES
+  </div>
+  <div class="csac-ticker-track-wrapper">
+    <ul class="csac-ticker-track">
       {% for notice in marquee_notices %}
-      <li class="single__marque__item__list__text" style="font-family:Roboto Slab,serif;font-size:18px;color:white">
+      <li class="csac-ticker-item">
         {% if notice.flag %}
-        <span class="marquee-badge" style="background: linear-gradient(135deg, #e61013, #b71a34); color: white; padding: 2px 8px; margin-right: 4px; border-radius: 4px; font-size: 13px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 0 5px rgba(230,16,19,0.5); vertical-align: middle; display: inline-block;">{{ notice.flag }}</span>
+        <span class="csac-ticker-flag">{{ notice.flag }}</span>
         {% endif %}
-        {% if notice.link %}<a href="{{ notice.link }}" style="color:white;">{{ notice.text }}</a>{% else %}{{ notice.text }}{% endif %}
+        {% if notice.link %}<a href="{{ notice.link }}">{{ notice.text }}</a>{% else %}<span>{{ notice.text }}</span>{% endif %}
       </li>
       {% endfor %}
     </ul>
-    <ul class="single__marque__item__list" style="height:30px;background-color:black;">
+    <ul class="csac-ticker-track" aria-hidden="true">
       {% for notice in marquee_notices %}
-      <li class="single__marque__item__list__text" style="font-family:Roboto Slab,serif;font-size:18px;color:white">
+      <li class="csac-ticker-item">
         {% if notice.flag %}
-        <span class="marquee-badge" style="background: linear-gradient(135deg, #e61013, #b71a34); color: white; padding: 2px 8px; margin-right: 4px; border-radius: 4px; font-size: 13px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 0 5px rgba(230,16,19,0.5); vertical-align: middle; display: inline-block;">{{ notice.flag }}</span>
+        <span class="csac-ticker-flag">{{ notice.flag }}</span>
         {% endif %}
-        {% if notice.link %}<a href="{{ notice.link }}" style="color:white;">{{ notice.text }}</a>{% else %}{{ notice.text }}{% endif %}
+        {% if notice.link %}<a href="{{ notice.link }}">{{ notice.text }}</a>{% else %}<span>{{ notice.text }}</span>{% endif %}
       </li>
       {% endfor %}
     </ul>
@@ -460,8 +530,21 @@ mark{background-color:rgb(243,64,64);padding:2px 4px;border-radius:3px;font-weig
 <!-- Mobile Side Menu -->
 <div class="side-bar" id="side-bar">
   <button class="close-icon-menu"><i class="far fa-times"></i></button>
+  <div class="csac-drawer-header">
+    <img src="{% if site_settings %}{{ site_settings.get_college_logo }}{% else %}{% static 'assets/csac_pmg.svg' %}{% endif %}" alt="Chaitanya Science & Arts College" class="img-fluid" style="max-height: 55px;"/>
+    <h4>Chaitanya Science &amp; Arts College</h4>
+    <p style="color: #94a3b8; font-size: 11px; margin: 4px 0 0 0;">Pamgarh, Janjgir-Champa (C.G.) – 495554</p>
+  </div>
+  <div class="csac-drawer-portals">
+    <a href="https://chaitanyapamgarh.onlineexamforms.com/student.aspx" target="_blank" rel="noopener noreferrer" class="csac-util-pill csac-pill-maroon">
+      <i class="fa-solid fa-graduation-cap me-1"></i> Student Portal Login
+    </a>
+    <a href="{% url 'admin:index' %}" target="_blank" rel="noopener noreferrer" class="csac-util-pill" style="background: #082B49; border-color: #082B49;">
+      <i class="fa-solid fa-chalkboard-user me-1"></i> Faculty Login
+    </a>
+  </div>
   <div class="mobile-menu-main">
-    <nav class="nav-main mainmenu-nav mt--30">
+    <nav class="nav-main mainmenu-nav mt--10">
       <ul class="mainmenu metismenu" id="mobile-menu-active">
         {% for menu in navbar_menu %}
         <li class="{% if menu.children.all %}has-droupdown{% endif %}">

@@ -1,0 +1,610 @@
+/* ==========================================================================
+   CHAITANYA SCIENCE AND ARTS COLLEGE - HEADER REDESIGN STYLESHEET
+   Design System:
+     Primary Maroon: #9B1020
+     Dark Navy:      #082B49
+     Dark Navy Deep: #051D32
+     Accent Gold:    #C9A227
+     Light BG:       #F8F9FA
+     White:          #FFFFFF
+   ========================================================================== */
+
+:root {
+  --csac-maroon: #9B1020;
+  --csac-maroon-dark: #7A0C19;
+  --csac-maroon-light: #B81427;
+  --csac-navy: #082B49;
+  --csac-navy-dark: #051D32;
+  --csac-navy-light: #0D3B63;
+  --csac-gold: #C9A227;
+  --csac-gold-light: #DFB738;
+  --csac-white: #FFFFFF;
+  --csac-bg-light: #F8F9FA;
+  --csac-border-light: #E5E7EB;
+  --csac-text-dark: #1F2937;
+  --csac-text-muted: #4B5563;
+}
+
+/* Prevent horizontal overflow */
+html, body {
+  overflow-x: hidden !important;
+}
+
+/* --------------------------------------------------------------------------
+   SECTION 1: TOP UTILITY BAR (40-45px)
+   -------------------------------------------------------------------------- */
+.csac-top-utility {
+  background-color: var(--csac-navy);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 12.5px;
+  color: #E2E8F0;
+  position: relative;
+  z-index: 100;
+}
+
+.csac-top-utility .container-fluid {
+  padding: 0 24px;
+}
+
+.csac-util-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.csac-util-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.csac-util-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #E2E8F0;
+  white-space: nowrap;
+}
+
+.csac-util-item i {
+  color: var(--csac-gold);
+  font-size: 13px;
+}
+
+.csac-util-link {
+  color: #E2E8F0 !important;
+  text-decoration: none !important;
+  transition: color 0.2s ease;
+}
+
+.csac-util-link:hover {
+  color: var(--csac-gold) !important;
+}
+
+.csac-util-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.csac-portal-pills {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.csac-util-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 11px;
+  border-radius: 4px;
+  font-size: 11.5px;
+  font-weight: 600;
+  text-decoration: none !important;
+  transition: all 0.2s ease;
+  line-height: 1.35;
+  white-space: nowrap;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #FFFFFF !important;
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.csac-util-pill:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.45);
+  color: #FFFFFF !important;
+  transform: translateY(-1px);
+}
+
+.csac-util-pill.csac-pill-maroon {
+  background-color: var(--csac-maroon);
+  border-color: var(--csac-maroon);
+  color: #FFFFFF !important;
+}
+
+.csac-util-pill.csac-pill-maroon:hover {
+  background-color: var(--csac-maroon-light);
+  border-color: var(--csac-maroon-light);
+  box-shadow: 0 2px 6px rgba(155, 16, 32, 0.4);
+}
+
+.csac-util-social {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-left: 10px;
+  border-left: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.csac-social-btn {
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  color: #FFFFFF !important;
+  font-size: 12px;
+  text-decoration: none !important;
+  transition: all 0.25s ease;
+}
+
+.csac-social-btn:hover {
+  background-color: var(--csac-maroon);
+  color: #FFFFFF !important;
+  transform: translateY(-1px);
+}
+
+.csac-social-btn.facebook:hover {
+  background-color: #1877F2;
+}
+
+.csac-social-btn.youtube:hover {
+  background-color: #FF0000;
+}
+
+.csac-social-btn.instagram:hover {
+  background: linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+}
+
+/* --------------------------------------------------------------------------
+   SECTION 2: MAIN COLLEGE BRANDING (155-175px)
+   -------------------------------------------------------------------------- */
+.csac-main-header {
+  background-color: var(--csac-white);
+  border-bottom: 1px solid #ECEFF1;
+  padding: 12px 0;
+  position: relative;
+}
+
+.csac-main-header .container-fluid {
+  padding: 0 24px;
+}
+
+.csac-branding-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+/* LEFT: Official College Crest */
+.csac-branding-left {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.csac-college-logo {
+  height: auto;
+  max-height: 120px;
+  width: auto;
+  max-width: 175px;
+  object-fit: contain;
+  display: block;
+  transition: transform 0.2s ease;
+}
+
+.csac-college-logo:hover {
+  transform: scale(1.02);
+}
+
+/* CENTER: Institutional Typography */
+.csac-branding-center {
+  flex-grow: 1;
+  text-align: center;
+  padding: 0 12px;
+}
+
+.csac-title-hindi {
+  margin: 0 0 2px 0;
+  font-family: 'Noto Serif Devanagari', 'Noto Sans Devanagari', 'Roboto Slab', serif;
+  font-size: clamp(17px, 1.7vw, 23px);
+  font-weight: 700;
+  color: var(--csac-maroon);
+  line-height: 1.25;
+  letter-spacing: 0.2px;
+}
+
+.csac-title-english {
+  margin: 0 0 3px 0;
+  font-family: 'Merriweather', Georgia, serif;
+  font-size: clamp(18px, 1.95vw, 26px);
+  font-weight: 900;
+  color: var(--csac-maroon);
+  line-height: 1.2;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.csac-location-tag {
+  margin: 0 0 4px 0;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: clamp(11.5px, 0.95vw, 13px);
+  font-weight: 700;
+  color: var(--csac-navy);
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+}
+
+.csac-affiliation-line {
+  margin: 0 0 4px 0;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: clamp(11px, 0.9vw, 12px);
+  font-weight: 500;
+  color: var(--csac-navy);
+  line-height: 1.35;
+}
+
+.csac-autonomous-badge-line {
+  margin: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: clamp(10.5px, 0.85vw, 11.5px);
+  font-weight: 600;
+  color: var(--csac-navy-dark);
+  line-height: 1.4;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.csac-sep-dot {
+  color: var(--csac-gold);
+  font-weight: bold;
+}
+
+.csac-badge-highlight {
+  color: var(--csac-maroon);
+  font-weight: 700;
+}
+
+/* RIGHT: Recognitions & Affiliations */
+.csac-branding-right {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.csac-recog-wrapper {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  padding: 10px 16px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.csac-recog-label {
+  display: block;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: #64748B;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #E2E8F0;
+  padding-bottom: 5px;
+}
+
+.csac-recog-logos {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.csac-recog-logo-img {
+  height: 78px;
+  width: auto;
+  max-width: 95px;
+  object-fit: contain;
+  display: block;
+  transition: all 0.25s ease;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.08));
+}
+
+.csac-recog-logo-img:hover {
+  transform: translateY(-3px) scale(1.06);
+}
+
+/* --------------------------------------------------------------------------
+   SECTION 4: NEWS / EVENT TICKER (38-42px)
+   -------------------------------------------------------------------------- */
+.csac-ticker-bar {
+  background-color: var(--csac-navy-dark);
+  min-height: 40px;
+  display: flex;
+  align-items: stretch;
+  overflow: hidden;
+  position: relative;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  z-index: 90;
+}
+
+.csac-ticker-label {
+  background: var(--csac-maroon);
+  color: #FFFFFF;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 18px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.25);
+}
+
+.csac-ticker-label i {
+  color: var(--csac-gold);
+  font-size: 12px;
+}
+
+.csac-ticker-track-wrapper {
+  flex-grow: 1;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.csac-ticker-track {
+  display: flex;
+  white-space: nowrap;
+  align-items: center;
+  animation: csacTickerAnim 40s linear infinite;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.csac-ticker-track:hover {
+  animation-play-state: paused;
+}
+
+.csac-ticker-item {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 45px;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #F1F5F9;
+}
+
+.csac-ticker-item a {
+  color: #FFFFFF !important;
+  text-decoration: none !important;
+  transition: color 0.2s ease;
+}
+
+.csac-ticker-item a:hover {
+  color: var(--csac-gold) !important;
+  text-decoration: underline !important;
+}
+
+.csac-ticker-flag {
+  background: linear-gradient(135deg, var(--csac-maroon), #b71a34);
+  color: #FFFFFF;
+  padding: 2px 7px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-right: 6px;
+  box-shadow: 0 1px 4px rgba(155, 16, 32, 0.4);
+  vertical-align: middle;
+}
+
+@keyframes csacTickerAnim {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   SECTION 5: RESPONSIVE BEHAVIOR
+   -------------------------------------------------------------------------- */
+
+.csac-mobile-recog-strip {
+  display: none;
+}
+
+/* Medium & Small Laptops / Tablets (1200px and down) */
+@media (max-width: 1200px) {
+  .csac-branding-right {
+    display: none;
+  }
+  .csac-mobile-recog-strip {
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    padding: 8px 12px;
+    background: #F8FAFC;
+    border-top: 1px solid #ECEFF1;
+    border-bottom: 1px solid #ECEFF1;
+    gap: 16px;
+    overflow-x: auto;
+  }
+  .csac-mobile-recog-strip img {
+    height: 48px;
+    width: auto;
+    object-fit: contain;
+  }
+  .csac-top-utility .container-fluid {
+    padding: 0 14px;
+  }
+  .csac-branding-row {
+    padding: 4px 0;
+  }
+  .csac-college-logo {
+    max-height: 85px;
+  }
+}
+
+/* Mobile Devices (<= 768px) */
+@media (max-width: 768px) {
+  .csac-top-utility {
+    min-height: 36px;
+    font-size: 11px;
+  }
+  .csac-util-item.csac-hide-mobile {
+    display: none !important;
+  }
+  .csac-util-pill {
+    padding: 3px 7px;
+    font-size: 10.5px;
+  }
+  .csac-branding-row {
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+    gap: 8px;
+  }
+  .csac-branding-left {
+    justify-content: center;
+    width: 100%;
+  }
+  .csac-college-logo {
+    max-height: 68px;
+    margin: 0 auto;
+  }
+  .csac-branding-center {
+    width: 100%;
+    padding: 0;
+  }
+  .csac-title-hindi {
+    font-size: 15.5px;
+  }
+  .csac-title-english {
+    font-size: 15.5px;
+    letter-spacing: 0.3px;
+  }
+  .csac-location-tag {
+    font-size: 11px;
+  }
+  .csac-affiliation-line {
+    font-size: 10.5px;
+  }
+  .csac-autonomous-badge-line {
+    font-size: 10px;
+    gap: 4px;
+  }
+  .csac-ticker-label {
+    padding: 0 10px;
+    font-size: 10px;
+  }
+  .csac-ticker-item {
+    font-size: 12px;
+    margin-right: 30px;
+  }
+}
+
+/* Extra Small (<= 480px) */
+@media (max-width: 480px) {
+  .csac-college-logo {
+    max-height: 56px;
+  }
+  .csac-title-hindi {
+    font-size: 14px;
+  }
+  .csac-title-english {
+    font-size: 14px;
+  }
+  .csac-autonomous-badge-line span {
+    font-size: 9.5px;
+  }
+  .csac-mobile-recog-strip img {
+    height: 40px;
+    gap: 10px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   OFF-CANVAS MOBILE DRAWER STYLING
+   -------------------------------------------------------------------------- */
+.side-bar {
+  background-color: #FFFFFF !important;
+  z-index: 10000 !important;
+}
+
+.csac-drawer-header {
+  background-color: var(--csac-navy);
+  padding: 20px 16px;
+  text-align: center;
+  border-bottom: 3px solid var(--csac-maroon);
+}
+
+.csac-drawer-header img {
+  max-height: 60px;
+  margin-bottom: 8px;
+}
+
+.csac-drawer-header h4 {
+  color: #FFFFFF;
+  font-family: 'Merriweather', serif;
+  font-size: 13.5px;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.csac-drawer-portals {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background-color: #F8FAFC;
+  border-bottom: 1px solid #E2E8F0;
+}
+
+.csac-drawer-portals .csac-util-pill {
+  justify-content: center;
+  padding: 8px 12px;
+  font-size: 12.5px;
+}

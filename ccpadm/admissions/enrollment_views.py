@@ -5,6 +5,7 @@ from django.db import models
 from django.contrib import messages
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods
 
@@ -77,23 +78,25 @@ def enrollment_form(request):
     if request.method == 'POST':
         action = request.POST.get('action', 'submit')
 
+        admission = StudentAdmission.objects.filter(reg_no=reg_no).order_by('-submitted_date', '-created_date').first()
+
         # Collect personal and contact data
-        full_name = request.POST.get('full_name', '').strip() or student.full_name
-        father_name = request.POST.get('father_name', '').strip()
-        mother_name = request.POST.get('mother_name', '').strip()
-        gender = request.POST.get('gender', '').strip()
-        dob_str = request.POST.get('dob', '').strip()
+        full_name = request.POST.get('full_name', '').strip() or student.full_name or (admission.full_name if admission else '') or ''
+        father_name = request.POST.get('father_name', '').strip() or (admission.father_name if admission else '') or ''
+        mother_name = request.POST.get('mother_name', '').strip() or (admission.mother_name if admission else '') or ''
+        gender = request.POST.get('gender', '').strip() or (admission.gender if admission else '') or ''
+        dob_str = request.POST.get('dob', '').strip() or (str(admission.dob) if admission and admission.dob else '')
         dob = dob_str if dob_str else None
-        category = request.POST.get('category', '').strip()
+        category = request.POST.get('category', '').strip() or (admission.category if admission else '') or ''
         nationality = request.POST.get('nationality', 'Indian').strip() or 'Indian'
-        religion = request.POST.get('religion', '').strip()
-        marital_status = request.POST.get('marital_status', '').strip()
-        blood_group = request.POST.get('blood_group', '').strip()
-        mobile = request.POST.get('mobile', '').strip() or student.mobile
-        email = request.POST.get('email', '').strip() or student.email
-        aadhaar = request.POST.get('aadhaar', '').strip() or student.aadhaar
-        apaar_id = request.POST.get('apaar_id', '').strip()
-        medium = request.POST.get('medium', '').strip()
+        religion = request.POST.get('religion', '').strip() or (admission.religion if admission else '') or ''
+        marital_status = request.POST.get('marital_status', '').strip() or (admission.marital_status if admission else '') or ''
+        blood_group = request.POST.get('blood_group', '').strip() or (admission.blood_group if admission else '') or ''
+        mobile = request.POST.get('mobile', '').strip() or student.mobile or (admission.mobile if admission else '') or ''
+        email = request.POST.get('email', '').strip() or student.email or (admission.email if admission else '') or ''
+        aadhaar = request.POST.get('aadhaar', '').strip() or student.aadhaar or (admission.aadhaar if admission else '') or ''
+        apaar_id = request.POST.get('apaar_id', '').strip() or (admission.apaar_id if admission else '') or ''
+        medium = request.POST.get('medium', '').strip() or (admission.medium if admission else '') or ''
 
         has_disability = request.POST.get('has_disability') in ('1', 'true', 'True', True)
         disability_details = request.POST.get('disability_details', '').strip()
@@ -173,7 +176,9 @@ def enrollment_form(request):
         bsc_subject_group = request.POST.get('bsc_subject_group', '').strip()
         selected_courses_json = request.POST.get('selected_courses_json', '').strip() or None
 
-        if not selected_courses_json and admission and admission.selected_subjects_json:
+        if not selected_courses_json and existing_enrollment and existing_enrollment.selected_courses_json:
+            selected_courses_json = existing_enrollment.selected_courses_json
+        elif not selected_courses_json and admission and admission.selected_subjects_json:
             selected_courses_json = admission.selected_subjects_json
 
         if not bsc_subject_group and selected_courses_json:
@@ -274,7 +279,15 @@ def enrollment_form(request):
         if payment_receipt_base64:
             enrollment.payment_receipt_base64 = payment_receipt_base64
 
-        if action == 'submit':
+        if action == 'save_payment':
+            if not enrollment.transaction_id:
+                messages.error(request, 'Please complete the ₹500 fee payment and enter your Transaction ID / UTR Number.')
+                return redirect('enrollment_form')
+            enrollment.status = 'Draft'
+            enrollment.save()
+            messages.success(request, 'Payment details submitted successfully! Section 3 and Course selection are now unlocked.')
+            return redirect(reverse('enrollment_form') + '?step=section3')
+        elif action == 'submit':
             if not enrollment.transaction_id:
                 messages.error(request, 'Please complete the ₹500 fee payment and enter your Transaction ID / UTR Number before submitting.')
                 return redirect('enrollment_form')
@@ -410,11 +423,16 @@ def enrollment_form(request):
         if programs_by_level.get(level)
     ]
 
+    is_payment_done = bool(existing_enrollment and existing_enrollment.transaction_id)
+    active_step = request.GET.get('step', '')
+
     ctx = {
         'student': student,
         'admission': admission,
         'existing_enrollment': existing_enrollment,
         'initial_data': initial_data,
+        'is_payment_done': is_payment_done,
+        'active_step': active_step,
         'show_ug_qualification': show_ug_qualification,
         'program_types': program_types,
         'selected_program_type': selected_program_type,

@@ -155,14 +155,30 @@ class EnrollmentViewsTestCase(TestCase):
         session['reg_no'] = self.student.registration_no
         session.save()
 
-        response = self.client.get(reverse('enrollment_form'))
-        self.assertEqual(response.status_code, 200)
-        self.assertFalse(response.context['show_ug_qualification'])
-        content = response.content.decode('utf-8')
-        self.assertNotIn('Undergraduate / Graduation Qualification', content)
-        self.assertIn('Fixed as applied in Admission', content)
-        self.assertIn('id="ddlProgramLevel" class="modern-select" disabled', content)
-        self.assertIn('id="ddlProgramType" class="modern-select" disabled', content)
+        # Before payment, section 3 & course selection are locked
+        response_before = self.client.get(reverse('enrollment_form'))
+        self.assertEqual(response_before.status_code, 200)
+        self.assertFalse(response_before.context['is_payment_done'])
+        content_before = response_before.content.decode('utf-8')
+        self.assertIn('अभी लॉक हैं', content_before)
+
+        # After payment, section 3 & course selection are unlocked
+        StudentEnrollment.objects.create(
+            reg_no=self.student.registration_no,
+            student=self.student,
+            transaction_id='TXN_PAID_123',
+            fee_amount='500',
+            status='Draft',
+        )
+        response_after = self.client.get(reverse('enrollment_form'))
+        self.assertEqual(response_after.status_code, 200)
+        self.assertTrue(response_after.context['is_payment_done'])
+        self.assertFalse(response_after.context['show_ug_qualification'])
+        content_after = response_after.content.decode('utf-8')
+        self.assertNotIn('Undergraduate / Graduation Qualification', content_after)
+        self.assertIn('Fixed as applied in Admission', content_after)
+        self.assertIn('id="ddlProgramLevel" class="modern-select" disabled', content_after)
+        self.assertIn('id="ddlProgramType" class="modern-select" disabled', content_after)
 
     def test_pg_student_shows_ug_qualification_and_saves_it(self):
         pg_student = Student.objects.create(
@@ -438,6 +454,7 @@ class CancelEnrollmentTestCase(TestCase):
     def test_enrollment_form_renders_course_code_column(self):
         self.enrollment.is_submitted = False
         self.enrollment.status = 'Draft'
+        self.enrollment.transaction_id = 'TXN_COURSE_CODE_123'
         self.enrollment.save()
 
         self._login_student()
@@ -445,6 +462,38 @@ class CancelEnrollmentTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         content = response.content.decode('utf-8')
         self.assertIn('Course Code', content)
+
+    def test_progressive_payment_unlocks_section3_and_courses(self):
+        """Verifies section 3 and further sections are locked until payment is submitted."""
+        self.enrollment.delete()  # Start with no enrollment
+        self._login_student()
+
+        # Step 1: GET enrollment_form before payment
+        res1 = self.client.get(reverse('enrollment_form'))
+        self.assertEqual(res1.status_code, 200)
+        self.assertFalse(res1.context['is_payment_done'])
+        self.assertIn('अभी लॉक हैं', res1.content.decode('utf-8'))
+        self.assertNotIn('id="section3Card"', res1.content.decode('utf-8'))
+
+        # Step 2: POST save_payment with UTR and checkbox
+        res2 = self.client.post(reverse('enrollment_form'), {
+            'action': 'save_payment',
+            'transaction_id': 'UTR998877665544',
+            'fee_amount': '500',
+            'info_correctness': 'on',
+        })
+        self.assertEqual(res2.status_code, 302)
+        self.assertIn('step=section3', res2.url)
+
+        # Step 3: GET enrollment_form after payment
+        res3 = self.client.get(reverse('enrollment_form'))
+        self.assertEqual(res3.status_code, 200)
+        self.assertTrue(res3.context['is_payment_done'])
+        content3 = res3.content.decode('utf-8')
+        self.assertIn('id="section3Card"', content3)
+        self.assertIn('Section E: Enrolled Program', content3)
+        self.assertIn('UTR: <strong style="font-family: monospace; color: #082B49;">UTR998877665544</strong>', content3)
+
 
 
 

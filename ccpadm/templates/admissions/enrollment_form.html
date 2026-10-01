@@ -287,97 +287,144 @@
                         <div>
                             <i class="fas fa-money-bill-wave text-success"></i> Section 2: University Enrollment Fee &amp; UPI Payment
                         </div>
+                        {% if is_payment_done %}
+                        <span class="badge bg-success" style="font-size: 11.5px; font-weight: 700;">
+                            <i class="fas fa-check-circle me-1"></i> Payment Details Submitted
+                        </span>
+                        {% else %}
                         <span class="badge bg-warning text-dark" style="font-size: 11.5px; font-weight: 700;">
                             <i class="fas fa-qrcode me-1"></i> Scan &amp; Pay via UPI
                         </span>
+                        {% endif %}
                     </div>
 
                     <input type="hidden" name="fee_amount" value="500">
 
-                    <div class="row g-3 align-items-stretch mb-3">
-                        <!-- Fee Details Column -->
-                        <div class="col-md-7">
-                            <div style="background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 8px; padding: 18px 20px; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
-                                <div>
-                                    <div class="d-flex align-items-center justify-content-between mb-2">
-                                        <span style="font-size: 12px; font-weight: 700; color: #166534; text-transform: uppercase; letter-spacing: 0.5px;">Fee Description</span>
-                                        <span class="badge bg-success" style="font-size: 11px;">Mandatory</span>
-                                    </div>
-                                    <h3 style="color: #065f46; font-size: 1.6rem; font-weight: 800; margin-bottom: 4px;">
-                                        ₹ 500 <span style="font-size: 13px; font-weight: 500; color: #15803d;">(Five Hundred Rupees Only)</span>
-                                    </h3>
-                                    <p style="font-size: 13px; color: #166534; margin-bottom: 12px; line-height: 1.4;">
-                                        Official University Enrollment &amp; Registration Fee for <strong>Academic Session 2026-27</strong>.
-                                    </p>
-                                    <div style="font-size: 12px; color: #1e293b; background: #ffffff; border: 1px solid #bbf7d0; border-radius: 6px; padding: 10px 12px; margin-bottom: 14px;">
-                                        <div><strong>Merchant:</strong> PRINCIPAL CHAITANYA SCIENCE AND ARTS COLLEGE AN AUTONOMOUS COLLEGE PAMGARH</div>
-                                        <div class="mt-1 d-flex align-items-center justify-content-between flex-wrap gap-1">
-                                            <span><strong>UPI ID:</strong> <code style="font-size: 13px; color: #082B49; font-weight: bold;">9827194555m@pnb</code></span>
-                                            <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size: 11px;" id="copyUpiBtn" onclick="copyUpiId()">
-                                                <i class="fas fa-copy"></i> Copy UPI
-                                            </button>
+                    {% if is_payment_done %}
+                    <!-- Verified Payment Summary Banner -->
+                    <div class="p-3 mb-3 border border-success rounded d-flex align-items-center justify-content-between flex-wrap gap-2" style="background: #f0fdf4 !important;">
+                        <div>
+                            <span class="badge bg-success me-2" style="font-size: 12px;"><i class="fas fa-check-circle"></i> चरण 1 व 2 पूर्ण (Payment Verified)</span>
+                            <strong style="color: #166534; font-size: 13.5px;">शुल्क: ₹500 प्राप्त (Paid Online)</strong>
+                            <span class="text-muted ms-2" style="font-size: 12.5px;">| UTR: <strong style="font-family: monospace; color: #082B49;">{{ initial_data.transaction_id }}</strong></span>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-secondary py-1" onclick="togglePaymentEdit()" id="btnTogglePaymentEdit">
+                            <i class="fas fa-edit me-1"></i> भुगतान विवरण देखें / बदलें
+                        </button>
+                    </div>
+                    {% endif %}
+
+                    <!-- Payment Inputs Container -->
+                    <div id="paymentInputsArea" style="{% if is_payment_done %}display: none;{% endif %}">
+                        <div class="row g-3 align-items-stretch mb-3">
+                            <!-- Fee Details Column -->
+                            <div class="col-md-7">
+                                <div style="background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 8px; padding: 18px 20px; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
+                                    <div>
+                                        <div class="d-flex align-items-center justify-content-between mb-2">
+                                            <span style="font-size: 12px; font-weight: 700; color: #166534; text-transform: uppercase; letter-spacing: 0.5px;">Fee Description</span>
+                                            <span class="badge bg-success" style="font-size: 11px;">Mandatory</span>
+                                        </div>
+                                        <h3 style="color: #065f46; font-size: 1.6rem; font-weight: 800; margin-bottom: 4px;">
+                                            ₹ 500 <span style="font-size: 13px; font-weight: 500; color: #15803d;">(Five Hundred Rupees Only)</span>
+                                        </h3>
+                                        <p style="font-size: 13px; color: #166534; margin-bottom: 12px; line-height: 1.4;">
+                                            Official University Enrollment &amp; Registration Fee for <strong>Academic Session 2026-27</strong>.
+                                        </p>
+                                        <div style="font-size: 12px; color: #1e293b; background: #ffffff; border: 1px solid #bbf7d0; border-radius: 6px; padding: 10px 12px; margin-bottom: 14px;">
+                                            <div><strong>Merchant:</strong> PRINCIPAL CHAITANYA SCIENCE AND ARTS COLLEGE AN AUTONOMOUS COLLEGE PAMGARH</div>
+                                            <div class="mt-1 d-flex align-items-center justify-content-between flex-wrap gap-1">
+                                                <span><strong>UPI ID:</strong> <code style="font-size: 13px; color: #082B49; font-weight: bold;">9827194555m@pnb</code></span>
+                                                <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size: 11px;" id="copyUpiBtn" onclick="copyUpiId()">
+                                                    <i class="fas fa-copy"></i> Copy UPI
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                <!-- Big Pay Action Button -->
-                                <div>
-                                    <button type="button" class="btn btn-primary w-100 py-2" onclick="openQrModal()" style="background: #082B49; border-color: #082B49; font-size: 14.5px; font-weight: 700; border-radius: 6px; box-shadow: 0 4px 6px rgba(8,43,73,0.2);">
-                                        <i class="fas fa-qrcode me-2 text-warning fs-5"></i> Click to Pay ₹500 (Open PNB QR Code)
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Quick Scan Thumbnail Column -->
-                        <div class="col-md-5">
-                            <div style="background: #ffffff; border: 1.5px dashed #cbd5e1; border-radius: 8px; padding: 14px; text-align: center; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer;" onclick="openQrModal()" title="Click to view full size QR code">
-                                <img src="{% static 'images/pnb_enrollment_qr.jpg' %}" alt="PNB QR Code Preview" style="max-height: 140px; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-                                <div style="margin-top: 8px; font-size: 12px; font-weight: 700; color: #082B49;">
-                                    <i class="fas fa-search-plus me-1 text-primary"></i> Click to View Full QR Code
-                                </div>
-                                <div style="font-size: 11px; color: #64748b; margin-top: 2px;">
-                                    Pay via PhonePe, GPay, Paytm, BHIM, etc.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Payment Verification Fields -->
-                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px 20px;">
-                        <h4 style="font-size: 14px; font-weight: 700; color: #082B49; margin-bottom: 12px;">
-                            <i class="fas fa-receipt text-primary me-1"></i> Payment Verification &amp; Receipt Upload (भुगतान विवरण दर्ज करें)
-                        </h4>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label" style="font-weight: 700; font-size: 13px; color: #1e293b;">
-                                    Transaction ID / UTR Number * <span class="text-danger">(Required)</span>
-                                </label>
-                                <input type="text" name="transaction_id" id="transactionIdInput" class="form-control" value="{{ initial_data.transaction_id|default:'' }}" placeholder="e.g. 4278XXXXXXXX (12-digit UTR/Ref No.)" style="font-family: monospace; font-size: 14px; font-weight: 600;" required>
-                                <div class="form-text" style="font-size: 11.5px; color: #64748b;">
-                                    Enter the 12-digit UTR or Reference ID received after paying ₹500 in your UPI app.
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label" style="font-weight: 700; font-size: 13px; color: #1e293b;">
-                                    Upload Payment Receipt Screenshot * <span class="text-danger">(Required)</span>
-                                </label>
-                                <input type="file" name="payment_receipt" id="paymentReceiptInput" class="form-control" accept="image/*,.pdf" data-has-existing="{% if initial_data.payment_receipt_url or initial_data.payment_receipt_base64 %}1{% else %}0{% endif %}" onchange="previewPaymentReceipt(this)">
-                                <input type="hidden" name="payment_receipt_base64" id="paymentReceiptBase64" value="{{ initial_data.payment_receipt_base64|default:'' }}">
-                                
-                                <div id="receiptPreviewContainer" style="margin-top: 10px; display: {% if initial_data.payment_receipt_url or initial_data.payment_receipt_base64 %}block{% else %}none{% endif %};">
-                                    <div style="font-size: 12px; font-weight: 700; color: #16a34a; margin-bottom: 4px;">
-                                        <i class="fas fa-check-circle"></i> <span id="receiptFileName">Payment Receipt Attached:</span>
+                                    <!-- Big Pay Action Button -->
+                                    <div>
+                                        <button type="button" class="btn btn-primary w-100 py-2" onclick="openQrModal()" style="background: #082B49; border-color: #082B49; font-size: 14.5px; font-weight: 700; border-radius: 6px; box-shadow: 0 4px 6px rgba(8,43,73,0.2);">
+                                            <i class="fas fa-qrcode me-2 text-warning fs-5"></i> Click to Pay ₹500 (Open PNB QR Code)
+                                        </button>
                                     </div>
-                                    <img id="receiptPreviewImg" src="{{ initial_data.payment_receipt_url|default:initial_data.payment_receipt_base64 }}" alt="Payment Receipt" style="max-height: 140px; max-width: 240px; border-radius: 6px; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.08); display: block;">
+                                </div>
+                            </div>
+
+                            <!-- Quick Scan Thumbnail Column -->
+                            <div class="col-md-5">
+                                <div style="background: #ffffff; border: 1.5px dashed #cbd5e1; border-radius: 8px; padding: 14px; text-align: center; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer;" onclick="openQrModal()" title="Click to view full size QR code">
+                                    <img src="{% static 'images/pnb_enrollment_qr.jpg' %}" alt="PNB QR Code Preview" style="max-height: 140px; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                                    <div style="margin-top: 8px; font-size: 12px; font-weight: 700; color: #082B49;">
+                                        <i class="fas fa-search-plus me-1 text-primary"></i> Click to View Full QR Code
+                                    </div>
+                                    <div style="font-size: 11px; color: #64748b; margin-top: 2px;">
+                                        Pay via PhonePe, GPay, Paytm, BHIM, etc.
+                                    </div>
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Payment Verification Fields -->
+                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px 20px;">
+                            <h4 style="font-size: 14px; font-weight: 700; color: #082B49; margin-bottom: 12px;">
+                                <i class="fas fa-receipt text-primary me-1"></i> Payment Verification &amp; Receipt Upload (भुगतान विवरण दर्ज करें)
+                            </h4>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label" style="font-weight: 700; font-size: 13px; color: #1e293b;">
+                                        Transaction ID / UTR Number * <span class="text-danger">(Required)</span>
+                                    </label>
+                                    <input type="text" name="transaction_id" id="transactionIdInput" class="form-control" value="{{ initial_data.transaction_id|default:'' }}" placeholder="e.g. 4278XXXXXXXX (12-digit UTR/Ref No.)" style="font-family: monospace; font-size: 14px; font-weight: 600;">
+                                    <div class="form-text" style="font-size: 11.5px; color: #64748b;">
+                                        Enter the 12-digit UTR or Reference ID received after paying ₹500 in your UPI app.
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label" style="font-weight: 700; font-size: 13px; color: #1e293b;">
+                                        Upload Payment Receipt Screenshot * <span class="text-danger">(Required)</span>
+                                    </label>
+                                    <input type="file" name="payment_receipt" id="paymentReceiptInput" class="form-control" accept="image/*,.pdf" data-has-existing="{% if initial_data.payment_receipt_url or initial_data.payment_receipt_base64 %}1{% else %}0{% endif %}" onchange="previewPaymentReceipt(this)">
+                                    <input type="hidden" name="payment_receipt_base64" id="paymentReceiptBase64" value="{{ initial_data.payment_receipt_base64|default:'' }}">
+                                    
+                                    <div id="receiptPreviewContainer" style="margin-top: 10px; display: {% if initial_data.payment_receipt_url or initial_data.payment_receipt_base64 %}block{% else %}none{% endif %};">
+                                        <div style="font-size: 12px; font-weight: 700; color: #16a34a; margin-bottom: 4px;">
+                                            <i class="fas fa-check-circle"></i> <span id="receiptFileName">Payment Receipt Attached:</span>
+                                        </div>
+                                        <img id="receiptPreviewImg" src="{{ initial_data.payment_receipt_url|default:initial_data.payment_receipt_base64 }}" alt="Payment Receipt" style="max-height: 140px; max-width: 240px; border-radius: 6px; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.08); display: block;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Information Correctness Declaration Checkbox -->
+                        <div class="mt-3 p-3 bg-white border rounded" style="border-left: 4px solid #082B49 !important;">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="infoCorrectnessCheck" name="info_correctness" {% if is_payment_done %}checked{% endif %} style="width: 19px; height: 19px; cursor: pointer;">
+                                <label class="form-check-label ms-2" for="infoCorrectnessCheck" style="font-size: 13.5px; font-weight: 600; color: #1e293b; cursor: pointer;">
+                                    मैं प्रमाणित करता/करती हूँ कि ऊपर प्रदर्शित मेरी समस्त व्यक्तिगत जानकारी एवं चयनित पाठ्यक्रम पूर्णतः सत्य व सही हैं।<br>
+                                    <span class="text-muted" style="font-size: 12px; font-weight: normal;">(I hereby declare and confirm that all information and details provided above are true, complete and verified by me.)</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        {% if not is_payment_done %}
+                        <!-- Step 1 Submission: Proceed to Section 3 Button -->
+                        <div class="mt-4 pt-2 text-center">
+                            <button type="submit" name="action" value="save_payment" class="btn btn-primary px-4 py-3" style="background: #082B49; border-color: #082B49; font-size: 15.5px; font-weight: 700; border-radius: 8px; box-shadow: 0 4px 10px rgba(8,43,73,0.25);" onclick="return validatePaymentStep(event)">
+                                <i class="fas fa-arrow-right me-2 text-warning"></i> भुगतान विवरण सबमिट करें एवं आगे बढ़ें (Submit Payment &amp; Proceed to Section 3)
+                            </button>
+                            <div class="text-muted mt-2" style="font-size: 12.5px;">
+                                <i class="fas fa-info-circle me-1 text-primary"></i> फीस भुगतान व UTR दर्ज कर सबमिट करने के बाद ही सेक्शन 3 (फोटो, हस्ताक्षर व विषय चयन) प्रदर्शित होगा।
+                            </div>
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
 
+                {% if is_payment_done %}
                 <!-- SECTION 3: APPLICANT PHOTO & SIGNATURE REVIEW -->
-                <div class="enroll-section-card">
+                <div class="enroll-section-card" id="section3Card">
                     <div class="enroll-section-title">
                         <i class="fas fa-camera"></i> Section 3: Student Photo &amp; Signature
                     </div>
@@ -497,6 +544,20 @@
                         <i class="fas fa-check-circle me-1"></i> Submit Enrollment Application
                     </button>
                 </div>
+                {% else %}
+                <!-- LOCKED NOTICE BEFORE PAYMENT -->
+                <div class="p-4 text-center border rounded bg-white mt-4" style="border-style: dashed !important; border-width: 2px !important; border-color: #cbd5e1 !important;">
+                    <div style="width: 52px; height: 52px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px;">
+                        <i class="fas fa-lock text-muted fs-4"></i>
+                    </div>
+                    <h5 style="color: #1e293b; font-weight: 700; margin-bottom: 6px;">
+                        सेक्शन 3 (फोटो एवं हस्ताक्षर) व आगे के सेक्शन अभी लॉक हैं
+                    </h5>
+                    <p style="color: #64748b; font-size: 13.5px; max-width: 600px; margin: 0 auto 8px; line-height: 1.5;">
+                        कृपया ऊपर दिए गए सेक्शन 2 में ₹500 का ऑनलाइन भुगतान कर अपना <strong>Transaction ID / UTR</strong> दर्ज करें, <strong>रसीद का स्क्रीनशॉट</strong> अपलोड करें तथा <strong>सत्यता घोषणा चेकबॉक्स</strong> को टिक करके <strong>"सबमिट करें एवं आगे बढ़ें"</strong> बटन दबाएँ। इसके बाद सेक्शन 3 से नामांकन फॉर्म खुल जाएगा।
+                    </p>
+                </div>
+                {% endif %}
             </form>
         </div>
     </div>
@@ -1463,6 +1524,63 @@ window.ENROLLMENT_CONFIG = {
         }
     };
 
+    window.validatePaymentStep = function (e) {
+        const txId = (document.getElementById('transactionIdInput')?.value || '').trim();
+        const receiptInput = document.getElementById('paymentReceiptInput');
+        const receiptBase64 = (document.getElementById('paymentReceiptBase64')?.value || '').trim();
+        const hasExistingReceipt = (receiptInput?.dataset.hasExisting === '1') || receiptBase64.length > 0;
+        const hasNewFile = receiptInput && receiptInput.files && receiptInput.files.length > 0;
+        const chkCorrectness = document.getElementById('infoCorrectnessCheck');
+
+        if (!txId) {
+            alert('कृपया ₹500 का भुगतान करें और अपना 12 अंकों का Transaction ID / UTR Number दर्ज करें। (Please enter your Transaction ID / UTR Number).');
+            e.preventDefault();
+            const txElem = document.getElementById('transactionIdInput');
+            if (txElem) {
+                txElem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                txElem.focus();
+            }
+            return false;
+        }
+
+        if (!hasExistingReceipt && !hasNewFile) {
+            alert('कृपया अपने भुगतान की रसीद या स्क्रीनशॉट अपलोड करें। (Please upload your payment receipt screenshot).');
+            e.preventDefault();
+            const rcptElem = document.getElementById('paymentReceiptInput');
+            if (rcptElem) {
+                rcptElem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                rcptElem.focus();
+            }
+            return false;
+        }
+
+        if (chkCorrectness && !chkCorrectness.checked) {
+            alert('कृपया जानकारी की सत्यता के चेकबॉक्स को टिक करें। (Please confirm that your information provided above is correct).');
+            e.preventDefault();
+            chkCorrectness.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            chkCorrectness.focus();
+            return false;
+        }
+
+        return true;
+    };
+
+    window.togglePaymentEdit = function () {
+        const area = document.getElementById('paymentInputsArea');
+        const btn = document.getElementById('btnTogglePaymentEdit');
+        if (area) {
+            if (area.style.display === 'none' || area.hidden) {
+                area.style.display = 'block';
+                area.hidden = false;
+                if (btn) btn.innerHTML = '<i class="fas fa-chevron-up me-1"></i> भुगतान विवरण छुपाएं (Hide)';
+            } else {
+                area.style.display = 'none';
+                area.hidden = true;
+                if (btn) btn.innerHTML = '<i class="fas fa-edit me-1"></i> भुगतान विवरण देखें / बदलें';
+            }
+        }
+    };
+
     window.confirmSubmit = function (e) {
         window.prepareSubmit();
         const action = e.submitter ? e.submitter.value : (e.target ? e.target.value : 'submit');
@@ -1578,13 +1696,24 @@ window.ENROLLMENT_CONFIG = {
         if (initialLevel && levelDdl) {
             levelDdl.value = initialLevel;
         }
-        populateProgramNames(initialLevel || levelDdl?.value, cfg.initialProgramType);
+        if (levelDdl) {
+            populateProgramNames(initialLevel || levelDdl?.value, cfg.initialProgramType);
+        }
         const activeProgram = nameDdl?.value || cfg.initialProgramType;
-        if (activeProgram) {
+        if (activeProgram && nameDdl) {
             updateBscGroupSectionVisibility(activeProgram);
             if (isBscProgram(activeProgram)) renderBscSubjectGroups();
             await loadCourses(activeProgram);
         }
+
+        {% if is_payment_done and active_step == 'section3' %}
+        setTimeout(() => {
+            const s3 = document.getElementById('section3Card');
+            if (s3) {
+                s3.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }, 350);
+        {% endif %}
     });
 })();
 </script>

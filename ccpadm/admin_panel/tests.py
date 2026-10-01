@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import Client, TestCase
 from django.urls import reverse
 
 from accounts.models import AdminUser, Student
@@ -230,6 +230,201 @@ class ManageStudentsProgramFilterTestCase(TestCase):
         self.student_ba.refresh_from_db()
         self.assertTrue(self.student_bsc.is_verified)
         self.assertTrue(self.student_ba.is_verified)
+
+
+class ExportEnrollmentsExcelTestCase(TestCase):
+    def setUp(self):
+        import json
+        from datetime import date
+        from accounts.models import AdminUser, Student
+        from admissions.models import StudentAdmission, StudentEnrollment
+
+        self.client = Client()
+        self.admin = AdminUser.objects.create(
+            username='export_admin',
+            password='admin_secret_pass',
+        )
+
+        self.student_m = Student.objects.create(
+            registration_no='REG_M_01',
+            full_name='Rohan Sahu',
+            mobile='9876543210',
+            password='pass1',
+        )
+        self.adm_m = StudentAdmission.objects.create(
+            reg_no='REG_M_01',
+            application_no='APP2026M01',
+            full_name='Rohan Sahu',
+            father_name='Ramesh Sahu',
+            mother_name='Savitri Sahu',
+            gender='Male',
+            dob=date(2003, 4, 15),
+            category='OBC',
+            medium='Hindi',
+            perm_village='Pamgarh',
+            perm_city='Pamgarh',
+            perm_district='Janjgir-Champa',
+            perm_state='Chhattisgarh',
+            perm_pin_code='495554',
+            subject='Hindi Language, History',
+        )
+        self.enr_m = StudentEnrollment.objects.create(
+            enrollment_no='CCP26059001',
+            reg_no='REG_M_01',
+            student=self.student_m,
+            admission=self.adm_m,
+            full_name='Rohan Sahu',
+            father_name='Ramesh Sahu',
+            mother_name='Savitri Sahu',
+            gender='Male',
+            dob=date(2003, 4, 15),
+            category='OBC',
+            medium='Hindi',
+            mobile='9876543210',
+            perm_village='Pamgarh',
+            perm_city='Pamgarh',
+            perm_district='Janjgir-Champa',
+            perm_state='Chhattisgarh',
+            perm_pin_code='495554',
+            program_type='B.A. First Semester',
+            status='Approved',
+            is_submitted=True,
+            selected_courses_json=json.dumps([
+                {'code': 'HNSC-01', 'name': 'Hindi — Hindi Sahitya Ka Itihas'},
+                {'code': 'HISC-01', 'name': 'History — Ancient Indian History'},
+            ]),
+        )
+
+        self.student_f = Student.objects.create(
+            registration_no='REG_F_01',
+            full_name='Kavita Patel',
+            mobile='9876543211',
+            password='pass2',
+        )
+        self.enr_f = StudentEnrollment.objects.create(
+            enrollment_no='CCP26059002',
+            reg_no='REG_F_01',
+            student=self.student_f,
+            full_name='Kavita Patel',
+            father_name='Dinesh Patel',
+            mother_name='Geeta Patel',
+            gender='Female',
+            dob=date(2004, 10, 22),
+            category='GEN',
+            medium='English',
+            mobile='9876543211',
+            perm_village='Bilaspur',
+            perm_city='Bilaspur',
+            perm_district='Bilaspur',
+            perm_state='Chhattisgarh',
+            perm_pin_code='495001',
+            program_type='B.Sc. First Semester',
+            status='Submitted',
+            is_submitted=True,
+            selected_courses_json=json.dumps({
+                'courses': [
+                    {'code': 'CHSC-01T', 'name': 'Chemistry — Fundamental Chemistry-I'},
+                    {'code': 'BOSC-01T', 'name': 'Botany — Elementary Botany'},
+                ]
+            }),
+        )
+
+    def _login_admin(self):
+        session = self.client.session
+        session['admin_user'] = self.admin.username
+        session['is_admin_logged_in'] = True
+        session.save()
+
+    def test_export_requires_admin_login(self):
+        resp = self.client.get(reverse('export_enrollments_excel'))
+        self.assertEqual(resp.status_code, 302)
+        self.assertIn('/admin/login/', resp.url)
+
+    def test_export_enrollments_excel_headers_and_data(self):
+        from io import BytesIO
+        import openpyxl
+
+        self._login_admin()
+        resp = self.client.get(reverse('export_enrollments_excel'))
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp['Content-Type'],
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        )
+        self.assertIn('attachment; filename="enrollments_', resp['Content-Disposition'])
+
+        wb = openpyxl.load_workbook(BytesIO(resp.content))
+        ws = wb.active
+        self.assertEqual(ws.title, 'Enrollments')
+
+        # Check headers (row 1)
+        expected_headers = [
+            'AddmissionNo',
+            'Univ_EnrolNo',
+            'Stud_nm',
+            'FatherName',
+            'MotherName',
+            'Medium',
+            'Category',
+            'Gender (MALE-1 ,FEMALE-0)',
+            'DOB (MM/DD/YYYY)',
+            'Address',
+            'Mobile',
+            'CLASS NAME',
+            'SUBJECT CODE',
+            'SUBJECTS',
+        ]
+        actual_headers = [ws.cell(row=1, column=col).value for col in range(1, len(expected_headers) + 1)]
+        self.assertEqual(actual_headers, expected_headers)
+
+        # Check data rows (rows 2 and 3)
+        rows = list(ws.iter_rows(min_row=2, values_only=True))
+        self.assertGreaterEqual(len(rows), 2)
+
+        # Find row for Rohan Sahu (Male)
+        rohan_row = next(r for r in rows if r[2] == 'Rohan Sahu')
+        self.assertEqual(rohan_row[0], 'APP2026M01')  # AddmissionNo
+        self.assertEqual(rohan_row[1], 'CCP26059001')  # Univ_EnrolNo
+        self.assertEqual(rohan_row[3], 'Ramesh Sahu')  # FatherName
+        self.assertEqual(rohan_row[4], 'Savitri Sahu')  # MotherName
+        self.assertEqual(rohan_row[5], 'Hindi')  # Medium
+        self.assertEqual(rohan_row[6], 'OBC')  # Category
+        self.assertEqual(rohan_row[7], 1)  # Gender: MALE-1
+        self.assertEqual(rohan_row[8], '04/15/2003')  # DOB: MM/DD/YYYY
+        self.assertIn('Pamgarh', rohan_row[9])  # Address
+        self.assertEqual(rohan_row[10], '9876543210')  # Mobile
+        self.assertEqual(rohan_row[11], 'B.A. First Semester')  # CLASS NAME
+        self.assertIn('HNSC-01', rohan_row[12])  # SUBJECT CODE
+        self.assertIn('HISC-01', rohan_row[12])
+        self.assertIn('Hindi Sahitya Ka Itihas', rohan_row[13])  # SUBJECTS
+        self.assertIn('Ancient Indian History', rohan_row[13])
+
+        # Find row for Kavita Patel (Female)
+        kavita_row = next(r for r in rows if r[2] == 'Kavita Patel')
+        self.assertEqual(kavita_row[1], 'CCP26059002')  # Univ_EnrolNo
+        self.assertEqual(kavita_row[7], 0)  # Gender: FEMALE-0
+        self.assertEqual(kavita_row[8], '10/22/2004')  # DOB: MM/DD/YYYY
+        self.assertEqual(kavita_row[11], 'B.Sc. First Semester')  # CLASS NAME
+        self.assertIn('CHSC-01T', kavita_row[12])  # SUBJECT CODE
+        self.assertIn('BOSC-01T', kavita_row[12])
+        self.assertIn('Fundamental Chemistry-I', kavita_row[13])  # SUBJECTS
+
+    def test_export_enrollments_excel_filtering(self):
+        from io import BytesIO
+        import openpyxl
+
+        self._login_admin()
+        # Filter by program
+        resp = self.client.get(reverse('export_enrollments_excel') + '?program=B.A.+First+Semester')
+        self.assertEqual(resp.status_code, 200)
+
+        wb = openpyxl.load_workbook(BytesIO(resp.content))
+        ws = wb.active
+        rows = list(ws.iter_rows(min_row=2, values_only=True))
+        # Should only contain B.A. First Semester
+        self.assertTrue(all(r[11] == 'B.A. First Semester' for r in rows))
+        self.assertTrue(any(r[2] == 'Rohan Sahu' for r in rows))
+        self.assertFalse(any(r[2] == 'Kavita Patel' for r in rows))
 
 
 

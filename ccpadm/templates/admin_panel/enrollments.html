@@ -61,7 +61,7 @@
                         <option value="Draft" {% if status_filter == 'Draft' %}selected{% endif %}>Draft (Editable)</option>
                     </select>
                 </div>
-                <div class="filter-actions" style="display: flex; gap: 8px;">
+                <div class="filter-actions" style="display: flex; gap: 8px; flex-wrap: wrap;">
                     <button type="submit" class="btn btn-primary btn-sm" style="background:#082B49; border-color:#082B49; padding: 7px 16px;">
                         <i class="fas fa-filter"></i> Filter
                     </button>
@@ -70,6 +70,9 @@
                         <i class="fas fa-times"></i> Reset
                     </a>
                     {% endif %}
+                    <a href="{% url 'export_enrollments_excel' %}?search={{ search|urlencode }}&program={{ program_filter|urlencode }}&status={{ status_filter|urlencode }}" class="btn btn-sm btn-success" style="background: #16a34a; border-color: #15803d; color: #fff; font-weight: 600; padding: 7px 16px; display: inline-flex; align-items: center; gap: 6px;" title="Export filtered enrollments to Excel (.xlsx)">
+                        <i class="fas fa-file-excel"></i> Export Excel
+                    </a>
                 </div>
             </form>
         </div>
@@ -89,10 +92,15 @@
             </button>
         </form>
 
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-xs);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-xs); flex-wrap: wrap; gap: 10px;">
             <p class="field-hint" style="margin-bottom: 0;">Showing <strong>{{ filtered_count }}</strong> enrollment application(s)</p>
-            <div class="field-hint text-muted" style="font-size: 11.5px;">
-                <i class="fas fa-info-circle text-primary"></i> Approving an enrollment locks it from student cancellation and assigns an official enrollment number.
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                <a href="{% url 'export_enrollments_excel' %}?search={{ search|urlencode }}&program={{ program_filter|urlencode }}&status={{ status_filter|urlencode }}" class="btn btn-sm" style="background: #107c41; border-color: #0b6a37; color: #fff; font-weight: 600; padding: 5px 12px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px;" title="Export filtered enrollments to Excel (.xlsx)">
+                    <i class="fas fa-file-excel"></i> Export Excel
+                </a>
+                <div class="field-hint text-muted" style="font-size: 11.5px;">
+                    <i class="fas fa-info-circle text-primary"></i> Approving an enrollment locks it from student cancellation and assigns an official enrollment number.
+                </div>
             </div>
         </div>
 

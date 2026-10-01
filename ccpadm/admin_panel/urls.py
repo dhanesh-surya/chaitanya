@@ -22,5 +22,6 @@ urlpatterns = [
     path('admissions/bulk-status/', views.bulk_update_admission_status, name='bulk_update_admission_status'),
     path('enrollment/<int:pk>/status/', views.update_enrollment_status, name='update_enrollment_status'),
     path('enrollments/', views.manage_enrollments, name='manage_enrollments'),
+    path('enrollments/export/excel/', views.export_enrollments_excel, name='export_enrollments_excel'),
     path('enrollments/bulk-status/', views.bulk_update_enrollment_status, name='bulk_update_enrollment_status'),
 ]

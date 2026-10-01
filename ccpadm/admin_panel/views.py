@@ -963,3 +963,317 @@ def manage_enrollments(request):
         'draft_count': draft_count,
         'filtered_count': enrollments.count(),
     })
+
+
+def _format_enrollment_address(enrollment):
+    perm_parts = [
+        enrollment.perm_village,
+        enrollment.perm_city,
+        enrollment.perm_district,
+        enrollment.perm_state,
+        enrollment.perm_pin_code,
+    ]
+    parts = []
+    for p in perm_parts:
+        val = (p or '').strip()
+        if val and (not parts or val.lower() != parts[-1].lower()):
+            parts.append(val)
+
+    if not parts:
+        corr_parts = [
+            enrollment.corr_village,
+            enrollment.corr_city,
+            enrollment.corr_district,
+            enrollment.corr_state,
+            enrollment.corr_pin_code,
+        ]
+        for p in corr_parts:
+            val = (p or '').strip()
+            if val and (not parts or val.lower() != parts[-1].lower()):
+                parts.append(val)
+
+    if not parts and enrollment.admission:
+        adm = enrollment.admission
+        adm_parts = [
+            adm.perm_village,
+            adm.perm_city,
+            adm.perm_district,
+            adm.perm_state,
+            adm.perm_pin_code,
+        ]
+        for p in adm_parts:
+            val = (p or '').strip()
+            if val and (not parts or val.lower() != parts[-1].lower()):
+                parts.append(val)
+
+    return ', '.join(parts)
+
+
+def _format_enrollment_gender(gender_val):
+    if not gender_val:
+        return ''
+    g = str(gender_val).strip().lower()
+    if g.startswith('m') or g in ('1', 'male'):
+        return 1
+    elif g.startswith('f') or g in ('0', 'female'):
+        return 0
+    return gender_val
+
+
+def _format_enrollment_dob(dob_val):
+    if not dob_val:
+        return ''
+    if hasattr(dob_val, 'strftime'):
+        return dob_val.strftime('%m/%d/%Y')
+    return str(dob_val)
+
+
+def _format_enrollment_subject_codes(enrollment):
+    import json
+    from courses.models import ProgramCourse
+
+    courses = []
+    if enrollment.selected_courses_json:
+        try:
+            data = json.loads(enrollment.selected_courses_json)
+            if isinstance(data, list):
+                courses = data
+            elif isinstance(data, dict):
+                courses = data.get('courses') or data.get('subjects') or []
+        except Exception:
+            courses = []
+
+    codes = []
+    for c in courses:
+        if not isinstance(c, dict):
+            continue
+        code = (c.get('code') or c.get('course_code') or '').strip()
+        name = (c.get('name') or c.get('course_name') or '').strip()
+        dept = (c.get('dept') or c.get('department') or '').strip()
+        type_2 = (c.get('type_2') or c.get('type2') or '').strip()
+
+        # If code was missing in JSON, resolve it from ProgramCourse
+        if not code and name:
+            clean_name = name.split('—')[-1].strip() if '—' in name else name
+            db_c = ProgramCourse.objects.filter(program_type__iexact=enrollment.program_type).filter(
+                Q(course_name__iexact=name) | Q(course_name__iexact=clean_name)
+            ).first()
+            if not db_c and dept:
+                db_c = ProgramCourse.objects.filter(
+                    program_type__iexact=enrollment.program_type,
+                    department__iexact=dept,
+                    course_type_2__iexact=type_2,
+                ).first()
+            if db_c and db_c.course_code:
+                code = db_c.course_code.strip()
+
+        if code and code not in codes:
+            codes.append(code)
+
+    return ', '.join(codes)
+
+
+def _format_enrollment_subjects(enrollment):
+    import json
+    courses = []
+    if enrollment.selected_courses_json:
+        try:
+            data = json.loads(enrollment.selected_courses_json)
+            if isinstance(data, list):
+                courses = data
+            elif isinstance(data, dict):
+                courses = data.get('courses') or data.get('subjects') or []
+        except Exception:
+            courses = []
+
+    names = []
+    for c in courses:
+        raw_name = ''
+        if isinstance(c, dict):
+            raw_name = c.get('name') or c.get('course_name') or ''
+        elif isinstance(c, str):
+            raw_name = c
+        if raw_name:
+            clean = _export_course_name_only(raw_name)
+            if clean and clean not in names:
+                names.append(clean)
+
+    if names:
+        return ', '.join(names)
+
+    adm = enrollment.admission
+    if not adm and enrollment.reg_no:
+        from admissions.models import StudentAdmission
+        adm = StudentAdmission.objects.filter(reg_no=enrollment.reg_no).first()
+
+    if adm and (adm.subject or '').strip():
+        parts = [_export_course_name_only(p) for p in adm.subject.split(',') if _export_course_name_only(p)]
+        return ', '.join(parts)
+
+    return ''
+
+
+def build_enrollment_export_row(enrollment):
+    adm = enrollment.admission
+    if not adm and enrollment.reg_no:
+        from admissions.models import StudentAdmission
+        adm = StudentAdmission.objects.filter(reg_no=enrollment.reg_no).first()
+
+    admission_no = (getattr(adm, 'application_no', '') or enrollment.reg_no or '').strip()
+    univ_enrol_no = enrollment.enrollment_no or ''
+    stud_nm = enrollment.full_name or (enrollment.student.full_name if enrollment.student else '')
+    father_name = enrollment.father_name or (getattr(adm, 'father_name', '') or '')
+    mother_name = enrollment.mother_name or (getattr(adm, 'mother_name', '') or '')
+    medium = enrollment.medium or (getattr(adm, 'medium', '') or '')
+    category = enrollment.category or (getattr(adm, 'category', '') or '')
+
+    gender_raw = enrollment.gender or (getattr(adm, 'gender', '') or '')
+    gender_val = _format_enrollment_gender(gender_raw)
+
+    dob_raw = enrollment.dob or (getattr(adm, 'dob', None))
+    dob_val = _format_enrollment_dob(dob_raw)
+
+    address = _format_enrollment_address(enrollment)
+    mobile = enrollment.mobile or (enrollment.student.mobile if enrollment.student else '')
+    class_name = enrollment.program_type or ''
+    subject_codes = _format_enrollment_subject_codes(enrollment)
+    subjects = _format_enrollment_subjects(enrollment)
+
+    return [
+        admission_no,
+        univ_enrol_no,
+        stud_nm,
+        father_name,
+        mother_name,
+        medium,
+        category,
+        gender_val,
+        dob_val,
+        address,
+        mobile,
+        class_name,
+        subject_codes,
+        subjects,
+    ]
+
+
+@admin_login_required
+def export_enrollments_excel(request):
+    """Export student enrollments as an Excel (.xlsx) spreadsheet matching university format."""
+    from io import BytesIO
+    import openpyxl
+    from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+    from openpyxl.utils import get_column_letter
+    from admissions.models import StudentEnrollment
+
+    search = request.GET.get('search', '').strip()
+    program_filter = request.GET.get('program', '').strip()
+    if program_filter == 'ALL':
+        program_filter = ''
+    status_filter = request.GET.get('status', 'ALL').strip() or 'ALL'
+
+    enrollments = StudentEnrollment.objects.all().select_related('student', 'admission')
+
+    if search:
+        enrollments = enrollments.filter(
+            Q(full_name__icontains=search)
+            | Q(reg_no__icontains=search)
+            | Q(enrollment_no__icontains=search)
+            | Q(mobile__icontains=search)
+            | Q(email__icontains=search)
+        )
+
+    if program_filter:
+        enrollments = enrollments.filter(program_type=program_filter)
+
+    if status_filter != 'ALL':
+        enrollments = enrollments.filter(status=status_filter)
+
+    enrollments = enrollments.order_by('program_type', 'enrollment_no', 'full_name')
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = 'Enrollments'
+    ws.views.sheetView[0].showGridLines = True
+
+    headers = [
+        'AddmissionNo',
+        'Univ_EnrolNo',
+        'Stud_nm',
+        'FatherName',
+        'MotherName',
+        'Medium',
+        'Category',
+        'Gender (MALE-1 ,FEMALE-0)',
+        'DOB (MM/DD/YYYY)',
+        'Address',
+        'Mobile',
+        'CLASS NAME',
+        'SUBJECT CODE',
+        'SUBJECTS',
+    ]
+
+    header_font = Font(name='Calibri', size=11, bold=True, color='FFFFFF')
+    header_fill = PatternFill('solid', fgColor='082B49')
+    center_align = Alignment(horizontal='center', vertical='center')
+    left_align = Alignment(horizontal='left', vertical='center')
+    thin_border = Border(
+        left=Side(style='thin', color='D1D5DB'),
+        right=Side(style='thin', color='D1D5DB'),
+        top=Side(style='thin', color='D1D5DB'),
+        bottom=Side(style='thin', color='D1D5DB'),
+    )
+
+    ws.row_dimensions[1].height = 28
+    for col_idx, header in enumerate(headers, start=1):
+        cell = ws.cell(row=1, column=col_idx, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = center_align
+        cell.border = thin_border
+
+    row_num = 2
+    for enr in enrollments:
+        row_data = build_enrollment_export_row(enr)
+        ws.row_dimensions[row_num].height = 20
+        for col_idx, val in enumerate(row_data, start=1):
+            cell = ws.cell(row=row_num, column=col_idx, value=val)
+            cell.font = Font(name='Calibri', size=10)
+            cell.border = thin_border
+            if col_idx in (8, 9, 11):  # Gender, DOB, Mobile
+                cell.alignment = center_align
+            else:
+                cell.alignment = left_align
+        row_num += 1
+
+    for col in ws.columns:
+        col_letter = get_column_letter(col[0].column)
+        max_len = max(len(str(cell.value or '')) for cell in col)
+        ws.column_dimensions[col_letter].width = max(max_len + 3, 12)
+
+    if ws.column_dimensions.get('J'):
+        ws.column_dimensions['J'].width = min(max(ws.column_dimensions['J'].width, 30), 50)
+    if ws.column_dimensions.get('M'):
+        ws.column_dimensions['M'].width = min(max(ws.column_dimensions['M'].width, 24), 45)
+    if ws.column_dimensions.get('N'):
+        ws.column_dimensions['N'].width = min(max(ws.column_dimensions['N'].width, 35), 65)
+
+    buffer = BytesIO()
+    wb.save(buffer)
+    buffer.seek(0)
+
+    filename_parts = ['enrollments']
+    if program_filter:
+        safe_prog = re.sub(r'[^\w\-]+', '_', program_filter).strip('_')
+        filename_parts.append(safe_prog)
+    if status_filter != 'ALL':
+        filename_parts.append(status_filter.lower())
+    filename_parts.append(timezone.now().strftime('%Y%m%d'))
+    filename = f"{'_'.join(filename_parts)}.xlsx"
+
+    response = HttpResponse(
+        buffer.getvalue(),
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    )
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    return response

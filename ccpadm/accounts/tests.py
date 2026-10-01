@@ -169,3 +169,51 @@ class ForgotPasswordTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertFalse(response.context['success'])
         self.assertContains(response, 'Please enter a valid 12-digit Aadhaar Number')
+
+
+class EnrollmentInstructionModalTestCase(TestCase):
+    def setUp(self):
+        from admissions.models import EnrollmentInstruction
+        self.student = Student.objects.create(
+            registration_no='REG3001',
+            full_name='Rohan Patel',
+            email='rohan@example.com',
+            mobile='9876543210',
+            password='password123',
+            aadhaar='123456789012',
+            program_type='B.Sc. First Semester',
+        )
+        EnrollmentInstruction.objects.all().delete()
+        self.instruction = EnrollmentInstruction.objects.create(
+            college_title='चैतन्य साइंस एंड आर्ट्स कॉलेज, पामगढ़',
+            title='छात्र नामांकन (Enrollment) प्रक्रिया — चरण-दर-चरण निर्देश',
+            content_html='<div class="step-card">Step 1 Instructions</div>',
+            is_active=True,
+        )
+
+    def test_dashboard_shows_enrollment_instruction_modal(self):
+        session = self.client.session
+        session['is_logged_in'] = True
+        session['reg_no'] = self.student.registration_no
+        session.save()
+
+        response = self.client.get(reverse('student_dashboard'))
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNotNone(response.context['enrollment_instruction'])
+        self.assertContains(response, 'id="enrollmentGuideModal"')
+        self.assertContains(response, 'Step 1 Instructions')
+
+    def test_dashboard_hides_modal_when_instruction_inactive(self):
+        self.instruction.is_active = False
+        self.instruction.save()
+
+        session = self.client.session
+        session['is_logged_in'] = True
+        session['reg_no'] = self.student.registration_no
+        session.save()
+
+        response = self.client.get(reverse('student_dashboard'))
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNone(response.context['enrollment_instruction'])
+        self.assertNotContains(response, 'id="enrollmentGuideModal"')
+

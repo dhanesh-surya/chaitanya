@@ -236,16 +236,18 @@ def student_dashboard(request):
             s.get('name', '') for s in selected_subjects if isinstance(s, dict) and s.get('name')
         )
 
-    from admissions.models import StudentEnrollment
+    from admissions.models import StudentEnrollment, EnrollmentInstruction
     from .utils import get_student_sidebar_context
 
     enrollment = StudentEnrollment.objects.filter(reg_no=reg_no).order_by('-submitted_date', '-created_at').first()
     can_cancel_enrollment = bool(enrollment and enrollment.is_submitted and enrollment.status != 'Approved')
+    enrollment_instruction = EnrollmentInstruction.objects.filter(is_active=True).first()
 
     ctx = {
         'student': student,
         'admission': admission,
         'enrollment': enrollment,
+        'enrollment_instruction': enrollment_instruction,
         'can_cancel_enrollment': can_cancel_enrollment,
         'masked_aadhaar': mask_aadhaar(student.aadhaar),
         'program_display': program_display,

@@ -1,9 +1,10 @@
 from django.contrib import admin, messages
 from django.utils.html import strip_tags
 
-from .forms import AdmissionSubmitInstructionForm
+from .forms import AdmissionSubmitInstructionForm, EnrollmentInstructionForm
 from .models import (
     AdmissionSubmitInstruction,
+    EnrollmentInstruction,
     StudentAdmission,
     StudentDocument,
     StudentEducation,
@@ -86,6 +87,33 @@ class AdmissionSubmitInstructionAdmin(admin.ModelAdmin):
         if len(text) > 80:
             return f'{text[:80]}…'
         return text or '—'
+
+
+@admin.register(EnrollmentInstruction)
+class EnrollmentInstructionAdmin(admin.ModelAdmin):
+    form = EnrollmentInstructionForm
+    list_display = (
+        'title',
+        'college_title',
+        'is_active',
+        'updated_at',
+    )
+    list_filter = ('is_active',)
+    search_fields = ('title', 'college_title', 'content_html')
+    fieldsets = (
+        ('Display Status', {
+            'fields': ('is_active',),
+            'description': 'Toggle whether this instruction popup appears on student dashboards.',
+        }),
+        ('Popup Headers', {
+            'fields': ('college_title', 'title'),
+            'description': 'College and process headings shown at the top of the modal popup.',
+        }),
+        ('Step-by-Step Instructions', {
+            'fields': ('content_html',),
+            'description': 'Full instructions text shown to students upon logging into their dashboard.',
+        }),
+    )
 
 
 admin.site.register(StudentEducation)

@@ -126,6 +126,11 @@
                     <i class="fas fa-user-graduate"></i> Apply for Enrollment
                 </a>
                 {% endif %}
+                {% if enrollment_instruction and enrollment_instruction.is_active %}
+                <button type="button" class="btn btn-outline-primary ms-2" onclick="openEnrollmentGuideModal()" title="View Step-by-Step Enrollment Instructions">
+                    <i class="fas fa-book-reader"></i> नामांकन निर्देश (Instructions)
+                </button>
+                {% endif %}
                 <a href="{% static 'docs/Student_Enrollment_User_Guide.pdf' %}" target="_blank" class="btn btn-outline-info ms-2" title="Download Step-by-Step Enrollment Visual Guide">
                     <i class="fas fa-file-pdf"></i> Enrollment Guide (PDF)
                 </a>
@@ -133,4 +138,301 @@
         </div>
     </div>
 </div>
+
+{% if enrollment_instruction and enrollment_instruction.is_active %}
+<!-- Enrollment Instructions Modal Popup -->
+<div id="enrollmentGuideModal" class="guide-modal-backdrop" style="display: none;">
+    <div class="guide-modal-dialog">
+        <div class="guide-modal-header">
+            <div class="guide-header-left">
+                <img src="{% static 'images/logo.png' %}" alt="Logo" class="guide-header-logo">
+                <div>
+                    <h3 class="guide-college-title">{{ enrollment_instruction.college_title }}</h3>
+                    <p class="guide-process-title"><i class="fas fa-graduation-cap"></i> {{ enrollment_instruction.title }}</p>
+                </div>
+            </div>
+            <button type="button" class="guide-close-btn" onclick="closeEnrollmentGuideModal()" aria-label="Close modal">&times;</button>
+        </div>
+
+        <div class="guide-modal-body">
+            {{ enrollment_instruction.content_html|safe }}
+        </div>
+
+        <div class="guide-modal-footer">
+            <label class="guide-dismiss-check">
+                <input type="checkbox" id="guideDontShowAgain"> इस सत्र में पुनः न दिखाएं (Don't show again this session)
+            </label>
+            <div class="guide-footer-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeEnrollmentGuideModal()">
+                    <i class="fas fa-times"></i> बंद करें (Close)
+                </button>
+                <a href="{% url 'enrollment_form' %}" class="btn btn-success">
+                    <i class="fas fa-arrow-right"></i> नामांकन फॉर्म भरें (Apply for Enrollment)
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Enrollment Guide Modal Styling */
+.guide-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(4px);
+    z-index: 1050;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    box-sizing: border-box;
+}
+.guide-modal-dialog {
+    background: #ffffff;
+    width: 100%;
+    max-width: 880px;
+    max-height: 88vh;
+    border-radius: 12px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid #cbd5e1;
+    animation: guideModalSlideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes guideModalSlideUp {
+    from { transform: translateY(24px) scale(0.98); opacity: 0; }
+    to { transform: translateY(0) scale(1); opacity: 1; }
+}
+.guide-modal-header {
+    background: linear-gradient(135deg, #082B49 0%, #0e4577 100%);
+    color: #ffffff;
+    padding: 16px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 2.5px solid #b8860b;
+}
+.guide-header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+.guide-header-logo {
+    width: 46px;
+    height: 46px;
+    object-fit: contain;
+    background: #ffffff;
+    border-radius: 50%;
+    padding: 2px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+.guide-college-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 0.3px;
+}
+.guide-process-title {
+    margin: 3px 0 0 0;
+    font-size: 13px;
+    color: #fde047;
+    font-weight: 600;
+}
+.guide-close-btn {
+    background: rgba(255, 255, 255, 0.12);
+    border: none;
+    color: #ffffff;
+    font-size: 26px;
+    line-height: 1;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+.guide-close-btn:hover {
+    background: rgba(239, 68, 68, 0.9);
+    color: #ffffff;
+    transform: rotate(90deg);
+}
+.guide-modal-body {
+    padding: 22px 24px;
+    overflow-y: auto;
+    flex: 1 1 auto;
+    font-size: 14px;
+    line-height: 1.65;
+    color: #334155;
+    background: #f8fafc;
+}
+.guide-modal-body h4 {
+    margin-top: 0;
+}
+
+/* Step cards styling */
+.enrollment-steps-container {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+.step-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 14px 18px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.step-card:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+.step-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 8px;
+}
+.step-number-badge {
+    background: #082B49;
+    color: #ffffff;
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.3px;
+    flex-shrink: 0;
+}
+.step-heading {
+    margin: 0;
+    font-size: 14.5px;
+    font-weight: 700;
+    color: #0f172a;
+}
+.step-card-body ol {
+    margin: 0 0 8px 0;
+    padding-left: 20px;
+}
+.step-card-body ol li {
+    margin-bottom: 5px;
+    color: #334155;
+}
+.step-card-body .sub-list {
+    margin: 4px 0 6px 15px;
+    list-style-type: circle;
+}
+.step-alert-box {
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    margin-top: 8px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    line-height: 1.5;
+}
+.step-alert-box.info {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    color: #1e40af;
+}
+.step-alert-box.warning {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    color: #92400e;
+}
+.step-alert-box.success {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #166534;
+}
+
+/* Modal Footer */
+.guide-modal-footer {
+    background: #ffffff;
+    border-top: 1px solid #e2e8f0;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+.guide-dismiss-check {
+    font-size: 13px;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    cursor: pointer;
+    user-select: none;
+    margin: 0;
+}
+.guide-dismiss-check input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+.guide-footer-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+</style>
+
+<script>
+function openEnrollmentGuideModal() {
+    const modal = document.getElementById('enrollmentGuideModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function closeEnrollmentGuideModal() {
+    const modal = document.getElementById('enrollmentGuideModal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        const chk = document.getElementById('guideDontShowAgain');
+        if (chk && chk.checked) {
+            sessionStorage.setItem('hideEnrollmentGuideModal', '1');
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('enrollmentGuideModal');
+    if (modal && !sessionStorage.getItem('hideEnrollmentGuideModal')) {
+        setTimeout(openEnrollmentGuideModal, 300);
+    }
+
+    // Close when clicking outside dialog
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeEnrollmentGuideModal();
+            }
+        });
+    }
+
+    // Close on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modal && modal.style.display === 'flex') {
+            closeEnrollmentGuideModal();
+        }
+    });
+});
+</script>
+{% endif %}
 {% endblock %}

@@ -266,3 +266,34 @@ class StudentEnrollment(models.Model):
 
     def __str__(self):
         return self.enrollment_no or f'Enrollment #{self.pk} ({self.reg_no})'
+
+
+class EnrollmentInstruction(models.Model):
+    """Enrollment instructions popup shown to students on their dashboard."""
+
+    college_title = models.CharField(
+        max_length=255,
+        default="चैतन्य साइंस एंड आर्ट्स कॉलेज, पामगढ़",
+        help_text="Header college name",
+    )
+    title = models.CharField(
+        max_length=255,
+        default="छात्र नामांकन (Enrollment) प्रक्रिया — चरण-दर-चरण निर्देश",
+        help_text="Process title / heading",
+    )
+    content_html = models.TextField(
+        help_text="Rich HTML / text content of the enrollment instructions shown in the modal popup.",
+    )
+    is_active = models.BooleanField(
+        default=True,
+        help_text="Enable or disable the popup window on student dashboard.",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Enrollment Dashboard Instruction"
+        verbose_name_plural = "Enrollment Dashboard Instructions"
+
+    def __str__(self):
+        return f"{self.college_title} - {self.title}"

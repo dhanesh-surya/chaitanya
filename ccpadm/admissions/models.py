@@ -246,6 +246,13 @@ class StudentEnrollment(models.Model):
     signature_base64 = models.TextField(blank=True, null=True)
     selected_courses_json = models.TextField(blank=True, null=True)
 
+    # Payment info
+    fee_amount = models.CharField(max_length=20, default='500', blank=True)
+    payment_status = models.CharField(max_length=20, default='Pending', blank=True)
+    transaction_id = models.CharField(max_length=100, blank=True)
+    payment_receipt = models.FileField(upload_to='uploads/enrollment_receipts/', null=True, blank=True)
+    payment_receipt_base64 = models.TextField(blank=True, null=True)
+
     # Status
     status = models.CharField(max_length=20, default='Draft', choices=STATUS_CHOICES)
     is_submitted = models.BooleanField(default=False)

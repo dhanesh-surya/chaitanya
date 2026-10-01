@@ -146,6 +146,12 @@ def enrollment_form(request):
         photo_base64 = request.POST.get('photo_base64', '').strip()
         signature_base64 = request.POST.get('signature_base64', '').strip()
 
+        # Payment details
+        fee_amount = request.POST.get('fee_amount', '500').strip() or '500'
+        transaction_id = request.POST.get('transaction_id', '').strip()
+        payment_receipt_file = request.FILES.get('payment_receipt')
+        payment_receipt_base64 = request.POST.get('payment_receipt_base64', '').strip()
+
         # Program & Courses - fixed as applied while admission time
         admission = StudentAdmission.objects.filter(reg_no=reg_no).order_by('-submitted_date', '-created_date').first()
         program_type = _normalize_program_name(request.POST.get('program_type', '').strip())
@@ -258,7 +264,20 @@ def enrollment_form(request):
         enrollment.semester = semester
         enrollment.selected_courses_json = selected_courses_json
 
+        # Payment persistence
+        enrollment.fee_amount = fee_amount
+        if transaction_id:
+            enrollment.transaction_id = transaction_id
+            enrollment.payment_status = 'Paid'
+        if payment_receipt_file:
+            enrollment.payment_receipt = payment_receipt_file
+        if payment_receipt_base64:
+            enrollment.payment_receipt_base64 = payment_receipt_base64
+
         if action == 'submit':
+            if not enrollment.transaction_id:
+                messages.error(request, 'Please complete the ₹500 fee payment and enter your Transaction ID / UTR Number before submitting.')
+                return redirect('enrollment_form')
             if not enrollment.enrollment_no:
                 enrollment.enrollment_no = generate_enrollment_number()
             enrollment.status = 'Submitted'
@@ -289,10 +308,16 @@ def enrollment_form(request):
             'board12', 'year12', 'total_marks12', 'obtained12', 'percentage12', 'grade12', 'stream12',
             'class_grad', 'board_grad', 'stream_grad', 'year_grad', 'total_marks_grad', 'obtained_grad',
             'percentage_grad', 'grade_grad',
-            'photo_base64', 'signature_base64', 'program_type', 'program_code', 'semester', 'selected_courses_json'
+            'photo_base64', 'signature_base64', 'program_type', 'program_code', 'semester', 'selected_courses_json',
+            'fee_amount', 'payment_status', 'transaction_id', 'payment_receipt_base64'
         ]:
             val = getattr(existing_enrollment, f, None)
             initial_data[f] = val.isoformat() if hasattr(val, 'isoformat') else val
+        if existing_enrollment.payment_receipt:
+            try:
+                initial_data['payment_receipt_url'] = existing_enrollment.payment_receipt.url
+            except Exception:
+                pass
     elif admission:
         for f in [
             'full_name', 'father_name', 'mother_name', 'gender', 'dob', 'category', 'nationality',
@@ -310,6 +335,11 @@ def enrollment_form(request):
             initial_data[f] = val.isoformat() if hasattr(val, 'isoformat') else val
         initial_data['selected_courses_json'] = admission.selected_subjects_json
         initial_data['semester'] = 'I'
+        initial_data['fee_amount'] = '500'
+        initial_data['payment_status'] = 'Pending'
+        initial_data['transaction_id'] = ''
+        initial_data['payment_receipt_url'] = ''
+        initial_data['payment_receipt_base64'] = ''
     else:
         initial_data = {
             'full_name': student.full_name,
@@ -601,7 +631,9 @@ def enrollment_fee_receipt(request, enrollment_no=None):
         'program_display': program_display,
         'deposit_date': deposit_date,
         'month_year': month_year,
-        'fee_amount': '500',
+        'fee_amount': enrollment.fee_amount or '500',
+        'transaction_id': enrollment.transaction_id or '',
+        'payment_status': enrollment.payment_status or ('Paid' if enrollment.transaction_id else 'Pending'),
     }
     return render(request, 'admissions/enrollment_receipt.html', ctx)
 

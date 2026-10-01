@@ -147,100 +147,239 @@
                 <input type="hidden" name="photo_base64" id="photoBase64" value="{{ initial_data.photo_base64|default:'' }}">
                 <input type="hidden" name="signature_base64" id="signatureBase64" value="{{ initial_data.signature_base64|default:'' }}">
 
-                <!-- SECTION 1: PERSONAL DETAILS -->
+                <!-- SECTION 1: PREVIOUSLY SUBMITTED DETAILS & APPLIED PROGRAM -->
                 <div class="enroll-section-card">
-                    <div class="enroll-section-title">
-                        <i class="fas fa-user-circle"></i> Section A: Personal & Demographic Details
+                    <div class="enroll-section-title d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-user-check text-primary"></i> Section 1: Candidate Information &amp; Applied Program
+                        </div>
+                        <span class="badge bg-success" style="font-size: 11.5px; font-weight: 600;">
+                            <i class="fas fa-check-circle me-1"></i> Pre-verified from Admission
+                        </span>
                     </div>
-                    <div class="grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;">
-                        <div class="field">
-                            <label>Full Name *</label>
-                            <input type="text" name="full_name" class="form-control" value="{{ initial_data.full_name|default:'' }}" required>
+
+                    <!-- Applied Program Banner -->
+                    <div class="program-highlight-banner" style="background: linear-gradient(135deg, #082b49 0%, #1e40af 100%); color: #ffffff; border-radius: 8px; padding: 16px 20px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; box-shadow: 0 4px 6px rgba(8,43,73,0.15);">
+                        <div>
+                            <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #93c5fd; font-weight: 700;">Applied Program / Course</div>
+                            <div style="font-size: 1.35rem; font-weight: 800; letter-spacing: 0.3px; margin-top: 2px;">
+                                <i class="fas fa-graduation-cap me-2 text-warning"></i>{{ selected_program_type|default:initial_data.program_type|default:"Undergraduate Program" }}
+                            </div>
+                            <div style="font-size: 12.5px; color: #cbd5e1; margin-top: 4px;">
+                                Semester: <strong>Semester I (NEP 2020)</strong> &nbsp;|&nbsp; Reg No / User ID: <strong>{{ reg_no }}</strong>
+                            </div>
                         </div>
-                        <div class="field">
-                            <label>Father's Name *</label>
-                            <input type="text" name="father_name" class="form-control" value="{{ initial_data.father_name|default:'' }}" required>
+                        <div>
+                            <span class="badge bg-light text-dark px-3 py-2" style="font-size: 12px; font-weight: 700; border-radius: 6px;">
+                                <i class="fas fa-id-card text-primary me-1"></i> Status: Ready for Enrollment
+                            </span>
                         </div>
-                        <div class="field">
-                            <label>Mother's Name *</label>
-                            <input type="text" name="mother_name" class="form-control" value="{{ initial_data.mother_name|default:'' }}" required>
+                    </div>
+
+                    <!-- Personal Details Verified Grid -->
+                    <div class="info-summary-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px 18px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px 20px;">
+                        <div class="info-summary-item">
+                            <span class="info-summary-label" style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase;">Student Full Name</span>
+                            <span class="info-summary-val" style="font-size: 13.5px; font-weight: 700; color: #0f172a;">{{ initial_data.full_name|upper|default:"-" }}</span>
                         </div>
-                        <div class="field">
-                            <label>Date of Birth *</label>
-                            <input type="date" name="dob" class="form-control" value="{{ initial_data.dob|default:'' }}" required>
+                        <div class="info-summary-item">
+                            <span class="info-summary-label" style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase;">Father's Name</span>
+                            <span class="info-summary-val" style="font-size: 13.5px; font-weight: 700; color: #0f172a;">{{ initial_data.father_name|default:"-" }}</span>
                         </div>
-                        <div class="field">
-                            <label>Gender *</label>
-                            <select name="gender" class="form-select" required>
-                                <option value="Male" {% if initial_data.gender == 'Male' %}selected{% endif %}>Male</option>
-                                <option value="Female" {% if initial_data.gender == 'Female' %}selected{% endif %}>Female</option>
-                                <option value="Transgender" {% if initial_data.gender == 'Transgender' %}selected{% endif %}>Transgender</option>
-                            </select>
+                        <div class="info-summary-item">
+                            <span class="info-summary-label" style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase;">Mother's Name</span>
+                            <span class="info-summary-val" style="font-size: 13.5px; font-weight: 700; color: #0f172a;">{{ initial_data.mother_name|default:"-" }}</span>
                         </div>
-                        <div class="field">
-                            <label>Category *</label>
-                            <select name="category" class="form-select" required>
-                                <option value="General" {% if initial_data.category == 'General' %}selected{% endif %}>General</option>
-                                <option value="OBC" {% if initial_data.category == 'OBC' %}selected{% endif %}>OBC</option>
-                                <option value="SC" {% if initial_data.category == 'SC' %}selected{% endif %}>SC</option>
-                                <option value="ST" {% if initial_data.category == 'ST' %}selected{% endif %}>ST</option>
-                            </select>
+                        <div class="info-summary-item">
+                            <span class="info-summary-label" style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase;">Date of Birth</span>
+                            <span class="info-summary-val" style="font-size: 13.5px; font-weight: 700; color: #0f172a;">{{ initial_data.dob|default:"-" }}</span>
                         </div>
-                        <div class="field">
-                            <label>Nationality</label>
-                            <input type="text" name="nationality" class="form-control" value="{{ initial_data.nationality|default:'Indian' }}">
+                        <div class="info-summary-item">
+                            <span class="info-summary-label" style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase;">Gender</span>
+                            <span class="info-summary-val" style="font-size: 13.5px; font-weight: 700; color: #0f172a;">{{ initial_data.gender|default:"-" }}</span>
                         </div>
-                        <div class="field">
-                            <label>Religion</label>
-                            <select name="religion" class="form-select">
-                                <option value="">Select Religion</option>
-                                {% for r in religion_choices %}
-                                <option value="{{ r }}" {% if initial_data.religion == r %}selected{% endif %}>{{ r }}</option>
-                                {% endfor %}
-                            </select>
+                        <div class="info-summary-item">
+                            <span class="info-summary-label" style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase;">Category</span>
+                            <span class="info-summary-val" style="font-size: 13.5px; font-weight: 700; color: #0f172a;">{{ initial_data.category|default:"General" }}</span>
                         </div>
-                        <div class="field">
-                            <label>Blood Group</label>
-                            <input type="text" name="blood_group" class="form-control" value="{{ initial_data.blood_group|default:'' }}" placeholder="e.g. O+, B+">
+                        <div class="info-summary-item">
+                            <span class="info-summary-label" style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase;">Mobile Number</span>
+                            <span class="info-summary-val" style="font-size: 13.5px; font-weight: 700; color: #0f172a;">{{ initial_data.mobile|default:"-" }}</span>
                         </div>
-                        <div class="field">
-                            <label>Marital Status</label>
-                            <select name="marital_status" class="form-select">
-                                <option value="Unmarried" {% if initial_data.marital_status == 'Unmarried' %}selected{% endif %}>Unmarried</option>
-                                <option value="Married" {% if initial_data.marital_status == 'Married' %}selected{% endif %}>Married</option>
-                            </select>
+                        <div class="info-summary-item">
+                            <span class="info-summary-label" style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase;">Email Address</span>
+                            <span class="info-summary-val" style="font-size: 13.5px; font-weight: 700; color: #0f172a;">{{ initial_data.email|default:"-" }}</span>
                         </div>
-                        <div class="field">
-                            <label>Aadhaar Number *</label>
-                            <input type="text" name="aadhaar" class="form-control" value="{{ initial_data.aadhaar|default:'' }}" maxlength="12" required>
+                        <div class="info-summary-item">
+                            <span class="info-summary-label" style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase;">Aadhaar Number</span>
+                            <span class="info-summary-val" style="font-size: 13.5px; font-weight: 700; color: #0f172a; font-family: monospace;">{{ initial_data.aadhaar|default:"-" }}</span>
                         </div>
-                        <div class="field">
-                            <label>APAAR / ABC ID</label>
-                            <input type="text" name="apaar_id" class="form-control" value="{{ initial_data.apaar_id|default:'' }}">
+                        <div class="info-summary-item">
+                            <span class="info-summary-label" style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase;">Medium of Instruction</span>
+                            <span class="info-summary-val" style="font-size: 13.5px; font-weight: 700; color: #0f172a;">{{ initial_data.medium|default:"Hindi" }}</span>
                         </div>
-                        <div class="field">
-                            <label>Mobile Number *</label>
-                            <input type="text" name="mobile" class="form-control" value="{{ initial_data.mobile|default:'' }}" maxlength="15" required>
+                    </div>
+
+                    <!-- Hidden Fields to preserve complete record on POST -->
+                    <input type="hidden" name="full_name" value="{{ initial_data.full_name|default:'' }}">
+                    <input type="hidden" name="father_name" value="{{ initial_data.father_name|default:'' }}">
+                    <input type="hidden" name="mother_name" value="{{ initial_data.mother_name|default:'' }}">
+                    <input type="hidden" name="dob" value="{{ initial_data.dob|default:'' }}">
+                    <input type="hidden" name="gender" value="{{ initial_data.gender|default:'' }}">
+                    <input type="hidden" name="category" value="{{ initial_data.category|default:'' }}">
+                    <input type="hidden" name="nationality" value="{{ initial_data.nationality|default:'Indian' }}">
+                    <input type="hidden" name="religion" value="{{ initial_data.religion|default:'' }}">
+                    <input type="hidden" name="blood_group" value="{{ initial_data.blood_group|default:'' }}">
+                    <input type="hidden" name="marital_status" value="{{ initial_data.marital_status|default:'' }}">
+                    <input type="hidden" name="aadhaar" value="{{ initial_data.aadhaar|default:'' }}">
+                    <input type="hidden" name="apaar_id" value="{{ initial_data.apaar_id|default:'' }}">
+                    <input type="hidden" name="mobile" value="{{ initial_data.mobile|default:'' }}">
+                    <input type="hidden" name="email" value="{{ initial_data.email|default:'' }}">
+                    <input type="hidden" name="medium" value="{{ initial_data.medium|default:'Hindi' }}">
+                    <input type="hidden" name="has_disability" value="{{ initial_data.has_disability|default:'' }}">
+                    <input type="hidden" name="disability_details" value="{{ initial_data.disability_details|default:'' }}">
+                    <input type="hidden" name="disability_percentage" value="{{ initial_data.disability_percentage|default:'' }}">
+                    <input type="hidden" name="disability_type" value="{{ initial_data.disability_type|default:'' }}">
+                    <input type="hidden" name="is_minority" value="{{ initial_data.is_minority|default:'' }}">
+                    
+                    <!-- Preserved Addresses -->
+                    <input type="hidden" name="perm_state" id="permState" value="{{ initial_data.perm_state|default:'' }}">
+                    <input type="hidden" name="perm_district" id="permDistrict" value="{{ initial_data.perm_district|default:'' }}">
+                    <input type="hidden" name="perm_city" id="permCity" value="{{ initial_data.perm_city|default:'' }}">
+                    <input type="hidden" name="perm_village" id="permVillage" value="{{ initial_data.perm_village|default:'' }}">
+                    <input type="hidden" name="perm_pin_code" id="permPinCode" value="{{ initial_data.perm_pin_code|default:'' }}">
+                    <input type="hidden" name="corr_state" id="corrState" value="{{ initial_data.corr_state|default:'' }}">
+                    <input type="hidden" name="corr_district" id="corrDistrict" value="{{ initial_data.corr_district|default:'' }}">
+                    <input type="hidden" name="corr_city" id="corrCity" value="{{ initial_data.corr_city|default:'' }}">
+                    <input type="hidden" name="corr_village" id="corrVillage" value="{{ initial_data.corr_village|default:'' }}">
+                    <input type="hidden" name="corr_pin_code" id="corrPinCode" value="{{ initial_data.corr_pin_code|default:'' }}">
+
+                    <!-- Preserved Previous Academic Qualification -->
+                    <input type="hidden" name="class10" value="{{ initial_data.class10|default:'' }}">
+                    <input type="hidden" name="board10" value="{{ initial_data.board10|default:'' }}">
+                    <input type="hidden" name="year10" value="{{ initial_data.year10|default:'' }}">
+                    <input type="hidden" name="total_marks10" value="{{ initial_data.total_marks10|default:'' }}">
+                    <input type="hidden" name="obtained10" value="{{ initial_data.obtained10|default:'' }}">
+                    <input type="hidden" name="percentage10" value="{{ initial_data.percentage10|default:'' }}">
+                    <input type="hidden" name="grade10" value="{{ initial_data.grade10|default:'' }}">
+                    <input type="hidden" name="class12" value="{{ initial_data.class12|default:'' }}">
+                    <input type="hidden" name="board12" value="{{ initial_data.board12|default:'' }}">
+                    <input type="hidden" name="stream12" value="{{ initial_data.stream12|default:'' }}">
+                    <input type="hidden" name="year12" value="{{ initial_data.year12|default:'' }}">
+                    <input type="hidden" name="total_marks12" value="{{ initial_data.total_marks12|default:'' }}">
+                    <input type="hidden" name="obtained12" value="{{ initial_data.obtained12|default:'' }}">
+                    <input type="hidden" name="percentage12" value="{{ initial_data.percentage12|default:'' }}">
+                    <input type="hidden" name="grade12" value="{{ initial_data.grade12|default:'' }}">
+                    <input type="hidden" name="class_grad" value="{{ initial_data.class_grad|default:'' }}">
+                    <input type="hidden" name="board_grad" value="{{ initial_data.board_grad|default:'' }}">
+                    <input type="hidden" name="stream_grad" value="{{ initial_data.stream_grad|default:'' }}">
+                    <input type="hidden" name="year_grad" value="{{ initial_data.year_grad|default:'' }}">
+                    <input type="hidden" name="total_marks_grad" value="{{ initial_data.total_marks_grad|default:'' }}">
+                    <input type="hidden" name="obtained_grad" value="{{ initial_data.obtained_grad|default:'' }}">
+                    <input type="hidden" name="percentage_grad" value="{{ initial_data.percentage_grad|default:'' }}">
+                    <input type="hidden" name="grade_grad" value="{{ initial_data.grade_grad|default:'' }}">
+                    <input type="hidden" name="education_json" value="{{ initial_data.education_json|default:'' }}">
+                </div>
+
+                <!-- SECTION 2: UNIVERSITY ENROLLMENT FEE & PAYMENT -->
+                <div class="enroll-section-card" id="feePaymentSection">
+                    <div class="enroll-section-title d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-money-bill-wave text-success"></i> Section 2: University Enrollment Fee &amp; UPI Payment
                         </div>
-                        <div class="field">
-                            <label>Email Address *</label>
-                            <input type="email" name="email" class="form-control" value="{{ initial_data.email|default:'' }}" required>
+                        <span class="badge bg-warning text-dark" style="font-size: 11.5px; font-weight: 700;">
+                            <i class="fas fa-qrcode me-1"></i> Scan &amp; Pay via UPI
+                        </span>
+                    </div>
+
+                    <input type="hidden" name="fee_amount" value="500">
+
+                    <div class="row g-3 align-items-stretch mb-3">
+                        <!-- Fee Details Column -->
+                        <div class="col-md-7">
+                            <div style="background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 8px; padding: 18px 20px; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
+                                <div>
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <span style="font-size: 12px; font-weight: 700; color: #166534; text-transform: uppercase; letter-spacing: 0.5px;">Fee Description</span>
+                                        <span class="badge bg-success" style="font-size: 11px;">Mandatory</span>
+                                    </div>
+                                    <h3 style="color: #065f46; font-size: 1.6rem; font-weight: 800; margin-bottom: 4px;">
+                                        ₹ 500 <span style="font-size: 13px; font-weight: 500; color: #15803d;">(Five Hundred Rupees Only)</span>
+                                    </h3>
+                                    <p style="font-size: 13px; color: #166534; margin-bottom: 12px; line-height: 1.4;">
+                                        Official University Enrollment &amp; Registration Fee for <strong>Academic Session 2026-27</strong>.
+                                    </p>
+                                    <div style="font-size: 12px; color: #1e293b; background: #ffffff; border: 1px solid #bbf7d0; border-radius: 6px; padding: 10px 12px; margin-bottom: 14px;">
+                                        <div><strong>Merchant:</strong> PRINCIPAL CHAITANYA SCIENCE AND ARTS COLLEGE AN AUTONOMOUS COLLEGE PAMGARH</div>
+                                        <div class="mt-1 d-flex align-items-center justify-content-between flex-wrap gap-1">
+                                            <span><strong>UPI ID:</strong> <code style="font-size: 13px; color: #082B49; font-weight: bold;">9827194555m@pnb</code></span>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size: 11px;" id="copyUpiBtn" onclick="copyUpiId()">
+                                                <i class="fas fa-copy"></i> Copy UPI
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Big Pay Action Button -->
+                                <div>
+                                    <button type="button" class="btn btn-primary w-100 py-2" onclick="openQrModal()" style="background: #082B49; border-color: #082B49; font-size: 14.5px; font-weight: 700; border-radius: 6px; box-shadow: 0 4px 6px rgba(8,43,73,0.2);">
+                                        <i class="fas fa-qrcode me-2 text-warning fs-5"></i> Click to Pay ₹500 (Open PNB QR Code)
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                        <div class="field">
-                            <label>Medium of Instruction</label>
-                            <select name="medium" class="form-select">
-                                {% for m in medium_choices %}
-                                <option value="{{ m }}" {% if initial_data.medium == m %}selected{% endif %}>{{ m }}</option>
-                                {% endfor %}
-                            </select>
+
+                        <!-- Quick Scan Thumbnail Column -->
+                        <div class="col-md-5">
+                            <div style="background: #ffffff; border: 1.5px dashed #cbd5e1; border-radius: 8px; padding: 14px; text-align: center; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer;" onclick="openQrModal()" title="Click to view full size QR code">
+                                <img src="{% static 'images/pnb_enrollment_qr.jpg' %}" alt="PNB QR Code Preview" style="max-height: 140px; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                                <div style="margin-top: 8px; font-size: 12px; font-weight: 700; color: #082B49;">
+                                    <i class="fas fa-search-plus me-1 text-primary"></i> Click to View Full QR Code
+                                </div>
+                                <div style="font-size: 11px; color: #64748b; margin-top: 2px;">
+                                    Pay via PhonePe, GPay, Paytm, BHIM, etc.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Verification Fields -->
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px 20px;">
+                        <h4 style="font-size: 14px; font-weight: 700; color: #082B49; margin-bottom: 12px;">
+                            <i class="fas fa-receipt text-primary me-1"></i> Payment Verification &amp; Receipt Upload (भुगतान विवरण दर्ज करें)
+                        </h4>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label" style="font-weight: 700; font-size: 13px; color: #1e293b;">
+                                    Transaction ID / UTR Number * <span class="text-danger">(Required)</span>
+                                </label>
+                                <input type="text" name="transaction_id" id="transactionIdInput" class="form-control" value="{{ initial_data.transaction_id|default:'' }}" placeholder="e.g. 4278XXXXXXXX (12-digit UTR/Ref No.)" style="font-family: monospace; font-size: 14px; font-weight: 600;" required>
+                                <div class="form-text" style="font-size: 11.5px; color: #64748b;">
+                                    Enter the 12-digit UTR or Reference ID received after paying ₹500 in your UPI app.
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" style="font-weight: 700; font-size: 13px; color: #1e293b;">
+                                    Upload Payment Receipt Screenshot * <span class="text-danger">(Required)</span>
+                                </label>
+                                <input type="file" name="payment_receipt" id="paymentReceiptInput" class="form-control" accept="image/*,.pdf" data-has-existing="{% if initial_data.payment_receipt_url or initial_data.payment_receipt_base64 %}1{% else %}0{% endif %}" onchange="previewPaymentReceipt(this)">
+                                <input type="hidden" name="payment_receipt_base64" id="paymentReceiptBase64" value="{{ initial_data.payment_receipt_base64|default:'' }}">
+                                
+                                <div id="receiptPreviewContainer" style="margin-top: 10px; display: {% if initial_data.payment_receipt_url or initial_data.payment_receipt_base64 %}block{% else %}none{% endif %};">
+                                    <div style="font-size: 12px; font-weight: 700; color: #16a34a; margin-bottom: 4px;">
+                                        <i class="fas fa-check-circle"></i> <span id="receiptFileName">Payment Receipt Attached:</span>
+                                    </div>
+                                    <img id="receiptPreviewImg" src="{{ initial_data.payment_receipt_url|default:initial_data.payment_receipt_base64 }}" alt="Payment Receipt" style="max-height: 140px; max-width: 240px; border-radius: 6px; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.08); display: block;">
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- SECTION 2: DOCUMENTS (PHOTO & SIGNATURE) -->
+                <!-- SECTION 3: APPLICANT PHOTO & SIGNATURE REVIEW -->
                 <div class="enroll-section-card">
                     <div class="enroll-section-title">
-                        <i class="fas fa-camera"></i> Section B: Student Photo &amp; Signature
+                        <i class="fas fa-camera"></i> Section 3: Student Photo &amp; Signature
                     </div>
                     <p style="font-size:13px; color:#64748b; margin-bottom:16px;">
                         The photo and signature submitted during admission are displayed below. You can keep them or upload new images.
@@ -272,168 +411,6 @@
                             <small class="text-muted d-block mt-1">JPG / PNG, Max 2MB</small>
                         </div>
                     </div>
-                </div>
-
-                <!-- SECTION 3: ADDRESSES -->
-                <div class="enroll-section-card">
-                    <div class="enroll-section-title">
-                        <i class="fas fa-map-marker-alt"></i> Section C: Address Details
-                    </div>
-                    <h4 style="font-size:14px; font-weight:700; color:#475569; margin-bottom:12px;">Permanent Address</h4>
-                    <div class="grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom:20px;">
-                        <div class="field">
-                            <label>State *</label>
-                            <input type="text" name="perm_state" id="permState" class="form-control" value="{{ initial_data.perm_state|default:'' }}" required>
-                        </div>
-                        <div class="field">
-                            <label>District *</label>
-                            <input type="text" name="perm_district" id="permDistrict" class="form-control" value="{{ initial_data.perm_district|default:'' }}" required>
-                        </div>
-                        <div class="field">
-                            <label>City / Tehsil</label>
-                            <input type="text" name="perm_city" id="permCity" class="form-control" value="{{ initial_data.perm_city|default:'' }}">
-                        </div>
-                        <div class="field">
-                            <label>Village / Street</label>
-                            <input type="text" name="perm_village" id="permVillage" class="form-control" value="{{ initial_data.perm_village|default:'' }}">
-                        </div>
-                        <div class="field">
-                            <label>Pin Code *</label>
-                            <input type="text" name="perm_pin_code" id="permPinCode" class="form-control" value="{{ initial_data.perm_pin_code|default:'' }}" maxlength="10" required>
-                        </div>
-                    </div>
-
-                    <div class="d-flex align-items-center justify-content-between mb-2">
-                        <h4 style="font-size:14px; font-weight:700; color:#475569; margin:0;">Correspondence Address</h4>
-                        <label style="font-size:13px; font-weight:normal; cursor:pointer;">
-                            <input type="checkbox" id="sameAsPerm" onchange="copyAddress()"> Same as Permanent Address
-                        </label>
-                    </div>
-                    <div class="grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
-                        <div class="field">
-                            <label>State</label>
-                            <input type="text" name="corr_state" id="corrState" class="form-control" value="{{ initial_data.corr_state|default:'' }}">
-                        </div>
-                        <div class="field">
-                            <label>District</label>
-                            <input type="text" name="corr_district" id="corrDistrict" class="form-control" value="{{ initial_data.corr_district|default:'' }}">
-                        </div>
-                        <div class="field">
-                            <label>City / Tehsil</label>
-                            <input type="text" name="corr_city" id="corrCity" class="form-control" value="{{ initial_data.corr_city|default:'' }}">
-                        </div>
-                        <div class="field">
-                            <label>Village / Street</label>
-                            <input type="text" name="corr_village" id="corrVillage" class="form-control" value="{{ initial_data.corr_village|default:'' }}">
-                        </div>
-                        <div class="field">
-                            <label>Pin Code</label>
-                            <input type="text" name="corr_pin_code" id="corrPinCode" class="form-control" value="{{ initial_data.corr_pin_code|default:'' }}" maxlength="10">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- SECTION 4: EDUCATIONAL QUALIFICATIONS -->
-                <div class="enroll-section-card">
-                    <div class="enroll-section-title">
-                        <i class="fas fa-graduation-cap"></i> Section D: Educational Qualifications
-                    </div>
-                    <h4 style="font-size:14px; font-weight:700; color:#475569; margin-bottom:8px;">Class 10 (Secondary)</h4>
-                    <div class="grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom:20px;">
-                        <div class="field">
-                            <label>Board</label>
-                            <input type="text" name="board10" class="form-control" value="{{ initial_data.board10|default:'' }}" placeholder="e.g. CGBSE / CBSE">
-                        </div>
-                        <div class="field">
-                            <label>Passing Year</label>
-                            <input type="number" name="year10" class="form-control" value="{{ initial_data.year10|default:'' }}" placeholder="YYYY">
-                        </div>
-                        <div class="field">
-                            <label>Total Marks</label>
-                            <input type="text" name="total_marks10" class="form-control" value="{{ initial_data.total_marks10|default:'' }}">
-                        </div>
-                        <div class="field">
-                            <label>Obtained Marks</label>
-                            <input type="text" name="obtained10" class="form-control" value="{{ initial_data.obtained10|default:'' }}">
-                        </div>
-                        <div class="field">
-                            <label>Percentage (%)</label>
-                            <input type="text" name="percentage10" class="form-control" value="{{ initial_data.percentage10|default:'' }}">
-                        </div>
-                    </div>
-
-                    <h4 style="font-size:14px; font-weight:700; color:#475569; margin-bottom:8px;">Class 12 (Higher Secondary)</h4>
-                    <div class="grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px;">
-                        <div class="field">
-                            <label>Board</label>
-                            <input type="text" name="board12" class="form-control" value="{{ initial_data.board12|default:'' }}" placeholder="e.g. CGBSE / CBSE">
-                        </div>
-                        <div class="field">
-                            <label>Passing Year</label>
-                            <input type="number" name="year12" class="form-control" value="{{ initial_data.year12|default:'' }}" placeholder="YYYY">
-                        </div>
-                        <div class="field">
-                            <label>Total Marks</label>
-                            <input type="text" name="total_marks12" class="form-control" value="{{ initial_data.total_marks12|default:'' }}">
-                        </div>
-                        <div class="field">
-                            <label>Obtained Marks</label>
-                            <input type="text" name="obtained12" class="form-control" value="{{ initial_data.obtained12|default:'' }}">
-                        </div>
-                        <div class="field">
-                            <label>Stream</label>
-                            <select name="stream12" id="ddlStream12" class="form-select">
-                                <option value="">Select Stream</option>
-                                <option value="Science" {% if initial_data.stream12 == 'Science' %}selected{% endif %}>Science</option>
-                                <option value="Arts" {% if initial_data.stream12 == 'Arts' %}selected{% endif %}>Arts</option>
-                                <option value="Commerce" {% if initial_data.stream12 == 'Commerce' %}selected{% endif %}>Commerce</option>
-                            </select>
-                        </div>
-                        <div class="field">
-                            <label>Percentage (%)</label>
-                            <input type="text" name="percentage12" class="form-control" value="{{ initial_data.percentage12|default:'' }}">
-                        </div>
-                    </div>
-                    {% if show_ug_qualification %}
-                    <h4 style="font-size:14px; font-weight:700; color:#475569; margin-top:20px; margin-bottom:8px;">
-                        Undergraduate / Graduation Qualification
-                        <span class="badge bg-primary ms-1" style="font-size:11px; font-weight:500;">Required for Post Graduate / PG Diploma</span>
-                    </h4>
-                    <div class="grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px;">
-                        <div class="field">
-                            <label>Exam / Degree</label>
-                            <input type="text" name="class_grad" class="form-control" value="{{ initial_data.class_grad|default:'' }}" placeholder="e.g. B.Sc. / B.A. / B.Com / BCA">
-                        </div>
-                        <div class="field">
-                            <label>University / Board</label>
-                            <input type="text" name="board_grad" class="form-control" value="{{ initial_data.board_grad|default:'' }}" placeholder="e.g. ABVV / Bilaspur University">
-                        </div>
-                        <div class="field">
-                            <label>Stream / Major</label>
-                            <input type="text" name="stream_grad" class="form-control" value="{{ initial_data.stream_grad|default:'' }}" placeholder="e.g. Science / Computer Science">
-                        </div>
-                        <div class="field">
-                            <label>Passing Year</label>
-                            <input type="number" name="year_grad" class="form-control" value="{{ initial_data.year_grad|default:'' }}" placeholder="YYYY">
-                        </div>
-                        <div class="field">
-                            <label>Total Marks</label>
-                            <input type="text" name="total_marks_grad" class="form-control" value="{{ initial_data.total_marks_grad|default:'' }}">
-                        </div>
-                        <div class="field">
-                            <label>Obtained Marks</label>
-                            <input type="text" name="obtained_grad" class="form-control" value="{{ initial_data.obtained_grad|default:'' }}">
-                        </div>
-                        <div class="field">
-                            <label>Percentage (%)</label>
-                            <input type="text" name="percentage_grad" class="form-control" value="{{ initial_data.percentage_grad|default:'' }}">
-                        </div>
-                        <div class="field">
-                            <label>Division / Grade</label>
-                            <input type="text" name="grade_grad" class="form-control" value="{{ initial_data.grade_grad|default:'' }}" placeholder="e.g. First / Grade A">
-                        </div>
-                    </div>
-                    {% endif %}
                 </div>
 
                 <!-- SECTION 5: PROGRAM & COURSE SELECTION -->
@@ -521,6 +498,47 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+<!-- PNB QR PAYMENT MODAL -->
+<div id="pnbQrModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 999999; align-items: center; justify-content: center; padding: 16px; backdrop-filter: blur(4px);">
+    <div style="background: #ffffff; border-radius: 12px; max-width: 440px; width: 100%; max-height: 92vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); border: 2px solid #082B49; position: relative;">
+        <!-- Modal Header -->
+        <div style="background: #082B49; color: #ffffff; padding: 14px 18px; border-top-left-radius: 10px; border-top-right-radius: 10px; display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-qrcode text-warning fs-5"></i>
+                <span style="font-weight: 700; font-size: 15px;">PNB Scan &amp; Pay - ₹500</span>
+            </div>
+            <button type="button" onclick="closeQrModal()" style="background: transparent; border: none; color: #ffffff; font-size: 22px; cursor: pointer; line-height: 1; padding: 0 4px;" title="Close">
+                &times;
+            </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div style="padding: 18px; text-align: center;">
+            <img src="{% static 'images/pnb_enrollment_qr.jpg' %}" alt="PNB Enrollment QR Code" style="width: 100%; max-width: 320px; height: auto; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 4px 8px rgba(0,0,0,0.08); display: block; margin: 0 auto 14px;">
+
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 16px; text-align: left; font-size: 12px;">
+                <div style="color: #64748b; font-size: 11px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.3px;">Beneficiary Merchant</div>
+                <div style="font-weight: 700; color: #082B49; font-size: 12.5px; line-height: 1.35;">
+                    PRINCIPAL CHAITANYA SCIENCE AND ARTS COLLEGE AN AUTONOMOUS COLLEGE PAMGARH
+                </div>
+                <div class="mt-2 pt-2 border-top d-flex align-items-center justify-content-between">
+                    <div>
+                        <span style="color: #64748b; font-size: 11px;">UPI ID:</span> <strong style="color: #082B49; font-family: monospace; font-size: 13px;">9827194555m@pnb</strong>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size: 11px;" id="modalCopyUpiBtn" onclick="copyUpiId()">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
+                </div>
+            </div>
+
+            <!-- Proceed Button inside modal -->
+            <button type="button" class="btn btn-success w-100 py-2" onclick="proceedAfterPayment()" style="font-size: 14.5px; font-weight: 700; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <i class="fas fa-check-circle me-1"></i> I Have Paid ₹500 - Proceed to Enter Details
+            </button>
         </div>
     </div>
 </div>
@@ -1375,8 +1393,110 @@ window.ENROLLMENT_CONFIG = {
         }
     };
 
+    window.openQrModal = function() {
+        const modal = document.getElementById('pnbQrModal');
+        if (modal) {
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+    };
+
+    window.closeQrModal = function() {
+        const modal = document.getElementById('pnbQrModal');
+        if (modal) {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+    };
+
+    window.proceedAfterPayment = function() {
+        window.closeQrModal();
+        const txElem = document.getElementById('transactionIdInput');
+        if (txElem) {
+            txElem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(() => txElem.focus(), 300);
+        }
+    };
+
+    window.copyUpiId = function() {
+        const upi = '9827194555m@pnb';
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(upi).then(() => {
+                const btns = [document.getElementById('copyUpiBtn'), document.getElementById('modalCopyUpiBtn')];
+                btns.forEach(b => {
+                    if (b) {
+                        b.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                        setTimeout(() => { b.innerHTML = '<i class="fas fa-copy"></i> Copy'; }, 2000);
+                    }
+                });
+            }).catch(() => {
+                prompt('Copy UPI ID:', upi);
+            });
+        } else {
+            prompt('Copy UPI ID:', upi);
+        }
+    };
+
+    window.previewPaymentReceipt = function(input) {
+        const file = input.files ? input.files[0] : null;
+        const container = document.getElementById('receiptPreviewContainer');
+        const img = document.getElementById('receiptPreviewImg');
+        const base64Input = document.getElementById('paymentReceiptBase64');
+        const fileNameEl = document.getElementById('receiptFileName');
+
+        if (!file) return;
+
+        if (fileNameEl) {
+            fileNameEl.textContent = `Attached: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+        }
+
+        if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                if (img) img.src = e.target.result;
+                if (base64Input) base64Input.value = e.target.result;
+                if (container) container.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        } else {
+            if (container) container.style.display = 'block';
+        }
+    };
+
     window.confirmSubmit = function (e) {
         window.prepareSubmit();
+        const action = e.submitter ? e.submitter.value : (e.target ? e.target.value : 'submit');
+
+        if (action === 'submit') {
+            const txId = (document.getElementById('transactionIdInput')?.value || '').trim();
+            const receiptInput = document.getElementById('paymentReceiptInput');
+            const receiptBase64 = (document.getElementById('paymentReceiptBase64')?.value || '').trim();
+            const hasExistingReceipt = (receiptInput?.dataset.hasExisting === '1') || receiptBase64.length > 0;
+            const hasNewFile = receiptInput && receiptInput.files && receiptInput.files.length > 0;
+
+            if (!txId) {
+                alert('Please pay the ₹500 enrollment fee and enter your Transaction ID / UTR Number before submitting.');
+                e.preventDefault();
+                const txElem = document.getElementById('transactionIdInput');
+                if (txElem) {
+                    txElem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    txElem.focus();
+                }
+                return false;
+            }
+
+            if (!hasExistingReceipt && !hasNewFile) {
+                alert('Please upload a screenshot or copy of your payment receipt before submitting.');
+                e.preventDefault();
+                const rcptElem = document.getElementById('paymentReceiptInput');
+                if (rcptElem) {
+                    rcptElem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    rcptElem.focus();
+                }
+                return false;
+            }
+        }
+
         const raw = document.getElementById('selectedCoursesJson').value || '[]';
         let courses = [];
         try {
@@ -1390,17 +1510,6 @@ window.ENROLLMENT_CONFIG = {
             }
         }
         return confirm('Are you sure you want to submit your Enrollment Application? An official Enrollment Number will be generated.');
-    };
-
-    window.copyAddress = function() {
-        const checked = document.getElementById('sameAsPerm').checked;
-        if (checked) {
-            document.getElementById('corrState').value = document.getElementById('permState').value;
-            document.getElementById('corrDistrict').value = document.getElementById('permDistrict').value;
-            document.getElementById('corrCity').value = document.getElementById('permCity').value;
-            document.getElementById('corrVillage').value = document.getElementById('permVillage').value;
-            document.getElementById('corrPinCode').value = document.getElementById('permPinCode').value;
-        }
     };
 
     // Photo & Signature previews

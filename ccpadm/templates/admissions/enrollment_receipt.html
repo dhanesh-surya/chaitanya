@@ -409,9 +409,19 @@
                         <tr>
                             <th>Payment Status</th>
                             <td>
+                                {% if transaction_id or payment_status == 'Paid' %}
+                                <span class="status-badge" style="background:#dcfce7; color:#15803d; border-color:#86efac;"><i class="fas fa-check-circle"></i> Paid Online (UPI)</span>
+                                {% else %}
                                 <span class="status-badge">Pending (Pay at Office)</span>
+                                {% endif %}
                             </td>
                         </tr>
+                        {% if transaction_id %}
+                        <tr>
+                            <th>UTR / Transaction ID</th>
+                            <td><strong style="font-family: monospace; color:#082B49;">{{ transaction_id }}</strong></td>
+                        </tr>
+                        {% endif %}
                         <tr>
                             <th>Deposit Date</th>
                             <td>{{ deposit_date }}</td>
@@ -494,9 +504,19 @@
                         <tr>
                             <th>Payment Status</th>
                             <td>
+                                {% if transaction_id or payment_status == 'Paid' %}
+                                <span class="status-badge" style="background:#dcfce7; color:#15803d; border-color:#86efac;"><i class="fas fa-check-circle"></i> Paid Online (UPI)</span>
+                                {% else %}
                                 <span class="status-badge">Pending (Pay at Office)</span>
+                                {% endif %}
                             </td>
                         </tr>
+                        {% if transaction_id %}
+                        <tr>
+                            <th>UTR / Transaction ID</th>
+                            <td><strong style="font-family: monospace; color:#082B49;">{{ transaction_id }}</strong></td>
+                        </tr>
+                        {% endif %}
                         <tr>
                             <th>Deposit Date</th>
                             <td>{{ deposit_date }}</td>

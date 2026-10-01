@@ -113,6 +113,8 @@ class EnrollmentViewsTestCase(TestCase):
             'program_type': 'B.A. First Semester',
             'program_code': 'CCBA01',
             'selected_courses_json': courses_json,
+            'fee_amount': '500',
+            'transaction_id': 'TXN1234567890',
         }
         response = self.client.post(reverse('enrollment_form'), payload)
         self.assertEqual(response.status_code, 302)
@@ -193,7 +195,7 @@ class EnrollmentViewsTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context['show_ug_qualification'])
         content = response.content.decode('utf-8')
-        self.assertIn('Undergraduate / Graduation Qualification', content)
+        self.assertIn('name="class_grad"', content)
         self.assertEqual(response.context['initial_data']['class_grad'], 'B.Sc. CS')
         self.assertEqual(response.context['initial_data']['board_grad'], 'ABVV')
         self.assertEqual(response.context['initial_data']['stream_grad'], 'Computer Science')
@@ -225,6 +227,8 @@ class EnrollmentViewsTestCase(TestCase):
             'obtained_grad': '1440',
             'percentage_grad': '80',
             'grade_grad': 'First',
+            'fee_amount': '500',
+            'transaction_id': 'TXN9988776655',
             # Even if program_type/selected_courses_json omitted because selects/inputs were disabled:
         }
         res_post = self.client.post(reverse('enrollment_form'), post_payload)

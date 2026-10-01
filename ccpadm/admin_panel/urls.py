@@ -20,4 +20,7 @@ urlpatterns = [
     path('students/pdf/<str:app_no>/', views.admin_download_pdf, name='admin_download_pdf'),
     path('admission/<int:pk>/status/', views.update_admission_status, name='update_admission_status'),
     path('admissions/bulk-status/', views.bulk_update_admission_status, name='bulk_update_admission_status'),
+    path('enrollment/<int:pk>/status/', views.update_enrollment_status, name='update_enrollment_status'),
+    path('enrollments/', views.manage_enrollments, name='manage_enrollments'),
+    path('enrollments/bulk-status/', views.bulk_update_enrollment_status, name='bulk_update_enrollment_status'),
 ]

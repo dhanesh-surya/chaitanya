@@ -8,8 +8,14 @@ class ProgramCourse(models.Model):
     program_type = models.CharField(max_length=100, blank=True)
     department = models.CharField(max_length=150, blank=True)
     course_name = models.CharField(max_length=250, blank=True)
+    course_code = models.CharField(max_length=50, blank=True, db_index=True)
+    semester = models.CharField(max_length=20, default='I', blank=True)
+    paper_no = models.CharField(max_length=20, blank=True)
     course_type_1 = models.CharField(max_length=50, blank=True)
     course_type_2 = models.CharField(max_length=50, blank=True)
+    credit_l = models.CharField(max_length=10, blank=True)
+    credit_t = models.CharField(max_length=10, blank=True)
+    credit_p = models.CharField(max_length=10, blank=True)
     sort_order = models.IntegerField(null=True, blank=True)
     is_compulsory = models.BooleanField(
         default=False,

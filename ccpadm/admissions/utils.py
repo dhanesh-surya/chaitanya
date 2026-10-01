@@ -30,6 +30,30 @@ def generate_application_number():
     return f'{prefix}{seq:04d}'
 
 
+def generate_enrollment_number():
+    from django.db import transaction
+    from .models import StudentEnrollment
+
+    prefix = 'CCP2605'
+    with transaction.atomic():
+        last = (
+            StudentEnrollment.objects.select_for_update()
+            .filter(enrollment_no__startswith=prefix)
+            .order_by('-enrollment_no')
+            .values_list('enrollment_no', flat=True)
+            .first()
+        )
+        if last and len(last) >= 11:
+            try:
+                seq = int(last[7:]) + 1
+            except ValueError:
+                seq = 1
+        else:
+            seq = 1
+        return f'{prefix}{seq:04d}'
+
+
+
 def save_base64_image(base64_string, app_no, image_type='photo'):
     if not base64_string:
         return None
@@ -56,8 +80,10 @@ def save_base64_image(base64_string, app_no, image_type='photo'):
 
 
 def _edu_field(item, *keys, default=''):
+    if not isinstance(item, dict):
+        return default
     for key in keys:
-        if key in item and item[key] not in (None, ''):
+        if key in item and item[key] not in (None, '', '-'):
             return item[key]
     return default
 
@@ -72,7 +98,8 @@ def _education_has_meaningful_data(education_list):
             'TotalMarks', 'totalMarks', 'total_marks', 'Obtained', 'obtained',
             'obtainedMarks', 'Percentage', 'percentage',
         ):
-            if str(_edu_field(item, key)).strip():
+            val = str(_edu_field(item, key)).strip()
+            if val and val != '-':
                 return True
     return False
 
@@ -90,10 +117,25 @@ def _load_education_json(admission):
 
 
 def _education_row_key(item):
-    cls = str(_edu_field(item, 'ClassName', 'className', 'class', 'Class')).lower()
+    if not isinstance(item, dict):
+        return '10'
+    row_key = str(_edu_field(item, 'RowKey', 'rowKey', 'row_key', 'key')).strip().lower()
+    if row_key in ('10', '10th'):
+        return '10'
+    if row_key in ('12', '12th'):
+        return '12'
+    if row_key in ('grad', 'graduation'):
+        return 'grad'
+
+    cls = str(_edu_field(item, 'ClassName', 'className', 'class', 'Class')).strip().lower()
     if any(x in cls for x in ('12', 'xii', 'inter', 'hsc', '+2', 'senior', 'higher')):
         return '12'
-    if any(x in cls for x in ('grad', 'ug', 'bachelor', 'degree', 'b.')):
+    if any(x in cls for x in ('10', 'ssc', 'matric', 'secondary', 'high')) or cls == 'x':
+        return '10'
+    if any(x in cls for x in ('grad', 'ug', 'bachelor', 'degree', 'bca', 'bba', 'bsc', 'b.sc', 'ba', 'b.a', 'bcom', 'b.com', 'btech', 'b.tech', 'be', 'b.e', 'bed', 'b.ed', 'pg', 'master', 'mca', 'm.sc', 'msc', 'mba', 'm.com', 'mcom', 'ma', 'm.a')):
+        return 'grad'
+    # Any other non-10/non-12 course entered as education row is graduation
+    if cls:
         return 'grad'
     return '10'
 
@@ -109,10 +151,19 @@ def _merge_education_lists(incoming, stored):
             continue
         key = _education_row_key(item)
         if _education_has_meaningful_data([item]):
-            merged[key] = {**merged.get(key, {}), **item}
+            current_row = dict(merged.get(key, {}))
+            for k, v in item.items():
+                if v not in (None, '', '-'):
+                    current_row[k] = v
+            current_row['RowKey'] = key
+            merged[key] = current_row
         elif key not in merged:
-            merged[key] = dict(item)
-    return list(merged.values())
+            item_copy = dict(item)
+            item_copy['RowKey'] = key
+            merged[key] = item_copy
+
+    order = {'10': 1, '12': 2, 'grad': 3}
+    return sorted(list(merged.values()), key=lambda x: order.get(_education_row_key(x), 99))
 
 
 def _resolve_application_no(data, reg_no):
@@ -135,15 +186,16 @@ def _resolve_application_no(data, reg_no):
 def parse_education(education_list):
     class10, class12, grad = {}, {}, {}
     for item in education_list or []:
-        cls = str(_edu_field(item, 'ClassName', 'className', 'class', 'Class')).lower()
-        target = None
-        if any(x in cls for x in ('12', 'xii', 'inter', 'hsc', '+2', 'senior', 'higher')):
+        if not isinstance(item, dict):
+            continue
+        key = _education_row_key(item)
+        if key == '12':
             target = class12
-        elif any(x in cls for x in ('10', 'ssc', 'matric', 'secondary', 'high')) or cls == 'x':
+        elif key == '10':
             target = class10
-        elif any(x in cls for x in ('grad', 'ug', 'bachelor', 'degree', 'b.')):
+        elif key == 'grad':
             target = grad
-        if target is None:
+        else:
             continue
         target.update({
             'class': _edu_field(item, 'ClassName', 'className', 'class', 'Class'),

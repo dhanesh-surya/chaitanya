@@ -1,0 +1,299 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Enrollments - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="portal-page portal-page--wide">
+    <div class="portal-main">
+        <div class="page-header page-header--admin">
+            <h2 class="page-title"><i class="fas fa-id-card"></i> Manage Student Enrollments</h2>
+            <nav class="page-actions page-actions--toolbar" aria-label="Admin navigation">
+                {% include 'partials/admin_nav_actions.html' with active_page='enrollments' %}
+                {% include 'partials/admin_nav_logout.html' %}
+            </nav>
+        </div>
+
+        <div class="stat-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: var(--space-lg);">
+            <a href="{% url 'manage_enrollments' %}" class="stat-card stat-card--link{% if status_filter == 'ALL' and not program_filter and not search %} is-active{% endif %}">
+                <h3>{{ total_count }}</h3>
+                <p>Total Enrollments</p>
+                <span class="stat-card__hint">View all</span>
+            </a>
+            <a href="{% url 'manage_enrollments' %}?status=Submitted{% if program_filter %}&program={{ program_filter|urlencode }}{% endif %}" class="stat-card stat-card--link{% if status_filter == 'Submitted' %} is-active{% endif %}" style="border-left: 4px solid #0284c7;">
+                <h3 style="color: #0284c7;">{{ submitted_count }}</h3>
+                <p>Pending Approval</p>
+                <span class="stat-card__hint">Requires review</span>
+            </a>
+            <a href="{% url 'manage_enrollments' %}?status=Approved{% if program_filter %}&program={{ program_filter|urlencode }}{% endif %}" class="stat-card stat-card--link{% if status_filter == 'Approved' %} is-active{% endif %}" style="border-left: 4px solid #16a34a;">
+                <h3 style="color: #16a34a;">{{ approved_count }}</h3>
+                <p>Approved / Accepted</p>
+                <span class="stat-card__hint">Enrollment locked</span>
+            </a>
+            <a href="{% url 'manage_enrollments' %}?status=Draft{% if program_filter %}&program={{ program_filter|urlencode }}{% endif %}" class="stat-card stat-card--link{% if status_filter == 'Draft' %} is-active{% endif %}" style="border-left: 4px solid #d97706;">
+                <h3 style="color: #d97706;">{{ draft_count }}</h3>
+                <p>Draft (Editable)</p>
+                <span class="stat-card__hint">In progress</span>
+            </a>
+        </div>
+
+        <!-- FILTERS & SEARCH -->
+        <div class="filter-panel" style="margin-bottom: var(--space-md); padding: 1.25rem; background: #ffffff; border-radius: 8px; border: 1px solid var(--color-border); box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+            <form method="get" action="{% url 'manage_enrollments' %}" class="filter-grid" style="display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end;">
+                <div class="filter-field" style="flex: 1 1 200px;">
+                    <label for="enrollmentSearch" style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; color: var(--color-text-muted);">Search</label>
+                    <input type="text" id="enrollmentSearch" name="search" class="portal-input" value="{{ search }}" placeholder="Name, Reg No, Enrollment No, Mobile..." style="width: 100%;">
+                </div>
+                <div class="filter-field" style="flex: 1 1 220px;">
+                    <label for="enrollmentProgram" style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; color: var(--color-text-muted);">Program</label>
+                    <select id="enrollmentProgram" name="program" class="portal-input" style="width: 100%;">
+                        <option value="">-- All Programs --</option>
+                        {% for pt in program_types %}
+                        <option value="{{ pt }}" {% if program_filter == pt %}selected{% endif %}>{{ pt }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-field" style="flex: 0 1 160px;">
+                    <label for="enrollmentStatus" style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; color: var(--color-text-muted);">Status</label>
+                    <select id="enrollmentStatus" name="status" class="portal-input" style="width: 100%;">
+                        <option value="ALL" {% if status_filter == 'ALL' %}selected{% endif %}>All Statuses</option>
+                        <option value="Submitted" {% if status_filter == 'Submitted' %}selected{% endif %}>Submitted (Pending)</option>
+                        <option value="Approved" {% if status_filter == 'Approved' %}selected{% endif %}>Approved / Accepted</option>
+                        <option value="Draft" {% if status_filter == 'Draft' %}selected{% endif %}>Draft (Editable)</option>
+                    </select>
+                </div>
+                <div class="filter-actions" style="display: flex; gap: 8px;">
+                    <button type="submit" class="btn btn-primary btn-sm" style="background:#082B49; border-color:#082B49; padding: 7px 16px;">
+                        <i class="fas fa-filter"></i> Filter
+                    </button>
+                    {% if search or program_filter or status_filter != 'ALL' %}
+                    <a href="{% url 'manage_enrollments' %}" class="btn btn-ghost btn-sm" style="padding: 7px 12px;" title="Reset filters">
+                        <i class="fas fa-times"></i> Reset
+                    </a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+
+        <!-- BULK ACTION BAR -->
+        <form method="post" action="{% url 'bulk_update_enrollment_status' %}" id="bulkEnrollmentActionForm" class="bulk-action-bar" hidden style="background: #f8fafc; border: 1.5px solid #0284c7; padding: 10px 16px; border-radius: 6px; margin-bottom: 12px; display: flex; align-items: center; gap: 12px;">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <span class="bulk-action-bar__count" id="bulkEnrollmentSelectedCount" style="font-weight: 700; color: #082B49;">0 selected</span>
+            <select name="status" id="bulkEnrollmentStatusSelect" class="portal-input" disabled style="min-width: 220px;" aria-label="Bulk enrollment status action">
+                <option value="">Choose action...</option>
+                <option value="Approved">Accept / Approve Selected</option>
+                <option value="Draft">Reset to Draft (Allow Students to Edit)</option>
+            </select>
+            <button type="submit" class="btn btn-primary btn-sm" id="bulkEnrollmentApplyBtn" disabled style="background: #16a34a; border-color: #15803d; color: #fff; font-weight: 600;">
+                <i class="fas fa-check-double" aria-hidden="true"></i> Apply to Selected
+            </button>
+        </form>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-xs);">
+            <p class="field-hint" style="margin-bottom: 0;">Showing <strong>{{ filtered_count }}</strong> enrollment application(s)</p>
+            <div class="field-hint text-muted" style="font-size: 11.5px;">
+                <i class="fas fa-info-circle text-primary"></i> Approving an enrollment locks it from student cancellation and assigns an official enrollment number.
+            </div>
+        </div>
+
+        <div class="table-wrap">
+            <table class="data-table" id="enrollmentsTable">
+                <thead>
+                    <tr>
+                        <th class="col-select" style="width: 40px; text-align: center;">
+                            <label class="table-checkbox" title="Select all enrollments">
+                                <input type="checkbox" id="selectAllEnrollments" aria-label="Select all enrollment applications">
+                            </label>
+                        </th>
+                        <th style="min-width: 140px;">Enrollment No</th>
+                        <th>Student Name &amp; Father's Name</th>
+                        <th>Reg No</th>
+                        <th>Program &amp; Sem</th>
+                        <th>Status</th>
+                        <th>Submitted Date</th>
+                        <th style="min-width: 200px;">Actions &amp; Approvals</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for e in enrollments %}
+                    <tr>
+                        <td class="col-select" style="text-align: center;">
+                            <label class="table-checkbox">
+                                <input type="checkbox" class="enrollment-row-select" value="{{ e.pk }}" aria-label="Select {{ e.full_name }}">
+                            </label>
+                        </td>
+                        <td>
+                            <strong style="font-family: monospace; font-size: 12.5px; color: #082B49;">
+                                {{ e.enrollment_no|default:"Not Assigned" }}
+                            </strong>
+                            <div style="margin-top: 4px; display: flex; gap: 8px;">
+                                <a href="{% url 'enrollment_print' e.enrollment_no|default:e.pk %}" target="_blank" class="text-sm" title="View / Print Enrollment Slip" style="color: #2563eb; font-weight: 600; text-decoration: none;">
+                                    <i class="fas fa-print"></i> Print Slip
+                                </a>
+                                {% if e.enrollment_no %}
+                                <a href="{% url 'enrollment_receipt' e.enrollment_no %}" target="_blank" class="text-sm" title="View / Print Fee Receipt" style="color: #059669; font-weight: 600; text-decoration: none;">
+                                    <i class="fas fa-receipt"></i> Receipt
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            <strong>{{ e.full_name }}</strong>
+                            {% if e.father_name %}
+                            <div class="text-muted text-sm" style="font-size: 11.5px;">S/D/W of: {{ e.father_name }}</div>
+                            {% endif %}
+                            {% if e.mobile %}
+                            <div class="text-muted text-sm" style="font-size: 11px;"><i class="fas fa-phone-alt" style="font-size: 10px;"></i> {{ e.mobile }}</div>
+                            {% endif %}
+                        </td>
+                        <td><span style="font-family: monospace; font-weight: 600;">{{ e.reg_no }}</span></td>
+                        <td>
+                            <div>{{ e.program_type|default:"—" }}</div>
+                            <span class="badge badge-secondary" style="font-size: 10.5px;">Sem {{ e.semester }}</span>
+                        </td>
+                        <td>
+                            {% if e.status == 'Approved' %}
+                            <span class="badge badge-success"><i class="fas fa-check-circle"></i> Approved</span>
+                            {% elif e.status == 'Submitted' or e.is_submitted %}
+                            <span class="badge badge-info"><i class="fas fa-clock"></i> Submitted</span>
+                            {% else %}
+                            <span class="badge badge-warning"><i class="fas fa-edit"></i> Draft</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ e.submitted_date|date:"d/m/Y H:i"|default:"—" }}</td>
+                        <td>
+                            <div style="display: flex; flex-direction: column; gap: 6px;">
+                                {% if e.status != 'Approved' %}
+                                <form method="post" action="{% url 'update_enrollment_status' e.pk %}" class="inline-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="status" value="Approved">
+                                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                    <button type="submit" class="btn btn-sm btn-success" style="background:#16a34a; border-color:#15803d; color:#fff; font-weight:600; width: 100%; justify-content: center; padding: 4px 10px;" title="Approve &amp; Accept this enrollment">
+                                        <i class="fas fa-check-circle me-1"></i> Approve / Accept
+                                    </button>
+                                </form>
+                                {% else %}
+                                <form method="post" action="{% url 'update_enrollment_status' e.pk %}" class="inline-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="status" value="Draft">
+                                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-warning" style="border: 1px solid #d97706; color: #b45309; background: #fffbeb; font-weight:600; width: 100%; justify-content: center; padding: 3px 8px; font-size: 11px;" title="Unlock to allow student to edit mistakes">
+                                        <i class="fas fa-undo me-1"></i> Reset to Draft (Allow Edit)
+                                    </button>
+                                </form>
+                                {% endif %}
+                                <form method="post" action="{% url 'update_enrollment_status' e.pk %}" class="inline-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                    <select name="status" onchange="this.form.submit()" class="portal-input" style="font-size: 11px; padding: 2px 6px; width: 100%;">
+                                        <option value="">More status options...</option>
+                                        <option value="Approved">Accept / Approve</option>
+                                        <option value="Submitted">Mark as Submitted</option>
+                                        <option value="Draft">Reset to Draft (Allow Edit)</option>
+                                    </select>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr class="empty-row">
+                        <td colspan="8" style="text-align: center; padding: 3rem 1rem; color: var(--color-text-muted);">
+                            <i class="fas fa-id-card" style="font-size: 2.2rem; margin-bottom: 0.75rem; display: block; opacity: 0.4;"></i>
+                            <strong style="font-size: 1.05rem;">No Enrollment Applications Found</strong>
+                            <div style="margin-top: 0.35rem;">
+                                {% if search or program_filter or status_filter != 'ALL' %}
+                                Try clearing the search or filters to see all enrollments.
+                                {% else %}
+                                No students have enrolled yet.
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    const table = document.getElementById('enrollmentsTable');
+    const bulkForm = document.getElementById('bulkEnrollmentActionForm');
+    const selectAll = document.getElementById('selectAllEnrollments');
+    const bulkCount = document.getElementById('bulkEnrollmentSelectedCount');
+    const bulkStatus = document.getElementById('bulkEnrollmentStatusSelect');
+    const bulkApplyBtn = document.getElementById('bulkEnrollmentApplyBtn');
+
+    if (!table || !bulkForm) return;
+
+    const rowChecks = () => Array.from(table.querySelectorAll('.enrollment-row-select'));
+
+    function selectedRows() {
+        return rowChecks().filter((cb) => cb.checked);
+    }
+
+    function syncBulkControls() {
+        const selected = selectedRows();
+        const count = selected.length;
+        const hasSelection = count > 0;
+
+        bulkForm.hidden = !hasSelection;
+        bulkCount.textContent = count + (count === 1 ? ' enrollment selected' : ' enrollments selected');
+        bulkStatus.disabled = !hasSelection;
+        bulkApplyBtn.disabled = !hasSelection || !bulkStatus.value;
+
+        if (selectAll) {
+            const allRows = rowChecks();
+            selectAll.indeterminate = count > 0 && count < allRows.length;
+            selectAll.checked = allRows.length > 0 && count === allRows.length;
+        }
+    }
+
+    if (selectAll) {
+        selectAll.addEventListener('change', function () {
+            const checked = selectAll.checked;
+            rowChecks().forEach((cb) => {
+                cb.checked = checked;
+            });
+            syncBulkControls();
+        });
+    }
+
+    table.addEventListener('change', function (event) {
+        if (event.target.classList.contains('enrollment-row-select')) {
+            syncBulkControls();
+        }
+    });
+
+    bulkStatus.addEventListener('change', syncBulkControls);
+
+    bulkForm.addEventListener('submit', function (event) {
+        const selected = selectedRows();
+        if (!selected.length || !bulkStatus.value) {
+            event.preventDefault();
+            return;
+        }
+
+        const actionLabel = bulkStatus.options[bulkStatus.selectedIndex].text;
+        if (!window.confirm('Apply "' + actionLabel + '" to ' + selected.length + ' selected enrollment(s)?')) {
+            event.preventDefault();
+            return;
+        }
+
+        bulkForm.querySelectorAll('input[name="enrollment_ids"]').forEach((input) => input.remove());
+        selected.forEach((cb) => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'enrollment_ids';
+            input.value = cb.value;
+            bulkForm.appendChild(input);
+        });
+    });
+
+    syncBulkControls();
+})();
+</script>
+{% endblock %}

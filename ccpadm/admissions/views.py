@@ -128,6 +128,8 @@ def courses_api(request):
             'id': c.legacy_id or c.pk,
             'course_name': label,
             'department': department,
+            'course_code': c.course_code or '',
+            'paper_no': c.paper_no or '',
             'course_type_1': c.course_type_1 or '',
             'course_type_2': c.course_type_2 or 'N/A',
             'is_compulsory': is_compulsory,

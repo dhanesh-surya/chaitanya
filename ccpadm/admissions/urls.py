@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import views
+from . import enrollment_views, views
 
 urlpatterns = [
     path('fill-form/', views.fill_admission_form, name='fill_admission_form'),
@@ -9,6 +9,12 @@ urlpatterns = [
     path('print/<str:app_no>/', views.print_application, name='print_application'),
     path('download-pdf/', views.download_pdf_page, name='download_pdf_page'),
     path('pdf/<str:app_no>/', views.download_pdf, name='download_pdf'),
+    path('enrollment/', enrollment_views.enrollment_form, name='enrollment_form'),
+    path('enrollment/print/', enrollment_views.enrollment_print, name='enrollment_print_default'),
+    path('enrollment/print/<str:enrollment_no>/', enrollment_views.enrollment_print, name='enrollment_print'),
+    path('enrollment/receipt/', enrollment_views.enrollment_fee_receipt, name='enrollment_receipt_default'),
+    path('enrollment/receipt/<str:enrollment_no>/', enrollment_views.enrollment_fee_receipt, name='enrollment_receipt'),
+    path('enrollment/cancel/', enrollment_views.cancel_enrollment, name='cancel_enrollment'),
     path('api/courses/', views.courses_api, name='courses_api'),
     path('api/save-draft/', views.save_draft_api, name='save_draft_api'),
     path('api/load-draft/', views.load_draft_api, name='load_draft_api'),

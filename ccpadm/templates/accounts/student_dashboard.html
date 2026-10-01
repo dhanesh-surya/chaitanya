@@ -58,13 +58,31 @@
                     <p>{{ admission.application_no }}</p>
                 </div>
                 <div class="info-card">
-                    <label>Status</label>
+                    <label>Admission Status</label>
                     <p><span class="badge badge-success">{{ admission.status }}</span></p>
                 </div>
                 {% else %}
                 <div class="info-card">
-                    <label>Status</label>
+                    <label>Admission Status</label>
                     <p><span class="badge badge-warning">Not Submitted</span></p>
+                </div>
+                {% endif %}
+                {% if enrollment %}
+                <div class="info-card">
+                    <label>Enrollment No</label>
+                    <p>{{ enrollment.enrollment_no|default:"—" }}</p>
+                </div>
+                <div class="info-card">
+                    <label>Enrollment Status</label>
+                    <p>
+                        {% if enrollment.status == 'Approved' %}
+                        <span class="badge badge-success"><i class="fas fa-check-circle"></i> Approved / Accepted</span>
+                        {% elif enrollment.status == 'Submitted' or enrollment.is_submitted %}
+                        <span class="badge badge-info"><i class="fas fa-clock"></i> Submitted (Pending Admin Approval)</span>
+                        {% else %}
+                        <span class="badge badge-warning"><i class="fas fa-edit"></i> Draft (Not Submitted)</span>
+                        {% endif %}
+                    </p>
                 </div>
                 {% endif %}
             </div>
@@ -77,6 +95,34 @@
                 {% else %}
                 <a href="{% url 'fill_admission_form' %}" class="btn btn-primary">
                     <i class="fas fa-edit"></i> Fill Admission Form
+                </a>
+                {% endif %}
+                {% if enrollment and enrollment.is_submitted %}
+                <a href="{% url 'enrollment_print_default' %}" class="btn btn-outline-success" target="_blank">
+                    <i class="fas fa-id-card"></i> Print Enrollment
+                </a>
+                <a href="{% url 'enrollment_receipt_default' %}" class="btn btn-outline-primary" target="_blank">
+                    <i class="fas fa-receipt"></i> Print Fee Receipt
+                </a>
+                {% if can_cancel_enrollment %}
+                <form method="post" action="{% url 'cancel_enrollment' %}" class="inline-form" onsubmit="return confirm('Are you sure you want to cancel your enrollment? You will be able to edit any incorrect entries and re-submit your enrollment application.');" style="display:inline-block;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-danger" title="Cancel enrollment to correct incorrect entries before admin accepts">
+                        <i class="fas fa-undo"></i> Cancel Enrollment
+                    </button>
+                </form>
+                {% else %}
+                <span class="btn btn-outline-secondary disabled" title="Enrollment application accepted by admin. Cancellation locked.">
+                    <i class="fas fa-lock"></i> Enrollment Accepted (Locked)
+                </span>
+                {% endif %}
+                {% elif enrollment and not enrollment.is_submitted %}
+                <a href="{% url 'enrollment_form' %}" class="btn btn-warning">
+                    <i class="fas fa-edit"></i> Edit / Complete Enrollment
+                </a>
+                {% elif admission and admission.status == 'Approved' %}
+                <a href="{% url 'enrollment_form' %}" class="btn btn-success">
+                    <i class="fas fa-user-graduate"></i> Apply for Enrollment
                 </a>
                 {% endif %}
             </div>

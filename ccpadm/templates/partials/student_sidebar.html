@@ -25,6 +25,18 @@
     <a href="{% url 'my_application' %}" class="{% if sidebar_active == 'applications' %}active{% endif %}">
         <i class="fas fa-list"></i><span>My Applications</span>
     </a>
+    {% if enrollment_submitted %}
+    <a href="{% url 'enrollment_print_default' %}" class="{% if sidebar_active == 'enrollment' %}active{% endif %}">
+        <i class="fas fa-id-card" style="color: #10b981;"></i><span>Enrollment Slip</span>
+    </a>
+    <a href="{% url 'enrollment_receipt_default' %}" class="{% if sidebar_active == 'receipt' %}active{% endif %}" target="_blank">
+        <i class="fas fa-receipt" style="color: #3b82f6;"></i><span>Fee Receipt</span>
+    </a>
+    {% else %}
+    <a href="{% url 'enrollment_form' %}" class="{% if sidebar_active == 'enrollment' %}active{% endif %}">
+        <i class="fas fa-user-graduate" style="color: #6366f1;"></i><span>Enrollment</span>
+    </a>
+    {% endif %}
     <a href="{% url 'logout' %}" class="nav-logout">
         <i class="fas fa-sign-out-alt"></i><span>Logout</span>
     </a>

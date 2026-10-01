@@ -208,15 +208,19 @@ def mask_aadhaar(aadhaar):
 
 
 def get_student_sidebar_context(reg_no, active=''):
+    from admissions.models import StudentEnrollment
     from admissions.services import get_editable_admission, get_printable_admission, is_admission_locked
 
     printable = get_printable_admission(reg_no)
     editable = get_editable_admission(reg_no)
+    enrollment = StudentEnrollment.objects.filter(reg_no=reg_no, is_submitted=True).first()
     return {
         'sidebar_active': active,
         'admission_submitted': printable is not None,
         'admission_editable': editable is not None and not is_admission_locked(reg_no),
         'sidebar_app_no': printable.application_no if printable else '',
+        'enrollment_submitted': enrollment is not None,
+        'enrollment_no': enrollment.enrollment_no if enrollment else '',
     }
 
 

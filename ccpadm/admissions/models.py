@@ -161,3 +161,101 @@ class StudentDocument(models.Model):
 
     class Meta:
         db_table = 'StudentDocuments'
+
+
+class StudentEnrollment(models.Model):
+    STATUS_CHOICES = [
+        ('Draft', 'Draft'),
+        ('Submitted', 'Submitted'),
+        ('Approved', 'Approved'),
+    ]
+
+    enrollment_no = models.CharField(max_length=50, unique=True, null=True, blank=True, db_index=True)
+    reg_no = models.CharField(max_length=50, db_index=True)
+    student = models.ForeignKey('accounts.Student', on_delete=models.CASCADE, related_name='enrollments')
+    admission = models.ForeignKey(StudentAdmission, null=True, blank=True, on_delete=models.SET_NULL, related_name='enrollments')
+
+    program_type = models.CharField(max_length=100, blank=True)
+    program_code = models.CharField(max_length=50, blank=True)
+    semester = models.CharField(max_length=20, default='I', blank=True)
+
+    # Personal info
+    full_name = models.CharField(max_length=150, blank=True)
+    father_name = models.CharField(max_length=150, blank=True)
+    mother_name = models.CharField(max_length=150, blank=True)
+    gender = models.CharField(max_length=10, blank=True)
+    category = models.CharField(max_length=20, blank=True)
+    nationality = models.CharField(max_length=50, default='Indian', blank=True)
+    religion = models.CharField(max_length=50, blank=True)
+    marital_status = models.CharField(max_length=20, blank=True)
+    blood_group = models.CharField(max_length=10, blank=True)
+    dob = models.DateField(null=True, blank=True)
+    mobile = models.CharField(max_length=15, blank=True)
+    email = models.CharField(max_length=100, blank=True)
+    aadhaar = models.CharField(max_length=12, blank=True)
+    apaar_id = models.CharField(max_length=20, blank=True)
+    medium = models.CharField(max_length=20, blank=True)
+    has_disability = models.BooleanField(null=True, blank=True)
+    disability_details = models.CharField(max_length=255, blank=True)
+    disability_percentage = models.CharField(max_length=10, blank=True)
+    disability_type = models.CharField(max_length=100, blank=True)
+    is_minority = models.BooleanField(null=True, blank=True)
+
+    # Addresses
+    perm_state = models.CharField(max_length=100, blank=True)
+    perm_district = models.CharField(max_length=100, blank=True)
+    perm_city = models.CharField(max_length=100, blank=True)
+    perm_village = models.CharField(max_length=150, blank=True)
+    perm_pin_code = models.CharField(max_length=10, blank=True)
+    corr_state = models.CharField(max_length=100, blank=True)
+    corr_district = models.CharField(max_length=100, blank=True)
+    corr_city = models.CharField(max_length=100, blank=True)
+    corr_village = models.CharField(max_length=150, blank=True)
+    corr_pin_code = models.CharField(max_length=10, blank=True)
+
+    # Education
+    class10 = models.CharField(max_length=50, blank=True)
+    board10 = models.CharField(max_length=150, blank=True)
+    year10 = models.IntegerField(null=True, blank=True)
+    total_marks10 = models.CharField(max_length=50, blank=True)
+    obtained10 = models.CharField(max_length=50, blank=True)
+    percentage10 = models.CharField(max_length=10, blank=True)
+    grade10 = models.CharField(max_length=20, blank=True)
+
+    class12 = models.CharField(max_length=50, blank=True)
+    board12 = models.CharField(max_length=150, blank=True)
+    stream12 = models.CharField(max_length=50, blank=True)
+    year12 = models.IntegerField(null=True, blank=True)
+    total_marks12 = models.CharField(max_length=50, blank=True)
+    obtained12 = models.CharField(max_length=50, blank=True)
+    percentage12 = models.CharField(max_length=10, blank=True)
+    grade12 = models.CharField(max_length=20, blank=True)
+
+    class_grad = models.CharField(max_length=50, blank=True)
+    board_grad = models.CharField(max_length=150, blank=True)
+    stream_grad = models.CharField(max_length=50, blank=True)
+    year_grad = models.IntegerField(null=True, blank=True)
+    total_marks_grad = models.CharField(max_length=50, blank=True)
+    obtained_grad = models.CharField(max_length=50, blank=True)
+    percentage_grad = models.CharField(max_length=10, blank=True)
+    grade_grad = models.CharField(max_length=20, blank=True)
+    education_json = models.TextField(blank=True, null=True)
+
+    # Media & Subjects
+    photo_base64 = models.TextField(blank=True, null=True)
+    signature_base64 = models.TextField(blank=True, null=True)
+    selected_courses_json = models.TextField(blank=True, null=True)
+
+    # Status
+    status = models.CharField(max_length=20, default='Draft', choices=STATUS_CHOICES)
+    is_submitted = models.BooleanField(default=False)
+    submitted_date = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'StudentEnrollment'
+        ordering = ['-submitted_date', '-created_at']
+
+    def __str__(self):
+        return self.enrollment_no or f'Enrollment #{self.pk} ({self.reg_no})'

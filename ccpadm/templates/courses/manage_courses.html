@@ -26,7 +26,7 @@
             <form method="get" class="filter-bar" style="margin-bottom: 0;" id="coursesFilterForm">
                 <input type="text" name="search" value="{{ search }}" class="portal-input" placeholder="Search program, department, or course...">
                 <select name="program" class="portal-input" onchange="this.form.submit()" aria-label="Filter by program">
-                    <option value="ALL">All Programs</option>
+                    <option value="" {% if not program_filter %}selected{% endif %}>-- Select Program --</option>
                     {% for pt in program_types %}
                     <option value="{{ pt }}" {% if program_filter == pt %}selected{% endif %}>{{ pt }}</option>
                     {% endfor %}
@@ -57,7 +57,7 @@
                 </select>
                 <button type="submit" class="btn btn-secondary btn-sm">Filter</button>
             </form>
-            {% if program_filter != 'ALL' %}
+            {% if program_filter %}
             <form method="post" action="{% url 'toggle_show_department' %}" class="inline-form checkbox-toggle-form">
                 {% csrf_token %}
                 <input type="hidden" name="search" value="{{ search }}">
@@ -87,13 +87,19 @@
             </form>
         </div>
 
-        <p class="field-hint" style="margin-bottom: var(--space-sm);">{{ total_count }} course(s) found{% if type2_filter == 'DSC' %} (DSC){% endif %}{% if group_filter != 'ALL' %} · group filter active{% endif %}</p>
+        {% if program_filter or search %}
+        <p class="field-hint" style="margin-bottom: var(--space-sm);">{{ total_count }} course(s) found{% if type2_filter == 'DSC' %} (DSC){% endif %}{% if group_filter != 'ALL' and group_filter %} · group filter active{% endif %}</p>
+        {% else %}
+        <p class="field-hint" style="margin-bottom: var(--space-sm);">Please select a program to view courses</p>
+        {% endif %}
 
         <div class="table-wrap">
             <table class="data-table">
                 <thead>
                     <tr>
                         <th>Program</th>
+                        <th>Code</th>
+                        <th>Paper</th>
                         <th>Department — Course Name</th>
                         {% if show_bsc_groups %}<th>Subject Group</th>{% endif %}
                         <th>Course Type 1</th>
@@ -106,6 +112,20 @@
                     {% for c in courses %}
                     <tr{% if c.is_dsc %} class="course-row--dsc"{% endif %}>
                         <td>{{ c.program_type }}</td>
+                        <td>
+                            {% if c.course_code %}
+                            <strong style="font-family: monospace; color: var(--color-primary, #082B49);">{{ c.course_code }}</strong>
+                            {% else %}
+                            <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if c.paper_no %}
+                            <strong>{{ c.paper_no }}</strong>
+                            {% else %}
+                            <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
                         <td>
                             {% if c.show_department_in_name and c.department %}
                             <strong>{{ c.department }}</strong> — {{ c.course_name }}
@@ -160,7 +180,21 @@
                     </tr>
                     {% empty %}
                     <tr class="empty-row">
-                        <td colspan="{% if show_bsc_groups %}7{% else %}6{% endif %}">No courses found.</td>
+                        {% if not program_filter and not search %}
+                        <td colspan="{% if show_bsc_groups %}9{% else %}8{% endif %}" style="text-align: center; padding: 3rem 1rem; color: var(--color-text-muted);">
+                            <i class="fas fa-book-open" style="font-size: 2.2rem; margin-bottom: 0.75rem; display: block; opacity: 0.4;"></i>
+                            <strong style="font-size: 1.05rem;">No Program Selected</strong>
+                            <div style="margin-top: 0.35rem;">Please select a program from the dropdown above to see courses.</div>
+                        </td>
+                        {% elif not program_filter and search %}
+                        <td colspan="{% if show_bsc_groups %}9{% else %}8{% endif %}" style="text-align: center; padding: 2rem 1rem; color: var(--color-text-muted);">
+                            No courses found matching "{{ search }}".
+                        </td>
+                        {% else %}
+                        <td colspan="{% if show_bsc_groups %}9{% else %}8{% endif %}" style="text-align: center; padding: 2rem 1rem; color: var(--color-text-muted);">
+                            No courses found for {{ program_filter }}.
+                        </td>
+                        {% endif %}
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -198,6 +232,18 @@
                 <label for="course_name">Course Name</label>
                 <input type="text" id="course_name" name="course_name" class="portal-input"
                        value="{{ edit_course.course_name|default:'' }}" placeholder="Course name" required>
+            </div>
+            <div class="form-field">
+                <label for="course_code">Course Code</label>
+                <input type="text" id="course_code" name="course_code" class="portal-input"
+                       value="{{ edit_course.course_code|default:'' }}" placeholder="e.g. HNSC-01, SOSC-01">
+                <small class="field-hint">Course Code shown in Enrollment Application Form &amp; Print Slip.</small>
+            </div>
+            <div class="form-field">
+                <label for="paper_no">Paper No.</label>
+                <input type="text" id="paper_no" name="paper_no" class="portal-input"
+                       value="{{ edit_course.paper_no|default:'' }}" placeholder="e.g. I, II, III">
+                <small class="field-hint">Paper Number (e.g. I, II; defaults to I on print slip if blank).</small>
             </div>
             <div class="form-field">
                 <label for="course_type_1">Course Type 1 (Theory / Practical)</label>

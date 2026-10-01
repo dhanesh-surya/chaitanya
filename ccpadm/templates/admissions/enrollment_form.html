@@ -1,0 +1,1475 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Student Enrollment - Chaitanya College{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admission_form.css' %}">
+<style>
+.enroll-section-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.enroll-section-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #082B49;
+    margin-bottom: 16px;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.img-preview-box {
+    width: 140px;
+    height: 160px;
+    border: 2px dashed #cbd5e1;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: #f8fafc;
+    margin-bottom: 8px;
+}
+.img-preview-box img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+.sig-preview-box {
+    width: 200px;
+    height: 80px;
+    border: 2px dashed #cbd5e1;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: #f8fafc;
+    margin-bottom: 8px;
+}
+.sig-preview-box img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+.badge-course {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    margin-right: 6px;
+}
+.badge-dsc { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+.badge-ge { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+.badge-aec { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+.badge-vac { background: #f3e8ff; color: #7e22ce; border: 1px solid #e9d5ff; }
+
+.course-item-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    background: #ffffff;
+    transition: all 0.15s ease-in-out;
+}
+.course-item-card:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+}
+.course-item-card input[type="checkbox"] {
+    margin-top: 4px;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+.course-details {
+    flex: 1;
+}
+.course-code-tag {
+    font-family: monospace;
+    font-weight: bold;
+    color: #0f172a;
+    background: #f1f5f9;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-right: 8px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="portal-page portal-page--wide portal-page--form">
+    <div class="portal-layout">
+        {% include 'partials/student_sidebar.html' %}
+
+        <div class="admission-main portal-main portal-main--form">
+            <div class="mb-4">
+                <h1 style="color: #082B49; font-size: 1.6rem; font-weight: 800; margin-bottom: 4px;">Student Enrollment Form</h1>
+                <p style="color: #64748b; font-size: 14px;">Session 2026-27 | Verify previous admission details and confirm your enrolled courses.</p>
+            </div>
+
+            {% if existing_enrollment and existing_enrollment.is_submitted %}
+            <div class="notice-banner notice-banner--success mb-4" style="background:#ecfdf5; border-left:4px solid #10b981; padding:16px; border-radius:6px;">
+                <div style="font-weight:700; color:#065f46; font-size:16px;">Enrollment Application Already Submitted</div>
+                <div style="color:#047857; margin-top:4px;">
+                    Enrollment No: <strong>{{ existing_enrollment.enrollment_no }}</strong> | Submitted on: {{ existing_enrollment.submitted_date|date:"d-M-Y" }}
+                </div>
+                <div class="mt-3">
+                    <a href="{% url 'enrollment_print' existing_enrollment.enrollment_no %}" class="btn btn-sm btn-success"><i class="fas fa-print me-1"></i> Print Enrollment Slip</a>
+                    <a href="{% url 'enrollment_receipt' existing_enrollment.enrollment_no %}" class="btn btn-sm btn-primary ms-2" target="_blank"><i class="fas fa-receipt me-1"></i> Print Fee Receipt</a>
+                </div>
+            </div>
+            {% endif %}
+
+            <form method="post" action="{% url 'enrollment_form' %}" id="enrollmentForm" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="selected_courses_json" id="selectedCoursesJson" value="{{ initial_data.selected_courses_json|default:'' }}">
+                <input type="hidden" name="bsc_subject_group" id="hdnBscSubjectGroup" value="{{ initial_bsc_group|default:'' }}">
+                <input type="hidden" name="program_type" id="hdnProgramType" value="{{ selected_program_type|default:'' }}">
+                <input type="hidden" name="program_level" id="hdnProgramLevel" value="{{ selected_program_level|default:'' }}">
+                <input type="hidden" name="photo_base64" id="photoBase64" value="{{ initial_data.photo_base64|default:'' }}">
+                <input type="hidden" name="signature_base64" id="signatureBase64" value="{{ initial_data.signature_base64|default:'' }}">
+
+                <!-- SECTION 1: PERSONAL DETAILS -->
+                <div class="enroll-section-card">
+                    <div class="enroll-section-title">
+                        <i class="fas fa-user-circle"></i> Section A: Personal & Demographic Details
+                    </div>
+                    <div class="grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;">
+                        <div class="field">
+                            <label>Full Name *</label>
+                            <input type="text" name="full_name" class="form-control" value="{{ initial_data.full_name|default:'' }}" required>
+                        </div>
+                        <div class="field">
+                            <label>Father's Name *</label>
+                            <input type="text" name="father_name" class="form-control" value="{{ initial_data.father_name|default:'' }}" required>
+                        </div>
+                        <div class="field">
+                            <label>Mother's Name *</label>
+                            <input type="text" name="mother_name" class="form-control" value="{{ initial_data.mother_name|default:'' }}" required>
+                        </div>
+                        <div class="field">
+                            <label>Date of Birth *</label>
+                            <input type="date" name="dob" class="form-control" value="{{ initial_data.dob|default:'' }}" required>
+                        </div>
+                        <div class="field">
+                            <label>Gender *</label>
+                            <select name="gender" class="form-select" required>
+                                <option value="Male" {% if initial_data.gender == 'Male' %}selected{% endif %}>Male</option>
+                                <option value="Female" {% if initial_data.gender == 'Female' %}selected{% endif %}>Female</option>
+                                <option value="Transgender" {% if initial_data.gender == 'Transgender' %}selected{% endif %}>Transgender</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>Category *</label>
+                            <select name="category" class="form-select" required>
+                                <option value="General" {% if initial_data.category == 'General' %}selected{% endif %}>General</option>
+                                <option value="OBC" {% if initial_data.category == 'OBC' %}selected{% endif %}>OBC</option>
+                                <option value="SC" {% if initial_data.category == 'SC' %}selected{% endif %}>SC</option>
+                                <option value="ST" {% if initial_data.category == 'ST' %}selected{% endif %}>ST</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>Nationality</label>
+                            <input type="text" name="nationality" class="form-control" value="{{ initial_data.nationality|default:'Indian' }}">
+                        </div>
+                        <div class="field">
+                            <label>Religion</label>
+                            <select name="religion" class="form-select">
+                                <option value="">Select Religion</option>
+                                {% for r in religion_choices %}
+                                <option value="{{ r }}" {% if initial_data.religion == r %}selected{% endif %}>{{ r }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>Blood Group</label>
+                            <input type="text" name="blood_group" class="form-control" value="{{ initial_data.blood_group|default:'' }}" placeholder="e.g. O+, B+">
+                        </div>
+                        <div class="field">
+                            <label>Marital Status</label>
+                            <select name="marital_status" class="form-select">
+                                <option value="Unmarried" {% if initial_data.marital_status == 'Unmarried' %}selected{% endif %}>Unmarried</option>
+                                <option value="Married" {% if initial_data.marital_status == 'Married' %}selected{% endif %}>Married</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>Aadhaar Number *</label>
+                            <input type="text" name="aadhaar" class="form-control" value="{{ initial_data.aadhaar|default:'' }}" maxlength="12" required>
+                        </div>
+                        <div class="field">
+                            <label>APAAR / ABC ID</label>
+                            <input type="text" name="apaar_id" class="form-control" value="{{ initial_data.apaar_id|default:'' }}">
+                        </div>
+                        <div class="field">
+                            <label>Mobile Number *</label>
+                            <input type="text" name="mobile" class="form-control" value="{{ initial_data.mobile|default:'' }}" maxlength="15" required>
+                        </div>
+                        <div class="field">
+                            <label>Email Address *</label>
+                            <input type="email" name="email" class="form-control" value="{{ initial_data.email|default:'' }}" required>
+                        </div>
+                        <div class="field">
+                            <label>Medium of Instruction</label>
+                            <select name="medium" class="form-select">
+                                {% for m in medium_choices %}
+                                <option value="{{ m }}" {% if initial_data.medium == m %}selected{% endif %}>{{ m }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 2: DOCUMENTS (PHOTO & SIGNATURE) -->
+                <div class="enroll-section-card">
+                    <div class="enroll-section-title">
+                        <i class="fas fa-camera"></i> Section B: Student Photo &amp; Signature
+                    </div>
+                    <p style="font-size:13px; color:#64748b; margin-bottom:16px;">
+                        The photo and signature submitted during admission are displayed below. You can keep them or upload new images.
+                    </p>
+                    <div style="display:flex; flex-wrap:wrap; gap:40px; align-items:flex-start;">
+                        <div>
+                            <label style="font-weight:600; display:block; margin-bottom:6px;">Applicant Photo</label>
+                            <div class="img-preview-box" id="photoBox">
+                                {% if initial_data.photo_base64 %}
+                                <img src="{{ initial_data.photo_base64 }}" alt="Photo" id="photoPreview">
+                                {% else %}
+                                <div id="photoPlaceholder" style="color:#94a3b8; font-size:12px; text-align:center;">No Photo</div>
+                                {% endif %}
+                            </div>
+                            <input type="file" id="photoFileInput" accept="image/*" class="form-control form-control-sm" style="max-width:200px;">
+                            <small class="text-muted d-block mt-1">JPG / PNG, Max 2MB</small>
+                        </div>
+
+                        <div>
+                            <label style="font-weight:600; display:block; margin-bottom:6px;">Applicant Signature</label>
+                            <div class="sig-preview-box" id="sigBox">
+                                {% if initial_data.signature_base64 %}
+                                <img src="{{ initial_data.signature_base64 }}" alt="Signature" id="sigPreview">
+                                {% else %}
+                                <div id="sigPlaceholder" style="color:#94a3b8; font-size:12px; text-align:center;">No Signature</div>
+                                {% endif %}
+                            </div>
+                            <input type="file" id="sigFileInput" accept="image/*" class="form-control form-control-sm" style="max-width:200px;">
+                            <small class="text-muted d-block mt-1">JPG / PNG, Max 2MB</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 3: ADDRESSES -->
+                <div class="enroll-section-card">
+                    <div class="enroll-section-title">
+                        <i class="fas fa-map-marker-alt"></i> Section C: Address Details
+                    </div>
+                    <h4 style="font-size:14px; font-weight:700; color:#475569; margin-bottom:12px;">Permanent Address</h4>
+                    <div class="grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom:20px;">
+                        <div class="field">
+                            <label>State *</label>
+                            <input type="text" name="perm_state" id="permState" class="form-control" value="{{ initial_data.perm_state|default:'' }}" required>
+                        </div>
+                        <div class="field">
+                            <label>District *</label>
+                            <input type="text" name="perm_district" id="permDistrict" class="form-control" value="{{ initial_data.perm_district|default:'' }}" required>
+                        </div>
+                        <div class="field">
+                            <label>City / Tehsil</label>
+                            <input type="text" name="perm_city" id="permCity" class="form-control" value="{{ initial_data.perm_city|default:'' }}">
+                        </div>
+                        <div class="field">
+                            <label>Village / Street</label>
+                            <input type="text" name="perm_village" id="permVillage" class="form-control" value="{{ initial_data.perm_village|default:'' }}">
+                        </div>
+                        <div class="field">
+                            <label>Pin Code *</label>
+                            <input type="text" name="perm_pin_code" id="permPinCode" class="form-control" value="{{ initial_data.perm_pin_code|default:'' }}" maxlength="10" required>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <h4 style="font-size:14px; font-weight:700; color:#475569; margin:0;">Correspondence Address</h4>
+                        <label style="font-size:13px; font-weight:normal; cursor:pointer;">
+                            <input type="checkbox" id="sameAsPerm" onchange="copyAddress()"> Same as Permanent Address
+                        </label>
+                    </div>
+                    <div class="grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
+                        <div class="field">
+                            <label>State</label>
+                            <input type="text" name="corr_state" id="corrState" class="form-control" value="{{ initial_data.corr_state|default:'' }}">
+                        </div>
+                        <div class="field">
+                            <label>District</label>
+                            <input type="text" name="corr_district" id="corrDistrict" class="form-control" value="{{ initial_data.corr_district|default:'' }}">
+                        </div>
+                        <div class="field">
+                            <label>City / Tehsil</label>
+                            <input type="text" name="corr_city" id="corrCity" class="form-control" value="{{ initial_data.corr_city|default:'' }}">
+                        </div>
+                        <div class="field">
+                            <label>Village / Street</label>
+                            <input type="text" name="corr_village" id="corrVillage" class="form-control" value="{{ initial_data.corr_village|default:'' }}">
+                        </div>
+                        <div class="field">
+                            <label>Pin Code</label>
+                            <input type="text" name="corr_pin_code" id="corrPinCode" class="form-control" value="{{ initial_data.corr_pin_code|default:'' }}" maxlength="10">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 4: EDUCATIONAL QUALIFICATIONS -->
+                <div class="enroll-section-card">
+                    <div class="enroll-section-title">
+                        <i class="fas fa-graduation-cap"></i> Section D: Educational Qualifications
+                    </div>
+                    <h4 style="font-size:14px; font-weight:700; color:#475569; margin-bottom:8px;">Class 10 (Secondary)</h4>
+                    <div class="grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom:20px;">
+                        <div class="field">
+                            <label>Board</label>
+                            <input type="text" name="board10" class="form-control" value="{{ initial_data.board10|default:'' }}" placeholder="e.g. CGBSE / CBSE">
+                        </div>
+                        <div class="field">
+                            <label>Passing Year</label>
+                            <input type="number" name="year10" class="form-control" value="{{ initial_data.year10|default:'' }}" placeholder="YYYY">
+                        </div>
+                        <div class="field">
+                            <label>Total Marks</label>
+                            <input type="text" name="total_marks10" class="form-control" value="{{ initial_data.total_marks10|default:'' }}">
+                        </div>
+                        <div class="field">
+                            <label>Obtained Marks</label>
+                            <input type="text" name="obtained10" class="form-control" value="{{ initial_data.obtained10|default:'' }}">
+                        </div>
+                        <div class="field">
+                            <label>Percentage (%)</label>
+                            <input type="text" name="percentage10" class="form-control" value="{{ initial_data.percentage10|default:'' }}">
+                        </div>
+                    </div>
+
+                    <h4 style="font-size:14px; font-weight:700; color:#475569; margin-bottom:8px;">Class 12 (Higher Secondary)</h4>
+                    <div class="grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px;">
+                        <div class="field">
+                            <label>Board</label>
+                            <input type="text" name="board12" class="form-control" value="{{ initial_data.board12|default:'' }}" placeholder="e.g. CGBSE / CBSE">
+                        </div>
+                        <div class="field">
+                            <label>Passing Year</label>
+                            <input type="number" name="year12" class="form-control" value="{{ initial_data.year12|default:'' }}" placeholder="YYYY">
+                        </div>
+                        <div class="field">
+                            <label>Total Marks</label>
+                            <input type="text" name="total_marks12" class="form-control" value="{{ initial_data.total_marks12|default:'' }}">
+                        </div>
+                        <div class="field">
+                            <label>Obtained Marks</label>
+                            <input type="text" name="obtained12" class="form-control" value="{{ initial_data.obtained12|default:'' }}">
+                        </div>
+                        <div class="field">
+                            <label>Stream</label>
+                            <select name="stream12" id="ddlStream12" class="form-select">
+                                <option value="">Select Stream</option>
+                                <option value="Science" {% if initial_data.stream12 == 'Science' %}selected{% endif %}>Science</option>
+                                <option value="Arts" {% if initial_data.stream12 == 'Arts' %}selected{% endif %}>Arts</option>
+                                <option value="Commerce" {% if initial_data.stream12 == 'Commerce' %}selected{% endif %}>Commerce</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>Percentage (%)</label>
+                            <input type="text" name="percentage12" class="form-control" value="{{ initial_data.percentage12|default:'' }}">
+                        </div>
+                    </div>
+                    {% if show_ug_qualification %}
+                    <h4 style="font-size:14px; font-weight:700; color:#475569; margin-top:20px; margin-bottom:8px;">
+                        Undergraduate / Graduation Qualification
+                        <span class="badge bg-primary ms-1" style="font-size:11px; font-weight:500;">Required for Post Graduate / PG Diploma</span>
+                    </h4>
+                    <div class="grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px;">
+                        <div class="field">
+                            <label>Exam / Degree</label>
+                            <input type="text" name="class_grad" class="form-control" value="{{ initial_data.class_grad|default:'' }}" placeholder="e.g. B.Sc. / B.A. / B.Com / BCA">
+                        </div>
+                        <div class="field">
+                            <label>University / Board</label>
+                            <input type="text" name="board_grad" class="form-control" value="{{ initial_data.board_grad|default:'' }}" placeholder="e.g. ABVV / Bilaspur University">
+                        </div>
+                        <div class="field">
+                            <label>Stream / Major</label>
+                            <input type="text" name="stream_grad" class="form-control" value="{{ initial_data.stream_grad|default:'' }}" placeholder="e.g. Science / Computer Science">
+                        </div>
+                        <div class="field">
+                            <label>Passing Year</label>
+                            <input type="number" name="year_grad" class="form-control" value="{{ initial_data.year_grad|default:'' }}" placeholder="YYYY">
+                        </div>
+                        <div class="field">
+                            <label>Total Marks</label>
+                            <input type="text" name="total_marks_grad" class="form-control" value="{{ initial_data.total_marks_grad|default:'' }}">
+                        </div>
+                        <div class="field">
+                            <label>Obtained Marks</label>
+                            <input type="text" name="obtained_grad" class="form-control" value="{{ initial_data.obtained_grad|default:'' }}">
+                        </div>
+                        <div class="field">
+                            <label>Percentage (%)</label>
+                            <input type="text" name="percentage_grad" class="form-control" value="{{ initial_data.percentage_grad|default:'' }}">
+                        </div>
+                        <div class="field">
+                            <label>Division / Grade</label>
+                            <input type="text" name="grade_grad" class="form-control" value="{{ initial_data.grade_grad|default:'' }}" placeholder="e.g. First / Grade A">
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- SECTION 5: PROGRAM & COURSE SELECTION -->
+                <div class="enroll-section-card">
+                    <div class="enroll-section-title d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-book-open"></i> Section E: Enrolled Program &amp; Courses (NEP Curriculum)
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span id="subjectLockBadge" class="badge bg-secondary" style="font-size:12px; font-weight:500;">
+                                <i class="fas fa-lock me-1"></i> Fixed as applied in Admission
+                            </span>
+                            <button type="button" id="btnToggleEditSubjects" class="btn btn-sm" style="font-size:12.5px; font-weight:600; padding:5px 14px; border-radius:4px; cursor:pointer; background-color:#082B49; color:#ffffff; border:1px solid #082B49; box-shadow:0 1px 2px rgba(0,0,0,0.1);">
+                                <i class="fas fa-edit me-1" style="color:#ffffff;"></i> <span id="btnEditSubjectsText">Edit Subjects</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="subjectEditAlert" class="alert alert-light border py-2 px-3 mb-3 d-flex align-items-center justify-content-between" style="font-size:13px; color:#475569; background-color:#f8fafc;">
+                        <div class="d-flex align-items-center">
+                            <i id="subjectEditAlertIcon" class="fas fa-info-circle text-primary me-2 fs-5"></i>
+                            <span id="subjectEditAlertText">Your enrolled courses are loaded from your admission application. Click <strong>Edit Subjects</strong> to change your subject selections.</span>
+                        </div>
+                        <button type="button" id="btnResetAdmissionSubjects" class="btn btn-sm btn-outline-danger" style="display:none; font-size:11.5px; font-weight:600; white-space:nowrap; margin-left:8px; padding:3px 10px; background:#fff; border-color:#dc2626; color:#dc2626;">
+                            <i class="fas fa-undo me-1"></i> Reset to Admission Choices
+                        </button>
+                    </div>
+                    <div class="grid">
+                        <div class="field">
+                            <label for="ddlProgramLevel">Program Type *</label>
+                            <select id="ddlProgramLevel" class="modern-select" disabled style="background-color: #f8fafc; cursor: not-allowed;">
+                                <option value="">-- Select Program Type --</option>
+                                {% for lvl in program_level_choices %}
+                                <option value="{{ lvl.value }}" {% if selected_program_level == lvl.value %}selected{% endif %}>{{ lvl.label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="ddlProgramType">Program Name *</label>
+                            <select id="ddlProgramType" class="modern-select" disabled style="background-color: #f8fafc; cursor: not-allowed;">
+                                <option value="">-- Select Program Name --</option>
+                            </select>
+                            <small class="field-hint text-muted"><i class="fas fa-lock me-1"></i>Fixed from your admission application.</small>
+                        </div>
+                        <div id="bscGroupSection" class="bsc-group-section full-width" hidden>
+                            <label class="bsc-group-label">B.Sc. Subject Group *</label>
+                            <p class="bsc-group-hint"><i class="fas fa-lock me-1"></i>B.Sc. Subject Group is fixed from your admission application.</p>
+                            <div id="bscSelectedGroupName" class="selected-group-badge" hidden></div>
+                            <div id="bscSubjectGroups" class="subject-group-panel"></div>
+                        </div>
+                        <div class="full-width table-scroll">
+                            <div id="courseSelectionLimitHint" class="course-selection-limit-hint" hidden aria-live="polite"></div>
+                            <div id="courseProgramInstructions" class="course-instruction-stack" hidden aria-live="polite"></div>
+                            <table class="course-table">
+                                <thead id="courseTableHead">
+                                    <tr>
+                                        <th style="width: 70px;">Select</th>
+                                        <th style="width: 140px;">Course Code</th>
+                                        <th>Course Name</th>
+                                        <th id="courseGroupCol" hidden>Group</th>
+                                        <th style="width: 110px;">Type 1</th>
+                                        <th style="width: 110px;">Type 2</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="courseTableBody"><tr><td colspan="5">Loading program courses...</td></tr></tbody>
+                            </table>
+                        </div>
+                        <div class="reg-box">
+                            <label>Registration Number</label>
+                            <input type="text" id="txtRegNo" class="reg-value" value="{{ student.registration_no }}" readonly>
+                            <div class="app-no-line">Application No: <strong id="lblAppNo">{{ admission.application_no|default:"Not Generated" }}</strong></div>
+                            {% if existing_enrollment.enrollment_no %}
+                            <div class="app-no-line" style="margin-top:4px;">Enrollment No: <strong style="color:#082B49;">{{ existing_enrollment.enrollment_no }}</strong></div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ACTIONS -->
+                <div class="d-flex align-items-center justify-content-between p-3 bg-white border rounded">
+                    <button type="submit" name="action" value="draft" class="btn btn-outline-secondary" onclick="prepareSubmit()">
+                        <i class="fas fa-save me-1"></i> Save Draft
+                    </button>
+                    <button type="submit" name="action" value="submit" class="btn btn-primary px-4 py-2" style="background:#082B49; border-color:#082B49;" onclick="return confirmSubmit(event)">
+                        <i class="fas fa-check-circle me-1"></i> Submit Enrollment Application
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{{ bsc_subject_groups|json_script:"bsc-subject-groups-data" }}
+{{ initial_courses_data|json_script:"initial-selected-courses-data" }}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+window.ENROLLMENT_CONFIG = {
+    coursesUrl: '{% url "courses_api" %}',
+    bscProgramName: '{{ bsc_program_name|escapejs }}',
+    bscProgramNames: {{ bsc_program_names_json|safe }},
+    initialProgramType: '{{ initial_program_type|escapejs }}',
+    initialProgramLevel: '{{ initial_program_level|escapejs }}',
+    initialBscGroup: '{{ initial_bsc_group|escapejs }}',
+    programsByLevel: {{ programs_by_level_json|safe }},
+};
+
+(function () {
+    const cfg = window.ENROLLMENT_CONFIG || {};
+    let bscSubjectGroups = [];
+    let selectedBscGroup = cfg.initialBscGroup || '';
+    let maxCourseSelections = null;
+    let optionalCheckOrder = [];
+    let isEditingSubjects = false;
+    const bscProgramName = cfg.bscProgramName || 'B.Sc.';
+    const bscProgramNames = new Set([
+        bscProgramName,
+        ...(Array.isArray(cfg.bscProgramNames) ? cfg.bscProgramNames : []),
+    ]);
+    const programsByLevel = cfg.programsByLevel || {};
+
+    function initBscSubjectGroups() {
+        const groupEl = document.getElementById('bsc-subject-groups-data');
+        if (groupEl?.textContent) {
+            try {
+                bscSubjectGroups = JSON.parse(groupEl.textContent);
+            } catch (e) {
+                console.error('Failed to parse B.Sc. subject groups', e);
+            }
+        }
+    }
+
+    function isBscProgram(programType) {
+        const name = (programType || '').trim();
+        if (!name) return false;
+        if (bscProgramNames.has(name)) return true;
+        return /^b\.sc/i.test(name);
+    }
+
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function formatCourseNameDisplay(course) {
+        const dept = (course.department || '').trim();
+        const label = (course.course_name || '').trim();
+        if (!dept) return escapeHtml(label);
+        const prefix = `${dept} — `;
+        if (!label.startsWith(prefix)) return escapeHtml(label);
+        const paperName = label.slice(prefix.length);
+        return `<span class="course-dept-name">${escapeHtml(dept)}</span> — ${escapeHtml(paperName)}`;
+    }
+
+    function renderCourseInstructions(instructions) {
+        const panel = document.getElementById('courseProgramInstructions');
+        if (!panel) return;
+        const items = Array.isArray(instructions) ? instructions.filter(item => item?.message) : [];
+        if (!items.length) {
+            panel.hidden = true;
+            panel.innerHTML = '';
+            return;
+        }
+        panel.innerHTML = items.map(item => {
+            const title = (item.title || '').trim();
+            const message = escapeHtml((item.message || '').trim()).replace(/\n/g, '<br>');
+            const titleHtml = title
+                ? `<strong class="course-instruction-card__title">${escapeHtml(title)}</strong>`
+                : '';
+            return `<div class="course-instruction-card" role="note">
+                <i class="fas fa-info-circle course-instruction-card__icon" aria-hidden="true"></i>
+                <div class="course-instruction-card__content">
+                    ${titleHtml}
+                    <p class="course-instruction-card__body">${message}</p>
+                </div>
+            </div>`;
+        }).join('');
+        panel.hidden = false;
+    }
+
+    function isOptionalCourseRow(tr) {
+        if (!tr || tr.hidden) return false;
+        const chk = tr.querySelector('input[type=checkbox]');
+        if (!chk) return false;
+        if (tr.dataset.dbCompulsory === '1') return false;
+        if (tr.classList.contains('group-locked')) return false;
+        if (tr.dataset.pairLocked === '1') return false;
+        return true;
+    }
+
+    function getOptionalCheckedRows() {
+        return Array.from(document.querySelectorAll('#courseTableBody tr')).filter(tr => {
+            const chk = tr.querySelector('input[type=checkbox]');
+            return isOptionalCourseRow(tr) && chk?.checked;
+        });
+    }
+
+    function rebuildOptionalCheckOrder() {
+        optionalCheckOrder = [];
+        document.querySelectorAll('#courseTableBody tr').forEach(tr => {
+            const chk = tr.querySelector('input[type=checkbox]');
+            if (chk?.checked && isOptionalCourseRow(tr) && tr.dataset.courseId) {
+                optionalCheckOrder.push(tr.dataset.courseId);
+            }
+        });
+    }
+
+    function updateCourseSelectionLimitHint() {
+        const hint = document.getElementById('courseSelectionLimitHint');
+        if (!hint) return;
+        if (!maxCourseSelections) {
+            hint.hidden = true;
+            hint.innerHTML = '';
+            return;
+        }
+        const count = getOptionalCheckedRows().length;
+        hint.hidden = false;
+        hint.innerHTML = `
+            <i class="fas fa-list-check" aria-hidden="true"></i>
+            <span>You may select up to <strong>${maxCourseSelections}</strong> optional courses
+            (<strong>${count}</strong>/${maxCourseSelections} selected).
+            Selecting another will automatically uncheck your previous last selection.</span>
+        `;
+    }
+
+    function enforceCourseSelectionLimit(changedTr) {
+        if (!maxCourseSelections || !changedTr) return;
+        const changedId = changedTr.dataset.courseId;
+        const chk = changedTr.querySelector('input[type=checkbox]');
+        if (!changedId || !chk) return;
+
+        if (!chk.checked) {
+            optionalCheckOrder = optionalCheckOrder.filter(id => id !== changedId);
+            updateCourseSelectionLimitHint();
+            return;
+        }
+
+        if (!isOptionalCourseRow(changedTr)) {
+            updateCourseSelectionLimitHint();
+            return;
+        }
+
+        optionalCheckOrder = optionalCheckOrder.filter(id => id !== changedId);
+        optionalCheckOrder.push(changedId);
+
+        while (getOptionalCheckedRows().length > maxCourseSelections) {
+            let removeId = null;
+            for (let i = optionalCheckOrder.length - 2; i >= 0; i -= 1) {
+                const id = optionalCheckOrder[i];
+                if (id === changedId) continue;
+                const row = findCourseRowById(id);
+                const rowChk = row?.querySelector('input[type=checkbox]');
+                if (row && rowChk?.checked && isOptionalCourseRow(row)) {
+                    removeId = id;
+                    break;
+                }
+            }
+            if (!removeId) break;
+            const removeRow = findCourseRowById(removeId);
+            const removeChk = removeRow?.querySelector('input[type=checkbox]');
+            if (removeChk) {
+                removeChk.checked = false;
+                syncAutoPairedCourses(removeRow, false);
+            }
+            optionalCheckOrder = optionalCheckOrder.filter(id => id !== removeId);
+        }
+        updateCourseSelectionLimitHint();
+    }
+
+    function clearCourseTable(message) {
+        const tbody = document.getElementById('courseTableBody');
+        if (tbody) tbody.innerHTML = `<tr><td colspan="5">${message || 'Select a program name'}</td></tr>`;
+        maxCourseSelections = null;
+        optionalCheckOrder = [];
+        updateCourseSelectionLimitHint();
+        renderCourseInstructions([]);
+        updateBscGroupSectionVisibility('');
+        const bscSection = document.getElementById('bscGroupSection');
+        if (bscSection) bscSection.hidden = true;
+        selectedBscGroup = '';
+        updateSelectedGroupBadge();
+    }
+
+    function inferProgramLevel(programName) {
+        const name = (programName || '').trim();
+        if (!name) return '';
+        for (const [level, names] of Object.entries(programsByLevel)) {
+            if ((names || []).includes(name)) return level;
+        }
+        if (isBscProgram(name)) {
+            for (const [level, names] of Object.entries(programsByLevel)) {
+                const match = (names || []).find(item => isBscProgram(item));
+                if (match) return level;
+            }
+        }
+        return '';
+    }
+
+    function populateProgramNames(level, selectedName) {
+        const ddl = document.getElementById('ddlProgramType');
+        if (!ddl) return '';
+        const programs = level ? (programsByLevel[level] || []) : [];
+        ddl.innerHTML = '<option value="">-- Select Program Name --</option>';
+        programs.forEach(name => {
+            const opt = document.createElement('option');
+            opt.value = name;
+            opt.textContent = name;
+            ddl.appendChild(opt);
+        });
+        let chosen = '';
+        if (selectedName) {
+            const match = programs.find(p => p.toLowerCase() === selectedName.toLowerCase()) || selectedName;
+            if (match && !programs.includes(match)) {
+                const opt = document.createElement('option');
+                opt.value = match;
+                opt.textContent = match;
+                ddl.appendChild(opt);
+            }
+            ddl.value = match;
+            chosen = match;
+        }
+        return chosen;
+    }
+
+    function getBscGroupFullName(groupKey) {
+        const group = findBscGroup(groupKey);
+        if (!group) return '';
+        return group.full_name || `${group.heading} — ${group.label}`;
+    }
+
+    function updateBscGroupSectionVisibility(programType) {
+        const section = document.getElementById('bscGroupSection');
+        const groupCol = document.getElementById('courseGroupCol');
+        if (section) section.hidden = !isBscProgram(programType);
+        if (groupCol) groupCol.hidden = !isBscProgram(programType);
+    }
+
+    function updateSelectedGroupBadge() {
+        const badge = document.getElementById('bscSelectedGroupName');
+        if (!badge) return;
+        if (!selectedBscGroup) {
+            badge.hidden = true;
+            badge.textContent = '';
+            return;
+        }
+        const fullName = getBscGroupFullName(selectedBscGroup);
+        badge.hidden = !fullName;
+        badge.textContent = fullName ? `Selected Group: ${fullName}` : '';
+    }
+
+    function normalizeDept(department) {
+        return (department || '').trim().toLowerCase();
+    }
+
+    function findBscGroup(groupKey) {
+        for (const section of bscSubjectGroups) {
+            const match = (section.groups || []).find(g => g.key === groupKey);
+            if (match) return { ...match, heading: section.heading };
+        }
+        return null;
+    }
+
+    function departmentInSelectedGroup(department, group) {
+        if (!group || !department) return false;
+        const dept = normalizeDept(department);
+        return (group.departments || []).some(d => normalizeDept(d) === dept);
+    }
+
+    function rowInSelectedGroup(tr, group, groupKey) {
+        if (!tr || !group || !groupKey) return false;
+        const groupKeys = (tr.dataset.groupKeys || '').split(',').filter(Boolean);
+        if (groupKeys.length) return groupKeys.includes(groupKey);
+        return departmentInSelectedGroup(tr.dataset.department || '', group);
+    }
+
+    function applyCompulsoryToRow(tr, compulsory) {
+        const chk = tr.querySelector('input[type=checkbox]');
+        if (!chk) return;
+        if (compulsory) {
+            chk.checked = true;
+            chk.disabled = true;
+            tr.classList.add('group-locked');
+            setCourseCompulsoryLabel(tr, true);
+        } else {
+            chk.disabled = !isEditingSubjects;
+            tr.classList.remove('group-locked');
+            setCourseCompulsoryLabel(tr, false);
+        }
+    }
+
+    function setupBscGroupListeners() {
+        const section = document.getElementById('bscGroupSection');
+        if (!section || section.dataset.listenersBound === '1') return;
+        section.dataset.listenersBound = '1';
+        section.addEventListener('change', (e) => {
+            if (!e.target.matches('input[name="bscSubjectGroup"]')) return;
+            selectedBscGroup = e.target.value;
+            applyBscGroupSelection(selectedBscGroup);
+            updateSelectedGroupBadge();
+        });
+        section.addEventListener('click', (e) => {
+            const radio = e.target.closest('input[name="bscSubjectGroup"]');
+            if (!radio) return;
+            selectedBscGroup = radio.value;
+            applyBscGroupSelection(selectedBscGroup);
+            updateSelectedGroupBadge();
+        });
+    }
+
+    function renderBscSubjectGroups() {
+        const panel = document.getElementById('bscSubjectGroups');
+        if (!panel) return;
+        if (!bscSubjectGroups.length) {
+            panel.innerHTML = '<p class="bsc-group-hint">Loading subject groups...</p>';
+            updateSelectedGroupBadge();
+            return;
+        }
+        panel.innerHTML = bscSubjectGroups.map(section => `
+            <div class="subject-group-section">
+                <p class="subject-group-heading">${section.heading}</p>
+                <div class="subject-group-options">
+                    ${(section.groups || []).map(group => `
+                        <label class="subject-group-option" style="cursor: ${isEditingSubjects ? 'pointer' : 'not-allowed'}; opacity: ${selectedBscGroup === group.key || isEditingSubjects ? '1' : '0.6'};">
+                            <input type="radio" name="bscSubjectGroup" value="${group.key}"
+                                ${selectedBscGroup === group.key ? 'checked' : ''} ${isEditingSubjects ? '' : 'disabled'}>
+                            <div>
+                                <strong>${group.full_name || (section.heading + ' — ' + group.label)}</strong><br>
+                                <span>${group.department_label}</span>
+                            </div>
+                        </label>
+                    `).join('')}
+                </div>
+            </div>
+        `).join('');
+        setupBscGroupListeners();
+        updateSelectedGroupBadge();
+    }
+
+    function isDscRow(tr) {
+        return (tr.dataset.type2 || '').toUpperCase() === 'DSC' || tr.dataset.dsc === '1';
+    }
+
+    function setCourseCompulsoryLabel(tr, on) {
+        const nameCell = tr.querySelector('.course-name-cell') || tr.children[2] || tr.children[1];
+        if (!nameCell) return;
+        const existing = nameCell.querySelector('.compulsory-tag');
+        if (on && !existing) {
+            nameCell.insertAdjacentHTML(
+                'beforeend',
+                ' <small class="compulsory-tag" style="color:#166534;font-weight:600;">(Compulsory)</small>'
+            );
+        } else if (!on && existing) {
+            existing.remove();
+        }
+    }
+
+    function setCourseAutoPairLabel(tr, on) {
+        const nameCell = tr.querySelector('.course-name-cell') || tr.children[2] || tr.children[1];
+        if (!nameCell) return;
+        const existing = nameCell.querySelector('.auto-pair-tag');
+        if (on && !existing) {
+            nameCell.insertAdjacentHTML(
+                'beforeend',
+                ' <small class="auto-pair-tag" style="color:#7f1d1d;font-weight:600;">(Auto-selected)</small>'
+            );
+        } else if (!on && existing) {
+            existing.remove();
+        }
+    }
+
+    function findCourseRowById(courseId) {
+        if (!courseId) return null;
+        return document.querySelector(`#courseTableBody tr[data-course-id="${courseId}"]`);
+    }
+
+    function applyPairedCourseLock(targetTr, locked) {
+        const chk = targetTr.querySelector('input[type=checkbox]');
+        if (!chk) return;
+        if (locked) {
+            targetTr.dataset.pairLocked = '1';
+            chk.checked = true;
+            chk.disabled = true;
+            targetTr.classList.add('pair-locked');
+            setCourseAutoPairLabel(targetTr, true);
+            return;
+        }
+        if (targetTr.dataset.pairLocked !== '1') return;
+        targetTr.dataset.pairLocked = '0';
+        targetTr.classList.remove('pair-locked');
+        setCourseAutoPairLabel(targetTr, false);
+        if (targetTr.dataset.dbCompulsory !== '1' && !targetTr.classList.contains('group-locked')) {
+            chk.disabled = false;
+            chk.checked = false;
+        }
+    }
+
+    function syncAutoPairedCourses(sourceTr, checked) {
+        const autoSelectId = sourceTr.dataset.autoSelectId;
+        if (!autoSelectId) return;
+        const targetTr = findCourseRowById(autoSelectId);
+        if (!targetTr) return;
+        applyPairedCourseLock(targetTr, checked);
+    }
+
+    function syncAllAutoPairedCourses() {
+        document.querySelectorAll('#courseTableBody tr').forEach(tr => {
+            const chk = tr.querySelector('input[type=checkbox]');
+            if (chk?.checked) syncAutoPairedCourses(tr, true);
+        });
+    }
+
+    function bindCourseTableListeners() {
+        const tbody = document.getElementById('courseTableBody');
+        if (!tbody || tbody.dataset.courseListenersBound === '1') return;
+        tbody.dataset.courseListenersBound = '1';
+        tbody.addEventListener('change', (e) => {
+            if (!e.target.matches('input[type=checkbox]')) return;
+            const tr = e.target.closest('tr');
+            if (!tr) return;
+            if (e.target.checked) {
+                enforceCourseSelectionLimit(tr);
+                syncAutoPairedCourses(tr, true);
+            } else {
+                syncAutoPairedCourses(tr, false);
+                enforceCourseSelectionLimit(tr);
+            }
+            updateCourseSelectionLimitHint();
+        });
+    }
+
+    function applyBscGroupSelection(groupKey) {
+        const group = findBscGroup(groupKey);
+        const groupName = getBscGroupFullName(groupKey);
+        const showBsc = isBscProgram(document.getElementById('ddlProgramType')?.value);
+        document.querySelectorAll('#courseTableBody tr').forEach(tr => {
+            const chk = tr.querySelector('input[type=checkbox]');
+            if (!chk || !tr.dataset.name) return;
+            const isGroupCourse = tr.dataset.groupCourse === '1';
+            const department = tr.dataset.department || '';
+            const dbCompulsory = tr.dataset.dbCompulsory === '1';
+            const groupColCell = showBsc ? (tr.querySelector('.course-group-cell') || tr.children[3] || tr.children[2]) : null;
+
+            if (!isGroupCourse) {
+                tr.hidden = false;
+                applyCompulsoryToRow(tr, dbCompulsory);
+                if (groupColCell) groupColCell.innerHTML = '—';
+                return;
+            }
+
+            if (!groupKey || !group) {
+                tr.hidden = true;
+                chk.checked = false;
+                chk.disabled = true;
+                tr.classList.remove('group-locked');
+                setCourseCompulsoryLabel(tr, false);
+                return;
+            }
+
+            const inGroup = rowInSelectedGroup(tr, group, groupKey);
+            if (!inGroup) {
+                tr.hidden = true;
+                chk.checked = false;
+                chk.disabled = true;
+                tr.classList.remove('group-locked');
+                setCourseCompulsoryLabel(tr, false);
+                return;
+            }
+
+            tr.hidden = false;
+            if (groupColCell && groupName) {
+                groupColCell.innerHTML = `<span class="course-group-tag">${groupName}</span>`;
+            }
+
+            if (isDscRow(tr) || dbCompulsory) {
+                applyCompulsoryToRow(tr, true);
+            } else {
+                chk.checked = false;
+                applyCompulsoryToRow(tr, false);
+            }
+        });
+        updateSelectedGroupBadge();
+    }
+
+    function resetBscGroupCoursesBeforeSelection() {
+        document.querySelectorAll('#courseTableBody tr').forEach(tr => {
+            const chk = tr.querySelector('input[type=checkbox]');
+            if (!chk || !tr.dataset.name) return;
+            if (tr.dataset.groupCourse === '1') {
+                tr.hidden = true;
+                chk.checked = false;
+                chk.disabled = true;
+                tr.classList.remove('group-locked');
+                setCourseCompulsoryLabel(tr, false);
+            }
+        });
+    }
+
+    async function loadCourses(programType) {
+        const tbody = document.getElementById('courseTableBody');
+        if (!tbody) return;
+        const resolvedProgramType = (programType || '').trim();
+        if (!resolvedProgramType) {
+            tbody.innerHTML = '<tr><td colspan="5">Select a program type</td></tr>';
+            renderCourseInstructions([]);
+            return;
+        }
+        const showBsc = isBscProgram(resolvedProgramType);
+        const colSpan = showBsc ? 6 : 5;
+        updateBscGroupSectionVisibility(resolvedProgramType);
+        tbody.innerHTML = `<tr><td colspan="${colSpan}">Loading courses...</td></tr>`;
+        if (!showBsc) {
+            selectedBscGroup = '';
+        }
+        try {
+            const res = await fetch(
+                cfg.coursesUrl
+                + '?program_type=' + encodeURIComponent(resolvedProgramType)
+                + '&_=' + Date.now()
+            );
+            const json = await res.json();
+            if (json.subject_groups?.length) {
+                bscSubjectGroups = json.subject_groups;
+            }
+            renderCourseInstructions(json.course_instructions || []);
+            maxCourseSelections = json.max_course_selections > 0 ? json.max_course_selections : null;
+            optionalCheckOrder = [];
+            updateCourseSelectionLimitHint();
+            if (showBsc) {
+                setupBscGroupListeners();
+                renderBscSubjectGroups();
+            }
+            tbody.innerHTML = '';
+            json.courses.forEach((c) => {
+                const tr = document.createElement('tr');
+                const isGroupCourse = !!c.is_group_course;
+                tr.dataset.courseId = String(c.id);
+                tr.dataset.name = c.course_name;
+                tr.dataset.code = c.course_code || '';
+                tr.dataset.paper = c.paper_no || '';
+                tr.dataset.department = c.department || '';
+                if (c.auto_select_course_id) {
+                    tr.dataset.autoSelectId = String(c.auto_select_course_id);
+                }
+                tr.dataset.type1 = c.course_type_1;
+                tr.dataset.type2 = c.course_type_2;
+                tr.dataset.dsc = c.is_dsc ? '1' : '0';
+                tr.dataset.groupCourse = isGroupCourse ? '1' : '0';
+                tr.dataset.groupDsc = c.is_group_dsc ? '1' : '0';
+                tr.dataset.groupKeys = (c.group_keys || []).join(',');
+                const compulsory = !!c.is_compulsory;
+                tr.dataset.dbCompulsory = compulsory ? '1' : '0';
+                const prelock = compulsory && !(showBsc && isGroupCourse);
+                const checked = prelock ? 'checked' : '';
+                const locked = prelock ? 'disabled' : '';
+                const title = prelock ? ' title="Compulsory subject"' : '';
+                if (showBsc && isGroupCourse) {
+                    tr.hidden = true;
+                }
+                const codeDisplay = c.course_code
+                    ? `<strong class="course-code-badge" style="font-family:monospace; color:#082B49; font-size:12.5px;">${escapeHtml(c.course_code)}</strong>`
+                    : '<span class="text-muted">—</span>';
+                const groupCell = showBsc ? '<td class="course-group-cell">—</td>' : '';
+                tr.innerHTML = `<td><input type="checkbox" ${checked} ${locked}${title}></td>
+                    <td class="course-code-cell">${codeDisplay}</td>
+                    <td class="course-name-cell">${formatCourseNameDisplay(c)}${compulsory ? ' <small class="compulsory-tag" style="color:#166534;font-weight:600;">(Compulsory)</small>' : ''}</td>
+                    ${groupCell}
+                    <td>${c.course_type_1 || '-'}</td><td>${c.course_type_2 || 'N/A'}</td>`;
+                tbody.appendChild(tr);
+            });
+            if (!json.courses.length) tbody.innerHTML = `<tr><td colspan="${colSpan}">No courses found</td></tr>`;
+            if (showBsc) {
+                if (selectedBscGroup) {
+                    const radio = document.querySelector(`input[name="bscSubjectGroup"][value="${selectedBscGroup}"]`);
+                    if (radio) radio.checked = true;
+                    applyBscGroupSelection(selectedBscGroup);
+                } else {
+                    resetBscGroupCoursesBeforeSelection();
+                }
+            }
+            bindCourseTableListeners();
+            syncAllAutoPairedCourses();
+            rebuildOptionalCheckOrder();
+            updateCourseSelectionLimitHint();
+
+            // Restore pre-selected courses
+            restoreSelectedCourses();
+
+            // Setup subject editing controls & initialize mode (pre-filled from admission, editable via button)
+            setupSubjectEditingControls();
+            setSubjectEditingMode(isEditingSubjects);
+        } catch (err) {
+            console.error('Failed to load courses', err);
+            tbody.innerHTML = `<tr><td colspan="${colSpan}">Error loading courses. Please refresh the page.</td></tr>`;
+        }
+    }
+
+    function setSubjectEditingMode(enabled) {
+        isEditingSubjects = !!enabled;
+        const btn = document.getElementById('btnToggleEditSubjects');
+        const badge = document.getElementById('subjectLockBadge');
+        const alertBox = document.getElementById('subjectEditAlert');
+        const alertIcon = document.getElementById('subjectEditAlertIcon');
+        const alertText = document.getElementById('subjectEditAlertText');
+        const resetBtn = document.getElementById('btnResetAdmissionSubjects');
+        const bscHint = document.getElementById('bscGroupHintText');
+
+        if (isEditingSubjects) {
+            if (btn) {
+                btn.className = 'btn btn-sm';
+                btn.style.backgroundColor = '#16a34a';
+                btn.style.color = '#ffffff';
+                btn.style.borderColor = '#15803d';
+                btn.style.fontWeight = '700';
+                btn.style.boxShadow = '0 2px 4px rgba(22, 163, 74, 0.35)';
+                btn.innerHTML = '<i class="fas fa-check-circle me-1" style="color:#ffffff;"></i> Done Editing';
+            }
+            if (badge) {
+                badge.className = 'badge bg-warning text-dark';
+                badge.innerHTML = '<i class="fas fa-pen me-1"></i> Editing Enabled';
+            }
+            if (alertBox) {
+                alertBox.style.backgroundColor = '#ecfdf5';
+                alertBox.style.borderColor = '#10b981';
+                alertBox.style.color = '#065f46';
+            }
+            if (alertIcon) {
+                alertIcon.className = 'fas fa-check-circle text-success me-2 fs-5';
+            }
+            if (alertText) {
+                alertText.innerHTML = '<strong>Subject editing enabled:</strong> You can now select or unselect optional courses and choose your subject group.';
+            }
+            if (resetBtn) {
+                resetBtn.style.display = 'inline-flex';
+            }
+            if (bscHint) {
+                bscHint.innerHTML = '<i class="fas fa-edit me-1 text-primary"></i> Select a B.Sc. Subject Group below:';
+            }
+
+            // Unlock optional course checkboxes
+            document.querySelectorAll('#courseTableBody tr').forEach(tr => {
+                const chk = tr.querySelector('input[type=checkbox]');
+                if (!chk) return;
+                const dbCompulsory = tr.dataset.dbCompulsory === '1';
+                const pairLocked = tr.dataset.pairLocked === '1';
+                const showBsc = isBscProgram(document.getElementById('ddlProgramType')?.value);
+                const isGroupDsc = tr.dataset.groupDsc === '1' || isDscRow(tr);
+
+                if (dbCompulsory || pairLocked || (showBsc && isGroupDsc)) {
+                    chk.disabled = true;
+                } else {
+                    chk.disabled = false;
+                }
+            });
+
+            // Unlock B.Sc. Subject Group radios
+            document.querySelectorAll('input[name="bscSubjectGroup"]').forEach(radio => {
+                radio.disabled = false;
+                const label = radio.closest('label');
+                if (label) {
+                    label.style.cursor = 'pointer';
+                    label.style.opacity = '1';
+                }
+            });
+        } else {
+            if (btn) {
+                btn.className = 'btn btn-sm';
+                btn.style.backgroundColor = '#082B49';
+                btn.style.color = '#ffffff';
+                btn.style.borderColor = '#082B49';
+                btn.style.fontWeight = '600';
+                btn.style.boxShadow = '0 1px 2px rgba(0,0,0,0.1)';
+                btn.innerHTML = '<i class="fas fa-edit me-1" style="color:#ffffff;"></i> Edit Subjects';
+            }
+            if (badge) {
+                badge.className = 'badge bg-secondary';
+                badge.innerHTML = '<i class="fas fa-lock me-1"></i> Fixed as applied in Admission';
+            }
+            if (alertBox) {
+                alertBox.style.backgroundColor = '#f8fafc';
+                alertBox.style.borderColor = '#e2e8f0';
+                alertBox.style.color = '#475569';
+            }
+            if (alertIcon) {
+                alertIcon.className = 'fas fa-info-circle text-primary me-2 fs-5';
+            }
+            if (alertText) {
+                alertText.innerHTML = 'Your enrolled courses are loaded from your admission application. Click <strong>Edit Subjects</strong> to change your subject selections.';
+            }
+            if (resetBtn) {
+                resetBtn.style.display = 'none';
+            }
+            if (bscHint) {
+                bscHint.innerHTML = '<i class="fas fa-lock me-1"></i> B.Sc. Subject Group is loaded from your admission application.';
+            }
+
+            // Lock all course checkboxes
+            document.querySelectorAll('#courseTableBody input[type=checkbox]').forEach(chk => {
+                chk.disabled = true;
+            });
+
+            // Lock B.Sc. Subject Group radios
+            document.querySelectorAll('input[name="bscSubjectGroup"]').forEach(radio => {
+                radio.disabled = true;
+                const label = radio.closest('label');
+                if (label) {
+                    label.style.cursor = 'not-allowed';
+                    label.style.opacity = radio.checked ? '1' : '0.6';
+                }
+            });
+        }
+    }
+
+    function setupSubjectEditingControls() {
+        const toggleBtn = document.getElementById('btnToggleEditSubjects');
+        if (toggleBtn && toggleBtn.dataset.bound !== '1') {
+            toggleBtn.dataset.bound = '1';
+            toggleBtn.addEventListener('click', () => {
+                setSubjectEditingMode(!isEditingSubjects);
+            });
+        }
+
+        const resetBtn = document.getElementById('btnResetAdmissionSubjects');
+        if (resetBtn && resetBtn.dataset.bound !== '1') {
+            resetBtn.dataset.bound = '1';
+            resetBtn.addEventListener('click', () => {
+                if (confirm('Revert all course selections back to your original admission application choices?')) {
+                    // Uncheck non-compulsory courses
+                    document.querySelectorAll('#courseTableBody tr').forEach(tr => {
+                        const chk = tr.querySelector('input[type=checkbox]');
+                        if (chk && tr.dataset.dbCompulsory !== '1' && tr.dataset.groupCourse !== '1') {
+                            chk.checked = false;
+                        }
+                    });
+                    // Reset group if applicable
+                    selectedBscGroup = cfg.initialBscGroup || '';
+                    if (selectedBscGroup) {
+                        const radio = document.querySelector(`input[name="bscSubjectGroup"][value="${selectedBscGroup}"]`);
+                        if (radio) radio.checked = true;
+                        applyBscGroupSelection(selectedBscGroup);
+                    }
+                    restoreSelectedCourses();
+                    setSubjectEditingMode(true);
+                }
+            });
+        }
+    }
+
+    function restoreSelectedCourses() {
+        const initialEl = document.getElementById('initial-selected-courses-data');
+        let initialCourses = [];
+        if (initialEl?.textContent) {
+            try {
+                initialCourses = JSON.parse(initialEl.textContent);
+            } catch(e) {}
+        }
+        if (!initialCourses.length) {
+            const rawJson = document.getElementById('selectedCoursesJson')?.value;
+            if (rawJson) {
+                try {
+                    const parsed = JSON.parse(rawJson);
+                    initialCourses = Array.isArray(parsed) ? parsed : (parsed.courses || parsed.subjects || []);
+                } catch(e) {}
+            }
+        }
+        if (Array.isArray(initialCourses) && initialCourses.length) {
+            function cleanStr(s) {
+                return (s || '').replace(/[\u2014\u2013\u2212\-\s]/g, '').toLowerCase();
+            }
+            initialCourses.forEach(s => {
+                const sName = (s.name || s.course_name || '').trim();
+                const sCode = (s.code || s.course_code || '').trim();
+                const sClean = cleanStr(sName);
+                const sSubClean = cleanStr(sName.split(/[\u2014\u2013\u2212—–-]/).pop());
+                document.querySelectorAll('#courseTableBody tr').forEach(tr => {
+                    if (tr.dataset.groupCourse === '1') return; // Handled by group selection
+                    const trCode = (tr.dataset.code || '').trim();
+                    const trName = (tr.dataset.name || '').trim();
+                    const trClean = cleanStr(trName);
+                    const trSubClean = cleanStr(trName.split(/[\u2014\u2013\u2212—–-]/).pop());
+
+                    const matchCode = (sCode && trCode && sCode.toLowerCase() === trCode.toLowerCase());
+                    const matchName = (sClean && trClean && sClean === trClean);
+                    const matchSubName = (sSubClean && trSubClean && sSubClean === trSubClean && sSubClean.length > 3);
+
+                    if (matchCode || matchName || matchSubName) {
+                        const chk = tr.querySelector('input[type=checkbox]');
+                        if (chk) chk.checked = true;
+                    }
+                });
+            });
+            syncAllAutoPairedCourses();
+            rebuildOptionalCheckOrder();
+            updateCourseSelectionLimitHint();
+        }
+    }
+
+    window.prepareSubmit = function () {
+        const selected = [];
+        document.querySelectorAll('#courseTableBody tr').forEach(tr => {
+            const chk = tr.querySelector('input[type=checkbox]');
+            if (chk && chk.checked) {
+                selected.push({
+                    id: tr.dataset.courseId || '',
+                    code: tr.dataset.code || '',
+                    name: tr.dataset.name || '',
+                    paper: tr.dataset.paper || '',
+                    type_1: tr.dataset.type1 || '',
+                    type_2: tr.dataset.type2 || '',
+                    dept: tr.dataset.department || '',
+                });
+            }
+        });
+        const activeBscGroup = selectedBscGroup || cfg.initialBscGroup || '';
+        const bscInput = document.getElementById('hdnBscSubjectGroup');
+        if (bscInput) bscInput.value = activeBscGroup;
+
+        if (selected.length > 0) {
+            if (activeBscGroup) {
+                document.getElementById('selectedCoursesJson').value = JSON.stringify({
+                    bsc_subject_group: activeBscGroup,
+                    courses: selected,
+                    subjects: selected,
+                });
+            } else {
+                document.getElementById('selectedCoursesJson').value = JSON.stringify(selected);
+            }
+        }
+        const progTypeInput = document.getElementById('hdnProgramType');
+        if (progTypeInput) {
+            progTypeInput.value = document.getElementById('ddlProgramType')?.value || cfg.initialProgramType || '';
+        }
+        const progLevelInput = document.getElementById('hdnProgramLevel');
+        if (progLevelInput) {
+            progLevelInput.value = document.getElementById('ddlProgramLevel')?.value || cfg.initialProgramLevel || '';
+        }
+    };
+
+    window.confirmSubmit = function (e) {
+        window.prepareSubmit();
+        const raw = document.getElementById('selectedCoursesJson').value || '[]';
+        let courses = [];
+        try {
+            const parsed = JSON.parse(raw);
+            courses = Array.isArray(parsed) ? parsed : (parsed.courses || parsed.subjects || []);
+        } catch(err) {}
+        if (courses.length === 0) {
+            if (!confirm('You have not selected any courses. Do you still wish to submit?')) {
+                e.preventDefault();
+                return false;
+            }
+        }
+        return confirm('Are you sure you want to submit your Enrollment Application? An official Enrollment Number will be generated.');
+    };
+
+    window.copyAddress = function() {
+        const checked = document.getElementById('sameAsPerm').checked;
+        if (checked) {
+            document.getElementById('corrState').value = document.getElementById('permState').value;
+            document.getElementById('corrDistrict').value = document.getElementById('permDistrict').value;
+            document.getElementById('corrCity').value = document.getElementById('permCity').value;
+            document.getElementById('corrVillage').value = document.getElementById('permVillage').value;
+            document.getElementById('corrPinCode').value = document.getElementById('permPinCode').value;
+        }
+    };
+
+    // Photo & Signature previews
+    const photoFileInput = document.getElementById('photoFileInput');
+    if (photoFileInput) {
+        photoFileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const base64 = evt.target.result;
+                document.getElementById('photoBase64').value = base64;
+                document.getElementById('photoBox').innerHTML = '<img src="' + base64 + '" alt="Photo" id="photoPreview">';
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    const sigFileInput = document.getElementById('sigFileInput');
+    if (sigFileInput) {
+        sigFileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const base64 = evt.target.result;
+                document.getElementById('signatureBase64').value = base64;
+                document.getElementById('sigBox').innerHTML = '<img src="' + base64 + '" alt="Signature" id="sigPreview">';
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        initBscSubjectGroups();
+        setupBscGroupListeners();
+
+        const form = document.getElementById('enrollmentForm');
+        if (form) {
+            form.addEventListener('submit', () => {
+                if (typeof window.prepareSubmit === 'function') {
+                    window.prepareSubmit();
+                }
+            });
+        }
+
+        const levelDdl = document.getElementById('ddlProgramLevel');
+        const nameDdl = document.getElementById('ddlProgramType');
+
+        if (levelDdl) {
+            levelDdl.addEventListener('change', () => {
+                populateProgramNames(levelDdl.value);
+                clearCourseTable('Select a program name');
+            });
+        }
+
+        if (nameDdl) {
+            nameDdl.addEventListener('change', () => {
+                updateBscGroupSectionVisibility(nameDdl.value);
+                if (isBscProgram(nameDdl.value)) renderBscSubjectGroups();
+                loadCourses(nameDdl.value);
+            });
+        }
+
+        const initialLevel = cfg.initialProgramLevel || inferProgramLevel(cfg.initialProgramType);
+        if (initialLevel && levelDdl) {
+            levelDdl.value = initialLevel;
+        }
+        populateProgramNames(initialLevel || levelDdl?.value, cfg.initialProgramType);
+        const activeProgram = nameDdl?.value || cfg.initialProgramType;
+        if (activeProgram) {
+            updateBscGroupSectionVisibility(activeProgram);
+            if (isBscProgram(activeProgram)) renderBscSubjectGroups();
+            await loadCourses(activeProgram);
+        }
+    });
+})();
+</script>
+{% endblock %}

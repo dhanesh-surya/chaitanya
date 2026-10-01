@@ -1,0 +1,626 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Enrollment Application - {{ enrollment.enrollment_no }}</title>
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 8mm 12mm 8mm 12mm;
+        }
+        * { box-sizing: border-box; }
+        html, body {
+            margin: 0;
+            padding: 0;
+            background: #f8fafc;
+            color: #1e293b;
+            font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+            font-size: 11px;
+            line-height: 1.3;
+        }
+        body {
+            padding: 20px 10px;
+        }
+        .slip-card {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            padding: 20px 24px;
+            max-width: 850px;
+            min-height: 270mm;
+            margin: 0 auto;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.06);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            page-break-inside: avoid;
+            break-inside: avoid;
+            page-break-after: avoid;
+            break-after: avoid;
+        }
+        .slip-body {
+            flex: 1 0 auto;
+        }
+        .slip-footer {
+            margin-top: auto;
+            flex-shrink: 0;
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        /* College Header (Matching Preview Header) */
+        .header-table {
+            width: 100%;
+            border-bottom: 2px solid #000;
+            margin-bottom: 6px;
+            border-collapse: collapse;
+        }
+        .header-table td {
+            vertical-align: middle;
+            padding: 2px 4px;
+        }
+        .logo-cell {
+            width: 72px;
+            text-align: center;
+        }
+        .logo-cell img {
+            width: 68px;
+            height: 68px;
+            object-fit: contain;
+            display: block;
+            margin: 0 auto;
+        }
+        .title-cell {
+            text-align: center;
+            padding: 0 8px;
+        }
+        .title-main {
+            font-size: 21px;
+            color: #800000;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 0 0 3px 0;
+            line-height: 1.2;
+        }
+        .title-ugc {
+            font-size: 11.5px;
+            color: #0b3d91;
+            font-weight: bold;
+            margin: 0 0 2px 0;
+        }
+        .title-address {
+            font-size: 11px;
+            color: #111;
+            margin: 0 0 3px 0;
+        }
+        .title-gold {
+            font-size: 10.5px;
+            color: #B8860B;
+            font-weight: bold;
+            margin: 1px 0;
+        }
+        .title-sub {
+            font-size: 10.5px;
+            color: #0b3d91;
+            margin: 1px 0;
+        }
+        .form-heading {
+            text-align: center;
+            font-size: 13.5px;
+            color: #800000;
+            font-weight: bold;
+            margin: 4px 0 6px 0;
+            letter-spacing: 0.3px;
+        }
+
+        /* Meta Information */
+        .meta-strip {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            padding: 5px 12px;
+            margin-bottom: 8px;
+            font-size: 11.5px;
+        }
+        .meta-strip .enr-num {
+            font-size: 13.5px;
+            font-weight: 800;
+            color: #082B49;
+            font-family: monospace;
+        }
+
+        /* Section Headings */
+        .section-heading {
+            background: #082B49;
+            color: #ffffff;
+            padding: 3.5px 8px;
+            font-size: 10.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin: 8px 0 3px 0;
+            border-radius: 2px;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        /* Tables */
+        table.info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 6px;
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+        table.info-table th, table.info-table td {
+            border: 1px solid #cbd5e1;
+            padding: 4px 7px;
+            font-size: 10.5px;
+            line-height: 1.25;
+            text-align: left;
+        }
+        table.info-table th {
+            background: #f8fafc;
+            color: #334155;
+            font-weight: 600;
+            width: 20%;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        table.personal-table {
+            width: calc(100% - 130px);
+        }
+
+        /* Photo & Signature */
+        .photo-sig-panel {
+            float: right;
+            width: 118px;
+            margin-left: 10px;
+            margin-bottom: 4px;
+            text-align: center;
+        }
+        .photo-box {
+            width: 118px;
+            height: 130px;
+            border: 1px solid #94a3b8;
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            margin-bottom: 4px;
+        }
+        .photo-box img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
+        }
+        .sig-box {
+            width: 118px;
+            height: 42px;
+            border: 1px solid #94a3b8;
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .sig-box img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        /* Course Table */
+        table.course-table th, table.course-table td {
+            padding: 3.5px 6px;
+            font-size: 10px;
+            line-height: 1.2;
+        }
+
+        /* Declaration & Signature Block */
+        .declaration-text {
+            font-size: 9.5px;
+            color: #475569;
+            line-height: 1.35;
+            margin-top: 10px;
+            padding: 4px 6px;
+            background: #f8fafc;
+            border-left: 3px solid #082B49;
+        }
+        .sign-area {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 36px;
+            padding-top: 0;
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+        .sign-block {
+            text-align: center;
+            width: 180px;
+            border-top: 1.5px solid #334155;
+            padding-top: 5px;
+            font-size: 10.5px;
+            font-weight: 600;
+        }
+
+        /* Action Buttons */
+        .no-print {
+            text-align: center;
+            margin-bottom: 14px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 8px 18px;
+            font-size: 13.5px;
+            font-weight: 600;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .btn-print { background: #082B49; color: #fff; border: 1px solid #082B49; }
+        .btn-receipt { background: #059669; color: #fff; border: 1px solid #059669; margin-left: 10px; }
+        .btn-receipt:hover { background: #047857; color: #fff; }
+        .btn-back { background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; margin-left: 10px; }
+
+        /* Print Specific Styles */
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 8mm 12mm 8mm 12mm;
+            }
+            html, body {
+                height: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                background: #fff !important;
+                font-size: 10.5px !important;
+                line-height: 1.3 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .slip-card {
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                max-width: 100% !important;
+                width: 100% !important;
+                min-height: 272mm !important;
+                height: 272mm !important;
+                max-height: 272mm !important;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: space-between !important;
+                box-sizing: border-box !important;
+                page-break-after: avoid !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+            .slip-body {
+                flex: 1 0 auto !important;
+            }
+            .slip-footer {
+                margin-top: auto !important;
+                flex-shrink: 0 !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+            .header-table {
+                width: 100% !important;
+                border-bottom: 2px solid #000 !important;
+                margin-bottom: 4px !important;
+            }
+            .header-table td {
+                padding: 1px 3px !important;
+            }
+            .logo-cell {
+                width: 58px !important;
+            }
+            .logo-cell img {
+                width: 54px !important;
+                height: 54px !important;
+            }
+            .title-cell {
+                padding: 0 4px !important;
+            }
+            .title-main {
+                font-size: 17px !important;
+                margin: 0 0 2px 0 !important;
+            }
+            .title-ugc {
+                font-size: 10px !important;
+                margin: 0 0 1px 0 !important;
+            }
+            .title-address {
+                font-size: 9.5px !important;
+                margin: 0 0 2px 0 !important;
+            }
+            .title-gold {
+                font-size: 9.5px !important;
+                margin: 1px 0 !important;
+            }
+            .title-sub {
+                font-size: 9.5px !important;
+                margin: 1px 0 !important;
+            }
+            .form-heading {
+                font-size: 12px !important;
+                margin: 2px 0 4px 0 !important;
+            }
+            .meta-strip {
+                padding: 4px 10px !important;
+                margin-bottom: 6px !important;
+                font-size: 10.5px !important;
+            }
+            .meta-strip .enr-num {
+                font-size: 12.5px !important;
+            }
+            .photo-sig-panel {
+                width: 108px !important;
+                margin-left: 8px !important;
+                margin-bottom: 2px !important;
+            }
+            .photo-box {
+                width: 108px !important;
+                height: 122px !important;
+                margin-bottom: 3px !important;
+            }
+            .sig-box {
+                width: 108px !important;
+                height: 38px !important;
+            }
+            table.personal-table {
+                width: calc(100% - 118px) !important;
+            }
+            .section-heading {
+                background: #082B49 !important;
+                color: #fff !important;
+                padding: 3px 6px !important;
+                font-size: 10px !important;
+                font-weight: 700 !important;
+                margin: 6px 0 3px 0 !important;
+            }
+            table.info-table {
+                margin-bottom: 5px !important;
+            }
+            table.info-table th, table.info-table td {
+                padding: 3.5px 6px !important;
+                font-size: 10px !important;
+                line-height: 1.25 !important;
+            }
+            table.course-table th, table.course-table td {
+                padding: 2.8px 5px !important;
+                font-size: 9.5px !important;
+                line-height: 1.2 !important;
+            }
+            .declaration-text {
+                margin-top: 8px !important;
+                font-size: 8.5px !important;
+                line-height: 1.3 !important;
+                padding: 3px 5px !important;
+            }
+            .sign-area {
+                margin-top: 32px !important;
+                padding-top: 0 !important;
+                display: flex !important;
+                justify-content: space-between !important;
+            }
+            .sign-block {
+                width: 160px !important;
+                font-size: 10px !important;
+                padding-top: 4px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="no-print">
+        <button onclick="window.print()" class="btn btn-print"><i class="fas fa-print"></i> Print Enrollment Application</button>
+        <a href="{% url 'enrollment_receipt' enrollment.enrollment_no %}" class="btn btn-receipt" target="_blank"><i class="fas fa-receipt"></i> Print Fee Receipt</a>
+        <a href="{% url 'student_dashboard' %}" class="btn btn-back">Back to Dashboard</a>
+    </div>
+
+    <div class="slip-card">
+        <div class="slip-body">
+            <table class="header-table">
+                <tr>
+                    <td class="logo-cell">
+                        <img src="{% static 'images/logo.png' %}" alt="Logo">
+                    </td>
+                    <td class="title-cell">
+                        <p class="title-main">CHAITANYA SCIENCE AND ARTS COLLEGE</p>
+                        <p class="title-ugc">(An Autonomous Institution Approved by UGC)</p>
+                        <p class="title-address">Pamgarh, Dist - Janjgir-Champa (C.G).</p>
+                        <p class="title-gold">ACCREDITED 'A' GRADE BY NAAC</p>
+                        <p class="title-sub">Affiliated to Shaheed Nandkumar Patel Vishwavidyalaya, Raigarh, Chhattisgarh</p>
+                    </td>
+                    <td class="logo-cell">
+                        <img src="{% static 'images/NAAC.png' %}" alt="NAAC">
+                    </td>
+                </tr>
+            </table>
+
+            <p class="form-heading">STUDENT ENROLLMENT APPLICATION (SESSION 2026-27)</p>
+
+        <div class="meta-strip">
+            <div>Enrollment Number: <span class="enr-num">{{ enrollment.enrollment_no }}</span></div>
+            <div>Registration No: <strong>{{ enrollment.reg_no }}</strong></div>
+            <div>Submission Date: <strong>{{ enrollment.submitted_date|date:"d-M-Y" }}</strong></div>
+        </div>
+
+        <div class="photo-sig-panel">
+            <div class="photo-box">
+                {% if enrollment.photo_base64 %}
+                <img src="{{ enrollment.photo_base64 }}" alt="Photo">
+                {% else %}
+                <span style="font-size:11px; color:#94a3b8;">Affix Photo</span>
+                {% endif %}
+            </div>
+            <div class="sig-box">
+                {% if enrollment.signature_base64 %}
+                <img src="{{ enrollment.signature_base64 }}" alt="Signature">
+                {% else %}
+                <span style="font-size:10px; color:#94a3b8;">Signature</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="section-heading">1. Personal &amp; Demographic Details</div>
+        <table class="info-table personal-table">
+            <tr>
+                <th>Applicant Name</th>
+                <td colspan="3"><strong>{{ enrollment.full_name }}</strong></td>
+            </tr>
+            <tr>
+                <th>Father's Name</th>
+                <td>{{ enrollment.father_name }}</td>
+                <th>Mother's Name</th>
+                <td>{{ enrollment.mother_name }}</td>
+            </tr>
+            <tr>
+                <th>Date of Birth</th>
+                <td>{{ enrollment.dob|date:"d-M-Y"|default:enrollment.dob }}</td>
+                <th>Gender</th>
+                <td>{{ enrollment.gender }}</td>
+            </tr>
+            <tr>
+                <th>Category</th>
+                <td>{{ enrollment.category }}</td>
+                <th>Aadhaar Number</th>
+                <td>{{ enrollment.aadhaar }}</td>
+            </tr>
+            <tr>
+                <th>Mobile Number</th>
+                <td>{{ enrollment.mobile }}</td>
+                <th>Email Address</th>
+                <td>{{ enrollment.email }}</td>
+            </tr>
+            <tr>
+                <th>APAAR / ABC ID</th>
+                <td>{{ enrollment.apaar_id|default:"N/A" }}</td>
+                <th>Medium</th>
+                <td>{{ enrollment.medium|default:"Hindi" }}</td>
+            </tr>
+        </table>
+
+        <div style="clear: both;"></div>
+
+        <div class="section-heading">2. Address Information</div>
+        <table class="info-table">
+            <tr>
+                <th>Permanent Address</th>
+                <td>{{ enrollment.perm_village }}, {{ enrollment.perm_city }}, Dist: {{ enrollment.perm_district }}, {{ enrollment.perm_state }} - {{ enrollment.perm_pin_code }}</td>
+            </tr>
+            <tr>
+                <th>Correspondence Address</th>
+                <td>{{ enrollment.corr_village }}, {{ enrollment.corr_city }}, Dist: {{ enrollment.corr_district }}, {{ enrollment.corr_state }} - {{ enrollment.corr_pin_code }}</td>
+            </tr>
+        </table>
+
+        <div class="section-heading">3. Academic Qualifications</div>
+        <table class="info-table">
+            <thead>
+                <tr style="background:#f1f5f9;">
+                    <th>Examination</th>
+                    <th>Board / University</th>
+                    <th>Year</th>
+                    <th>Total Marks</th>
+                    <th>Marks Obtained</th>
+                    <th>Percentage (%)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Class 10</strong></td>
+                    <td>{{ enrollment.board10|default:"-" }}</td>
+                    <td>{{ enrollment.year10|default:"-" }}</td>
+                    <td>{{ enrollment.total_marks10|default:"-" }}</td>
+                    <td>{{ enrollment.obtained10|default:"-" }}</td>
+                    <td>{{ enrollment.percentage10|default:"-" }}%</td>
+                </tr>
+                <tr>
+                    <td><strong>Class 12</strong></td>
+                    <td>{{ enrollment.board12|default:"-" }}</td>
+                    <td>{{ enrollment.year12|default:"-" }}</td>
+                    <td>{{ enrollment.total_marks12|default:"-" }}</td>
+                    <td>{{ enrollment.obtained12|default:"-" }}</td>
+                    <td>{{ enrollment.percentage12|default:"-" }}%</td>
+                </tr>
+                {% if enrollment.class_grad or enrollment.board_grad %}
+                <tr>
+                    <td><strong>{{ enrollment.class_grad|default:"Graduation" }}</strong></td>
+                    <td>{{ enrollment.board_grad|default:"-" }}</td>
+                    <td>{{ enrollment.year_grad|default:"-" }}</td>
+                    <td>{{ enrollment.total_marks_grad|default:"-" }}</td>
+                    <td>{{ enrollment.obtained_grad|default:"-" }}</td>
+                    <td>{{ enrollment.percentage_grad|default:"-" }}%</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+
+        <div class="section-heading">4. Enrolled Program &amp; Courses</div>
+        <table class="info-table" style="margin-bottom:6px;">
+            <tr>
+                <th style="width:20%;">Program Enrolled</th>
+                <td style="width:40%;"><strong>{{ enrollment.program_type }}</strong></td>
+                <th style="width:20%;">Semester</th>
+                <td style="width:20%;"><strong>Semester {{ enrollment.semester }}</strong></td>
+            </tr>
+        </table>
+
+        <table class="info-table course-table">
+            <thead>
+                <tr style="background:#f1f5f9;">
+                    <th style="width:5%;">#</th>
+                    <th style="width:18%;">Course Code</th>
+                    <th style="width:40%;">Course Title</th>
+                    <th style="width:12%;">Paper No.</th>
+                    <th style="width:15%;">Category</th>
+                    <th style="width:10%;">Type</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if enrolled_courses %}
+                {% for c in enrolled_courses %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td><strong style="font-family:monospace;">{{ c.code }}</strong></td>
+                    <td>{{ c.name }}</td>
+                    <td>{{ c.paper|default:"I" }}</td>
+                    <td>{{ c.type_2 }}</td>
+                    <td>{{ c.type_1 }}</td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="6" style="text-align:center; color:#94a3b8;">No courses selected</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+        </div>
+
+        <div class="slip-footer">
+            <div class="declaration-text">
+                <strong>Declaration:</strong> I hereby declare that all information provided in this enrollment application is true and correct to the best of my knowledge. I agree to abide by the rules and regulations of Chaitanya Science &amp; Arts College, Pamgarh.
+            </div>
+
+            <div class="sign-area">
+                <div class="sign-block">Student Signature</div>
+                <div class="sign-block">College Verification Officer</div>
+                <div class="sign-block">Principal / Seal</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,4 +1,4 @@
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.utils.html import strip_tags
 
 from .forms import AdmissionSubmitInstructionForm
@@ -7,6 +7,7 @@ from .models import (
     StudentAdmission,
     StudentDocument,
     StudentEducation,
+    StudentEnrollment,
 )
 
 
@@ -15,6 +16,42 @@ class StudentAdmissionAdmin(admin.ModelAdmin):
     list_display = ('application_no', 'reg_no', 'full_name', 'status', 'submitted_date')
     list_filter = ('status', 'program_type')
     search_fields = ('application_no', 'reg_no', 'full_name', 'email')
+
+
+@admin.register(StudentEnrollment)
+class StudentEnrollmentAdmin(admin.ModelAdmin):
+    list_display = (
+        'enrollment_no',
+        'reg_no',
+        'full_name',
+        'program_type',
+        'semester',
+        'status',
+        'is_submitted',
+        'submitted_date',
+    )
+    list_filter = ('status', 'is_submitted', 'program_type', 'semester')
+    search_fields = ('enrollment_no', 'reg_no', 'full_name', 'email', 'mobile')
+    readonly_fields = ('created_at', 'updated_at')
+    actions = ['approve_enrollment', 'reset_to_draft']
+
+    @admin.action(description='Accept / Approve selected enrollment applications')
+    def approve_enrollment(self, request, queryset):
+        updated = queryset.update(status='Approved', is_submitted=True)
+        self.message_user(
+            request,
+            f'{updated} enrollment application(s) marked as Approved / Accepted.',
+            messages.SUCCESS,
+        )
+
+    @admin.action(description='Reset selected enrollments to Draft (Allow student to edit)')
+    def reset_to_draft(self, request, queryset):
+        updated = queryset.update(status='Draft', is_submitted=False)
+        self.message_user(
+            request,
+            f'{updated} enrollment application(s) reset to Draft.',
+            messages.SUCCESS,
+        )
 
 
 @admin.register(AdmissionSubmitInstruction)

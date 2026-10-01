@@ -47,7 +47,9 @@ def _students_filter_params(request):
     else:
         source = request.GET
 
-    program = (source.get('program') or 'ALL').strip() or 'ALL'
+    program = (source.get('program') or '').strip()
+    if program == 'ALL':
+        program = ''
     verified = (source.get('verified') or 'ALL').strip() or 'ALL'
     group = (source.get('group') or 'ALL').strip() or 'ALL'
     return {
@@ -120,7 +122,9 @@ def _students_url(params=None, edit_pk=None):
     return f'{base}?{urlencode(query)}'
 
 
-def _get_students_queryset(search='', program_filter='ALL', verified_filter='ALL'):
+def _get_students_queryset(search='', program_filter='', verified_filter='ALL'):
+    if not program_filter and not search:
+        return Student.objects.none()
     students = Student.objects.all()
     if search:
         students = students.filter(
@@ -130,7 +134,7 @@ def _get_students_queryset(search='', program_filter='ALL', verified_filter='ALL
             | Q(registration_no__icontains=search)
             | Q(aadhaar__icontains=search)
         )
-    if program_filter != 'ALL':
+    if program_filter:
         students = students.filter(program_type=program_filter)
     if verified_filter == 'YES':
         students = students.filter(is_verified=True)
@@ -344,6 +348,8 @@ def admin_logout(request):
 
 @admin_login_required
 def admin_dashboard(request):
+    from admissions.models import StudentEnrollment
+
     show_verified = request.GET.get('show_verified') == '1'
     verified_students = Student.objects.filter(is_verified=True).count()
     stats = {
@@ -354,11 +360,16 @@ def admin_dashboard(request):
         'submitted': StudentAdmission.objects.filter(status='Submitted').count(),
         'students': Student.objects.count(),
         'verified_students': verified_students,
+        'total_enrollments': StudentEnrollment.objects.count(),
+        'submitted_enrollments': StudentEnrollment.objects.filter(is_submitted=True).count(),
+        'approved_enrollments': StudentEnrollment.objects.filter(status='Approved').count(),
     }
     recent = StudentAdmission.objects.order_by('-submitted_date', '-created_date')[:20]
+    recent_enrollments = StudentEnrollment.objects.order_by('-submitted_date', '-created_at')[:20]
     return render(request, 'admin_panel/dashboard.html', {
         'stats': stats,
         'recent': recent,
+        'recent_enrollments': recent_enrollments,
         'show_verified': show_verified,
         'verified_by_program': _build_verified_students_by_program() if show_verified else [],
     })
@@ -702,6 +713,9 @@ def export_merit_list_excel(request):
 @admin_login_required
 def export_students_csv(request):
     params = _students_filter_params(request)
+    if not params['program'] and not params['search']:
+        messages.warning(request, 'Please select a program before exporting CSV.')
+        return redirect('manage_students')
     group_filter = _normalize_group_filter(params['group'], params['program'])
     students = _filter_students_by_group(
         _attach_admissions(
@@ -832,3 +846,120 @@ def bulk_update_admission_status(request):
     else:
         messages.error(request, 'No matching applications found.')
     return redirect('admin_dashboard')
+
+
+@admin_login_required
+@require_http_methods(['POST'])
+def update_enrollment_status(request, pk):
+    from admissions.models import StudentEnrollment
+    from admissions.utils import generate_enrollment_number
+
+    enrollment = get_object_or_404(StudentEnrollment, pk=pk)
+    new_status = request.POST.get('status', '').strip()
+    if new_status in ('Approved', 'Submitted', 'Draft'):
+        enrollment.status = new_status
+        if new_status == 'Approved':
+            enrollment.is_submitted = True
+            if not enrollment.enrollment_no:
+                enrollment.enrollment_no = generate_enrollment_number()
+            enrollment.save(update_fields=['status', 'is_submitted', 'enrollment_no'])
+            Student.objects.filter(registration_no=enrollment.reg_no).update(is_verified=True)
+            messages.success(request, f'Enrollment {enrollment.enrollment_no} for {enrollment.full_name} has been Approved / Accepted.')
+        elif new_status == 'Draft':
+            enrollment.is_submitted = False
+            enrollment.save(update_fields=['status', 'is_submitted'])
+            messages.success(request, f'Enrollment {enrollment.enrollment_no or enrollment.reg_no} for {enrollment.full_name} reset to Draft (student can now edit).')
+        else:
+            enrollment.save(update_fields=['status'])
+            messages.success(request, f'Enrollment status updated to {new_status}.')
+    next_url = request.POST.get('next') or request.META.get('HTTP_REFERER') or 'admin_dashboard'
+    return redirect(next_url)
+
+
+@admin_login_required
+@require_http_methods(['POST'])
+def bulk_update_enrollment_status(request):
+    from admissions.models import StudentEnrollment
+    from admissions.utils import generate_enrollment_number
+
+    enrollment_ids = request.POST.getlist('enrollment_ids')
+    new_status = request.POST.get('status', '').strip()
+    valid_statuses = ('Approved', 'Draft')
+
+    if not enrollment_ids:
+        messages.error(request, 'Select at least one enrollment application.')
+        return redirect(request.META.get('HTTP_REFERER') or 'admin_dashboard')
+    if new_status not in valid_statuses:
+        messages.error(request, 'Choose a valid status (Approve or Reset to Draft).')
+        return redirect(request.META.get('HTTP_REFERER') or 'admin_dashboard')
+
+    enrollments = StudentEnrollment.objects.filter(pk__in=enrollment_ids)
+    count = 0
+    if new_status == 'Approved':
+        for enr in enrollments:
+            enr.status = 'Approved'
+            enr.is_submitted = True
+            if not enr.enrollment_no:
+                enr.enrollment_no = generate_enrollment_number()
+            enr.save(update_fields=['status', 'is_submitted', 'enrollment_no'])
+            Student.objects.filter(registration_no=enr.reg_no).update(is_verified=True)
+            count += 1
+        messages.success(request, f'Successfully Approved & Accepted {count} enrollment application(s).')
+    elif new_status == 'Draft':
+        for enr in enrollments:
+            enr.status = 'Draft'
+            enr.is_submitted = False
+            enr.save(update_fields=['status', 'is_submitted'])
+            count += 1
+        messages.success(request, f'Reset {count} enrollment application(s) to Draft (students can now edit).')
+
+    next_url = request.POST.get('next') or request.META.get('HTTP_REFERER') or 'admin_dashboard'
+    return redirect(next_url)
+
+
+@admin_login_required
+def manage_enrollments(request):
+    from admissions.models import StudentEnrollment
+
+    search = request.GET.get('search', '').strip()
+    program_filter = request.GET.get('program', '').strip()
+    if program_filter == 'ALL':
+        program_filter = ''
+    status_filter = request.GET.get('status', 'ALL').strip() or 'ALL'
+
+    enrollments = StudentEnrollment.objects.all().select_related('student')
+
+    if search:
+        enrollments = enrollments.filter(
+            Q(full_name__icontains=search)
+            | Q(reg_no__icontains=search)
+            | Q(enrollment_no__icontains=search)
+            | Q(mobile__icontains=search)
+            | Q(email__icontains=search)
+        )
+
+    if program_filter:
+        enrollments = enrollments.filter(program_type=program_filter)
+
+    if status_filter != 'ALL':
+        enrollments = enrollments.filter(status=status_filter)
+
+    total_count = StudentEnrollment.objects.count()
+    submitted_count = StudentEnrollment.objects.filter(status='Submitted').count()
+    approved_count = StudentEnrollment.objects.filter(status='Approved').count()
+    draft_count = StudentEnrollment.objects.filter(status='Draft').count()
+
+    program_types = get_program_names(active_only=False)
+
+    return render(request, 'admin_panel/enrollments.html', {
+        'enrollments': enrollments,
+        'search': search,
+        'program_filter': program_filter,
+        'status_filter': status_filter,
+        'program_types': program_types,
+        'total_count': total_count,
+        'submitted_count': submitted_count,
+        'approved_count': approved_count,
+        'draft_count': draft_count,
+        'filtered_count': enrollments.count(),
+    })

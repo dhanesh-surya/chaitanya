@@ -827,13 +827,22 @@
         document.querySelectorAll('.edu-data-row').forEach(row => {
             if (row.id === 'rowGrad' && !isEducationRowVisible('rowGrad')) return;
             let classNameVal = (row.querySelector('.class-name')?.value || '').trim();
-            if (!classNameVal) {
-                if (row.id === 'row10th') classNameVal = '10th';
-                else if (row.id === 'row12th') classNameVal = '12th';
-                else return;
+            let rowKey = '10';
+            if (row.id === 'row10th') {
+                rowKey = '10';
+                if (!classNameVal) classNameVal = '10th';
+            } else if (row.id === 'row12th') {
+                rowKey = '12';
+                if (!classNameVal) classNameVal = '12th';
+            } else if (row.id === 'rowGrad') {
+                rowKey = 'grad';
+                if (!classNameVal) classNameVal = 'Graduation';
             }
             education.push({
+                RowKey: rowKey,
+                rowKey: rowKey,
                 ClassName: classNameVal,
+                className: classNameVal,
                 Board: getBoardValueFromRow(row),
                 Stream: row.querySelector('.stream')?.value || '',
                 Duration: row.querySelector('.duration')?.value || '',
@@ -2003,12 +2012,14 @@
     }
 
     function eduClassName(edu) {
-        return edu.ClassName || edu.className || edu.Class || '';
+        return edu?.ClassName || edu?.className || edu?.Class || '';
     }
 
     function eduField(edu, ...keys) {
+        if (!edu || typeof edu !== 'object') return '';
         for (const key of keys) {
-            if (edu[key] != null && edu[key] !== '') return edu[key];
+            const val = edu[key];
+            if (val != null && val !== '' && val !== '-') return val;
         }
         return '';
     }
@@ -2019,7 +2030,7 @@
     }
 
     function educationHasContent(eduList) {
-        return eduList.some(edu =>
+        return Array.isArray(eduList) && eduList.some(edu =>
             eduField(edu, 'Board', 'board')
             || eduField(edu, 'Stream', 'stream')
             || eduField(edu, 'Year', 'year')
@@ -2029,15 +2040,21 @@
     }
 
     function eduRowId(edu) {
+        if (!edu || typeof edu !== 'object') return '';
+        const rowKey = String(eduField(edu, 'RowKey', 'rowKey', 'row_key', 'key') || '').trim().toLowerCase();
+        if (rowKey === '10' || rowKey === '10th') return 'row10th';
+        if (rowKey === '12' || rowKey === '12th') return 'row12th';
+        if (rowKey === 'grad' || rowKey === 'graduation') return 'rowGrad';
+
         const lower = eduClassName(edu).toLowerCase();
-        if (lower.includes('grad') || lower.includes('bachelor') || lower.includes('degree')) {
-            return 'rowGrad';
-        }
-        if (lower.includes('12') || lower.includes('xii') || lower.includes('inter')) {
+        if (lower.includes('12') || lower.includes('xii') || lower.includes('inter') || lower.includes('hsc') || lower.includes('+2')) {
             return 'row12th';
         }
         if (lower.includes('10') || lower.includes('ssc') || lower.includes('matric') || lower === 'x') {
             return 'row10th';
+        }
+        if (lower) {
+            return 'rowGrad';
         }
         return '';
     }
@@ -2064,8 +2081,9 @@
             if (!row) return;
             const set = (cls, v) => {
                 const el = row.querySelector('.' + cls);
-                if (!el || v == null || v === '') return;
-                const strVal = String(v);
+                if (!el || v == null || v === '' || v === '-') return;
+                const strVal = String(v).trim();
+                if (!strVal || strVal === '-') return;
                 if (el.tagName === 'SELECT') ensureSelectOption(el, strVal);
                 el.value = strVal;
             };
@@ -2081,7 +2099,7 @@
             set('percentage', eduField(edu, 'Percentage', 'percentage'));
             set('grade', eduField(edu, 'Grade', 'grade'));
             const streamEl = row.querySelector('.stream');
-            if (streamEl && streamEl.value) streamEl.required = true;
+            if (streamEl && streamEl.value && streamEl.value !== '-') streamEl.required = true;
         });
         return educationHasContent(education);
     }

@@ -34,9 +34,11 @@ def _filter_querystring(request):
     params = {}
     for key in ('search', 'program', 'type1', 'type2', 'group', 'level'):
         value = request.GET.get(key, '').strip() or request.POST.get(key, '').strip()
+        if value == 'ALL' and key == 'program':
+            continue
         if value and value != 'ALL':
             params[key] = value
-        elif key in ('program', 'type1', 'type2', 'group', 'level') and value == 'ALL':
+        elif key in ('type1', 'type2', 'group', 'level') and value == 'ALL':
             params[key] = value
     return params
 
@@ -82,32 +84,37 @@ def _manage_programs_url(params=None, edit_pk=None):
 
 @admin_login_required
 def manage_courses(request):
-    courses = ProgramCourse.objects.prefetch_related('subject_groups')
     search = request.GET.get('search', '').strip()
-    program_filter = request.GET.get('program', 'ALL').strip() or 'ALL'
+    program_filter = request.GET.get('program', '').strip()
+    if program_filter == 'ALL':
+        program_filter = ''
     type1_filter = request.GET.get('type1', 'ALL').strip() or 'ALL'
     type2_filter = request.GET.get('type2', 'ALL').strip() or 'ALL'
     group_filter = request.GET.get('group', 'ALL').strip() or 'ALL'
     edit_pk = request.GET.get('edit', '').strip()
 
-    if search:
-        courses = courses.filter(
-            Q(course_name__icontains=search)
-            | Q(department__icontains=search)
-            | Q(program_type__icontains=search)
-        )
-    if program_filter != 'ALL':
-        if is_bsc_program(program_filter):
-            resolved = resolve_bsc_courses_program_type(program_filter)
-            program_names = {program_filter, resolved}
-            program_names.discard('')
-            courses = courses.filter(program_type__in=program_names)
-        else:
-            courses = courses.filter(program_type=program_filter)
-    if type1_filter != 'ALL':
-        courses = courses.filter(course_type_1__iexact=type1_filter)
-    if type2_filter != 'ALL':
-        courses = courses.filter(course_type_2__iexact=type2_filter)
+    if not program_filter and not search:
+        courses = ProgramCourse.objects.none()
+    else:
+        courses = ProgramCourse.objects.prefetch_related('subject_groups')
+        if search:
+            courses = courses.filter(
+                Q(course_name__icontains=search)
+                | Q(department__icontains=search)
+                | Q(program_type__icontains=search)
+            )
+        if program_filter:
+            if is_bsc_program(program_filter):
+                resolved = resolve_bsc_courses_program_type(program_filter)
+                program_names = {program_filter, resolved}
+                program_names.discard('')
+                courses = courses.filter(program_type__in=program_names)
+            else:
+                courses = courses.filter(program_type=program_filter)
+        if type1_filter != 'ALL':
+            courses = courses.filter(course_type_1__iexact=type1_filter)
+        if type2_filter != 'ALL':
+            courses = courses.filter(course_type_2__iexact=type2_filter)
 
     program_types = get_program_names(active_only=False)
     type2_options = (
@@ -137,7 +144,7 @@ def manage_courses(request):
     current_type2 = edit_course.course_type_2 if edit_course else ''
     if edit_course:
         current_program = edit_course.program_type
-    elif program_filter != 'ALL':
+    elif program_filter:
         current_program = program_filter
     else:
         current_program = ''
@@ -194,7 +201,7 @@ def manage_courses(request):
         ]
 
     show_department_in_course_name = True
-    if program_filter != 'ALL':
+    if program_filter:
         show_department_in_course_name = program_shows_department_in_course_name(
             program_filter,
         )
@@ -272,6 +279,8 @@ def add_course(request):
         program_type=request.POST.get('program_type', '').strip(),
         department=request.POST.get('department', '').strip(),
         course_name=request.POST.get('course_name', '').strip(),
+        course_code=request.POST.get('course_code', '').strip(),
+        paper_no=request.POST.get('paper_no', '').strip(),
         course_type_1=request.POST.get('course_type_1', '').strip(),
         course_type_2=request.POST.get('course_type_2', '').strip(),
         is_compulsory=request.POST.get('is_compulsory') == 'on',
@@ -295,6 +304,8 @@ def edit_course(request, pk):
     course.program_type = request.POST.get('program_type', '').strip()
     course.department = request.POST.get('department', '').strip()
     course.course_name = request.POST.get('course_name', '').strip()
+    course.course_code = request.POST.get('course_code', '').strip()
+    course.paper_no = request.POST.get('paper_no', '').strip()
     course.course_type_1 = request.POST.get('course_type_1', '').strip()
     course.course_type_2 = request.POST.get('course_type_2', '').strip()
     course.is_compulsory = request.POST.get('is_compulsory') == 'on'

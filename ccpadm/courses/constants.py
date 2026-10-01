@@ -1,6 +1,6 @@
 COURSE_TYPE_1_CHOICES = ('Theory', 'Practical')
 
-COURSE_TYPE_2_CHOICES = ('DSC', 'GE', 'AEC', 'SEC', 'DSE', 'VAC')
+COURSE_TYPE_2_CHOICES = ('DSC', 'GE', 'AEC', 'SEC', 'DSE', 'VAC', 'Theory', 'Practical')
 
 PROGRAM_LEVEL_CHOICES = ('UG', 'PG', 'Diploma')
 

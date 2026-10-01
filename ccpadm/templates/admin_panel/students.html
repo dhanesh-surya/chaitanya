@@ -19,7 +19,7 @@
         <form method="get" class="filter-bar" id="studentsFilterForm">
             <input type="text" name="search" value="{{ search }}" class="portal-input" placeholder="Search name, email, mobile, reg no...">
             <select name="program" class="portal-input" id="programFilter" aria-label="Filter by program" onchange="this.form.submit()">
-                <option value="ALL">All Programs</option>
+                <option value="" {% if not program_filter %}selected{% endif %}>-- Select Program --</option>
                 {% for pt in program_types %}
                 <option value="{{ pt }}" {% if program_filter == pt %}selected{% endif %}>{{ pt }}</option>
                 {% endfor %}
@@ -45,7 +45,11 @@
             <button type="submit" class="btn btn-secondary btn-sm">Filter</button>
         </form>
 
+        {% if program_filter or search %}
         <p class="field-hint" style="margin-bottom: var(--space-md);">{{ total_count }} student(s) found</p>
+        {% else %}
+        <p class="field-hint" style="margin-bottom: var(--space-md);">Please select a program to view student details</p>
+        {% endif %}
 
         <form method="post" action="{% url 'bulk_student_action' %}" id="bulkActionForm" class="bulk-action-bar" hidden>
             {% csrf_token %}
@@ -219,7 +223,21 @@
                     </tr>
                     {% empty %}
                     <tr class="empty-row">
-                        <td colspan="10">No students found.</td>
+                        {% if not program_filter and not search %}
+                        <td colspan="10" style="text-align: center; padding: 3rem 1rem; color: var(--color-text-muted);">
+                            <i class="fas fa-graduation-cap" style="font-size: 2.2rem; margin-bottom: 0.75rem; display: block; opacity: 0.4;"></i>
+                            <strong style="font-size: 1.05rem;">No Program Selected</strong>
+                            <div style="margin-top: 0.35rem;">Please select a program from the dropdown above to see details.</div>
+                        </td>
+                        {% elif not program_filter and search %}
+                        <td colspan="10" style="text-align: center; padding: 2rem 1rem; color: var(--color-text-muted);">
+                            No students found matching "{{ search }}".
+                        </td>
+                        {% else %}
+                        <td colspan="10" style="text-align: center; padding: 2rem 1rem; color: var(--color-text-muted);">
+                            No students found for {{ program_filter }}.
+                        </td>
+                        {% endif %}
                     </tr>
                     {% endfor %}
                 </tbody>

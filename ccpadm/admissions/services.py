@@ -97,7 +97,7 @@ def _education_field(item, *keys, default=''):
         return default
     for key in keys:
         val = item.get(key)
-        if val not in (None, ''):
+        if val not in (None, '', '-'):
             return val
     return default
 
@@ -116,10 +116,30 @@ def normalize_education_row(item, default_class=''):
     percentage = _education_field(item, 'percentage', 'Percentage')
     grade = _education_field(item, 'grade', 'Grade')
 
+    row_key = str(_education_field(item, 'RowKey', 'rowKey', 'row_key', 'key')).strip().lower()
+    if row_key in ('10', '10th'):
+        row_key = '10'
+    elif row_key in ('12', '12th'):
+        row_key = '12'
+    elif row_key in ('grad', 'graduation'):
+        row_key = 'grad'
+    else:
+        cls_lower = (class_name or default_class or '').lower()
+        if any(x in cls_lower for x in ('12', 'xii', 'inter', 'hsc', '+2', 'senior', 'higher')):
+            row_key = '12'
+        elif any(x in cls_lower for x in ('10', 'ssc', 'matric', 'secondary', 'high')) or cls_lower == 'x':
+            row_key = '10'
+        elif cls_lower:
+            row_key = 'grad'
+        else:
+            row_key = '10'
+
     if not any((class_name, board, stream, year, total, obtained, percentage, grade)):
         return None
 
     row = {
+        'RowKey': row_key,
+        'rowKey': row_key,
         'className': class_name or default_class or '-',
         'board': board or '-',
         'stream': stream or '-',
@@ -149,24 +169,31 @@ def build_education_list(admission):
         try:
             stored = json.loads(admission.education_json)
             if isinstance(stored, list) and stored:
-                raw_rows = stored
+                raw_rows = [r for r in stored if isinstance(r, dict)]
         except (json.JSONDecodeError, TypeError):
             pass
 
-    if not raw_rows:
-        mappings = [
-            ('10th', admission.class10, admission.board10, None, admission.duration10, admission.year10,
-             admission.total_marks10, admission.obtained10, admission.percentage10, admission.grade10),
-            ('12th', admission.class12, admission.board12, admission.stream12, admission.duration12,
-             admission.year12, admission.total_marks12, admission.obtained12, admission.percentage12,
-             admission.grade12),
-            ('Graduation', admission.class_grad, admission.board_grad, admission.stream_grad,
-             admission.duration_grad, admission.year_grad, admission.total_marks_grad,
-             admission.obtained_grad, admission.percentage_grad, admission.grade_grad),
-        ]
-        for prefix, cls, board, stream, duration, year, total, obtained, pct, grade in mappings:
-            if cls or board or stream:
+    # Check which levels exist in raw_rows
+    from admissions.utils import _education_row_key
+    present_keys = {_education_row_key(r) for r in raw_rows}
+
+    # Fallback to model fields for any missing level
+    model_mappings = [
+        ('10', '10th', admission.class10, admission.board10, None, admission.duration10, admission.year10,
+         admission.total_marks10, admission.obtained10, admission.percentage10, admission.grade10),
+        ('12', '12th', admission.class12, admission.board12, admission.stream12, admission.duration12,
+         admission.year12, admission.total_marks12, admission.obtained12, admission.percentage12,
+         admission.grade12),
+        ('grad', 'Graduation', admission.class_grad, admission.board_grad, admission.stream_grad,
+         admission.duration_grad, admission.year_grad, admission.total_marks_grad,
+         admission.obtained_grad, admission.percentage_grad, admission.grade_grad),
+    ]
+
+    for key, prefix, cls, board, stream, duration, year, total, obtained, pct, grade in model_mappings:
+        if key not in present_keys:
+            if cls or board or stream or year or total or obtained:
                 raw_rows.append({
+                    'RowKey': key,
                     'ClassName': cls or prefix,
                     'Board': board or '',
                     'Stream': stream or '',
@@ -179,11 +206,66 @@ def build_education_list(admission):
                 })
 
     rows = []
+    seen_keys = set()
     for item in raw_rows:
         default_class = _education_field(item, 'className', 'ClassName', 'Class', 'class')
         normalized = normalize_education_row(item, default_class=default_class)
         if normalized:
-            rows.append(normalized)
+            k = normalized.get('RowKey', '10')
+            if k not in seen_keys:
+                seen_keys.add(k)
+                rows.append(normalized)
+
+    if '10' not in seen_keys:
+        rows.append({
+            'RowKey': '10',
+            'rowKey': '10',
+            'ClassName': '10th',
+            'className': '10th',
+            'Board': admission.board10 or '',
+            'board': admission.board10 or '-',
+            'Stream': '',
+            'stream': '-',
+            'Duration': str(admission.duration10) if admission.duration10 else '1',
+            'duration': str(admission.duration10) if admission.duration10 else '1',
+            'Year': str(admission.year10) if admission.year10 else '',
+            'year': str(admission.year10) if admission.year10 else '-',
+            'TotalMarks': str(admission.total_marks10 or ''),
+            'totalMarks': str(admission.total_marks10 or '-'),
+            'Obtained': str(admission.obtained10 or ''),
+            'obtained': str(admission.obtained10 or '-'),
+            'Percentage': str(admission.percentage10 or ''),
+            'percentage': str(admission.percentage10 or '-'),
+            'Grade': str(admission.grade10 or ''),
+            'grade': str(admission.grade10 or '-'),
+        })
+
+    if '12' not in seen_keys:
+        rows.append({
+            'RowKey': '12',
+            'rowKey': '12',
+            'ClassName': '12th',
+            'className': '12th',
+            'Board': admission.board12 or '',
+            'board': admission.board12 or '-',
+            'Stream': admission.stream12 or '',
+            'stream': admission.stream12 or '-',
+            'Duration': str(admission.duration12) if admission.duration12 else '1',
+            'duration': str(admission.duration12) if admission.duration12 else '1',
+            'Year': str(admission.year12) if admission.year12 else '',
+            'year': str(admission.year12) if admission.year12 else '-',
+            'TotalMarks': str(admission.total_marks12 or ''),
+            'totalMarks': str(admission.total_marks12 or '-'),
+            'Obtained': str(admission.obtained12 or ''),
+            'obtained': str(admission.obtained12 or '-'),
+            'Percentage': str(admission.percentage12 or ''),
+            'percentage': str(admission.percentage12 or '-'),
+            'Grade': str(admission.grade12 or ''),
+            'grade': str(admission.grade12 or '-'),
+        })
+
+    order = {'10': 1, '12': 2, 'grad': 3}
+    rows.sort(key=lambda x: order.get(x.get('RowKey'), 99))
     return rows
 
 

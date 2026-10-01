@@ -1,6 +1,6 @@
 import json
 import re
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from django.contrib import messages
 from django.db.models import Q
@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods
 
+from admissions.models import StudentAdmission, StudentEnrollment
 from courses.constants import PROGRAM_LEVEL_CHOICES
 from courses.utils import get_programs_by_level
 
@@ -235,11 +236,17 @@ def student_dashboard(request):
             s.get('name', '') for s in selected_subjects if isinstance(s, dict) and s.get('name')
         )
 
+    from admissions.models import StudentEnrollment
     from .utils import get_student_sidebar_context
+
+    enrollment = StudentEnrollment.objects.filter(reg_no=reg_no).order_by('-submitted_date', '-created_at').first()
+    can_cancel_enrollment = bool(enrollment and enrollment.is_submitted and enrollment.status != 'Approved')
 
     ctx = {
         'student': student,
         'admission': admission,
+        'enrollment': enrollment,
+        'can_cancel_enrollment': can_cancel_enrollment,
         'masked_aadhaar': mask_aadhaar(student.aadhaar),
         'program_display': program_display,
         'selected_subjects': selected_subjects,
@@ -249,175 +256,171 @@ def student_dashboard(request):
     return render(request, 'accounts/student_dashboard.html', ctx)
 
 
-_RESET_SESSION_KEYS = ('reset_email', 'reset_step', 'otp_verified')
+def _parse_recovery_dob(dob_str):
+    if not dob_str:
+        return None
+    dob_str = str(dob_str).strip()
+    for fmt in ('%Y-%m-%d', '%d-%m-%Y', '%d/%m/%Y', '%Y/%m/%d'):
+        try:
+            return datetime.strptime(dob_str, fmt).date()
+        except ValueError:
+            pass
+    return None
 
 
-def _clear_reset_session(request):
-    for key in _RESET_SESSION_KEYS:
-        request.session.pop(key, None)
+def _match_student_name(full_name_input, candidate_name):
+    if not full_name_input or not candidate_name:
+        return False
+    clean_input = ' '.join(str(full_name_input).strip().lower().split())
+    clean_candidate = ' '.join(str(candidate_name).strip().lower().split())
+    if not clean_input or not clean_candidate:
+        return False
+
+    # Exact normalized match
+    if clean_input == clean_candidate:
+        return True
+
+    input_tokens = clean_input.split()
+    cand_tokens = clean_candidate.split()
+
+    # Same set of tokens in any order (e.g., "Kumar Amar" vs "Amar Kumar")
+    if set(input_tokens) == set(cand_tokens):
+        return True
+
+    # All tokens of input are in candidate (e.g. entered "Sonam Barman" for "Sonam Singh Barman")
+    if all(tok in cand_tokens for tok in input_tokens):
+        return True
+
+    # All tokens of candidate in input (e.g. entered extra middle name or title)
+    if all(tok in input_tokens for tok in cand_tokens):
+        return True
+
+    # Compact match ignoring whitespace (for compound names like Devid Gayakwad vs Devid Gayak Wad)
+    if clean_input.replace(' ', '') == clean_candidate.replace(' ', ''):
+        return True
+
+    return False
 
 
-def _forgot_password_redirect(step='find'):
-    if step == 'find':
-        return redirect('forgot_password')
-    return redirect(f'{reverse("forgot_password")}?step={step}')
+def find_student_for_password_recovery(full_name, dob, aadhaar_input):
+    """
+    Validates full name, DOB, and Aadhaar to find matching student and their password.
+    Returns (student, error_message).
+    """
+    clean_name = (full_name or '').strip()
+    clean_aadhaar = re.sub(r'\D', '', aadhaar_input or '')
 
+    if not clean_name:
+        return None, 'Please enter your Full Name.'
+    if not dob:
+        return None, 'Please enter a valid Date of Birth.'
+    if not clean_aadhaar or len(clean_aadhaar) != 12:
+        return None, 'Please enter a valid 12-digit Aadhaar Number.'
 
-def _otp_failure_message(reason):
-    messages_by_reason = {
-        'not_configured': (
-            'Could not send OTP email. Email service is not configured correctly. '
-            'Please contact the college office.'
-        ),
-        'daily_limit': (
-            'The college email account has reached its daily sending limit. '
-            'Please try again after 24 hours or contact the college office.'
-        ),
-        'auth_error': (
-            'Could not send OTP email because the college email login failed. '
-            'Please contact the college office.'
-        ),
-        'ses_not_verified': (
-            'Could not send OTP because the email address is not verified with the mail service. '
-            'Please contact the college office.'
-        ),
-        'ses_permission': (
-            'Could not send OTP because the server is not allowed to send email. '
-            'Please contact the college office.'
-        ),
-        'blocked': (
-            'The email provider blocked delivery of this message. '
-            'Please try again later or contact the college office.'
-        ),
-        'connection_error': (
-            'Could not reach the email server right now. Please try again later.'
-        ),
-    }
-    return messages_by_reason.get(
-        reason,
-        'Could not send OTP email right now. Please try again later or contact the college office.',
-    )
+    # Find candidates by Aadhaar across Student, StudentAdmission, and StudentEnrollment
+    students_by_aadhaar = list(Student.objects.filter(aadhaar=clean_aadhaar))
+    adm_by_aadhaar = list(StudentAdmission.objects.filter(aadhaar=clean_aadhaar))
+    enr_by_aadhaar = list(StudentEnrollment.objects.filter(aadhaar=clean_aadhaar))
 
+    candidate_reg_nos = set()
+    for s in students_by_aadhaar:
+        candidate_reg_nos.add(s.registration_no)
+    for a in adm_by_aadhaar:
+        if a.reg_no:
+            candidate_reg_nos.add(a.reg_no)
+    for e in enr_by_aadhaar:
+        if e.reg_no:
+            candidate_reg_nos.add(e.reg_no)
 
-def _send_password_reset_otp(request, email):
-    otp = generate_otp()
-    PasswordResetOTP.objects.create(
-        email=email,
-        otp_hash=hash_otp(otp),
-        expiry_at=timezone.now() + timedelta(minutes=10),
-    )
-    sent, reason = send_otp_email(email, otp)
-    if sent:
-        request.session['reset_email'] = email
-        request.session['reset_step'] = 'verify'
-        return True, reason
-    return False, reason
+    if not candidate_reg_nos:
+        # Check if Aadhaar was recorded with spaces or formatting in legacy records
+        for s in Student.objects.filter(aadhaar__icontains=clean_aadhaar[-8:]):
+            s_aadhaar_clean = re.sub(r'\D', '', s.aadhaar or '')
+            if s_aadhaar_clean == clean_aadhaar:
+                candidate_reg_nos.add(s.registration_no)
+
+    if not candidate_reg_nos:
+        return None, 'No student record found matching the provided Aadhaar Number.'
+
+    matched_student = None
+    for reg_no in candidate_reg_nos:
+        student = Student.objects.filter(registration_no=reg_no).first()
+        if not student:
+            continue
+
+        adm = StudentAdmission.objects.filter(reg_no=reg_no).first()
+        enr = StudentEnrollment.objects.filter(reg_no=reg_no).first()
+
+        # Check DOB
+        candidate_dobs = [d for d in [getattr(adm, 'dob', None), getattr(enr, 'dob', None)] if d]
+        for a in adm_by_aadhaar:
+            if a.dob and a.dob not in candidate_dobs:
+                candidate_dobs.append(a.dob)
+        for e in enr_by_aadhaar:
+            if e.dob and e.dob not in candidate_dobs:
+                candidate_dobs.append(e.dob)
+
+        if dob not in candidate_dobs:
+            continue
+
+        # Check Name
+        name_candidates = [student.full_name]
+        if adm and adm.full_name:
+            name_candidates.append(adm.full_name)
+        if enr and enr.full_name:
+            name_candidates.append(enr.full_name)
+
+        if any(_match_student_name(clean_name, name) for name in name_candidates):
+            matched_student = student
+            break
+
+    if not matched_student:
+        return None, (
+            'The details provided do not match our records. '
+            'Please verify your Full Name, Date of Birth, and Aadhaar Number.'
+        )
+
+    return matched_student, None
 
 
 @require_http_methods(['GET', 'POST'])
 def forgot_password(request):
-    step = 'find'
-    reset_email = None
-
-    if request.method == 'GET':
-        step_param = request.GET.get('step')
-        if step_param in ('verify', 'reset'):
-            reset_email = request.session.get('reset_email')
-            session_step = request.session.get('reset_step', 'find')
-            if step_param == 'verify' and reset_email and session_step == 'verify':
-                step = 'verify'
-            elif (
-                step_param == 'reset'
-                and reset_email
-                and session_step == 'reset'
-                and request.session.get('otp_verified')
-            ):
-                step = 'reset'
-            else:
-                _clear_reset_session(request)
-        else:
-            _clear_reset_session(request)
+    success = False
+    matched_student = None
+    error_message = None
+    form_data = {
+        'full_name': '',
+        'dob': '',
+        'aadhaar': '',
+    }
 
     if request.method == 'POST':
-        action = request.POST.get('action', 'find')
+        full_name = request.POST.get('full_name', '').strip()
+        dob_str = request.POST.get('dob', '').strip()
+        aadhaar = request.POST.get('aadhaar', '').strip()
 
-        if action == 'find':
-            email = request.POST.get('email', '').strip().lower()
-            if not is_valid_email(email):
-                messages.error(request, 'Please enter a valid email address.')
-                return _forgot_password_redirect()
+        form_data = {
+            'full_name': full_name,
+            'dob': dob_str,
+            'aadhaar': aadhaar,
+        }
 
-            student = Student.objects.filter(email__iexact=email).first()
-            if student:
-                sent, reason = _send_password_reset_otp(request, student.email)
-                if sent:
-                    messages.success(
-                        request,
-                        'OTP has been sent to your registered email. Check your inbox.',
-                    )
-                    return _forgot_password_redirect('verify')
-                messages.error(request, _otp_failure_message(reason))
-                return _forgot_password_redirect()
-            messages.error(
-                request,
-                'No account found with this email. Use the same email you used during registration.',
-            )
-            return _forgot_password_redirect()
+        parsed_dob = _parse_recovery_dob(dob_str)
+        matched_student, error_message = find_student_for_password_recovery(
+            full_name=full_name,
+            dob=parsed_dob,
+            aadhaar_input=aadhaar,
+        )
 
-        if action in ('send_otp', 'resend_otp'):
-            email = request.session.get('reset_email')
-            if not email:
-                return _forgot_password_redirect()
-            sent, reason = _send_password_reset_otp(request, email)
-            if sent:
-                messages.info(request, 'A new OTP has been sent to your registered email.')
-                return _forgot_password_redirect('verify')
-            messages.error(request, _otp_failure_message(reason))
-            return _forgot_password_redirect()
-
-        if action == 'verify_otp':
-            email = request.session.get('reset_email')
-            if not email:
-                return _forgot_password_redirect()
-            otp_input = request.POST.get('otp', '').strip()
-            record = (
-                PasswordResetOTP.objects.filter(email=email, is_used=False)
-                .order_by('-created_at')
-                .first()
-            )
-            if not record or record.expiry_at < timezone.now():
-                messages.error(request, 'OTP expired. Please request a new one.')
-                return _forgot_password_redirect('verify')
-            if record.otp_hash != hash_otp(otp_input):
-                record.attempts += 1
-                record.save(update_fields=['attempts'])
-                messages.error(request, 'Invalid OTP.')
-                return _forgot_password_redirect('verify')
-            record.is_used = True
-            record.save(update_fields=['is_used'])
-            request.session['otp_verified'] = True
-            request.session['reset_step'] = 'reset'
-            messages.success(request, 'OTP verified.')
-            return _forgot_password_redirect('reset')
-
-        if action == 'reset_password':
-            if not request.session.get('otp_verified'):
-                return _forgot_password_redirect()
-            new_pass = request.POST.get('new_password', '').strip()
-            confirm = request.POST.get('confirm_password', '').strip()
-            if not new_pass or new_pass != confirm:
-                messages.error(request, 'Passwords do not match.')
-                return _forgot_password_redirect('reset')
-            email = request.session.get('reset_email')
-            Student.objects.filter(email__iexact=email).update(password=new_pass)
-            _clear_reset_session(request)
-            messages.success(request, 'Password reset successful. Please login.')
-            return redirect('login')
-
-    if step != 'find':
-        reset_email = request.session.get('reset_email')
+        if matched_student:
+            success = True
+            messages.success(request, 'Student identity verified successfully!')
+        else:
+            messages.error(request, error_message)
 
     return render(request, 'accounts/forgot_password.html', {
-        'step': step,
-        'reset_email': reset_email,
+        'success': success,
+        'matched_student': matched_student,
+        'error_message': error_message,
+        'form_data': form_data,
     })

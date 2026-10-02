@@ -33,6 +33,12 @@ from .utils import (
 
 def _home_page_context():
     now = timezone.now()
+    try:
+        from admissions.models import EnrollmentInstruction
+        enrollment_instruction = EnrollmentInstruction.objects.filter(is_active=True).first()
+    except Exception:
+        enrollment_instruction = None
+
     return {
         'important_instructions': ImportantInstruction.objects.filter(is_active=True).order_by(
             'sort_order', '-created_at'
@@ -42,6 +48,7 @@ def _home_page_context():
         ).filter(
             Q(expires_at__isnull=True) | Q(expires_at__gt=now),
         ).order_by('sort_order', '-created_at'),
+        'enrollment_instruction': enrollment_instruction,
     }
 
 

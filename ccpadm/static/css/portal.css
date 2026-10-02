@@ -2333,3 +2333,218 @@ h3.college-title-main {
         font-size: 0.92rem;
     }
 }
+
+/* ---- Home Enrollment Instructions Section ---- */
+html {
+    scroll-behavior: smooth;
+}
+
+.btn-warning {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(217, 119, 6, 0.35);
+}
+
+.btn-warning:hover {
+    transform: translateY(-2px);
+    color: #fff;
+    box-shadow: 0 6px 18px rgba(217, 119, 6, 0.45);
+}
+
+.btn-outline-white {
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.btn-outline-white:hover {
+    background: rgba(255, 255, 255, 0.25);
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+.home-enrollment-section {
+    max-width: 1280px;
+    margin: 36px auto 0 auto;
+    background: var(--card-bg, #ffffff);
+    border: 1px solid rgba(8, 43, 73, 0.12);
+    border-radius: var(--radius-lg, 16px);
+    box-shadow: var(--card-shadow, 0 10px 30px rgba(0, 0, 0, 0.08));
+    overflow: hidden;
+}
+
+.home-enrollment-header {
+    background: linear-gradient(135deg, #082B49 0%, #0d416b 100%);
+    color: #ffffff;
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    border-bottom: 3px solid #ffcc00;
+}
+
+.home-enrollment-header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.home-enrollment-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.14);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    color: #ffd700;
+    flex-shrink: 0;
+}
+
+.home-enrollment-title-wrap h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 0.2px;
+}
+
+.home-enrollment-title-wrap p {
+    margin: 3px 0 0 0;
+    font-size: 0.88rem;
+    color: #cbd5e1;
+    font-weight: 500;
+}
+
+.home-enrollment-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.home-enrollment-body {
+    padding: 24px;
+    background: #f8fafc;
+}
+
+.home-enrollment-section .enrollment-steps-container {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+@media (max-width: 900px) {
+    .home-enrollment-section .enrollment-steps-container {
+        grid-template-columns: 1fr;
+    }
+    .home-enrollment-header {
+        padding: 14px 16px;
+    }
+    .home-enrollment-body {
+        padding: 16px;
+    }
+    .home-enrollment-title-wrap h2 {
+        font-size: 1.1rem;
+    }
+}
+
+.home-enrollment-section .step-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 16px 18px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.home-enrollment-section .step-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+    border-color: #cbd5e1;
+}
+
+.home-enrollment-section .step-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 8px;
+}
+
+.home-enrollment-section .step-number-badge {
+    background: #082B49;
+    color: #ffffff;
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.3px;
+    flex-shrink: 0;
+}
+
+.home-enrollment-section .step-heading {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.home-enrollment-section .step-card-body {
+    flex: 1;
+    font-size: 13.5px;
+    color: #334155;
+}
+
+.home-enrollment-section .step-card-body ol {
+    margin: 0 0 8px 0;
+    padding-left: 20px;
+}
+
+.home-enrollment-section .step-card-body ol li {
+    margin-bottom: 6px;
+    color: #334155;
+    line-height: 1.5;
+}
+
+.home-enrollment-section .step-card-body .sub-list {
+    margin: 4px 0 6px 15px;
+    list-style-type: circle;
+}
+
+.home-enrollment-section .step-alert-box {
+    padding: 9px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    margin-top: 10px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    line-height: 1.5;
+}
+
+.home-enrollment-section .step-alert-box.info {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    color: #1e40af;
+}
+
+.home-enrollment-section .step-alert-box.warning {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    color: #92400e;
+}
+
+.home-enrollment-section .step-alert-box.success {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #166534;
+}

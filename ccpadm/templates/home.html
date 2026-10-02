@@ -51,6 +51,11 @@
                     <a href="{% url 'login' %}" class="btn btn-secondary btn-block">
                         <i class="fas fa-sign-in-alt"></i> Student Login
                     </a>
+                    {% if enrollment_instruction and enrollment_instruction.is_active %}
+                    <a href="#enrollment-instructions" class="btn btn-warning btn-block" style="margin-top: 10px;">
+                        <i class="fas fa-book-reader"></i> नामांकन निर्देश (Enrollment Guide)
+                    </a>
+                    {% endif %}
                 </div>
             </div>
         </main>
@@ -83,5 +88,34 @@
             {% endif %}
         </aside>
     </div>
+
+    <!-- Enrollment Instructions -->
+    {% if enrollment_instruction and enrollment_instruction.is_active %}
+    <section class="home-enrollment-section" id="enrollment-instructions" aria-labelledby="enrollment-instructions-heading">
+        <header class="home-enrollment-header">
+            <div class="home-enrollment-header-left">
+                <div class="home-enrollment-icon">
+                    <i class="fas fa-book-open-reader" aria-hidden="true"></i>
+                </div>
+                <div class="home-enrollment-title-wrap">
+                    <h2 id="enrollment-instructions-heading">{{ enrollment_instruction.title }}</h2>
+                    <p><i class="fas fa-university"></i> {{ enrollment_instruction.college_title }} — सत्र 2026-27</p>
+                </div>
+            </div>
+            <div class="home-enrollment-header-actions">
+                <a href="{% url 'login' %}" class="btn btn-warning btn-sm">
+                    <i class="fas fa-sign-in-alt"></i> Student Login (लॉगिन करें)
+                </a>
+                <a href="{% url 'register' %}" class="btn btn-outline-white btn-sm">
+                    <i class="fas fa-user-plus"></i> New Registration
+                </a>
+            </div>
+        </header>
+
+        <div class="home-enrollment-body">
+            {{ enrollment_instruction.content_html|safe }}
+        </div>
+    </section>
+    {% endif %}
 </div>
 {% endblock %}

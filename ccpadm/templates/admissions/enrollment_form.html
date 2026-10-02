@@ -545,17 +545,20 @@
                     </button>
                 </div>
                 {% else %}
-                <!-- LOCKED NOTICE BEFORE PAYMENT -->
-                <div class="p-4 text-center border rounded bg-white mt-4" style="border-style: dashed !important; border-width: 2px !important; border-color: #cbd5e1 !important;">
-                    <div style="width: 52px; height: 52px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px;">
-                        <i class="fas fa-lock text-muted fs-4"></i>
+                <!-- LOCKED NOTICE BEFORE PAYMENT (PROMINENTLY HIGHLIGHTED) -->
+                <div class="locked-notice-card mt-4" style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 2px solid #f59e0b; border-left: 6px solid #d97706; border-radius: 10px; padding: 24px 22px; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.12); text-align: center;">
+                    <div style="width: 58px; height: 58px; background: #fde68a; border: 2px solid #f59e0b; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; box-shadow: 0 2px 6px rgba(180, 83, 9, 0.2);">
+                        <i class="fas fa-lock fs-3" style="color: #b45309 !important;"></i>
                     </div>
-                    <h5 style="color: #1e293b; font-weight: 700; margin-bottom: 6px;">
-                        सेक्शन 3 (फोटो एवं हस्ताक्षर) व आगे के सेक्शन अभी लॉक हैं
-                    </h5>
-                    <p style="color: #64748b; font-size: 13.5px; max-width: 600px; margin: 0 auto 8px; line-height: 1.5;">
-                        कृपया ऊपर दिए गए सेक्शन 2 में ₹500 का ऑनलाइन भुगतान कर अपना <strong>Transaction ID / UTR</strong> दर्ज करें, <strong>रसीद का स्क्रीनशॉट</strong> अपलोड करें तथा <strong>सत्यता घोषणा चेकबॉक्स</strong> को टिक करके <strong>"सबमिट करें एवं आगे बढ़ें"</strong> बटन दबाएँ। इसके बाद सेक्शन 3 से नामांकन फॉर्म खुल जाएगा।
+                    <h4 style="color: #78350f; font-weight: 800; font-size: 17.5px; margin-bottom: 10px; letter-spacing: 0.2px;">
+                        <i class="fas fa-shield-alt me-1"></i> सेक्शन 3 (फोटो एवं हस्ताक्षर) व आगे के सेक्शन अभी लॉक हैं
+                    </h4>
+                    <p style="color: #451a03; font-size: 14.5px; max-width: 680px; margin: 0 auto 14px; line-height: 1.7; font-weight: 500;">
+                        कृपया ऊपर दिए गए <strong>सेक्शन 2</strong> में <span style="background: #fde68a; color: #78350f; padding: 2px 8px; border-radius: 4px; font-weight: 700; border: 1px solid #fcd34d;">₹500 का ऑनलाइन भुगतान</span> कर अपना <span style="background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 4px; font-weight: 700; border: 1px solid #bfdbfe;">Transaction ID / UTR</span> दर्ज करें, <span style="background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 4px; font-weight: 700; border: 1px solid #bbf7d0;">रसीद का स्क्रीनशॉट</span> अपलोड करें तथा <strong>सत्यता घोषणा चेकबॉक्स</strong> को टिक करके <span style="background: #082B49; color: #ffffff; padding: 3px 10px; border-radius: 4px; font-weight: 700; box-shadow: 0 1px 3px rgba(0,0,0,0.2);">"सबमिट करें एवं आगे बढ़ें"</span> बटन दबाएँ। इसके बाद सेक्शन 3 से नामांकन फॉर्म खुल जाएगा।
                     </p>
+                    <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(245, 158, 11, 0.15); border: 1px solid #f59e0b; border-radius: 20px; padding: 5px 16px; font-size: 12.5px; font-weight: 700; color: #92400e;">
+                        <i class="fas fa-exclamation-triangle"></i> चरण 1 व 2 (फीस भुगतान एवं UTR सत्यापन) अनिवार्य है
+                    </div>
                 </div>
                 {% endif %}
             </form>

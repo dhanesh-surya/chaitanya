@@ -138,6 +138,18 @@
             </div>
             {% endif %}
 
+            {% if existing_enrollment and existing_enrollment.admin_remarks %}
+            <div class="alert alert-warning" style="margin-bottom: 20px; border-left: 5px solid #d97706; background: #fffbeb; padding: 14px 18px; border-radius: 8px;">
+                <div style="display: flex; align-items: flex-start; gap: 10px;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 20px; color: #d97706; margin-top: 2px;"></i>
+                    <div>
+                        <h5 style="margin: 0 0 4px; color: #92400e; font-weight: 700; font-size: 14.5px;">एडमिन द्वारा निर्देश / संशोधन (Admin Instructions):</h5>
+                        <p style="margin: 0; color: #78350f; font-size: 13.5px; line-height: 1.5;">{{ existing_enrollment.admin_remarks }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
             <form method="post" action="{% url 'enrollment_form' %}" id="enrollmentForm" enctype="multipart/form-data">
                 {% csrf_token %}
                 <input type="hidden" name="selected_courses_json" id="selectedCoursesJson" value="{{ initial_data.selected_courses_json|default:'' }}">

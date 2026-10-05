@@ -426,5 +426,127 @@ class ExportEnrollmentsExcelTestCase(TestCase):
         self.assertTrue(any(r[2] == 'Rohan Sahu' for r in rows))
         self.assertFalse(any(r[2] == 'Kavita Patel' for r in rows))
 
+    def test_manage_enrollments_has_edit_button(self):
+        self._login_admin()
+        resp = self.client.get(reverse('manage_enrollments'))
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, 'View &amp; Edit Form')
+        self.assertContains(resp, reverse('admin_edit_enrollment', args=[self.enr_m.pk]))
+
+    def test_admin_edit_enrollment_get(self):
+        self._login_admin()
+        resp = self.client.get(reverse('admin_edit_enrollment', args=[self.enr_m.pk]))
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, 'Review &amp; Edit Enrollment Application')
+        self.assertContains(resp, 'Rohan Sahu')
+        self.assertContains(resp, 'Ramesh Sahu')
+
+    def test_admin_edit_enrollment_post_submitted(self):
+        from courses.models import ProgramCourse
+        course = ProgramCourse.objects.create(
+            program_type='B.A. First Semester',
+            course_name='Hindi Literature',
+            course_code='HNSC-99',
+            sort_order=1,
+        )
+
+        self._login_admin()
+        post_data = {
+            'full_name': 'Rohan Kumar Sahu',
+            'father_name': 'Ramesh Chandra Sahu',
+            'mother_name': 'Savitri Devi Sahu',
+            'gender': 'Male',
+            'dob': '2003-04-15',
+            'category': 'OBC',
+            'nationality': 'Indian',
+            'religion': 'Hindu',
+            'marital_status': 'Single',
+            'blood_group': 'B+',
+            'mobile': '9876543210',
+            'email': 'rohan.updated@gmail.com',
+            'aadhaar': '123456789012',
+            'apaar_id': 'ABC-12345',
+            'medium': 'Hindi',
+            'perm_village': 'Ward 5, Pamgarh',
+            'perm_city': 'Pamgarh',
+            'perm_district': 'Janjgir-Champa',
+            'perm_state': 'Chhattisgarh',
+            'perm_pin_code': '495556',
+            'corr_village': 'Ward 5, Pamgarh',
+            'corr_city': 'Pamgarh',
+            'corr_district': 'Janjgir-Champa',
+            'corr_state': 'Chhattisgarh',
+            'corr_pin_code': '495556',
+            'class10': '10th',
+            'board10': 'CGBSE Raipur',
+            'year10': '2019',
+            'total_marks10': '600',
+            'obtained10': '490',
+            'percentage10': '81.67',
+            'grade10': 'A',
+            'class12': '12th',
+            'board12': 'CGBSE Raipur',
+            'stream12': 'Arts',
+            'year12': '2021',
+            'total_marks12': '500',
+            'obtained12': '420',
+            'percentage12': '84.0',
+            'grade12': 'A',
+            'fee_amount': '500',
+            'transaction_id': 'UTR998877665544',
+            'payment_status': 'Paid',
+            'semester': 'I',
+            'status': 'Submitted',
+            'admin_remarks': 'Corrected name spelling and verified marksheet.',
+            'selected_courses': [str(course.id)],
+        }
+        resp = self.client.post(reverse('admin_edit_enrollment', args=[self.enr_m.pk]), data=post_data)
+        self.assertEqual(resp.status_code, 302)
+        self.enr_m.refresh_from_db()
+        self.assertEqual(self.enr_m.full_name, 'Rohan Kumar Sahu')
+        self.assertEqual(self.enr_m.father_name, 'Ramesh Chandra Sahu')
+        self.assertEqual(self.enr_m.transaction_id, 'UTR998877665544')
+        self.assertEqual(self.enr_m.status, 'Submitted')
+        self.assertTrue(self.enr_m.is_submitted)
+        self.assertEqual(self.enr_m.admin_remarks, 'Corrected name spelling and verified marksheet.')
+        self.assertIn('HNSC-99', self.enr_m.selected_courses_json)
+
+    def test_admin_edit_enrollment_post_draft_shows_on_student_dashboard(self):
+        self._login_admin()
+        post_data = {
+            'full_name': 'Rohan Sahu',
+            'father_name': 'Ramesh Sahu',
+            'mother_name': 'Savitri Sahu',
+            'gender': 'Male',
+            'dob': '2003-04-15',
+            'category': 'OBC',
+            'mobile': '9876543210',
+            'fee_amount': '500',
+            'transaction_id': 'UTR123456789012',
+            'status': 'Draft',
+            'admin_remarks': 'Please re-upload clearer copy of 12th marksheet.',
+        }
+        resp = self.client.post(reverse('admin_edit_enrollment', args=[self.enr_m.pk]), data=post_data)
+        self.assertEqual(resp.status_code, 302)
+        self.enr_m.refresh_from_db()
+        self.assertEqual(self.enr_m.status, 'Draft')
+        self.assertFalse(self.enr_m.is_submitted)
+        self.assertEqual(self.enr_m.admin_remarks, 'Please re-upload clearer copy of 12th marksheet.')
+
+        # Student logs in and checks dashboard
+        session = self.client.session
+        session['is_logged_in'] = True
+        session['is_student_logged_in'] = True
+        session['reg_no'] = self.student_m.registration_no
+        session['student_name'] = self.student_m.full_name
+        session.save()
+
+        dash_resp = self.client.get(reverse('student_dashboard'))
+        self.assertEqual(dash_resp.status_code, 200)
+        self.assertContains(dash_resp, 'Enrollment Resubmission Required')
+        self.assertContains(dash_resp, 'Please re-upload clearer copy of 12th marksheet.')
+        self.assertContains(dash_resp, 'Review &amp; Resubmit Form')
+
+
 
 

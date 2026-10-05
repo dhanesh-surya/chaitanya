@@ -965,6 +965,250 @@ def manage_enrollments(request):
     })
 
 
+@admin_login_required
+@require_http_methods(['GET', 'POST'])
+def admin_edit_enrollment(request, pk):
+    import base64
+    import json
+    from admissions.constants import MEDIUM_CHOICES, RELIGION_CHOICES
+    from admissions.models import StudentEnrollment, StudentAdmission
+    from admissions.utils import generate_enrollment_number
+    from courses.models import Program, ProgramCourse
+    from courses.subject_groups import get_bsc_subject_group_sections, is_bsc_program
+
+    enrollment = get_object_or_404(StudentEnrollment.objects.select_related('student', 'admission'), pk=pk)
+    student = enrollment.student
+    admission = enrollment.admission or StudentAdmission.objects.filter(reg_no=enrollment.reg_no).first()
+
+    # Determine available courses for the program
+    program_type = enrollment.program_type or (admission.program_type if admission else '') or (student.program_type if student else '')
+    courses = ProgramCourse.objects.filter(program_type__iexact=program_type).order_by('sort_order', 'course_code')
+    if not courses.exists() and program_type:
+        short_name = program_type.replace(' First Semester', '').strip()
+        courses = ProgramCourse.objects.filter(program_type__iexact=short_name).order_by('sort_order', 'course_code')
+
+    bsc_subject_groups = get_bsc_subject_group_sections(program_type) if is_bsc_program(program_type) else []
+
+    if request.method == 'POST':
+        # 1. Personal Details
+        enrollment.full_name = request.POST.get('full_name', '').strip()
+        enrollment.father_name = request.POST.get('father_name', '').strip()
+        enrollment.mother_name = request.POST.get('mother_name', '').strip()
+        enrollment.gender = request.POST.get('gender', '').strip()
+        dob_str = request.POST.get('dob', '').strip()
+        enrollment.dob = dob_str if dob_str else None
+        enrollment.category = request.POST.get('category', '').strip()
+        enrollment.nationality = request.POST.get('nationality', 'Indian').strip() or 'Indian'
+        enrollment.religion = request.POST.get('religion', '').strip()
+        enrollment.marital_status = request.POST.get('marital_status', '').strip()
+        enrollment.blood_group = request.POST.get('blood_group', '').strip()
+        enrollment.mobile = request.POST.get('mobile', '').strip()
+        enrollment.email = request.POST.get('email', '').strip()
+        enrollment.aadhaar = request.POST.get('aadhaar', '').strip()
+        enrollment.apaar_id = request.POST.get('apaar_id', '').strip()
+        enrollment.medium = request.POST.get('medium', '').strip()
+        enrollment.has_disability = request.POST.get('has_disability') in ('1', 'true', 'True', True)
+        enrollment.disability_details = request.POST.get('disability_details', '').strip()
+        enrollment.disability_percentage = request.POST.get('disability_percentage', '').strip()
+        enrollment.disability_type = request.POST.get('disability_type', '').strip()
+        enrollment.is_minority = request.POST.get('is_minority') in ('1', 'true', 'True', True)
+
+        # 2. Addresses
+        enrollment.perm_state = request.POST.get('perm_state', '').strip()
+        enrollment.perm_district = request.POST.get('perm_district', '').strip()
+        enrollment.perm_city = request.POST.get('perm_city', '').strip()
+        enrollment.perm_village = request.POST.get('perm_village', '').strip()
+        enrollment.perm_pin_code = request.POST.get('perm_pin_code', '').strip()
+
+        enrollment.corr_state = request.POST.get('corr_state', '').strip()
+        enrollment.corr_district = request.POST.get('corr_district', '').strip()
+        enrollment.corr_city = request.POST.get('corr_city', '').strip()
+        enrollment.corr_village = request.POST.get('corr_village', '').strip()
+        enrollment.corr_pin_code = request.POST.get('corr_pin_code', '').strip()
+
+        # 3. Education Details
+        enrollment.class10 = request.POST.get('class10', '10th').strip()
+        enrollment.board10 = request.POST.get('board10', '').strip()
+        y10 = request.POST.get('year10', '').strip()
+        enrollment.year10 = int(y10) if y10.isdigit() else None
+        enrollment.total_marks10 = request.POST.get('total_marks10', '').strip()
+        enrollment.obtained10 = request.POST.get('obtained10', '').strip()
+        enrollment.percentage10 = request.POST.get('percentage10', '').strip()
+        enrollment.grade10 = request.POST.get('grade10', '').strip()
+
+        enrollment.class12 = request.POST.get('class12', '12th').strip()
+        enrollment.board12 = request.POST.get('board12', '').strip()
+        enrollment.stream12 = request.POST.get('stream12', '').strip()
+        y12 = request.POST.get('year12', '').strip()
+        enrollment.year12 = int(y12) if y12.isdigit() else None
+        enrollment.total_marks12 = request.POST.get('total_marks12', '').strip()
+        enrollment.obtained12 = request.POST.get('obtained12', '').strip()
+        enrollment.percentage12 = request.POST.get('percentage12', '').strip()
+        enrollment.grade12 = request.POST.get('grade12', '').strip()
+
+        enrollment.class_grad = request.POST.get('class_grad', '').strip()
+        enrollment.board_grad = request.POST.get('board_grad', '').strip()
+        enrollment.stream_grad = request.POST.get('stream_grad', '').strip()
+        ygrad = request.POST.get('year_grad', '').strip()
+        enrollment.year_grad = int(ygrad) if ygrad.isdigit() else None
+        enrollment.total_marks_grad = request.POST.get('total_marks_grad', '').strip()
+        enrollment.obtained_grad = request.POST.get('obtained_grad', '').strip()
+        enrollment.percentage_grad = request.POST.get('percentage_grad', '').strip()
+        enrollment.grade_grad = request.POST.get('grade_grad', '').strip()
+
+        # 4. Fee & Payment Details
+        enrollment.fee_amount = request.POST.get('fee_amount', '500').strip() or '500'
+        enrollment.transaction_id = request.POST.get('transaction_id', '').strip()
+        enrollment.payment_status = request.POST.get('payment_status', 'Paid').strip() or 'Paid'
+        receipt_file = request.FILES.get('payment_receipt')
+        if receipt_file:
+            enrollment.payment_receipt = receipt_file
+
+        # 5. Photo & Signature
+        photo_file = request.FILES.get('photo_file')
+        if photo_file:
+            b64 = base64.b64encode(photo_file.read()).decode('utf-8')
+            enrollment.photo_base64 = f"data:{photo_file.content_type};base64,{b64}"
+        elif request.POST.get('photo_base64'):
+            enrollment.photo_base64 = request.POST.get('photo_base64').strip()
+
+        sig_file = request.FILES.get('signature_file')
+        if sig_file:
+            b64 = base64.b64encode(sig_file.read()).decode('utf-8')
+            enrollment.signature_base64 = f"data:{sig_file.content_type};base64,{b64}"
+        elif request.POST.get('signature_base64'):
+            enrollment.signature_base64 = request.POST.get('signature_base64').strip()
+
+        # 6. Courses Selection
+        selected_course_ids = request.POST.getlist('selected_courses')
+        bsc_subject_group = request.POST.get('bsc_subject_group', '').strip()
+        raw_courses_json = request.POST.get('selected_courses_json', '').strip()
+
+        if selected_course_ids:
+            sel_courses = ProgramCourse.objects.filter(id__in=selected_course_ids).order_by('sort_order', 'course_code')
+            course_list = []
+            for c in sel_courses:
+                course_list.append({
+                    'id': str(c.id),
+                    'code': c.course_code,
+                    'name': c.course_name,
+                    'paper': c.paper_no,
+                    'type_1': c.course_type_1,
+                    'type_2': c.course_type_2,
+                    'dept': c.department,
+                    'credit_l': c.credit_l,
+                    'credit_t': c.credit_t,
+                    'credit_p': c.credit_p,
+                })
+            if bsc_subject_group:
+                enrollment.selected_courses_json = json.dumps({
+                    'bsc_subject_group': bsc_subject_group,
+                    'courses': course_list,
+                    'subjects': course_list,
+                })
+            else:
+                enrollment.selected_courses_json = json.dumps(course_list)
+        elif raw_courses_json:
+            enrollment.selected_courses_json = raw_courses_json
+
+        # 7. Status, Remarks & Admin Action
+        new_status = request.POST.get('status', 'Submitted').strip()
+        admin_remarks = request.POST.get('admin_remarks', '').strip()
+        enrollment.admin_remarks = admin_remarks
+
+        if new_status == 'Approved':
+            enrollment.status = 'Approved'
+            enrollment.is_submitted = True
+            if not enrollment.enrollment_no:
+                enrollment.enrollment_no = generate_enrollment_number()
+            student.is_verified = True
+            student.save(update_fields=['is_verified'])
+        elif new_status == 'Draft':
+            enrollment.status = 'Draft'
+            enrollment.is_submitted = False
+        else:  # 'Submitted'
+            enrollment.status = 'Submitted'
+            enrollment.is_submitted = True
+            if not enrollment.submitted_date:
+                enrollment.submitted_date = timezone.now()
+
+        enrollment.save()
+
+        # Sync student basic fields for consistency
+        if enrollment.full_name and student.full_name != enrollment.full_name:
+            student.full_name = enrollment.full_name
+        if enrollment.mobile and student.mobile != enrollment.mobile:
+            student.mobile = enrollment.mobile
+        if enrollment.email and student.email != enrollment.email:
+            student.email = enrollment.email
+        if enrollment.aadhaar and student.aadhaar != enrollment.aadhaar:
+            student.aadhaar = enrollment.aadhaar
+        student.save()
+
+        status_msg = {
+            'Approved': 'Approved / Accepted (locked for student)',
+            'Submitted': 'Updated automatically at student end (Status: Submitted)',
+            'Draft': 'Reset to Draft (Student must review & resubmit)',
+        }.get(new_status, new_status)
+
+        messages.success(
+            request,
+            f'Enrollment application #{enrollment.enrollment_no or enrollment.pk} for {enrollment.full_name} '
+            f'successfully updated. Status: {status_msg}.'
+        )
+
+        if 'save_continue' in request.POST:
+            return redirect('admin_edit_enrollment', pk=enrollment.pk)
+        return redirect('manage_enrollments')
+
+    # GET Request: Prepare form data
+    selected_course_ids = []
+    selected_course_codes = []
+    current_bsc_group = ''
+    if enrollment.selected_courses_json:
+        try:
+            data = json.loads(enrollment.selected_courses_json)
+            c_list = []
+            if isinstance(data, list):
+                c_list = data
+            elif isinstance(data, dict):
+                c_list = data.get('courses') or data.get('subjects') or []
+                current_bsc_group = data.get('bsc_subject_group') or data.get('BScSubjectGroup') or ''
+            for c in c_list:
+                if isinstance(c, dict):
+                    if c.get('id'):
+                        selected_course_ids.append(str(c.get('id')))
+                    if c.get('code') or c.get('course_code'):
+                        selected_course_codes.append((c.get('code') or c.get('course_code')).strip().upper())
+        except Exception:
+            pass
+
+    # Annotate courses for convenient template checking
+    annotated_courses = []
+    for c in courses:
+        is_sel = (str(c.id) in selected_course_ids) or (c.course_code.strip().upper() in selected_course_codes)
+        annotated_courses.append({
+            'obj': c,
+            'is_selected': is_sel,
+        })
+
+    is_pg = any(x in (program_type or '').upper() for x in ('PG', 'M.SC', 'M.A', 'M.COM', 'M.S.W', 'PGDCA'))
+
+    return render(request, 'admin_panel/edit_enrollment.html', {
+        'enrollment': enrollment,
+        'student': student,
+        'admission': admission,
+        'program_type': program_type,
+        'courses': annotated_courses,
+        'bsc_subject_groups': bsc_subject_groups,
+        'current_bsc_group': current_bsc_group,
+        'is_pg': is_pg,
+        'religion_choices': RELIGION_CHOICES,
+        'medium_choices': MEDIUM_CHOICES,
+        'status_choices': StudentEnrollment.STATUS_CHOICES,
+    })
+
+
 def _format_enrollment_address(enrollment):
     perm_parts = [
         enrollment.perm_village,

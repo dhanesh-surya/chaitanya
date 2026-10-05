@@ -134,7 +134,10 @@
                             <strong style="font-family: monospace; font-size: 12.5px; color: #082B49;">
                                 {{ e.enrollment_no|default:"Not Assigned" }}
                             </strong>
-                            <div style="margin-top: 4px; display: flex; gap: 8px;">
+                            <div style="margin-top: 4px; display: flex; gap: 8px; flex-wrap: wrap;">
+                                <a href="{% url 'admin_edit_enrollment' e.pk %}" class="text-sm" title="View / Edit Enrollment Form" style="color: #082B49; font-weight: 700; text-decoration: none;">
+                                    <i class="fas fa-file-pen"></i> Edit Form
+                                </a>
                                 <a href="{% url 'enrollment_print' e.enrollment_no|default:e.pk %}" target="_blank" class="text-sm" title="View / Print Enrollment Slip" style="color: #2563eb; font-weight: 600; text-decoration: none;">
                                     <i class="fas fa-print"></i> Print Slip
                                 </a>
@@ -195,6 +198,9 @@
                         <td>{{ e.submitted_date|date:"d/m/Y H:i"|default:"—" }}</td>
                         <td>
                             <div style="display: flex; flex-direction: column; gap: 6px;">
+                                <a href="{% url 'admin_edit_enrollment' e.pk %}" class="btn btn-sm btn-primary" style="background:#082B49; border-color:#082B49; color:#fff; font-weight:700; width: 100%; justify-content: center; padding: 5px 10px; font-size: 12px; display: inline-flex; align-items: center; gap: 5px;" title="View &amp; Edit Enrollment Application Form">
+                                    <i class="fas fa-file-pen"></i> View &amp; Edit Form
+                                </a>
                                 {% if e.status != 'Approved' %}
                                 <form method="post" action="{% url 'update_enrollment_status' e.pk %}" class="inline-form">
                                     {% csrf_token %}

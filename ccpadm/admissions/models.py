@@ -257,6 +257,7 @@ class StudentEnrollment(models.Model):
     status = models.CharField(max_length=20, default='Draft', choices=STATUS_CHOICES)
     is_submitted = models.BooleanField(default=False)
     submitted_date = models.DateTimeField(null=True, blank=True)
+    admin_remarks = models.TextField(blank=True, default='')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

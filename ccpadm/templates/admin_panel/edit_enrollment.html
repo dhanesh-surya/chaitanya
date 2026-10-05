@@ -1,0 +1,820 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Enrollment - {{ enrollment.full_name }} ({{ enrollment.reg_no }}) - Admin Panel{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admission_form.css' %}">
+<style>
+.admin-enroll-header {
+    background: linear-gradient(135deg, #082B49 0%, #0d416b 100%);
+    color: #ffffff;
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 15px rgba(8, 43, 73, 0.15);
+    border-left: 5px solid #ffcc00;
+}
+.admin-enroll-header h2 {
+    margin: 0 0 6px 0;
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: #ffffff;
+}
+.admin-enroll-header p {
+    margin: 0;
+    color: #cbd5e1;
+    font-size: 0.95rem;
+}
+.admin-header-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-top: 12px;
+}
+.enroll-section-card {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 22px 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}
+.enroll-section-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #082B49;
+    margin-bottom: 16px;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.enroll-section-title i {
+    color: #0284c7;
+}
+.admin-action-card {
+    background: #f0fdf4;
+    border: 2px solid #16a34a;
+    border-radius: 12px;
+    padding: 22px 24px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 14px rgba(22, 163, 74, 0.12);
+}
+.admin-action-card.draft-mode {
+    background: #fffbeb;
+    border-color: #d97706;
+}
+.img-preview-box {
+    width: 130px;
+    height: 155px;
+    border: 2px dashed #94a3b8;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: #f8fafc;
+    margin-bottom: 10px;
+}
+.img-preview-box img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+.sig-preview-box {
+    width: 200px;
+    height: 75px;
+    border: 2px dashed #94a3b8;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: #f8fafc;
+    margin-bottom: 10px;
+}
+.sig-preview-box img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+.receipt-preview-box {
+    padding: 12px;
+    border: 1px solid #bfdbfe;
+    background: #eff6ff;
+    border-radius: 8px;
+    margin-bottom: 12px;
+}
+.form-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+}
+.form-grid-4 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+}
+.form-field {
+    display: flex;
+    flex-direction: column;
+}
+.form-field label {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 5px;
+}
+.form-field input, .form-field select, .form-field textarea {
+    padding: 7px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 13.5px;
+    color: #0f172a;
+    background: #ffffff;
+    transition: border-color 0.15s ease;
+}
+.form-field input:focus, .form-field select:focus, .form-field textarea:focus {
+    outline: none;
+    border-color: #0284c7;
+    box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.2);
+}
+.courses-table-wrap {
+    max-height: 380px;
+    overflow-y: auto;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background: #ffffff;
+}
+.course-row-selected {
+    background-color: #f0fdf4 !important;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="portal-page portal-page--wide">
+    <div class="portal-main">
+
+        <!-- ADMIN BREADCRUMB / NAV -->
+        <div class="page-header page-header--admin" style="margin-bottom: 16px;">
+            <h2 class="page-title"><i class="fas fa-file-pen"></i> Review &amp; Edit Enrollment Application</h2>
+            <nav class="page-actions page-actions--toolbar" aria-label="Admin navigation">
+                {% include 'partials/admin_nav_actions.html' with active_page='enrollments' %}
+                {% include 'partials/admin_nav_logout.html' %}
+            </nav>
+        </div>
+
+        <!-- TOP SUMMARY HEADER -->
+        <div class="admin-enroll-header">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px;">
+                <div>
+                    <h2>{{ enrollment.full_name }}</h2>
+                    <p>
+                        <strong>Reg No:</strong> {{ enrollment.reg_no }} &nbsp;|&nbsp;
+                        <strong>Enrollment No:</strong> {{ enrollment.enrollment_no|default:"Not Assigned Yet" }} &nbsp;|&nbsp;
+                        <strong>Program:</strong> {{ program_type|default:"—" }} (Sem {{ enrollment.semester|default:"I" }})
+                    </p>
+                </div>
+                <div>
+                    {% if enrollment.status == 'Approved' %}
+                    <span class="badge" style="background: #16a34a; color:#fff; font-size:13px; padding: 6px 14px; border-radius: 20px;">
+                        <i class="fas fa-check-circle"></i> Approved / Accepted
+                    </span>
+                    {% elif enrollment.status == 'Submitted' or enrollment.is_submitted %}
+                    <span class="badge" style="background: #0284c7; color:#fff; font-size:13px; padding: 6px 14px; border-radius: 20px;">
+                        <i class="fas fa-clock"></i> Submitted (Pending Review)
+                    </span>
+                    {% else %}
+                    <span class="badge" style="background: #d97706; color:#fff; font-size:13px; padding: 6px 14px; border-radius: 20px;">
+                        <i class="fas fa-edit"></i> Draft (Editable)
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="admin-header-actions">
+                <a href="{% url 'manage_enrollments' %}" class="btn btn-sm btn-ghost" style="background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3);">
+                    <i class="fas fa-arrow-left"></i> Back to All Enrollments
+                </a>
+                <a href="{% url 'enrollment_print' enrollment.enrollment_no|default:enrollment.pk %}" target="_blank" class="btn btn-sm btn-ghost" style="background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3);">
+                    <i class="fas fa-print"></i> View / Print Slip
+                </a>
+                {% if enrollment.enrollment_no %}
+                <a href="{% url 'enrollment_receipt' enrollment.enrollment_no %}" target="_blank" class="btn btn-sm btn-ghost" style="background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3);">
+                    <i class="fas fa-receipt"></i> View Fee Receipt
+                </a>
+                {% endif %}
+                {% if admission %}
+                <a href="{% url 'admin_print_application' admission.application_no %}" target="_blank" class="btn btn-sm btn-ghost" style="background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3);">
+                    <i class="fas fa-user-graduate"></i> Admission Form
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" id="adminEditEnrollmentForm">
+            {% csrf_token %}
+
+            <!-- SECTION 7 (TOP HIGHLIGHT): ADMIN STATUS, ACTIONS & REMARKS -->
+            <div class="admin-action-card" id="adminActionCard">
+                <div class="enroll-section-title" style="border-bottom-color: #86efac; color: #166534;">
+                    <i class="fas fa-shield-halved" style="color: #166534;"></i> Admin Decision &amp; Student End Update Controls
+                </div>
+                <p style="font-size: 13.5px; color: #334155; margin-bottom: 16px;">
+                    Select how this update should be applied. Any corrections made below will be saved directly into the student's enrollment record.
+                </p>
+
+                <div class="form-grid-3" style="margin-bottom: 14px;">
+                    <div class="form-field">
+                        <label for="enrollmentStatusSelect" style="font-size: 13px; font-weight: 700; color: #082B49;">
+                            Enrollment Status *
+                        </label>
+                        <select name="status" id="enrollmentStatusSelect" style="font-weight: 600; padding: 9px 12px;">
+                            <option value="Submitted" {% if enrollment.status == 'Submitted' %}selected{% endif %}>
+                                Submitted (Keep Submitted &mdash; Auto-Update at Student End)
+                            </option>
+                            <option value="Approved" {% if enrollment.status == 'Approved' %}selected{% endif %}>
+                                Approved &amp; Accepted (Lock Application &amp; Issue Enrollment No)
+                            </option>
+                            <option value="Draft" {% if enrollment.status == 'Draft' %}selected{% endif %}>
+                                Draft (Require Student Resubmission &mdash; Form Reopened)
+                            </option>
+                        </select>
+                        <small class="text-muted mt-1" id="statusHint" style="font-size: 12px; line-height: 1.4;">
+                            {% if enrollment.status == 'Draft' %}
+                            Student will see a notice on their dashboard: "Resubmit Form / Review Admin Changes".
+                            {% else %}
+                            Student's dashboard and print slip will automatically reflect all updated fields without needing them to re-apply.
+                            {% endif %}
+                        </small>
+                    </div>
+
+                    <div class="form-field" style="grid-column: span 2;">
+                        <label for="adminRemarksInput" style="font-size: 13px; font-weight: 700; color: #082B49;">
+                            Admin Remarks / Instructions for Student (Optional)
+                        </label>
+                        <textarea name="admin_remarks" id="adminRemarksInput" rows="2" placeholder="e.g. Corrected father name spelling; Updated course subjects to match college allotment; Or reason why form needs resubmission..." style="resize: vertical;">{{ enrollment.admin_remarks|default:'' }}</textarea>
+                        <small class="text-muted mt-1" style="font-size: 11.5px;">
+                            These remarks will be displayed on the student's dashboard and form if clarification or action is required.
+                        </small>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center; padding-top: 10px; border-top: 1px dashed #bbf7d0;">
+                    <button type="submit" name="save" class="btn btn-success" style="background: #16a34a; border-color: #15803d; font-weight: 700; padding: 9px 20px; font-size: 14px;">
+                        <i class="fas fa-save"></i> Save Changes &amp; Update Enrollment
+                    </button>
+                    <button type="submit" name="save_continue" class="btn btn-outline-success" style="font-weight: 600; padding: 9px 16px; font-size: 14px; background:#ffffff;">
+                        <i class="fas fa-check"></i> Save &amp; Continue Editing
+                    </button>
+                    <a href="{% url 'manage_enrollments' %}" class="btn btn-ghost" style="padding: 9px 16px; font-size: 14px;">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                </div>
+            </div>
+
+            <!-- SECTION 1: CANDIDATE'S PREVIOUSLY FILLED PERSONAL DETAILS -->
+            <div class="enroll-section-card">
+                <div class="enroll-section-title">
+                    <i class="fas fa-user"></i> Section 1: Candidate's Personal &amp; Admission Details
+                </div>
+
+                <div class="form-grid-3" style="margin-bottom: 16px;">
+                    <div class="form-field">
+                        <label>Student Full Name *</label>
+                        <input type="text" name="full_name" value="{{ enrollment.full_name|default:'' }}" required>
+                    </div>
+                    <div class="form-field">
+                        <label>Father's Name *</label>
+                        <input type="text" name="father_name" value="{{ enrollment.father_name|default:'' }}" required>
+                    </div>
+                    <div class="form-field">
+                        <label>Mother's Name *</label>
+                        <input type="text" name="mother_name" value="{{ enrollment.mother_name|default:'' }}" required>
+                    </div>
+
+                    <div class="form-field">
+                        <label>Date of Birth *</label>
+                        <input type="date" name="dob" value="{{ enrollment.dob|date:'Y-m-d'|default:'' }}" required>
+                    </div>
+                    <div class="form-field">
+                        <label>Gender *</label>
+                        <select name="gender" required>
+                            <option value="">-- Select --</option>
+                            <option value="Male" {% if enrollment.gender == 'Male' %}selected{% endif %}>Male</option>
+                            <option value="Female" {% if enrollment.gender == 'Female' %}selected{% endif %}>Female</option>
+                            <option value="Transgender" {% if enrollment.gender == 'Transgender' %}selected{% endif %}>Transgender</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label>Category *</label>
+                        <select name="category" required>
+                            <option value="">-- Select --</option>
+                            <option value="GEN" {% if enrollment.category == 'GEN' %}selected{% endif %}>General</option>
+                            <option value="OBC" {% if enrollment.category == 'OBC' %}selected{% endif %}>OBC</option>
+                            <option value="SC" {% if enrollment.category == 'SC' %}selected{% endif %}>SC</option>
+                            <option value="ST" {% if enrollment.category == 'ST' %}selected{% endif %}>ST</option>
+                        </select>
+                    </div>
+
+                    <div class="form-field">
+                        <label>Mobile Number *</label>
+                        <input type="text" name="mobile" value="{{ enrollment.mobile|default:'' }}" maxlength="15" required>
+                    </div>
+                    <div class="form-field">
+                        <label>Email Address</label>
+                        <input type="email" name="email" value="{{ enrollment.email|default:'' }}">
+                    </div>
+                    <div class="form-field">
+                        <label>Aadhaar Number</label>
+                        <input type="text" name="aadhaar" value="{{ enrollment.aadhaar|default:'' }}" maxlength="12">
+                    </div>
+
+                    <div class="form-field">
+                        <label>APAAR / ABC ID</label>
+                        <input type="text" name="apaar_id" value="{{ enrollment.apaar_id|default:'' }}">
+                    </div>
+                    <div class="form-field">
+                        <label>Religion</label>
+                        <select name="religion">
+                            <option value="">-- Select Religion --</option>
+                            {% for r in religion_choices %}
+                            <option value="{{ r }}" {% if enrollment.religion == r %}selected{% endif %}>{{ r }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label>Medium of Instruction</label>
+                        <select name="medium">
+                            <option value="">-- Select Medium --</option>
+                            {% for m in medium_choices %}
+                            <option value="{{ m }}" {% if enrollment.medium == m %}selected{% endif %}>{{ m }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-field">
+                        <label>Marital Status</label>
+                        <select name="marital_status">
+                            <option value="Single" {% if enrollment.marital_status == 'Single' %}selected{% endif %}>Single / Unmarried</option>
+                            <option value="Married" {% if enrollment.marital_status == 'Married' %}selected{% endif %}>Married</option>
+                            <option value="Other" {% if enrollment.marital_status == 'Other' %}selected{% endif %}>Other</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label>Blood Group</label>
+                        <input type="text" name="blood_group" value="{{ enrollment.blood_group|default:'' }}" placeholder="e.g. O+, B+, A+">
+                    </div>
+                    <div class="form-field">
+                        <label>Nationality</label>
+                        <input type="text" name="nationality" value="{{ enrollment.nationality|default:'Indian' }}">
+                    </div>
+                </div>
+
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px;">
+                    <div style="display: flex; gap: 24px; flex-wrap: wrap;">
+                        <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">
+                            <input type="checkbox" name="has_disability" value="1" {% if enrollment.has_disability %}checked{% endif %}>
+                            Person with Disability (PwD)
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">
+                            <input type="checkbox" name="is_minority" value="1" {% if enrollment.is_minority %}checked{% endif %}>
+                            Minority Community
+                        </label>
+                    </div>
+                    {% if enrollment.has_disability or enrollment.disability_type or enrollment.disability_percentage %}
+                    <div class="form-grid-3" style="margin-top: 10px;">
+                        <div class="form-field">
+                            <label>Disability Type</label>
+                            <input type="text" name="disability_type" value="{{ enrollment.disability_type|default:'' }}">
+                        </div>
+                        <div class="form-field">
+                            <label>Percentage (%)</label>
+                            <input type="text" name="disability_percentage" value="{{ enrollment.disability_percentage|default:'' }}">
+                        </div>
+                        <div class="form-field">
+                            <label>Details</label>
+                            <input type="text" name="disability_details" value="{{ enrollment.disability_details|default:'' }}">
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- SECTION 2: ENROLLMENT FEE & PAYMENT VERIFICATION DETAILS -->
+            <div class="enroll-section-card">
+                <div class="enroll-section-title">
+                    <i class="fas fa-qrcode"></i> Section 2: Enrollment Fee &amp; Payment Verification Details
+                </div>
+
+                <div class="form-grid-3" style="margin-bottom: 16px;">
+                    <div class="form-field">
+                        <label>Enrollment Fee (₹)</label>
+                        <input type="text" name="fee_amount" value="{{ enrollment.fee_amount|default:'500' }}" style="font-weight: 700; color: #166534;">
+                    </div>
+                    <div class="form-field">
+                        <label>Transaction ID / UTR Number *</label>
+                        <input type="text" name="transaction_id" value="{{ enrollment.transaction_id|default:'' }}" style="font-family: monospace; font-weight: 700; color: #082B49;" required>
+                    </div>
+                    <div class="form-field">
+                        <label>Payment Status</label>
+                        <select name="payment_status" style="font-weight: 600;">
+                            <option value="Paid" {% if enrollment.payment_status == 'Paid' or enrollment.transaction_id %}selected{% endif %}>Paid</option>
+                            <option value="Pending" {% if enrollment.payment_status == 'Pending' and not enrollment.transaction_id %}selected{% endif %}>Pending</option>
+                            <option value="Failed" {% if enrollment.payment_status == 'Failed' %}selected{% endif %}>Failed</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="receipt-preview-box">
+                    <label style="font-weight: 700; font-size: 13px; color: #1e40af; display: block; margin-bottom: 6px;">
+                        <i class="fas fa-file-invoice"></i> Uploaded Payment Screenshot / Receipt:
+                    </label>
+                    <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+                        {% if enrollment.payment_receipt %}
+                        <a href="{{ enrollment.payment_receipt.url }}" target="_blank" class="btn btn-sm btn-primary" style="background:#0284c7; border-color:#0284c7;">
+                            <i class="fas fa-eye"></i> View Current Uploaded Receipt
+                        </a>
+                        <span class="text-muted" style="font-size: 12px;">({{ enrollment.payment_receipt.name }})</span>
+                        {% elif enrollment.payment_receipt_base64 %}
+                        <a href="{{ enrollment.payment_receipt_base64 }}" target="_blank" class="btn btn-sm btn-primary" style="background:#0284c7; border-color:#0284c7;">
+                            <i class="fas fa-eye"></i> View Current Uploaded Receipt (Base64)
+                        </a>
+                        {% else %}
+                        <span class="badge badge-warning" style="padding: 6px 10px;">No file uploaded</span>
+                        {% endif %}
+
+                        <div style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
+                            <label style="font-size: 12px; font-weight: 600; margin: 0;">Replace / Upload New Receipt:</label>
+                            <input type="file" name="payment_receipt" accept="image/*,application/pdf" style="font-size: 12px;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 3: CANDIDATE PHOTO & SIGNATURE -->
+            <div class="enroll-section-card">
+                <div class="enroll-section-title">
+                    <i class="fas fa-camera"></i> Section 3: Candidate Photo &amp; Signature
+                </div>
+
+                <div style="display: flex; flex-wrap: wrap; gap: 40px; align-items: flex-start;">
+                    <div>
+                        <label style="font-weight: 600; display: block; margin-bottom: 6px;">Student Photo</label>
+                        <div class="img-preview-box">
+                            {% if enrollment.photo_base64 %}
+                            <img src="{{ enrollment.photo_base64 }}" alt="Photo">
+                            {% else %}
+                            <span class="text-muted" style="font-size: 12px;">No Photo</span>
+                            {% endif %}
+                        </div>
+                        <input type="hidden" name="photo_base64" value="{{ enrollment.photo_base64|default:'' }}">
+                        <label style="font-size: 12px; font-weight: 600; color: #475569;">Upload New Photo:</label>
+                        <input type="file" name="photo_file" accept="image/*" class="form-control form-control-sm" style="font-size: 12px;">
+                    </div>
+
+                    <div>
+                        <label style="font-weight: 600; display: block; margin-bottom: 6px;">Student Signature</label>
+                        <div class="sig-preview-box">
+                            {% if enrollment.signature_base64 %}
+                            <img src="{{ enrollment.signature_base64 }}" alt="Signature">
+                            {% else %}
+                            <span class="text-muted" style="font-size: 12px;">No Signature</span>
+                            {% endif %}
+                        </div>
+                        <input type="hidden" name="signature_base64" value="{{ enrollment.signature_base64|default:'' }}">
+                        <label style="font-size: 12px; font-weight: 600; color: #475569;">Upload New Signature:</label>
+                        <input type="file" name="signature_file" accept="image/*" class="form-control form-control-sm" style="font-size: 12px;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 4: ENROLLED PROGRAM & COURSES -->
+            <div class="enroll-section-card">
+                <div class="enroll-section-title">
+                    <i class="fas fa-book-open"></i> Section 4: Enrolled Program &amp; Courses (NEP Curriculum)
+                </div>
+
+                <div class="form-grid-3" style="margin-bottom: 16px;">
+                    <div class="form-field">
+                        <label>Enrolled Program Name</label>
+                        <input type="text" value="{{ program_type }}" readonly style="background: #f1f5f9; font-weight: 700; color: #082B49;">
+                    </div>
+                    <div class="form-field">
+                        <label>Semester</label>
+                        <input type="text" name="semester" value="{{ enrollment.semester|default:'I' }}" style="font-weight: 600;">
+                    </div>
+                    {% if bsc_subject_groups %}
+                    <div class="form-field">
+                        <label>B.Sc. Subject Group</label>
+                        <select name="bsc_subject_group">
+                            <option value="">-- Choose Group --</option>
+                            {% for grp in bsc_subject_groups %}
+                            <option value="{{ grp.name }}" {% if current_bsc_group == grp.name %}selected{% endif %}>{{ grp.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <p style="font-size: 13px; color: #475569; margin-bottom: 10px;">
+                    <i class="fas fa-info-circle text-primary"></i> <strong>Course Allotment:</strong> Below are the courses for this program. Checked courses represent the student's enrolled subjects. Admin can check or uncheck courses to update the student's course allotment.
+                </p>
+
+                <div class="courses-table-wrap">
+                    <table class="data-table" style="margin: 0; font-size: 13px;">
+                        <thead>
+                            <tr style="background: #f8fafc;">
+                                <th style="width: 50px; text-align: center;">Select</th>
+                                <th style="width: 130px;">Course Code</th>
+                                <th>Course Title / Paper Name</th>
+                                <th style="width: 100px;">Type 1</th>
+                                <th style="width: 90px;">Type 2</th>
+                                <th style="width: 80px;">Credits</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for c in courses %}
+                            <tr class="{% if c.is_selected %}course-row-selected{% endif %}">
+                                <td style="text-align: center;">
+                                    <input type="checkbox" name="selected_courses" value="{{ c.obj.id }}" {% if c.is_selected %}checked{% endif %} style="width: 16px; height: 16px; cursor: pointer;">
+                                </td>
+                                <td>
+                                    <strong style="font-family: monospace; color: #082B49;">{{ c.obj.course_code }}</strong>
+                                </td>
+                                <td>
+                                    <strong>{{ c.obj.course_name }}</strong>
+                                    {% if c.obj.paper_no %}
+                                    <span class="text-muted" style="font-size: 11.5px;">(Paper {{ c.obj.paper_no }})</span>
+                                    {% endif %}
+                                </td>
+                                <td><span class="badge" style="background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd;">{{ c.obj.course_type_1|default:"—" }}</span></td>
+                                <td><span class="badge" style="background:#f3e8ff; color:#7e22ce; border:1px solid #e9d5ff;">{{ c.obj.course_type_2|default:"—" }}</span></td>
+                                <td>{{ c.obj.credit_l|default:0 }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" style="text-align: center; color: #94a3b8; padding: 20px;">
+                                    No courses configured in the curriculum for {{ program_type }}.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- SECTION 5: PREVIOUS ACADEMIC EXAMINATION DETAILS -->
+            <div class="enroll-section-card">
+                <div class="enroll-section-title">
+                    <i class="fas fa-graduation-cap"></i> Section 5: Previous Academic / Qualifying Examination Details
+                </div>
+
+                <!-- 10th Details -->
+                <h5 style="font-size: 13.5px; font-weight: 700; color: #082B49; margin: 0 0 10px 0; border-bottom: 1px dashed #cbd5e1; padding-bottom: 4px;">
+                    10th High School Details
+                </h5>
+                <div class="form-grid-4" style="margin-bottom: 16px;">
+                    <div class="form-field">
+                        <label>10th Board</label>
+                        <input type="text" name="board10" value="{{ enrollment.board10|default:'' }}">
+                    </div>
+                    <div class="form-field">
+                        <label>Passing Year</label>
+                        <input type="text" name="year10" value="{{ enrollment.year10|default:'' }}">
+                    </div>
+                    <div class="form-field">
+                        <label>Total Marks</label>
+                        <input type="text" name="total_marks10" value="{{ enrollment.total_marks10|default:'' }}">
+                    </div>
+                    <div class="form-field">
+                        <label>Obtained Marks</label>
+                        <input type="text" name="obtained10" value="{{ enrollment.obtained10|default:'' }}">
+                    </div>
+                    <div class="form-field">
+                        <label>Percentage (%)</label>
+                        <input type="text" name="percentage10" value="{{ enrollment.percentage10|default:'' }}">
+                    </div>
+                    <div class="form-field">
+                        <label>Grade / Div</label>
+                        <input type="text" name="grade10" value="{{ enrollment.grade10|default:'' }}">
+                    </div>
+                </div>
+
+                <!-- 12th Details -->
+                <h5 style="font-size: 13.5px; font-weight: 700; color: #082B49; margin: 16px 0 10px 0; border-bottom: 1px dashed #cbd5e1; padding-bottom: 4px;">
+                    12th Higher Secondary Details
+                </h5>
+                <div class="form-grid-4" style="margin-bottom: 16px;">
+                    <div class="form-field">
+                        <label>12th Board</label>
+                        <input type="text" name="board12" value="{{ enrollment.board12|default:'' }}">
+                    </div>
+                    <div class="form-field">
+                        <label>Stream (Faculty)</label>
+                        <input type="text" name="stream12" value="{{ enrollment.stream12|default:'' }}" placeholder="e.g. Science, Arts, Commerce">
+                    </div>
+                    <div class="form-field">
+                        <label>Passing Year</label>
+                        <input type="text" name="year12" value="{{ enrollment.year12|default:'' }}">
+                    </div>
+                    <div class="form-field">
+                        <label>Total Marks</label>
+                        <input type="text" name="total_marks12" value="{{ enrollment.total_marks12|default:'' }}">
+                    </div>
+                    <div class="form-field">
+                        <label>Obtained Marks</label>
+                        <input type="text" name="obtained12" value="{{ enrollment.obtained12|default:'' }}">
+                    </div>
+                    <div class="form-field">
+                        <label>Percentage (%)</label>
+                        <input type="text" name="percentage12" value="{{ enrollment.percentage12|default:'' }}">
+                    </div>
+                    <div class="form-field">
+                        <label>Grade / Div</label>
+                        <input type="text" name="grade12" value="{{ enrollment.grade12|default:'' }}">
+                    </div>
+                </div>
+
+                <!-- Graduation Details (if applicable) -->
+                <h5 style="font-size: 13.5px; font-weight: 700; color: #082B49; margin: 16px 0 10px 0; border-bottom: 1px dashed #cbd5e1; padding-bottom: 4px;">
+                    Graduation / UG Qualifying Examination (For PG / Diploma Candidates)
+                </h5>
+                <div class="form-grid-4">
+                    <div class="form-field">
+                        <label>Degree / Class</label>
+                        <input type="text" name="class_grad" value="{{ enrollment.class_grad|default:'' }}" placeholder="e.g. B.A., B.Sc., B.Com.">
+                    </div>
+                    <div class="form-field">
+                        <label>University / Board</label>
+                        <input type="text" name="board_grad" value="{{ enrollment.board_grad|default:'' }}">
+                    </div>
+                    <div class="form-field">
+                        <label>Stream</label>
+                        <input type="text" name="stream_grad" value="{{ enrollment.stream_grad|default:'' }}">
+                    </div>
+                    <div class="form-field">
+                        <label>Passing Year</label>
+                        <input type="text" name="year_grad" value="{{ enrollment.year_grad|default:'' }}">
+                    </div>
+                    <div class="form-field">
+                        <label>Total Marks</label>
+                        <input type="text" name="total_marks_grad" value="{{ enrollment.total_marks_grad|default:'' }}">
+                    </div>
+                    <div class="form-field">
+                        <label>Obtained Marks</label>
+                        <input type="text" name="obtained_grad" value="{{ enrollment.obtained_grad|default:'' }}">
+                    </div>
+                    <div class="form-field">
+                        <label>Percentage (%)</label>
+                        <input type="text" name="percentage_grad" value="{{ enrollment.percentage_grad|default:'' }}">
+                    </div>
+                    <div class="form-field">
+                        <label>Grade / Div</label>
+                        <input type="text" name="grade_grad" value="{{ enrollment.grade_grad|default:'' }}">
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 6: ADDRESS INFORMATION -->
+            <div class="enroll-section-card">
+                <div class="enroll-section-title">
+                    <i class="fas fa-location-dot"></i> Section 6: Address Information
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
+                    <!-- Permanent Address -->
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px;">
+                        <h5 style="margin: 0 0 12px 0; font-size: 13.5px; font-weight: 700; color: #082B49;">
+                            Permanent Address
+                        </h5>
+                        <div class="form-field" style="margin-bottom: 10px;">
+                            <label>Village / Colony / Street</label>
+                            <input type="text" name="perm_village" value="{{ enrollment.perm_village|default:'' }}">
+                        </div>
+                        <div class="form-field" style="margin-bottom: 10px;">
+                            <label>City / Town</label>
+                            <input type="text" name="perm_city" value="{{ enrollment.perm_city|default:'' }}">
+                        </div>
+                        <div class="form-field" style="margin-bottom: 10px;">
+                            <label>District</label>
+                            <input type="text" name="perm_district" value="{{ enrollment.perm_district|default:'' }}">
+                        </div>
+                        <div class="form-field" style="margin-bottom: 10px;">
+                            <label>State</label>
+                            <input type="text" name="perm_state" value="{{ enrollment.perm_state|default:'' }}">
+                        </div>
+                        <div class="form-field">
+                            <label>Pin Code</label>
+                            <input type="text" name="perm_pin_code" value="{{ enrollment.perm_pin_code|default:'' }}" maxlength="10">
+                        </div>
+                    </div>
+
+                    <!-- Correspondence Address -->
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <h5 style="margin: 0; font-size: 13.5px; font-weight: 700; color: #082B49;">
+                                Correspondence Address
+                            </h5>
+                            <button type="button" class="btn btn-sm btn-ghost" onclick="copyPermAddress()" style="font-size: 11px; padding: 2px 8px;">
+                                <i class="fas fa-copy"></i> Copy Permanent
+                            </button>
+                        </div>
+                        <div class="form-field" style="margin-bottom: 10px;">
+                            <label>Village / Colony / Street</label>
+                            <input type="text" name="corr_village" id="corr_village" value="{{ enrollment.corr_village|default:'' }}">
+                        </div>
+                        <div class="form-field" style="margin-bottom: 10px;">
+                            <label>City / Town</label>
+                            <input type="text" name="corr_city" id="corr_city" value="{{ enrollment.corr_city|default:'' }}">
+                        </div>
+                        <div class="form-field" style="margin-bottom: 10px;">
+                            <label>District</label>
+                            <input type="text" name="corr_district" id="corr_district" value="{{ enrollment.corr_district|default:'' }}">
+                        </div>
+                        <div class="form-field" style="margin-bottom: 10px;">
+                            <label>State</label>
+                            <input type="text" name="corr_state" id="corr_state" value="{{ enrollment.corr_state|default:'' }}">
+                        </div>
+                        <div class="form-field">
+                            <label>Pin Code</label>
+                            <input type="text" name="corr_pin_code" id="corr_pin_code" value="{{ enrollment.corr_pin_code|default:'' }}" maxlength="10">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BOTTOM SUBMIT BAR -->
+            <div style="position: sticky; bottom: 0; background: #ffffff; padding: 16px 24px; border: 1px solid #cbd5e1; border-radius: 10px; box-shadow: 0 -4px 16px rgba(0,0,0,0.08); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 24px;">
+                <div style="font-size: 13px; color: #475569;">
+                    Editing Enrollment for: <strong>{{ enrollment.full_name }}</strong> ({{ enrollment.reg_no }})
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <a href="{% url 'manage_enrollments' %}" class="btn btn-ghost">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                    <button type="submit" name="save_continue" class="btn btn-outline-success">
+                        <i class="fas fa-check"></i> Save &amp; Continue Editing
+                    </button>
+                    <button type="submit" name="save" class="btn btn-success" style="background: #16a34a; border-color: #15803d; font-weight: 700; padding: 8px 24px;">
+                        <i class="fas fa-save"></i> Save Changes &amp; Update
+                    </button>
+                </div>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+<script>
+function copyPermAddress() {
+    const v = document.querySelector('input[name="perm_village"]').value;
+    const c = document.querySelector('input[name="perm_city"]').value;
+    const d = document.querySelector('input[name="perm_district"]').value;
+    const s = document.querySelector('input[name="perm_state"]').value;
+    const p = document.querySelector('input[name="perm_pin_code"]').value;
+
+    document.getElementById('corr_village').value = v;
+    document.getElementById('corr_city').value = c;
+    document.getElementById('corr_district').value = d;
+    document.getElementById('corr_state').value = s;
+    document.getElementById('corr_pin_code').value = p;
+}
+
+// Highlight selected course rows on checkbox toggle
+document.addEventListener('DOMContentLoaded', function() {
+    const checkboxes = document.querySelectorAll('input[name="selected_courses"]');
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', function() {
+            const tr = this.closest('tr');
+            if (tr) {
+                if (this.checked) tr.classList.add('course-row-selected');
+                else tr.classList.remove('course-row-selected');
+            }
+        });
+    });
+
+    const statusSel = document.getElementById('enrollmentStatusSelect');
+    const statusHint = document.getElementById('statusHint');
+    const actionCard = document.getElementById('adminActionCard');
+    if (statusSel && statusHint) {
+        statusSel.addEventListener('change', function() {
+            if (this.value === 'Draft') {
+                actionCard.classList.add('draft-mode');
+                statusHint.innerHTML = '<strong style="color:#b45309;">Draft Mode Selected:</strong> Student will see a prominent notice on their dashboard: "Resubmit Form / Review Admin Changes", and their form will be unlocked for review & resubmission.';
+            } else if (this.value === 'Approved') {
+                actionCard.classList.remove('draft-mode');
+                statusHint.innerHTML = '<strong style="color:#15803d;">Approved Mode:</strong> Form is officially accepted, locked from student cancellation, and an enrollment number will be assigned if not already present.';
+            } else {
+                actionCard.classList.remove('draft-mode');
+                statusHint.innerHTML = '<strong>Submitted Mode:</strong> All changes will be updated automatically at student end. When student views their dashboard, print slip, or receipt, updated details reflect immediately without requiring them to re-apply.';
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

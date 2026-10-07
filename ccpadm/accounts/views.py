@@ -35,7 +35,7 @@ def _home_page_context():
     now = timezone.now()
     try:
         from admissions.models import EnrollmentInstruction
-        enrollment_instruction = EnrollmentInstruction.objects.filter(is_active=True).first()
+        enrollment_instruction = EnrollmentInstruction.objects.filter(is_active=True).order_by('-updated_at', '-id').first()
     except Exception:
         enrollment_instruction = None
 
@@ -249,7 +249,7 @@ def student_dashboard(request):
     enrollment = StudentEnrollment.objects.filter(reg_no=reg_no).order_by('-submitted_date', '-created_at').first()
     can_cancel_enrollment = bool(enrollment and enrollment.is_submitted and enrollment.status != 'Approved')
     try:
-        enrollment_instruction = EnrollmentInstruction.objects.filter(is_active=True).first()
+        enrollment_instruction = EnrollmentInstruction.objects.filter(is_active=True).order_by('-updated_at', '-id').first()
     except Exception:
         enrollment_instruction = None
 

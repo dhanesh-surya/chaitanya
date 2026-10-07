@@ -452,7 +452,7 @@ def enrollment_form(request):
     }
     try:
         from admissions.models import EnrollmentInstruction
-        ctx['enrollment_instruction'] = EnrollmentInstruction.objects.filter(is_active=True).first()
+        ctx['enrollment_instruction'] = EnrollmentInstruction.objects.filter(is_active=True).order_by('-updated_at', '-id').first()
     except Exception:
         ctx['enrollment_instruction'] = None
     ctx.update(get_student_sidebar_context(reg_no, active='enrollment'))

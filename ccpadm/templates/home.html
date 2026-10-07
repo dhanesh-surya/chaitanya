@@ -2,6 +2,524 @@
 
 {% block title %}Home - Chaitanya College{% endblock %}
 
+{% block extra_css %}
+<style>
+/* Enrollment Guide Homepage Section - High Contrast Academic UI/UX */
+html {
+    scroll-behavior: smooth;
+}
+
+.home-enrollment-section {
+    width: 100%;
+    max-width: 1280px;
+    margin: 40px auto 0 auto;
+    background: #ffffff;
+    border: 2px solid #082B49;
+    border-radius: 18px;
+    box-shadow: 0 16px 45px rgba(8, 43, 73, 0.14), 0 2px 8px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    scroll-margin-top: 130px;
+    box-sizing: border-box;
+}
+
+.home-enrollment-header {
+    background: linear-gradient(135deg, #05192d 0%, #082B49 50%, #0d4373 100%);
+    color: #ffffff;
+    padding: 22px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 18px;
+    border-bottom: 4px solid #f59e0b;
+}
+
+.home-enrollment-header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.home-enrollment-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: rgba(245, 158, 11, 0.2);
+    border: 2px solid #f59e0b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: #fbbf24;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
+}
+
+.home-enrollment-title-wrap h2 {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #ffffff !important;
+    letter-spacing: 0.3px;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.home-enrollment-title-wrap p {
+    margin: 4px 0 0 0;
+    font-size: 0.95rem;
+    color: #fef08a !important;
+    font-weight: 600;
+}
+
+.home-enrollment-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.btn-outline-white {
+    background: transparent;
+    border: 1.5px solid rgba(255, 255, 255, 0.7);
+    color: #fff !important;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+
+.btn-outline-white:hover {
+    background: rgba(255, 255, 255, 0.25);
+    color: #fff !important;
+    transform: translateY(-2px);
+}
+
+.home-enrollment-body {
+    padding: 28px;
+    background: #e9eef5 !important;
+}
+
+.home-enrollment-section .enrollment-steps-container {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+@media (max-width: 992px) {
+    .home-enrollment-section .enrollment-steps-container {
+        grid-template-columns: 1fr;
+    }
+    .home-enrollment-header {
+        padding: 16px 20px;
+    }
+    .home-enrollment-body {
+        padding: 18px;
+    }
+    .home-enrollment-title-wrap h2 {
+        font-size: 1.15rem;
+    }
+}
+
+/* Base Step Card */
+.enrollment-steps-container .step-card {
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 14px;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.enrollment-steps-container .step-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+}
+
+.enrollment-steps-container .step-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 18px;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+}
+
+.enrollment-steps-container .step-number-badge {
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    letter-spacing: 0.4px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.enrollment-steps-container .step-heading {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.35;
+    flex: 1;
+}
+
+.enrollment-steps-container .step-card-header::after {
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    font-size: 18px;
+    opacity: 0.85;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+.enrollment-steps-container .step-card-body {
+    flex: 1;
+    font-size: 14px;
+    color: #1e293b;
+    padding: 16px 20px 20px 20px;
+    line-height: 1.65;
+}
+
+.enrollment-steps-container .step-card-body ol {
+    margin: 0 0 10px 0;
+    padding-left: 22px;
+}
+
+.enrollment-steps-container .step-card-body ol li {
+    margin-bottom: 7px;
+    color: #334155;
+}
+
+.enrollment-steps-container .step-card-body ol li::marker {
+    font-weight: 700;
+}
+
+/* Step 1: Portal & Login (Royal Blue Theme) */
+.enrollment-steps-container .step-card:nth-child(1),
+.enrollment-steps-container .step-card.step-card--1 {
+    border-left: 6px solid #2563eb;
+}
+.enrollment-steps-container .step-card:nth-child(1) .step-card-header,
+.enrollment-steps-container .step-card.step-card--1 .step-card-header {
+    background: linear-gradient(90deg, #eff6ff 0%, #ffffff 100%);
+    border-bottom-color: #bfdbfe;
+}
+.enrollment-steps-container .step-card:nth-child(1) .step-number-badge,
+.enrollment-steps-container .step-card.step-card--1 .step-number-badge {
+    background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.35);
+}
+.enrollment-steps-container .step-card:nth-child(1) .step-heading,
+.enrollment-steps-container .step-card.step-card--1 .step-heading {
+    color: #1e40af;
+}
+.enrollment-steps-container .step-card:nth-child(1) .step-card-header::after,
+.enrollment-steps-container .step-card.step-card--1 .step-card-header::after {
+    content: "\f2f6";
+    color: #2563eb;
+}
+.enrollment-steps-container .step-card:nth-child(1) strong,
+.enrollment-steps-container .step-card.step-card--1 strong {
+    color: #1d4ed8;
+}
+
+/* Step 2: Open Enrollment Form (Cyan / Teal Theme) */
+.enrollment-steps-container .step-card:nth-child(2),
+.enrollment-steps-container .step-card.step-card--2 {
+    border-left: 6px solid #0891b2;
+}
+.enrollment-steps-container .step-card:nth-child(2) .step-card-header,
+.enrollment-steps-container .step-card.step-card--2 .step-card-header {
+    background: linear-gradient(90deg, #ecfeff 0%, #ffffff 100%);
+    border-bottom-color: #a5f3fc;
+}
+.enrollment-steps-container .step-card:nth-child(2) .step-number-badge,
+.enrollment-steps-container .step-card.step-card--2 .step-number-badge {
+    background: linear-gradient(135deg, #0e7490, #06b6d4);
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(8, 145, 178, 0.35);
+}
+.enrollment-steps-container .step-card:nth-child(2) .step-heading,
+.enrollment-steps-container .step-card.step-card--2 .step-heading {
+    color: #155e75;
+}
+.enrollment-steps-container .step-card:nth-child(2) .step-card-header::after,
+.enrollment-steps-container .step-card.step-card--2 .step-card-header::after {
+    content: "\f31c";
+    color: #0891b2;
+}
+.enrollment-steps-container .step-card:nth-child(2) strong,
+.enrollment-steps-container .step-card.step-card--2 strong {
+    color: #0e7490;
+}
+
+/* Step 3: Info & Subject Verification (Indigo Theme) */
+.enrollment-steps-container .step-card:nth-child(3),
+.enrollment-steps-container .step-card.step-card--3 {
+    border-left: 6px solid #6366f1;
+}
+.enrollment-steps-container .step-card:nth-child(3) .step-card-header,
+.enrollment-steps-container .step-card.step-card--3 .step-card-header {
+    background: linear-gradient(90deg, #eef2ff 0%, #ffffff 100%);
+    border-bottom-color: #c7d2fe;
+}
+.enrollment-steps-container .step-card:nth-child(3) .step-number-badge,
+.enrollment-steps-container .step-card.step-card--3 .step-number-badge {
+    background: linear-gradient(135deg, #4338ca, #6366f1);
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(99, 102, 241, 0.35);
+}
+.enrollment-steps-container .step-card:nth-child(3) .step-heading,
+.enrollment-steps-container .step-card.step-card--3 .step-heading {
+    color: #3730a3;
+}
+.enrollment-steps-container .step-card:nth-child(3) .step-card-header::after,
+.enrollment-steps-container .step-card.step-card--3 .step-card-header::after {
+    content: "\f4fc";
+    color: #6366f1;
+}
+.enrollment-steps-container .step-card:nth-child(3) strong,
+.enrollment-steps-container .step-card.step-card--3 strong {
+    color: #4338ca;
+}
+
+/* Step 4: ₹500 PNB QR Payment (Amber / Warm Gold Theme) */
+.enrollment-steps-container .step-card:nth-child(4),
+.enrollment-steps-container .step-card.step-card--4 {
+    border-left: 6px solid #d97706;
+}
+.enrollment-steps-container .step-card:nth-child(4) .step-card-header,
+.enrollment-steps-container .step-card.step-card--4 .step-card-header {
+    background: linear-gradient(90deg, #fffbeb 0%, #ffffff 100%);
+    border-bottom-color: #fde68a;
+}
+.enrollment-steps-container .step-card:nth-child(4) .step-number-badge,
+.enrollment-steps-container .step-card.step-card--4 .step-number-badge {
+    background: linear-gradient(135deg, #b45309, #f59e0b);
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(217, 119, 6, 0.4);
+}
+.enrollment-steps-container .step-card:nth-child(4) .step-heading,
+.enrollment-steps-container .step-card.step-card--4 .step-heading {
+    color: #9a3412;
+    font-weight: 800;
+}
+.enrollment-steps-container .step-card:nth-child(4) .step-card-header::after,
+.enrollment-steps-container .step-card.step-card--4 .step-card-header::after {
+    content: "\f029";
+    color: #d97706;
+}
+.enrollment-steps-container .step-card:nth-child(4) strong,
+.enrollment-steps-container .step-card.step-card--4 strong {
+    color: #b45309;
+}
+
+/* Step 5: Transaction ID & Receipt Upload (Violet / Purple Theme) */
+.enrollment-steps-container .step-card:nth-child(5),
+.enrollment-steps-container .step-card.step-card--5 {
+    border-left: 6px solid #9333ea;
+}
+.enrollment-steps-container .step-card:nth-child(5) .step-card-header,
+.enrollment-steps-container .step-card.step-card--5 .step-card-header {
+    background: linear-gradient(90deg, #faf5ff 0%, #ffffff 100%);
+    border-bottom-color: #e9d5ff;
+}
+.enrollment-steps-container .step-card:nth-child(5) .step-number-badge,
+.enrollment-steps-container .step-card.step-card--5 .step-number-badge {
+    background: linear-gradient(135deg, #7e22ce, #a855f7);
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(147, 51, 234, 0.35);
+}
+.enrollment-steps-container .step-card:nth-child(5) .step-heading,
+.enrollment-steps-container .step-card.step-card--5 .step-heading {
+    color: #581c87;
+}
+.enrollment-steps-container .step-card:nth-child(5) .step-card-header::after,
+.enrollment-steps-container .step-card.step-card--5 .step-card-header::after {
+    content: "\f543";
+    color: #9333ea;
+}
+.enrollment-steps-container .step-card:nth-child(5) strong,
+.enrollment-steps-container .step-card.step-card--5 strong {
+    color: #7e22ce;
+}
+
+/* Step 6: Photo, Sign & Final Submit (Emerald Green Theme) */
+.enrollment-steps-container .step-card:nth-child(6),
+.enrollment-steps-container .step-card.step-card--6 {
+    border-left: 6px solid #059669;
+}
+.enrollment-steps-container .step-card:nth-child(6) .step-card-header,
+.enrollment-steps-container .step-card.step-card--6 .step-card-header {
+    background: linear-gradient(90deg, #ecfdf5 0%, #ffffff 100%);
+    border-bottom-color: #a7f3d0;
+}
+.enrollment-steps-container .step-card:nth-child(6) .step-number-badge,
+.enrollment-steps-container .step-card.step-card--6 .step-number-badge {
+    background: linear-gradient(135deg, #047857, #10b981);
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(5, 150, 105, 0.35);
+}
+.enrollment-steps-container .step-card:nth-child(6) .step-heading,
+.enrollment-steps-container .step-card.step-card--6 .step-heading {
+    color: #064e3b;
+}
+.enrollment-steps-container .step-card:nth-child(6) .step-card-header::after,
+.enrollment-steps-container .step-card.step-card--6 .step-card-header::after {
+    content: "\f00c";
+    color: #059669;
+}
+.enrollment-steps-container .step-card:nth-child(6) strong,
+.enrollment-steps-container .step-card.step-card--6 strong {
+    color: #047857;
+}
+
+/* Step 7: Print Slip & Payment Receipt (Sky / Cobalt Theme) */
+.enrollment-steps-container .step-card:nth-child(7),
+.enrollment-steps-container .step-card.step-card--7 {
+    border-left: 6px solid #0284c7;
+}
+.enrollment-steps-container .step-card:nth-child(7) .step-card-header,
+.enrollment-steps-container .step-card.step-card--7 .step-card-header {
+    background: linear-gradient(90deg, #f0f9ff 0%, #ffffff 100%);
+    border-bottom-color: #bae6fd;
+}
+.enrollment-steps-container .step-card:nth-child(7) .step-number-badge,
+.enrollment-steps-container .step-card.step-card--7 .step-number-badge {
+    background: linear-gradient(135deg, #0369a1, #38bdf8);
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(2, 132, 199, 0.35);
+}
+.enrollment-steps-container .step-card:nth-child(7) .step-heading,
+.enrollment-steps-container .step-card.step-card--7 .step-heading {
+    color: #075985;
+}
+.enrollment-steps-container .step-card:nth-child(7) .step-card-header::after,
+.enrollment-steps-container .step-card.step-card--7 .step-card-header::after {
+    content: "\f02f";
+    color: #0284c7;
+}
+.enrollment-steps-container .step-card:nth-child(7) strong,
+.enrollment-steps-container .step-card.step-card--7 strong {
+    color: #0369a1;
+}
+
+/* Step 8: College Office Physical Submission (Academic Maroon Theme) */
+.enrollment-steps-container .step-card:nth-child(8),
+.enrollment-steps-container .step-card.step-card--8 {
+    border-left: 6px solid #b91c1c;
+}
+.enrollment-steps-container .step-card:nth-child(8) .step-card-header,
+.enrollment-steps-container .step-card.step-card--8 .step-card-header {
+    background: linear-gradient(90deg, #fef2f2 0%, #ffffff 100%);
+    border-bottom-color: #fecaca;
+}
+.enrollment-steps-container .step-card:nth-child(8) .step-number-badge,
+.enrollment-steps-container .step-card.step-card--8 .step-number-badge {
+    background: linear-gradient(135deg, #991b1b, #dc2626);
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(185, 28, 28, 0.35);
+}
+.enrollment-steps-container .step-card:nth-child(8) .step-heading,
+.enrollment-steps-container .step-card.step-card--8 .step-heading {
+    color: #7f1d1d;
+    font-weight: 800;
+}
+.enrollment-steps-container .step-card:nth-child(8) .step-card-header::after,
+.enrollment-steps-container .step-card.step-card--8 .step-card-header::after {
+    content: "\f19c";
+    color: #b91c1c;
+}
+.enrollment-steps-container .step-card:nth-child(8) strong,
+.enrollment-steps-container .step-card.step-card--8 strong {
+    color: #991b1b;
+}
+.enrollment-steps-container .step-card:nth-child(8) .step-card-body > p,
+.enrollment-steps-container .step-card.step-card--8 .step-card-body > p {
+    color: #991b1b;
+    font-weight: 700;
+    margin-bottom: 8px;
+    font-size: 14.5px;
+}
+
+/* Sub-list (Step 4 UPI Details) */
+.enrollment-steps-container .sub-list {
+    margin: 8px 0 10px 10px;
+    list-style-type: none;
+    background: #fffdf5;
+    border: 1.5px dashed #f59e0b;
+    border-radius: 8px;
+    padding: 10px 14px;
+}
+.enrollment-steps-container .sub-list li {
+    margin-bottom: 5px;
+    color: #78350f !important;
+}
+.enrollment-steps-container .sub-list code {
+    background: #fef3c7;
+    color: #92400e;
+    font-weight: 700;
+    font-size: 13.5px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    border: 1px solid #fde68a;
+    display: inline-block;
+    letter-spacing: 0.3px;
+}
+
+/* Alert Boxes Inside Steps */
+.enrollment-steps-container .step-alert-box {
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    font-weight: 500;
+    margin-top: 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    line-height: 1.55;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+.enrollment-steps-container .step-alert-box i {
+    font-size: 16px;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+.enrollment-steps-container .step-alert-box.info {
+    background: #eff6ff;
+    border: 1.5px solid #93c5fd;
+    color: #1e40af;
+}
+.enrollment-steps-container .step-alert-box.info i {
+    color: #2563eb;
+}
+.enrollment-steps-container .step-alert-box.warning {
+    background: #fffbeb;
+    border: 1.5px solid #fcd34d;
+    color: #92400e;
+}
+.enrollment-steps-container .step-alert-box.warning i {
+    color: #d97706;
+}
+.enrollment-steps-container .step-alert-box.success {
+    background: #f0fdf4;
+    border: 1.5px solid #86efac;
+    color: #14532d;
+}
+.enrollment-steps-container .step-alert-box.success i {
+    color: #16a34a;
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="home-page">
     <div class="home-grid">

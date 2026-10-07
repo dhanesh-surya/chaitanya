@@ -495,8 +495,32 @@ class CancelEnrollmentTestCase(TestCase):
         self.assertIn('UTR: <strong style="font-family: monospace; color: #082B49;">UTR998877665544</strong>', content3)
 
 
+    def test_enrollment_form_header_visibility_and_instructions_modal(self):
+        from admissions.models import EnrollmentInstruction
+        instr = EnrollmentInstruction.objects.filter(is_active=True).first()
+        if not instr:
+            instr = EnrollmentInstruction.objects.create(
+                title="छात्र नामांकन प्रक्रिया",
+                college_title="चैतन्य कॉलेज",
+                content_html="<p>चरण 1: निर्देश</p>",
+                is_active=True,
+            )
+        self.enrollment.is_submitted = False
+        self.enrollment.save()
 
+        session = self.client.session
+        session['is_logged_in'] = True
+        session['reg_no'] = self.student.registration_no
+        session.save()
 
-
-
+        response = self.client.get(reverse('enrollment_form'))
+        self.assertEqual(response.status_code, 200)
+        content = response.content.decode('utf-8')
+        self.assertIn('enrollment-header-card', content)
+        self.assertIn('Student Enrollment Form (छात्र नामांकन फॉर्म)', content)
+        self.assertNotIn('Student_Enrollment_User_Guide.pdf', content)
+        self.assertNotIn('Enrollment Guide (PDF)', content)
+        self.assertIn('नामांकन निर्देश (Instructions)', content)
+        self.assertIn('id="enrollmentGuideModal"', content)
+        self.assertIn('चरण 1', content)
 

@@ -113,15 +113,32 @@
         {% include 'partials/student_sidebar.html' %}
 
         <div class="admission-main portal-main portal-main--form">
-            <div class="mb-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
-                <div>
-                    <h1 style="color: #082B49; font-size: 1.6rem; font-weight: 800; margin-bottom: 4px;">Student Enrollment Form</h1>
-                    <p style="color: #64748b; font-size: 14px; margin-bottom: 0;">Session 2026-27 | Verify previous admission details and confirm your enrolled courses.</p>
-                </div>
-                <div>
-                    <a href="{% static 'docs/Student_Enrollment_User_Guide.pdf' %}" target="_blank" class="btn btn-outline-primary btn-sm" style="font-weight: 600; padding: 6px 14px; border-radius: 6px;">
-                        <i class="fas fa-file-pdf me-1"></i> Enrollment Guide (PDF)
-                    </a>
+            <!-- ENROLLMENT HEADER CARD (HIGH VISIBILITY ACADEMIC DESIGN) -->
+            <div class="enrollment-header-card mb-4" style="background: #ffffff; border-radius: 12px; padding: 22px 26px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); border: 1px solid #e2e8f0; border-left: 6px solid #082B49;">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span class="badge" style="background: #082B49; color: #ffffff; font-size: 11.5px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 0.5px;">
+                                सत्र / Session 2026-27
+                            </span>
+                            <span class="badge" style="background: #e0f2fe; color: #0284c7; font-size: 11.5px; font-weight: 700; padding: 4px 10px; border-radius: 4px; border: 1px solid #bae6fd;">
+                                <i class="fas fa-graduation-cap"></i> Autonomous NEP 2020
+                            </span>
+                        </div>
+                        <h1 style="color: #082B49; font-size: 1.7rem; font-weight: 800; margin: 0 0 6px 0; display: flex; align-items: center; gap: 10px;">
+                            <i class="fas fa-id-card" style="color: #A32623;"></i> Student Enrollment Form (छात्र नामांकन फॉर्म)
+                        </h1>
+                        <p style="color: #475569; font-size: 14px; margin-bottom: 0; font-weight: 500; line-height: 1.5;">
+                            प्रवेश विवरण सत्यापित करें, नामांकन शुल्क जमा करें एवं अपने विषयों (Courses) का चयन सुनिश्चित करें।
+                        </p>
+                    </div>
+                    <div>
+                        {% if enrollment_instruction and enrollment_instruction.is_active %}
+                        <button type="button" class="btn btn-outline-primary" onclick="openEnrollmentGuideModal()" title="नामांकन निर्देश देखें" style="font-weight: 700; padding: 10px 18px; border-radius: 8px; font-size: 13.5px; display: inline-flex; align-items: center; gap: 8px; border: 1.5px solid #082B49; color: #082B49; background: #f8fafc; transition: all 0.2s ease; box-shadow: 0 2px 6px rgba(0,0,0,0.05); cursor: pointer;">
+                            <i class="fas fa-book-reader" style="color: #d97706; font-size: 16px;"></i> नामांकन निर्देश (Instructions)
+                        </button>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
 
@@ -1732,4 +1749,179 @@ window.ENROLLMENT_CONFIG = {
     });
 })();
 </script>
+
+{% if enrollment_instruction and enrollment_instruction.is_active %}
+<!-- Enrollment Instructions Modal Popup -->
+<div id="enrollmentGuideModal" class="guide-modal-backdrop" style="display: none;">
+    <div class="guide-modal-dialog">
+        <div class="guide-modal-header">
+            <div class="guide-header-left">
+                <img src="{% static 'images/logo.png' %}" alt="Logo" class="guide-header-logo">
+                <div>
+                    <h3 class="guide-college-title">{{ enrollment_instruction.college_title }}</h3>
+                    <p class="guide-process-title"><i class="fas fa-graduation-cap"></i> {{ enrollment_instruction.title }}</p>
+                </div>
+            </div>
+            <button type="button" class="guide-close-btn" onclick="closeEnrollmentGuideModal()" aria-label="Close modal">&times;</button>
+        </div>
+
+        <div class="guide-modal-body">
+            {{ enrollment_instruction.content_html|safe }}
+        </div>
+
+        <div class="guide-modal-footer">
+            <button type="button" class="btn btn-primary" onclick="closeEnrollmentGuideModal()" style="font-weight: 600; padding: 9px 22px; border-radius: 6px; background: #082B49; border-color: #082B49; color: #fff;">
+                <i class="fas fa-check-circle me-1"></i> ठीक है, समझ गया (Understood)
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Enrollment Guide Modal Styling */
+.guide-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(4px);
+    z-index: 1050;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    box-sizing: border-box;
+}
+.guide-modal-dialog {
+    background: #ffffff;
+    width: 100%;
+    max-width: 880px;
+    max-height: 88vh;
+    border-radius: 12px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid #cbd5e1;
+    animation: guideModalSlideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes guideModalSlideUp {
+    from { transform: translateY(24px) scale(0.98); opacity: 0; }
+    to { transform: translateY(0) scale(1); opacity: 1; }
+}
+.guide-modal-header {
+    background: linear-gradient(135deg, #082B49 0%, #0e4577 100%);
+    color: #ffffff;
+    padding: 16px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 2.5px solid #b8860b;
+}
+.guide-header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+.guide-header-logo {
+    width: 46px;
+    height: 46px;
+    object-fit: contain;
+    background: #ffffff;
+    border-radius: 50%;
+    padding: 2px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+.guide-college-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 0.3px;
+}
+.guide-process-title {
+    margin: 3px 0 0 0;
+    font-size: 13px;
+    color: #fde047;
+    font-weight: 600;
+}
+.guide-close-btn {
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    font-size: 26px;
+    font-weight: 400;
+    cursor: pointer;
+    line-height: 1;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+.guide-close-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #f87171;
+}
+.guide-modal-body {
+    padding: 22px 26px;
+    overflow-y: auto;
+    font-size: 14.5px;
+    line-height: 1.65;
+    color: #1e293b;
+    background: #ffffff;
+}
+.guide-modal-body h4 {
+    color: #082B49;
+    font-weight: 700;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 8px;
+    margin-top: 18px;
+    margin-bottom: 12px;
+}
+.guide-modal-footer {
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    padding: 12px 24px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+}
+</style>
+
+<script>
+function openEnrollmentGuideModal() {
+    const modal = document.getElementById('enrollmentGuideModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function closeEnrollmentGuideModal() {
+    const modal = document.getElementById('enrollmentGuideModal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('enrollmentGuideModal');
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeEnrollmentGuideModal();
+            }
+        });
+    }
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modal && modal.style.display === 'flex') {
+            closeEnrollmentGuideModal();
+        }
+    });
+});
+</script>
+{% endif %}
 {% endblock %}

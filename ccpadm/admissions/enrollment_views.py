@@ -450,6 +450,11 @@ def enrollment_form(request):
         'religion_choices': RELIGION_CHOICES,
         'medium_choices': MEDIUM_CHOICES,
     }
+    try:
+        from admissions.models import EnrollmentInstruction
+        ctx['enrollment_instruction'] = EnrollmentInstruction.objects.filter(is_active=True).first()
+    except Exception:
+        ctx['enrollment_instruction'] = None
     ctx.update(get_student_sidebar_context(reg_no, active='enrollment'))
     return render(request, 'admissions/enrollment_form.html', ctx)
 

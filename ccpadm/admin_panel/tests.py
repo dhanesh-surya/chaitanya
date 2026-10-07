@@ -248,6 +248,7 @@ class ExportEnrollmentsExcelTestCase(TestCase):
         self.student_m = Student.objects.create(
             registration_no='REG_M_01',
             full_name='Rohan Sahu',
+            program_type='B.A. First Semester',
             mobile='9876543210',
             password='pass1',
         )
@@ -298,6 +299,7 @@ class ExportEnrollmentsExcelTestCase(TestCase):
         self.student_f = Student.objects.create(
             registration_no='REG_F_01',
             full_name='Kavita Patel',
+            program_type='B.Sc. First Semester',
             mobile='9876543211',
             password='pass2',
         )
@@ -546,6 +548,93 @@ class ExportEnrollmentsExcelTestCase(TestCase):
         self.assertContains(dash_resp, 'Enrollment Resubmission Required')
         self.assertContains(dash_resp, 'Please re-upload clearer copy of 12th marksheet.')
         self.assertContains(dash_resp, 'Review &amp; Resubmit Form')
+
+    def test_export_students_csv_has_father_and_mother_name(self):
+        self._login_admin()
+        resp = self.client.get(reverse('export_students_csv') + '?program=B.A.+First+Semester&verified=ALL')
+        self.assertEqual(resp.status_code, 200)
+        content = resp.content.decode('utf-8')
+        lines = content.splitlines()
+        self.assertIn("Father's Name", lines[0])
+        self.assertIn("Mother's Name", lines[0])
+        self.assertIn("Ramesh Sahu", content)
+        self.assertIn("Savitri Sahu", content)
+
+    def test_export_students_excel_has_father_and_mother_name(self):
+        from io import BytesIO
+        import openpyxl
+
+        self._login_admin()
+        resp = self.client.get(reverse('export_students_excel') + '?program=B.A.+First+Semester&verified=ALL')
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp['Content-Type'],
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        )
+        wb = openpyxl.load_workbook(BytesIO(resp.content))
+        ws = wb.active
+        headers = [cell.value for cell in ws[1]]
+        self.assertIn("Father's Name", headers)
+        self.assertIn("Mother's Name", headers)
+        self.assertEqual(headers[2], "Father's Name")
+        self.assertEqual(headers[3], "Mother's Name")
+        row2 = [cell.value for cell in ws[2]]
+        self.assertIn("Rohan Sahu", row2)
+        self.assertIn("Ramesh Sahu", row2)
+        self.assertIn("Savitri Sahu", row2)
+
+    def test_attendance_sheets_view_get(self):
+        self._login_admin()
+        resp = self.client.get(reverse('attendance_sheets') + '?program=B.A.+First+Semester')
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, 'Attendance Sheets (Internal Assessment)')
+        self.assertContains(resp, 'B.A. First Semester')
+        self.assertContains(resp, 'Rohan Sahu')
+        self.assertContains(resp, 'Ramesh Sahu')
+
+    def test_export_attendance_sheet_excel_general_and_subject_wise(self):
+        from io import BytesIO
+        import openpyxl
+        from courses.models import ProgramCourse
+
+        course = ProgramCourse.objects.create(
+            program_type='B.A. First Semester',
+            course_name='Hindi Sahitya',
+            course_code='HNSC-101',
+            paper_no='I',
+            is_compulsory=True,
+        )
+
+        self._login_admin()
+        # 1. Export without specific subject (All Subjects / General)
+        resp_gen = self.client.get(reverse('export_attendance_sheet_excel') + '?program=B.A.+First+Semester&month=October&year=2026')
+        self.assertEqual(resp_gen.status_code, 200)
+        self.assertEqual(
+            resp_gen['Content-Type'],
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        )
+        wb_gen = openpyxl.load_workbook(BytesIO(resp_gen.content))
+        ws_gen = wb_gen.active
+        self.assertEqual(int(ws_gen.page_setup.paperSize), 9)
+        self.assertEqual(ws_gen['A1'].value, 'CHAITANYA SCIENCE AND ARTS COLLEGE, PAMGARH')
+        self.assertIn('INTERNAL ASSESSMENT ATTENDANCE SHEET', ws_gen['A3'].value)
+        self.assertIn('OCTOBER 2026', ws_gen['A3'].value)
+        headers_gen = [ws_gen.cell(row=7, column=c).value for c in range(1, 6)]
+        self.assertEqual(headers_gen, ['Sn', 'Student ID', 'NAME', 'Father Name', 'Signature'])
+        self.assertEqual(ws_gen.cell(row=8, column=1).value, 1)
+        self.assertEqual(ws_gen.cell(row=8, column=2).value, self.student_m.registration_no)
+        self.assertEqual(ws_gen.cell(row=8, column=3).value, 'Rohan Sahu')
+        self.assertEqual(ws_gen.cell(row=8, column=4).value, 'Ramesh Sahu')
+        self.assertIn(ws_gen.cell(row=8, column=5).value, (None, ''))
+
+        # 2. Export subject-wise
+        resp_subj = self.client.get(reverse('export_attendance_sheet_excel') + f'?program=B.A.+First+Semester&course_id={course.id}&month=October&year=2026')
+        self.assertEqual(resp_subj.status_code, 200)
+        wb_subj = openpyxl.load_workbook(BytesIO(resp_subj.content))
+        ws_subj = wb_subj.active
+        self.assertIn('Hindi Sahitya', ws_subj['A5'].value)
+        self.assertIn('HNSC-101', ws_subj['A5'].value)
+
 
 
 

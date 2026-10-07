@@ -55,6 +55,11 @@
                 <p>Verified Students</p>
                 <span class="stat-card__hint">{% if show_verified %}Click to hide{% else %}Click for details{% endif %}</span>
             </a>
+            <a href="{% url 'attendance_sheets' %}" class="stat-card stat-card--link" title="Generate and export Internal Assessment Attendance Sheets">
+                <h3 style="color: #4f46e5;"><i class="fas fa-clipboard-user"></i></h3>
+                <p>Attendance Sheets</p>
+                <span class="stat-card__hint">Internal Assessment / A4</span>
+            </a>
         </div>
 
         {% if show_verified %}

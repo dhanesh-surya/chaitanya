@@ -1,0 +1,456 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Attendance Sheet - {{ program|default:"Internal Assessment" }}{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Attendance Sheet Admin & Print Styles */
+.attendance-filter-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 18px 22px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+    margin-bottom: 24px;
+}
+
+.attendance-filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+    align-items: flex-end;
+}
+
+.attendance-field label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #082B49;
+    margin-bottom: 5px;
+}
+
+.attendance-field select,
+.attendance-field input {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 13.5px;
+    background: #f8fafc;
+    color: #0f172a;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.attendance-field select:focus,
+.attendance-field input:focus {
+    border-color: #082B49;
+    background: #ffffff;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(8, 43, 73, 0.12);
+}
+
+.attendance-sheet-paper {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    padding: 32px 36px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    margin-bottom: 30px;
+    font-family: 'Calibri', 'Poppins', sans-serif;
+    color: #0f172a;
+}
+
+.sheet-header-block {
+    text-align: center;
+    border-bottom: 2px solid #082B49;
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+}
+
+.sheet-college-name {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #082B49;
+    letter-spacing: 0.5px;
+    margin: 0 0 4px 0;
+    text-transform: uppercase;
+}
+
+.sheet-college-sub {
+    font-size: 12.5px;
+    color: #475569;
+    font-style: italic;
+    margin: 0 0 8px 0;
+}
+
+.sheet-assessment-title {
+    display: inline-block;
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    padding: 5px 18px;
+    border-radius: 4px;
+    font-weight: 800;
+    font-size: 13.5px;
+    color: #0f172a;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-top: 4px;
+}
+
+.sheet-meta-grid {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 12px;
+    padding: 10px 14px;
+    background: #f8fafc;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    font-size: 13.5px;
+}
+
+.sheet-subject-banner {
+    background: #e0f2fe;
+    border-left: 4px solid #0284c7;
+    padding: 9px 14px;
+    border-radius: 4px;
+    margin-bottom: 16px;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #0369a1;
+}
+
+.attendance-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    font-size: 13px;
+}
+
+.attendance-table th,
+.attendance-table td {
+    border: 1px solid #475569;
+    padding: 8px 10px;
+    vertical-align: middle;
+}
+
+.attendance-table th {
+    background: #082B49;
+    color: #ffffff;
+    font-weight: 700;
+    text-align: center;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.attendance-table tbody tr:nth-child(even) {
+    background-color: #f8fafc;
+}
+
+.attendance-table td.col-sn {
+    width: 50px;
+    text-align: center;
+    font-weight: 600;
+}
+
+.attendance-table td.col-id {
+    width: 150px;
+    text-align: center;
+    font-weight: 700;
+    font-family: monospace;
+    font-size: 13.5px;
+}
+
+.attendance-table td.col-name {
+    font-weight: 700;
+    color: #082B49;
+}
+
+.attendance-table td.col-father {
+    color: #334155;
+}
+
+.attendance-table td.col-sig {
+    width: 190px;
+    background: #ffffff !important;
+}
+
+.sheet-footer-block {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding-top: 20px;
+    border-top: 1.5px dashed #94a3b8;
+    margin-top: 16px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+@media print {
+    body {
+        background: #ffffff !important;
+        color: #000000 !important;
+    }
+    .college-header-top,
+    .site-navbar,
+    .site-footer,
+    .page-header--admin,
+    .attendance-filter-card,
+    .btn,
+    .admin-actions-bar {
+        display: none !important;
+    }
+    .portal-page,
+    .portal-main {
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        box-shadow: none !important;
+        background: transparent !important;
+        border: none !important;
+    }
+    .attendance-sheet-paper {
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    .attendance-table th {
+        background: #e2e8f0 !important;
+        color: #000000 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    .sheet-subject-banner {
+        background: #f1f5f9 !important;
+        color: #000000 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    @page {
+        size: A4 portrait;
+        margin: 12mm 12mm 15mm 12mm;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="portal-page portal-page--wide">
+    <div class="portal-main">
+
+        <!-- HEADER & ADMIN TOOLBAR -->
+        <div class="page-header page-header--admin" style="margin-bottom: 18px;">
+            <h2 class="page-title"><i class="fas fa-clipboard-user"></i> Attendance Sheets (Internal Assessment)</h2>
+            <nav class="page-actions page-actions--toolbar" aria-label="Admin navigation">
+                {% include 'partials/admin_nav_actions.html' with active_page='attendance' %}
+                {% if program %}
+                <a href="{% url 'export_attendance_sheet_excel' %}?program={{ program|urlencode }}&course_id={{ course_id|urlencode }}&month={{ month|urlencode }}&year={{ year|urlencode }}&assessment_title={{ assessment_title|urlencode }}&verified={{ verified|urlencode }}&search={{ search|urlencode }}" class="page-action-btn page-action-btn--accent" title="Export formatted A4 Excel Sheet">
+                    <i class="fas fa-file-excel" aria-hidden="true"></i><span>Export Excel (.xlsx)</span>
+                </a>
+                <button type="button" onclick="window.print()" class="page-action-btn" title="Print this sheet">
+                    <i class="fas fa-print" aria-hidden="true"></i><span>Print A4</span>
+                </button>
+                {% endif %}
+                {% include 'partials/admin_nav_logout.html' %}
+            </nav>
+        </div>
+
+        <!-- FILTER SELECTION CARD -->
+        <div class="attendance-filter-card">
+            <form method="get" id="attendanceFilterForm">
+                <div class="attendance-filter-grid">
+                    <div class="attendance-field" style="grid-column: span 2;">
+                        <label for="programSelect"><i class="fas fa-graduation-cap"></i> Select Program / Class *</label>
+                        <select name="program" id="programSelect" onchange="this.form.submit()">
+                            <option value="">-- Choose Program / Semester --</option>
+                            {% for pt in program_types %}
+                            <option value="{{ pt }}" {% if program == pt %}selected{% endif %}>{{ pt }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="attendance-field" style="grid-column: span 2;">
+                        <label for="courseSelect"><i class="fas fa-book"></i> Subject / Course (Optional)</label>
+                        <select name="course_id" id="courseSelect" onchange="this.form.submit()">
+                            <option value="ALL" {% if not course_id or course_id == 'ALL' %}selected{% endif %}>-- All Subjects (General Attendance / Whole Class) --</option>
+                            {% for c in available_courses %}
+                            <option value="{{ c.id }}" {% if course_id == c.id|stringformat:"s" %}selected{% endif %}>
+                                {{ c.course_name }} {% if c.course_code %}({{ c.course_code }}){% endif %} {% if c.paper_no %}[Paper {{ c.paper_no }}]{% endif %}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="attendance-field">
+                        <label for="monthSelect"><i class="fas fa-calendar-alt"></i> Month</label>
+                        <select name="month" id="monthSelect">
+                            {% for m in months_list %}
+                            <option value="{{ m }}" {% if month == m %}selected{% endif %}>{{ m }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="attendance-field">
+                        <label for="yearSelect"><i class="fas fa-calendar"></i> Year</label>
+                        <select name="year" id="yearSelect">
+                            {% for y in years_list %}
+                            <option value="{{ y }}" {% if year == y %}selected{% endif %}>{{ y }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="attendance-field">
+                        <label for="assessmentTitle"><i class="fas fa-pen-nib"></i> Assessment Title</label>
+                        <input type="text" name="assessment_title" id="assessmentTitle" value="{{ assessment_title }}" placeholder="e.g. Internal Assessment">
+                    </div>
+
+                    <div class="attendance-field">
+                        <label for="verifiedSelect"><i class="fas fa-user-check"></i> Verification</label>
+                        <select name="verified" id="verifiedSelect">
+                            <option value="ALL" {% if verified == 'ALL' %}selected{% endif %}>All Students</option>
+                            <option value="YES" {% if verified == 'YES' %}selected{% endif %}>Verified Only</option>
+                            <option value="NO" {% if verified == 'NO' %}selected{% endif %}>Not Verified</option>
+                        </select>
+                    </div>
+
+                    <div class="attendance-field" style="display: flex; gap: 8px;">
+                        <button type="submit" class="btn btn-primary" style="flex: 1; padding: 10px 16px; font-weight: 700; height: 42px;">
+                            <i class="fas fa-filter"></i> Apply
+                        </button>
+                        <a href="{% url 'attendance_sheets' %}" class="btn btn-secondary" style="height: 42px; display: inline-flex; align-items: center;" title="Reset filters">
+                            <i class="fas fa-redo"></i>
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        {% if program %}
+        <!-- ATTENDANCE SHEET PREVIEW (EXACTLY MATCHING A4 EXCEL SHEET) -->
+        <div class="attendance-sheet-paper" id="printableAttendanceSheet">
+
+            <!-- SHEET HEADER -->
+            <div class="sheet-header-block">
+                <h1 class="sheet-college-name">Chaitanya Science and Arts College, Pamgarh</h1>
+                <p class="sheet-college-sub">(An Autonomous Institution Approved by UGC | Affiliated to SNPV, Raigarh)</p>
+                <div class="sheet-assessment-title">
+                    <i class="fas fa-clipboard-check"></i> {{ assessment_title }} Attendance Sheet &mdash; {{ month }} {{ year }}
+                </div>
+            </div>
+
+            <!-- SHEET META INFO -->
+            <div class="sheet-meta-grid">
+                <div>
+                    <strong>Class / Program:</strong> <span style="color: #082B49; font-weight: 700;">{{ program }}</span>
+                </div>
+                <div>
+                    <strong>Session:</strong> 2026-27 &nbsp;|&nbsp;
+                    <strong>Total Students:</strong> <span class="badge" style="background: #082B49; color: #fff; padding: 2px 8px; border-radius: 4px;">{{ total_students }}</span> &nbsp;|&nbsp;
+                    <strong>Date:</strong> ____________________
+                </div>
+            </div>
+
+            <!-- SUBJECT BANNER -->
+            {% if selected_course %}
+            <div class="sheet-subject-banner">
+                <i class="fas fa-book-open"></i> <strong>Subject / Course:</strong> {{ selected_course.course_name }}
+                {% if selected_course.course_code %}&nbsp;[Code: <strong>{{ selected_course.course_code }}</strong>]{% endif %}
+                {% if selected_course.paper_no %}&nbsp;[Paper: <strong>{{ selected_course.paper_no }}</strong>]{% endif %}
+            </div>
+            {% else %}
+            <div class="sheet-subject-banner" style="background: #f8fafc; border-left-color: #64748b; color: #475569;">
+                <i class="fas fa-users"></i> <strong>General Class Attendance Sheet</strong> (All Enrolled Subjects)
+            </div>
+            {% endif %}
+
+            <!-- ATTENDANCE TABLE -->
+            {% if students %}
+            <div class="table-responsive">
+                <table class="attendance-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">Sn</th>
+                            <th style="width: 150px;">Student ID</th>
+                            <th>NAME</th>
+                            <th>Father Name</th>
+                            <th style="width: 190px;">Signature</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in students %}
+                        <tr>
+                            <td class="col-sn">{{ forloop.counter }}</td>
+                            <td class="col-id">{{ s.registration_no }}</td>
+                            <td class="col-name">{{ s.full_name }}</td>
+                            <td class="col-father">
+                                {% if s.father_name %}
+                                {{ s.father_name }}
+                                {% elif s.latest_admission and s.latest_admission.father_name %}
+                                {{ s.latest_admission.father_name }}
+                                {% else %}
+                                &mdash;
+                                {% endif %}
+                            </td>
+                            <td class="col-sig"></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- SHEET FOOTER SUMMARY -->
+            <div class="sheet-footer-block">
+                <div>
+                    Total Students: <strong>{{ total_students }}</strong> &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;
+                    Present: ____________ &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;
+                    Absent: ____________
+                </div>
+                <div>
+                    Signature of Subject Teacher / Invigilator: ___________________________
+                </div>
+            </div>
+
+            {% else %}
+            <div class="alert alert-info text-center" style="padding: 24px; border-radius: 8px;">
+                <i class="fas fa-info-circle fa-2x mb-2" style="color: #0284c7;"></i>
+                <p style="margin: 0; font-weight: 600;">No students found for the selected program and subject filter.</p>
+            </div>
+            {% endif %}
+
+        </div>
+
+        <!-- BOTTOM EXPORT ACTIONS BAR -->
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4 admin-actions-bar" style="background: #ffffff; padding: 16px 20px; border-radius: 10px; border: 1px solid #e2e8f0;">
+            <div style="font-size: 14px; color: #475569;">
+                <i class="fas fa-check-circle" style="color: #16a34a;"></i> Ready to print or export formatted for <strong>A4 Paper</strong>.
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{% url 'export_attendance_sheet_excel' %}?program={{ program|urlencode }}&course_id={{ course_id|urlencode }}&month={{ month|urlencode }}&year={{ year|urlencode }}&assessment_title={{ assessment_title|urlencode }}&verified={{ verified|urlencode }}&search={{ search|urlencode }}" class="btn btn-success" style="font-weight: 700; padding: 9px 20px;">
+                    <i class="fas fa-file-excel me-1"></i> Export Excel Sheet (.xlsx)
+                </a>
+                <button type="button" onclick="window.print()" class="btn btn-secondary" style="font-weight: 600; padding: 9px 18px;">
+                    <i class="fas fa-print me-1"></i> Print / Save as PDF
+                </button>
+            </div>
+        </div>
+
+        {% else %}
+        <!-- EMPTY STATE PROMPT -->
+        <div class="alert alert-info text-center" style="background: #ffffff; border: 2px dashed #93c5fd; padding: 48px 24px; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.04);">
+            <i class="fas fa-clipboard-user fa-3x mb-3" style="color: #0284c7;"></i>
+            <h3 style="color: #082B49; font-weight: 800; margin-bottom: 8px;">Generate Internal Assessment Attendance Sheet</h3>
+            <p style="color: #64748b; max-width: 600px; margin: 0 auto 20px; font-size: 14.5px;">
+                Please select a <strong>Program / Class</strong> from the dropdown above to view, customize, and export attendance sheets with College Header, Month, Student ID, Name, Father Name, and Signature column formatted for A4 paper.
+            </p>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

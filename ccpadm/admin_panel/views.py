@@ -1,4 +1,5 @@
 import csv
+import json
 import re
 
 from django.contrib import messages
@@ -16,7 +17,8 @@ from accounts.utils import (
     is_valid_email,
     is_valid_mobile,
 )
-from admissions.models import StudentAdmission
+from admissions.models import StudentAdmission, StudentEnrollment
+from courses.models import ProgramCourse
 from admissions.services import (
     get_print_context,
     parse_selected_subjects,
@@ -208,6 +210,7 @@ def _admission_dsc_course_labels(admission):
 def _attach_admissions(students):
     reg_nos = [s.registration_no for s in students]
     admission_map = {}
+    enrollment_map = {}
     if reg_nos:
         for adm in (
             StudentAdmission.objects.filter(reg_no__in=reg_nos)
@@ -215,9 +218,25 @@ def _attach_admissions(students):
         ):
             if adm.reg_no not in admission_map:
                 admission_map[adm.reg_no] = adm
+        for enr in (
+            StudentEnrollment.objects.filter(reg_no__in=reg_nos)
+            .order_by('-submitted_date', '-created_at')
+        ):
+            if enr.reg_no not in enrollment_map:
+                enrollment_map[enr.reg_no] = enr
     for student in students:
         admission = admission_map.get(student.registration_no)
+        enrollment = enrollment_map.get(student.registration_no)
         student.latest_admission = admission
+        student.latest_enrollment = enrollment
+        student.father_name = (
+            (admission.father_name if admission and admission.father_name else '')
+            or (enrollment.father_name if enrollment and enrollment.father_name else '')
+        )
+        student.mother_name = (
+            (admission.mother_name if admission and admission.mother_name else '')
+            or (enrollment.mother_name if enrollment and enrollment.mother_name else '')
+        )
         group_key = _admission_bsc_group_key(admission)
         student.bsc_group_key = group_key
         student.bsc_group_label = (
@@ -725,18 +744,23 @@ def export_students_csv(request):
     )
 
     response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="students.csv"'
+    filename = f"Students_{params['program'] or 'All'}.csv".replace(' ', '_').replace('/', '_')
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
     writer = csv.writer(response)
     writer.writerow([
-        'Registration No', 'Full Name', 'Email', 'Mobile', 'Aadhaar',
+        'Registration No', 'Full Name', "Father's Name", "Mother's Name", 'Email', 'Mobile', 'Aadhaar',
         'Program', 'Subject Group', 'DSC Courses', 'Course', 'Selected Courses / Paper Name',
         'Application No', 'Verified', 'Registered On',
     ])
     for s in students:
         admission = getattr(s, 'latest_admission', None)
+        father = getattr(s, 'father_name', '') or (admission.father_name if admission else '')
+        mother = getattr(s, 'mother_name', '') or (admission.mother_name if admission else '')
         writer.writerow([
             s.registration_no,
             s.full_name,
+            father,
+            mother,
             s.email or '',
             s.mobile or '',
             s.aadhaar or '',
@@ -749,6 +773,135 @@ def export_students_csv(request):
             'Yes' if s.is_verified else 'No',
             s.created_date.strftime('%d-%m-%Y %H:%M') if s.created_date else '',
         ])
+    return response
+
+
+@admin_login_required
+def export_students_excel(request):
+    """Export student list as an Excel (.xlsx) file with full details including Father & Mother name."""
+    from io import BytesIO
+    import openpyxl
+    from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+    from openpyxl.utils import get_column_letter
+
+    params = _students_filter_params(request)
+    if not params['program'] and not params['search']:
+        messages.warning(request, 'Please select a program before exporting Excel.')
+        return redirect('manage_students')
+
+    group_filter = _normalize_group_filter(params['group'], params['program'])
+    students = _filter_students_by_group(
+        _attach_admissions(
+            list(_get_students_queryset(params['search'], params['program'], params['verified']))
+        ),
+        group_filter,
+    )
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = 'Students'
+    ws.views.sheetView[0].showGridLines = True
+
+    headers = [
+        'Registration No',
+        'Full Name',
+        "Father's Name",
+        "Mother's Name",
+        'Email',
+        'Mobile',
+        'Aadhaar',
+        'Program',
+        'Subject Group',
+        'DSC Courses',
+        'Course',
+        'Selected Courses / Paper Name',
+        'Application No',
+        'Verified',
+        'Registered On',
+    ]
+
+    header_font = Font(name='Calibri', size=11, bold=True, color='FFFFFF')
+    header_fill = PatternFill(start_color='082B49', end_color='082B49', fill_type='solid')
+    header_alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+
+    thin_border = Border(
+        left=Side(style='thin', color='CBD5E1'),
+        right=Side(style='thin', color='CBD5E1'),
+        top=Side(style='thin', color='CBD5E1'),
+        bottom=Side(style='thin', color='CBD5E1'),
+    )
+
+    data_font = Font(name='Calibri', size=10)
+    data_align_left = Alignment(horizontal='left', vertical='center')
+    data_align_center = Alignment(horizontal='center', vertical='center')
+
+    ws.row_dimensions[1].height = 28
+    for col_idx, header in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col_idx, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = header_alignment
+        cell.border = thin_border
+
+    zebra_fill = PatternFill(start_color='F8FAFC', end_color='F8FAFC', fill_type='solid')
+
+    for row_idx, s in enumerate(students, 2):
+        admission = getattr(s, 'latest_admission', None)
+        father = getattr(s, 'father_name', '') or (admission.father_name if admission else '')
+        mother = getattr(s, 'mother_name', '') or (admission.mother_name if admission else '')
+
+        row_data = [
+            s.registration_no,
+            s.full_name,
+            father,
+            mother,
+            s.email or '',
+            s.mobile or '',
+            s.aadhaar or '',
+            s.program_type,
+            getattr(s, 'bsc_group_label', '') or '',
+            getattr(s, 'dsc_courses_display', '') or '',
+            s.course_name,
+            _format_selected_courses_for_export(s),
+            (admission.application_no if admission else '') or '',
+            'Yes' if s.is_verified else 'No',
+            s.created_date.strftime('%d-%m-%Y %H:%M') if s.created_date else '',
+        ]
+
+        ws.row_dimensions[row_idx].height = 22
+        fill_to_apply = zebra_fill if row_idx % 2 == 0 else PatternFill(fill_type=None)
+
+        for col_idx, value in enumerate(row_data, 1):
+            cell = ws.cell(row=row_idx, column=col_idx, value=value)
+            cell.font = data_font
+            cell.border = thin_border
+            if fill_to_apply.fill_type:
+                cell.fill = fill_to_apply
+
+            if col_idx in (1, 6, 7, 13, 14, 15):
+                cell.alignment = data_align_center
+            else:
+                cell.alignment = data_align_left
+
+    for col in ws.columns:
+        col_letter = get_column_letter(col[0].column)
+        max_len = 0
+        for cell in col:
+            val_str = str(cell.value or '')
+            if len(val_str) > max_len:
+                max_len = len(val_str)
+        ws.column_dimensions[col_letter].width = max(max_len + 3, 12)
+
+    output = BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    filename = f"Students_{params['program'] or 'All'}.xlsx".replace(' ', '_').replace('/', '_')
+    response = HttpResponse(
+        output.getvalue(),
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    )
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
     return response
 
 
@@ -1514,6 +1667,335 @@ def export_enrollments_excel(request):
         filename_parts.append(status_filter.lower())
     filename_parts.append(timezone.now().strftime('%Y%m%d'))
     filename = f"{'_'.join(filename_parts)}.xlsx"
+
+    response = HttpResponse(
+        buffer.getvalue(),
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    )
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    return response
+
+
+ATTENDANCE_MONTHS = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+]
+
+
+def _filter_attendance_students(program, course_id=None, verified='ALL', search=''):
+    """Fetch students for attendance sheet matching program and optional subject."""
+    if not program:
+        return [], None
+
+    students_qs = Student.objects.filter(program_type=program)
+    if verified == 'YES':
+        students_qs = students_qs.filter(is_verified=True)
+    elif verified == 'NO':
+        students_qs = students_qs.filter(is_verified=False)
+    if search:
+        students_qs = students_qs.filter(
+            Q(full_name__icontains=search) | Q(registration_no__icontains=search)
+        )
+
+    students = list(students_qs.order_by('registration_no', 'full_name'))
+    students = _attach_admissions(students)
+
+    selected_course = None
+    if course_id and str(course_id).strip() and str(course_id).strip() != 'ALL':
+        selected_course = ProgramCourse.objects.filter(pk=course_id).first()
+        if selected_course and not selected_course.is_compulsory:
+            filtered = []
+            for s in students:
+                takes = False
+                enr = getattr(s, 'latest_enrollment', None)
+                if enr and enr.selected_courses_json:
+                    try:
+                        data = json.loads(enr.selected_courses_json)
+                        c_list = data if isinstance(data, list) else (data.get('courses') or data.get('subjects') or [])
+                        for item in c_list:
+                            if isinstance(item, dict):
+                                if item.get('id') and str(item.get('id')) == str(selected_course.id):
+                                    takes = True
+                                    break
+                                if selected_course.course_code and (item.get('code') or item.get('course_code')):
+                                    if (item.get('code') or item.get('course_code')).strip().upper() == selected_course.course_code.strip().upper():
+                                        takes = True
+                                        break
+                                if selected_course.course_name and (item.get('name') or item.get('course_name')):
+                                    if (item.get('name') or item.get('course_name')).strip().lower() == selected_course.course_name.strip().lower():
+                                        takes = True
+                                        break
+                    except Exception:
+                        pass
+
+                if not takes:
+                    adm = getattr(s, 'latest_admission', None)
+                    if adm and adm.selected_subjects_json:
+                        try:
+                            items, _ = parse_selected_subjects_payload(adm.selected_subjects_json)
+                            for item in items:
+                                if isinstance(item, dict):
+                                    if item.get('id') and str(item.get('id')) == str(selected_course.id):
+                                        takes = True
+                                        break
+                                    if selected_course.course_code and (item.get('code') or item.get('course_code')):
+                                        if (item.get('code') or item.get('course_code')).strip().upper() == selected_course.course_code.strip().upper():
+                                            takes = True
+                                            break
+                                    if selected_course.course_name and (item.get('name') or item.get('course_name')):
+                                        if (item.get('name') or item.get('course_name')).strip().lower() in selected_course.course_name.strip().lower():
+                                            takes = True
+                                            break
+                        except Exception:
+                            pass
+
+                if takes:
+                    filtered.append(s)
+
+            if filtered:
+                students = filtered
+
+    return students, selected_course
+
+
+@admin_login_required
+def attendance_sheets(request):
+    """Admin module to preview and export Internal Assessment Attendance Sheets."""
+    now = timezone.now()
+    default_month = now.strftime('%B')
+    default_year = str(now.year)
+
+    program = request.GET.get('program', '').strip()
+    course_id = request.GET.get('course_id', '').strip()
+    month = request.GET.get('month', '').strip() or default_month
+    year = request.GET.get('year', '').strip() or default_year
+    assessment_title = request.GET.get('assessment_title', '').strip() or 'Internal Assessment'
+    verified = request.GET.get('verified', 'ALL').strip() or 'ALL'
+    search = request.GET.get('search', '').strip()
+
+    program_types = get_program_names()
+    available_courses = []
+    students = []
+    selected_course = None
+
+    if program:
+        available_courses = ProgramCourse.objects.filter(program_type=program).order_by('sort_order', 'course_code', 'course_name')
+        students, selected_course = _filter_attendance_students(program, course_id, verified, search)
+
+    years_list = [str(now.year - 1), str(now.year), str(now.year + 1)]
+
+    context = {
+        'program': program,
+        'course_id': course_id,
+        'selected_course': selected_course,
+        'month': month,
+        'year': year,
+        'assessment_title': assessment_title,
+        'verified': verified,
+        'search': search,
+        'program_types': program_types,
+        'available_courses': available_courses,
+        'students': students,
+        'total_students': len(students),
+        'months_list': ATTENDANCE_MONTHS,
+        'years_list': years_list,
+    }
+    return render(request, 'admin_panel/attendance_sheets.html', context)
+
+
+@admin_login_required
+def export_attendance_sheet_excel(request):
+    """Export Internal Assessment Attendance Sheet strictly formatted for A4 Paper printing."""
+    from io import BytesIO
+    import openpyxl
+    from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+
+    now = timezone.now()
+    program = request.GET.get('program', '').strip()
+    if not program:
+        messages.warning(request, 'Please select a program before exporting attendance sheet.')
+        return redirect('attendance_sheets')
+
+    course_id = request.GET.get('course_id', '').strip()
+    month = request.GET.get('month', '').strip() or now.strftime('%B')
+    year = request.GET.get('year', '').strip() or str(now.year)
+    assessment_title = request.GET.get('assessment_title', '').strip() or 'Internal Assessment'
+    verified = request.GET.get('verified', 'ALL').strip() or 'ALL'
+    search = request.GET.get('search', '').strip()
+
+    students, selected_course = _filter_attendance_students(program, course_id, verified, search)
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Attendance Sheet"
+
+    # Strict A4 Page Setup
+    ws.page_setup.paperSize = ws.PAPERSIZE_A4
+    ws.page_setup.orientation = ws.ORIENTATION_PORTRAIT
+    ws.sheet_properties.pageSetUpPr.fitToPage = True
+    ws.page_setup.fitToWidth = 1
+    ws.page_setup.fitToHeight = 0
+    ws.page_margins.left = 0.5
+    ws.page_margins.right = 0.5
+    ws.page_margins.top = 0.6
+    ws.page_margins.bottom = 0.6
+    ws.print_options.horizontalCentered = True
+    ws.views.sheetView[0].showGridLines = True
+    ws.print_title_rows = '1:7'
+
+    thin_side = Side(style='thin', color='334155')
+    cell_border = Border(left=thin_side, right=thin_side, top=thin_side, bottom=thin_side)
+    thick_bottom_side = Side(style='medium', color='082B49')
+
+    # Row 1: College Name
+    ws.merge_cells('A1:E1')
+    c1 = ws['A1']
+    c1.value = "CHAITANYA SCIENCE AND ARTS COLLEGE, PAMGARH"
+    c1.font = Font(name='Calibri', size=15, bold=True, color='082B49')
+    c1.alignment = Alignment(horizontal='center', vertical='center')
+    ws.row_dimensions[1].height = 26
+
+    # Row 2: Sub-affiliation
+    ws.merge_cells('A2:E2')
+    c2 = ws['A2']
+    c2.value = "(An Autonomous Institution Approved by UGC | Affiliated to SNPV, Raigarh)"
+    c2.font = Font(name='Calibri', size=9.5, italic=True, color='475569')
+    c2.alignment = Alignment(horizontal='center', vertical='center')
+    ws.row_dimensions[2].height = 18
+
+    # Row 3: Assessment Title & Month/Year
+    ws.merge_cells('A3:E3')
+    c3 = ws['A3']
+    c3.value = f"{assessment_title.upper()} ATTENDANCE SHEET — {month.upper()} {year}"
+    c3.font = Font(name='Calibri', size=12, bold=True, color='0F172A')
+    c3.fill = PatternFill('solid', fgColor='F1F5F9')
+    c3.alignment = Alignment(horizontal='center', vertical='center')
+    ws.row_dimensions[3].height = 23
+    for col in range(1, 6):
+        cell = ws.cell(row=3, column=col)
+        cell.border = Border(top=thin_side, bottom=thin_side)
+
+    # Row 4: Program & Session/Date
+    ws.merge_cells('A4:C4')
+    c4a = ws['A4']
+    c4a.value = f"Class / Program: {program}"
+    c4a.font = Font(name='Calibri', size=10.5, bold=True, color='1E293B')
+    c4a.alignment = Alignment(horizontal='left', vertical='center')
+
+    ws.merge_cells('D4:E4')
+    c4b = ws['D4']
+    c4b.value = "Session: 2026-27   |   Date: ______________"
+    c4b.font = Font(name='Calibri', size=10, color='334155')
+    c4b.alignment = Alignment(horizontal='right', vertical='center')
+    ws.row_dimensions[4].height = 20
+
+    # Row 5: Subject line (subject-wise vs general)
+    ws.merge_cells('A5:E5')
+    c5 = ws['A5']
+    if selected_course:
+        c_code = selected_course.course_code or '—'
+        c_paper = f" | Paper: {selected_course.paper_no}" if selected_course.paper_no else ""
+        c5.value = f"Subject / Course: {selected_course.course_name} (Code: {c_code}{c_paper})"
+        c5.font = Font(name='Calibri', size=11, bold=True, color='082B49')
+        c5.fill = PatternFill('solid', fgColor='E0F2FE')
+    else:
+        c5.value = "Class Attendance Sheet (All Enrolled Subjects / General)"
+        c5.font = Font(name='Calibri', size=10.5, italic=True, color='475569')
+        c5.fill = PatternFill('solid', fgColor='F8FAFC')
+    c5.alignment = Alignment(horizontal='left', vertical='center', indent=1)
+    ws.row_dimensions[5].height = 22
+    for col in range(1, 6):
+        ws.cell(row=5, column=col).border = Border(top=thin_side, bottom=thin_side)
+
+    # Row 6: Spacer
+    ws.row_dimensions[6].height = 6
+
+    # Row 7: Table Headers
+    headers = ['Sn', 'Student ID', 'NAME', 'Father Name', 'Signature']
+    header_font = Font(name='Calibri', size=11, bold=True, color='FFFFFF')
+    header_fill = PatternFill('solid', fgColor='082B49')
+    header_align = Alignment(horizontal='center', vertical='center')
+
+    ws.row_dimensions[7].height = 26
+    for col_idx, h in enumerate(headers, start=1):
+        cell = ws.cell(row=7, column=col_idx, value=h)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = header_align
+        cell.border = Border(left=thin_side, right=thin_side, top=thin_side, bottom=thick_bottom_side)
+
+    # Data Rows
+    zebra_fill = PatternFill('solid', fgColor='F8FAFC')
+    row_num = 8
+    for idx, s in enumerate(students, start=1):
+        ws.row_dimensions[row_num].height = 28  # Generous height for signing!
+        fill_to_apply = zebra_fill if idx % 2 == 0 else PatternFill(fill_type=None)
+
+        # Sn
+        c_sn = ws.cell(row=row_num, column=1, value=idx)
+        c_sn.alignment = Alignment(horizontal='center', vertical='center')
+        c_sn.font = Font(name='Calibri', size=10)
+
+        # Student ID
+        c_id = ws.cell(row=row_num, column=2, value=s.registration_no)
+        c_id.alignment = Alignment(horizontal='center', vertical='center')
+        c_id.font = Font(name='Calibri', size=10, bold=True)
+
+        # NAME
+        c_name = ws.cell(row=row_num, column=3, value=s.full_name)
+        c_name.alignment = Alignment(horizontal='left', vertical='center', indent=1)
+        c_name.font = Font(name='Calibri', size=10, bold=True)
+
+        # Father Name
+        father = getattr(s, 'father_name', '')
+        if not father and getattr(s, 'latest_admission', None):
+            father = s.latest_admission.father_name or ''
+        c_father = ws.cell(row=row_num, column=4, value=father or '—')
+        c_father.alignment = Alignment(horizontal='left', vertical='center', indent=1)
+        c_father.font = Font(name='Calibri', size=10)
+
+        # Signature (Blank for physical handwriting)
+        c_sig = ws.cell(row=row_num, column=5, value="")
+        c_sig.alignment = Alignment(horizontal='center', vertical='center')
+
+        for col_idx in range(1, 6):
+            cell = ws.cell(row=row_num, column=col_idx)
+            cell.border = cell_border
+            if fill_to_apply.fill_type:
+                cell.fill = fill_to_apply
+
+        row_num += 1
+
+    # Spacer row
+    ws.row_dimensions[row_num].height = 10
+    row_num += 1
+
+    # Footer summary row
+    ws.row_dimensions[row_num].height = 28
+    ws.merge_cells(start_row=row_num, start_column=1, end_row=row_num, end_column=3)
+    c_f1 = ws.cell(row=row_num, column=1, value=f"Total Students: {len(students)}       Present: _________       Absent: _________")
+    c_f1.font = Font(name='Calibri', size=10, bold=True, color='082B49')
+    c_f1.alignment = Alignment(horizontal='left', vertical='center')
+
+    ws.merge_cells(start_row=row_num, start_column=4, end_row=row_num, end_column=5)
+    c_f2 = ws.cell(row=row_num, column=4, value="Signature of Subject Teacher / Invigilator: __________________")
+    c_f2.font = Font(name='Calibri', size=10, bold=True, color='082B49')
+    c_f2.alignment = Alignment(horizontal='right', vertical='center')
+
+    # Column widths formatted for A4 Portrait print
+    ws.column_dimensions['A'].width = 6.5
+    ws.column_dimensions['B'].width = 17.5
+    ws.column_dimensions['C'].width = 28.5
+    ws.column_dimensions['D'].width = 28.5
+    ws.column_dimensions['E'].width = 26.5
+
+    buffer = BytesIO()
+    wb.save(buffer)
+    buffer.seek(0)
+
+    prog_clean = re.sub(r'[^\w\-]+', '_', program).strip('_')
+    sub_clean = f"_{re.sub(r'[^\w\-]+', '_', selected_course.course_name).strip('_')}" if selected_course else ""
+    filename = f"Attendance_{prog_clean}{sub_clean}_{month}_{year}.xlsx"
 
     response = HttpResponse(
         buffer.getvalue(),

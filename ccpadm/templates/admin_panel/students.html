@@ -9,7 +9,10 @@
             <h2 class="page-title"><i class="fas fa-users"></i> Registered Students</h2>
             <nav class="page-actions page-actions--toolbar" aria-label="Admin navigation">
                 {% include 'partials/admin_nav_actions.html' with active_page='students' %}
-                <a href="{% url 'export_students_csv' %}?search={{ search|urlencode }}&program={{ program_filter|urlencode }}&verified={{ verified_filter|urlencode }}&group={{ group_filter|urlencode }}" class="page-action-btn page-action-btn--accent">
+                <a href="{% url 'export_students_excel' %}?search={{ search|urlencode }}&program={{ program_filter|urlencode }}&verified={{ verified_filter|urlencode }}&group={{ group_filter|urlencode }}" class="page-action-btn page-action-btn--accent" title="Export as Excel spreadsheet (.xlsx)">
+                    <i class="fas fa-file-excel" aria-hidden="true"></i><span>Export Excel</span>
+                </a>
+                <a href="{% url 'export_students_csv' %}?search={{ search|urlencode }}&program={{ program_filter|urlencode }}&verified={{ verified_filter|urlencode }}&group={{ group_filter|urlencode }}" class="page-action-btn" title="Export as CSV">
                     <i class="fas fa-file-csv" aria-hidden="true"></i><span>Export CSV</span>
                 </a>
                 {% include 'partials/admin_nav_logout.html' %}

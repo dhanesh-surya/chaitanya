@@ -281,7 +281,7 @@
                             <option value="ALL" {% if not course_id or course_id == 'ALL' %}selected{% endif %}>-- All Subjects (General Attendance / Whole Class) --</option>
                             {% for c in available_courses %}
                             <option value="{{ c.id }}" {% if course_id == c.id|stringformat:"s" %}selected{% endif %}>
-                                {{ c.course_name }} {% if c.course_code %}({{ c.course_code }}){% endif %} {% if c.paper_no %}[Paper {{ c.paper_no }}]{% endif %}
+                                {% if c.department %}{{ c.department }} - {% endif %}{{ c.course_name }}
                             </option>
                             {% endfor %}
                         </select>
@@ -359,9 +359,7 @@
             <!-- SUBJECT BANNER -->
             {% if selected_course %}
             <div class="sheet-subject-banner">
-                <i class="fas fa-book-open"></i> <strong>Subject / Course:</strong> {{ selected_course.course_name }}
-                {% if selected_course.course_code %}&nbsp;[Code: <strong>{{ selected_course.course_code }}</strong>]{% endif %}
-                {% if selected_course.paper_no %}&nbsp;[Paper: <strong>{{ selected_course.paper_no }}</strong>]{% endif %}
+                <i class="fas fa-book-open"></i> <strong>Subject / Course:</strong> {% if selected_course.department %}{{ selected_course.department }} - {% endif %}{{ selected_course.course_name }}
             </div>
             {% else %}
             <div class="sheet-subject-banner" style="background: #f8fafc; border-left-color: #64748b; color: #475569;">

@@ -635,6 +635,53 @@ class ExportEnrollmentsExcelTestCase(TestCase):
         self.assertIn('Hindi Sahitya', ws_subj['A5'].value)
         self.assertIn('HNSC-101', ws_subj['A5'].value)
 
+    def test_attendance_sheets_dropdown_and_geography_filtering(self):
+        """Verify course dropdown shows 'Department - Course Name' without code, and Geography DSC theory matches admitted students."""
+        import json
+        from courses.models import ProgramCourse
+        from admissions.models import StudentAdmission
+
+        geo_course = ProgramCourse.objects.create(
+            program_type='B.A. First Semester',
+            department='Geography',
+            course_name='Fundamental of Physical Geography',
+            course_code='GOSC-01T',
+            course_type_1='Theory',
+            is_compulsory=False,
+        )
+
+        # Student opting for Geography in admission
+        StudentAdmission.objects.create(
+            reg_no=self.student_m.registration_no,
+            full_name=self.student_m.full_name,
+            father_name='Ramesh Sahu',
+            program_type='B.A. First Semester',
+            status='Submitted',
+            selected_subjects_json=json.dumps([
+                {"name": "Geography — Fundamental of Physical Geography", "type1": "Theory", "type2": "DSC"},
+                {"name": "Political Science — Introduction to Political Theory", "type1": "Theory", "type2": "DSC"},
+            ]),
+        )
+
+        self._login_admin()
+
+        # 1. Check web preview dropdown formatting
+        resp = self.client.get(reverse('attendance_sheets') + '?program=B.A.+First+Semester&course_id=ALL')
+        self.assertEqual(resp.status_code, 200)
+        content = resp.content.decode('utf-8')
+        # Dropdown must display Department - Course Name
+        self.assertIn('Geography - Fundamental of Physical Geography', content)
+        # Dropdown must NOT display course code
+        self.assertNotIn('(GOSC-01T)', content)
+
+        # 2. Filter by Geography Theory course
+        resp_geo = self.client.get(reverse('attendance_sheets') + f'?program=B.A.+First+Semester&course_id={geo_course.id}')
+        self.assertEqual(resp_geo.status_code, 200)
+        geo_content = resp_geo.content.decode('utf-8')
+        self.assertIn(self.student_m.registration_no, geo_content)
+        self.assertIn('Rohan Sahu', geo_content)
+        self.assertIn('Ramesh Sahu', geo_content)
+
 
 
 

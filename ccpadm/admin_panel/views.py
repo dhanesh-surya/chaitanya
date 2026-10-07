@@ -1682,12 +1682,115 @@ ATTENDANCE_MONTHS = [
 ]
 
 
+def _normalize_attendance_str(text):
+    if not text:
+        return ''
+    return re.sub(r'[^\w]+', '', str(text).lower())
+
+
+def _course_item_matches(item, selected_course):
+    """Check if a subject dict from admission or enrollment JSON matches the ProgramCourse."""
+    if not isinstance(item, dict):
+        return False
+
+    # 1. Direct ID match
+    item_id = str(item.get('id') or '').strip()
+    if item_id and item_id == str(selected_course.id):
+        return True
+
+    # 2. Course code match
+    selected_code = _normalize_attendance_str(selected_course.course_code)
+    item_code = _normalize_attendance_str(item.get('code') or item.get('course_code') or '')
+    if selected_code and item_code and selected_code == item_code:
+        return True
+
+    # 3. Type check (Theory vs Practical)
+    c_type1 = (selected_course.course_type_1 or '').strip().lower()
+    item_type1 = (item.get('type1') or item.get('type_1') or '').strip().lower()
+    if c_type1 and item_type1:
+        is_c_pract = ('pract' in c_type1 or 'lab' in c_type1)
+        is_it_pract = ('pract' in item_type1 or 'lab' in item_type1)
+        if is_c_pract != is_it_pract:
+            return False
+
+    # 4. Name and Department match
+    item_name = (item.get('name') or item.get('course_name') or '').strip()
+    item_dept = (item.get('dept') or item.get('department') or '').strip()
+    c_name = (selected_course.course_name or '').strip()
+    c_dept = (selected_course.department or '').strip()
+
+    # Split department prefix in item_name if present (e.g. "Geography — Fundamental of Physical Geography")
+    if ' — ' in item_name:
+        parts = item_name.split(' — ', 1)
+        item_dept = item_dept or parts[0].strip()
+        item_cname = parts[1].strip()
+    elif ' - ' in item_name:
+        parts = item_name.split(' - ', 1)
+        item_dept = item_dept or parts[0].strip()
+        item_cname = parts[1].strip()
+    else:
+        item_cname = item_name
+
+    norm_c_name = _normalize_attendance_str(c_name)
+    norm_it_cname = _normalize_attendance_str(item_cname)
+    norm_it_full = _normalize_attendance_str(item_name)
+
+    if norm_c_name and (norm_c_name in norm_it_full or norm_it_cname in norm_c_name or norm_c_name in norm_it_cname):
+        return True
+
+    # Hindi script matching support
+    if c_dept.lower() == 'hindi' and (item_dept.lower() == 'hindi' or 'hindi' in item_name.lower()):
+        if 'sahitya' in norm_c_name and ('साहित्य' in item_name or 'sahitya' in norm_it_full):
+            return True
+        if 'language' in norm_c_name and ('language' in norm_it_full or 'भाषा' in item_name):
+            return True
+
+    return False
+
+
+def _student_takes_course(student, selected_course):
+    """Determine whether student took selected_course from their enrollment or admission."""
+    # Check enrollment first
+    enr = getattr(student, 'latest_enrollment', None)
+    if enr and enr.selected_courses_json:
+        try:
+            data = json.loads(enr.selected_courses_json)
+            c_list = data if isinstance(data, list) else (data.get('courses') or data.get('subjects') or [])
+            for it in c_list:
+                if _course_item_matches(it, selected_course):
+                    return True
+        except Exception:
+            pass
+
+    # Check admission
+    adm = getattr(student, 'latest_admission', None)
+    if adm and adm.selected_subjects_json:
+        try:
+            items, _ = parse_selected_subjects_payload(adm.selected_subjects_json)
+            for it in items:
+                if _course_item_matches(it, selected_course):
+                    return True
+        except Exception:
+            pass
+
+    return False
+
+
 def _filter_attendance_students(program, course_id=None, verified='ALL', search=''):
-    """Fetch students for attendance sheet matching program and optional subject."""
+    """Fetch admitted students for attendance sheet matching program and optional subject."""
     if not program:
         return [], None
 
-    students_qs = Student.objects.filter(program_type=program)
+    # Admitted students matching program either via Student or StudentAdmission
+    adm_reg_nos = list(
+        StudentAdmission.objects.filter(program_type=program)
+        .exclude(status='Rejected')
+        .values_list('reg_no', flat=True)
+    )
+
+    students_qs = Student.objects.filter(
+        Q(program_type=program) | Q(registration_no__in=adm_reg_nos)
+    )
     if verified == 'YES':
         students_qs = students_qs.filter(is_verified=True)
     elif verified == 'NO':
@@ -1700,60 +1803,17 @@ def _filter_attendance_students(program, course_id=None, verified='ALL', search=
     students = list(students_qs.order_by('registration_no', 'full_name'))
     students = _attach_admissions(students)
 
+    # Exclude students whose admission was explicitly rejected
+    students = [
+        s for s in students
+        if not getattr(s, 'latest_admission', None) or s.latest_admission.status != 'Rejected'
+    ]
+
     selected_course = None
     if course_id and str(course_id).strip() and str(course_id).strip() != 'ALL':
         selected_course = ProgramCourse.objects.filter(pk=course_id).first()
         if selected_course and not selected_course.is_compulsory:
-            filtered = []
-            for s in students:
-                takes = False
-                enr = getattr(s, 'latest_enrollment', None)
-                if enr and enr.selected_courses_json:
-                    try:
-                        data = json.loads(enr.selected_courses_json)
-                        c_list = data if isinstance(data, list) else (data.get('courses') or data.get('subjects') or [])
-                        for item in c_list:
-                            if isinstance(item, dict):
-                                if item.get('id') and str(item.get('id')) == str(selected_course.id):
-                                    takes = True
-                                    break
-                                if selected_course.course_code and (item.get('code') or item.get('course_code')):
-                                    if (item.get('code') or item.get('course_code')).strip().upper() == selected_course.course_code.strip().upper():
-                                        takes = True
-                                        break
-                                if selected_course.course_name and (item.get('name') or item.get('course_name')):
-                                    if (item.get('name') or item.get('course_name')).strip().lower() == selected_course.course_name.strip().lower():
-                                        takes = True
-                                        break
-                    except Exception:
-                        pass
-
-                if not takes:
-                    adm = getattr(s, 'latest_admission', None)
-                    if adm and adm.selected_subjects_json:
-                        try:
-                            items, _ = parse_selected_subjects_payload(adm.selected_subjects_json)
-                            for item in items:
-                                if isinstance(item, dict):
-                                    if item.get('id') and str(item.get('id')) == str(selected_course.id):
-                                        takes = True
-                                        break
-                                    if selected_course.course_code and (item.get('code') or item.get('course_code')):
-                                        if (item.get('code') or item.get('course_code')).strip().upper() == selected_course.course_code.strip().upper():
-                                            takes = True
-                                            break
-                                    if selected_course.course_name and (item.get('name') or item.get('course_name')):
-                                        if (item.get('name') or item.get('course_name')).strip().lower() in selected_course.course_name.strip().lower():
-                                            takes = True
-                                            break
-                        except Exception:
-                            pass
-
-                if takes:
-                    filtered.append(s)
-
-            if filtered:
-                students = filtered
+            students = [s for s in students if _student_takes_course(s, selected_course)]
 
     return students, selected_course
 
@@ -1779,7 +1839,12 @@ def attendance_sheets(request):
     selected_course = None
 
     if program:
-        available_courses = ProgramCourse.objects.filter(program_type=program).order_by('sort_order', 'course_code', 'course_name')
+        available_courses = ProgramCourse.objects.filter(program_type=program).order_by('department', 'course_name', 'sort_order')
+        if not available_courses.exists():
+            base_prog = program.replace(' - First Semester', '').replace(' First Semester', '').strip()
+            available_courses = ProgramCourse.objects.filter(
+                Q(program_type=base_prog) | Q(program_type__istartswith=base_prog)
+            ).order_by('department', 'course_name', 'sort_order')
         students, selected_course = _filter_attendance_students(program, course_id, verified, search)
 
     years_list = [str(now.year - 1), str(now.year), str(now.year + 1)]
@@ -1893,9 +1958,9 @@ def export_attendance_sheet_excel(request):
     ws.merge_cells('A5:E5')
     c5 = ws['A5']
     if selected_course:
-        c_code = selected_course.course_code or '—'
-        c_paper = f" | Paper: {selected_course.paper_no}" if selected_course.paper_no else ""
-        c5.value = f"Subject / Course: {selected_course.course_name} (Code: {c_code}{c_paper})"
+        course_label = f"{selected_course.department} - {selected_course.course_name}" if selected_course.department else selected_course.course_name
+        code_part = f" (Code: {selected_course.course_code})" if selected_course.course_code else ""
+        c5.value = f"Subject / Course: {course_label}{code_part}"
         c5.font = Font(name='Calibri', size=11, bold=True, color='082B49')
         c5.fill = PatternFill('solid', fgColor='E0F2FE')
     else:

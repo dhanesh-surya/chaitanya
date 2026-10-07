@@ -1089,6 +1089,7 @@ def manage_enrollments(request):
             | Q(enrollment_no__icontains=search)
             | Q(mobile__icontains=search)
             | Q(email__icontains=search)
+            | Q(transaction_id__icontains=search)
         )
 
     if program_filter:
@@ -1411,9 +1412,9 @@ def _format_enrollment_gender(gender_val):
         return ''
     g = str(gender_val).strip().lower()
     if g.startswith('m') or g in ('1', 'male'):
-        return 1
+        return 'M'
     elif g.startswith('f') or g in ('0', 'female'):
-        return 0
+        return 'F'
     return gender_val
 
 
@@ -1535,6 +1536,7 @@ def build_enrollment_export_row(enrollment):
     class_name = enrollment.program_type or ''
     subject_codes = _format_enrollment_subject_codes(enrollment)
     subjects = _format_enrollment_subjects(enrollment)
+    utr_no = (enrollment.transaction_id or getattr(adm, 'transaction_id', '') or '').strip()
 
     return [
         admission_no,
@@ -1551,6 +1553,7 @@ def build_enrollment_export_row(enrollment):
         class_name,
         subject_codes,
         subjects,
+        utr_no,
     ]
 
 
@@ -1578,6 +1581,7 @@ def export_enrollments_excel(request):
             | Q(enrollment_no__icontains=search)
             | Q(mobile__icontains=search)
             | Q(email__icontains=search)
+            | Q(transaction_id__icontains=search)
         )
 
     if program_filter:
@@ -1601,13 +1605,14 @@ def export_enrollments_excel(request):
         'MotherName',
         'Medium',
         'Category',
-        'Gender (MALE-1 ,FEMALE-0)',
+        'Gender',
         'DOB (MM/DD/YYYY)',
         'Address',
         'Mobile',
         'CLASS NAME',
         'SUBJECT CODE',
         'SUBJECTS',
+        'UTR No',
     ]
 
     header_font = Font(name='Calibri', size=11, bold=True, color='FFFFFF')
@@ -1637,7 +1642,7 @@ def export_enrollments_excel(request):
             cell = ws.cell(row=row_num, column=col_idx, value=val)
             cell.font = Font(name='Calibri', size=10)
             cell.border = thin_border
-            if col_idx in (8, 9, 11):  # Gender, DOB, Mobile
+            if col_idx in (8, 9, 11, 15):  # Gender, DOB, Mobile, UTR No
                 cell.alignment = center_align
             else:
                 cell.alignment = left_align
@@ -1654,6 +1659,8 @@ def export_enrollments_excel(request):
         ws.column_dimensions['M'].width = min(max(ws.column_dimensions['M'].width, 24), 45)
     if ws.column_dimensions.get('N'):
         ws.column_dimensions['N'].width = min(max(ws.column_dimensions['N'].width, 35), 65)
+    if ws.column_dimensions.get('O'):
+        ws.column_dimensions['O'].width = min(max(ws.column_dimensions['O'].width, 18), 32)
 
     buffer = BytesIO()
     wb.save(buffer)

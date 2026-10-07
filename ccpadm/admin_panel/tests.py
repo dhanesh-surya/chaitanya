@@ -288,6 +288,7 @@ class ExportEnrollmentsExcelTestCase(TestCase):
             perm_state='Chhattisgarh',
             perm_pin_code='495554',
             program_type='B.A. First Semester',
+            transaction_id='UTR998877665544',
             status='Approved',
             is_submitted=True,
             selected_courses_json=json.dumps([
@@ -321,6 +322,7 @@ class ExportEnrollmentsExcelTestCase(TestCase):
             perm_state='Chhattisgarh',
             perm_pin_code='495001',
             program_type='B.Sc. First Semester',
+            transaction_id='UTR123456789012',
             status='Submitted',
             is_submitted=True,
             selected_courses_json=json.dumps({
@@ -368,13 +370,14 @@ class ExportEnrollmentsExcelTestCase(TestCase):
             'MotherName',
             'Medium',
             'Category',
-            'Gender (MALE-1 ,FEMALE-0)',
+            'Gender',
             'DOB (MM/DD/YYYY)',
             'Address',
             'Mobile',
             'CLASS NAME',
             'SUBJECT CODE',
             'SUBJECTS',
+            'UTR No',
         ]
         actual_headers = [ws.cell(row=1, column=col).value for col in range(1, len(expected_headers) + 1)]
         self.assertEqual(actual_headers, expected_headers)
@@ -391,7 +394,7 @@ class ExportEnrollmentsExcelTestCase(TestCase):
         self.assertEqual(rohan_row[4], 'Savitri Sahu')  # MotherName
         self.assertEqual(rohan_row[5], 'Hindi')  # Medium
         self.assertEqual(rohan_row[6], 'OBC')  # Category
-        self.assertEqual(rohan_row[7], 1)  # Gender: MALE-1
+        self.assertEqual(rohan_row[7], 'M')  # Gender: M for Male
         self.assertEqual(rohan_row[8], '04/15/2003')  # DOB: MM/DD/YYYY
         self.assertIn('Pamgarh', rohan_row[9])  # Address
         self.assertEqual(rohan_row[10], '9876543210')  # Mobile
@@ -400,16 +403,18 @@ class ExportEnrollmentsExcelTestCase(TestCase):
         self.assertIn('HISC-01', rohan_row[12])
         self.assertIn('Hindi Sahitya Ka Itihas', rohan_row[13])  # SUBJECTS
         self.assertIn('Ancient Indian History', rohan_row[13])
+        self.assertEqual(rohan_row[14], 'UTR998877665544')  # UTR No
 
         # Find row for Kavita Patel (Female)
         kavita_row = next(r for r in rows if r[2] == 'Kavita Patel')
         self.assertEqual(kavita_row[1], 'CCP26059002')  # Univ_EnrolNo
-        self.assertEqual(kavita_row[7], 0)  # Gender: FEMALE-0
+        self.assertEqual(kavita_row[7], 'F')  # Gender: F for Female
         self.assertEqual(kavita_row[8], '10/22/2004')  # DOB: MM/DD/YYYY
         self.assertEqual(kavita_row[11], 'B.Sc. First Semester')  # CLASS NAME
         self.assertIn('CHSC-01T', kavita_row[12])  # SUBJECT CODE
         self.assertIn('BOSC-01T', kavita_row[12])
         self.assertIn('Fundamental Chemistry-I', kavita_row[13])  # SUBJECTS
+        self.assertEqual(kavita_row[14], 'UTR123456789012')  # UTR No
 
     def test_export_enrollments_excel_filtering(self):
         from io import BytesIO
@@ -427,6 +432,27 @@ class ExportEnrollmentsExcelTestCase(TestCase):
         self.assertTrue(all(r[11] == 'B.A. First Semester' for r in rows))
         self.assertTrue(any(r[2] == 'Rohan Sahu' for r in rows))
         self.assertFalse(any(r[2] == 'Kavita Patel' for r in rows))
+
+    def test_search_enrollments_by_utr_in_manager_and_export(self):
+        from io import BytesIO
+        import openpyxl
+
+        self._login_admin()
+        # Search by UTR in manage_enrollments
+        resp = self.client.get(reverse('manage_enrollments') + '?search=UTR998877665544')
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, 'Rohan Sahu')
+        self.assertNotContains(resp, 'Kavita Patel')
+
+        # Search by UTR in export_enrollments_excel
+        export_resp = self.client.get(reverse('export_enrollments_excel') + '?search=UTR998877665544')
+        self.assertEqual(export_resp.status_code, 200)
+        wb = openpyxl.load_workbook(BytesIO(export_resp.content))
+        ws = wb.active
+        rows = list(ws.iter_rows(min_row=2, values_only=True))
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0][2], 'Rohan Sahu')
+        self.assertEqual(rows[0][14], 'UTR998877665544')
 
     def test_manage_enrollments_has_edit_button(self):
         self._login_admin()

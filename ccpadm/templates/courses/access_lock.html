@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}Course Management Access Lock — Chaitanya College{% endblock %}
+
+{% block content %}
+<div class="portal-center" style="min-height: 72vh; display: flex; align-items: center; justify-content: center; padding: 24px 16px;">
+    <div class="glass-card glass-card--medium" style="max-width: 480px; width: 100%; border-radius: 16px; box-shadow: 0 12px 36px rgba(8, 43, 73, 0.14); border: 1px solid #e2e8f0; background: #ffffff; padding: 36px 30px; text-align: center;">
+
+        <!-- Security Lock Icon -->
+        <div style="width: 76px; height: 76px; margin: 0 auto 18px; border-radius: 50%; background: linear-gradient(135deg, #082B49, #1b4d75); display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 18px rgba(8, 43, 73, 0.22);">
+            <i class="fas fa-lock" style="font-size: 34px; color: #f59e0b;"></i>
+        </div>
+
+        <h2 style="font-size: 1.45rem; font-weight: 800; color: #082B49; margin-bottom: 6px; letter-spacing: -0.3px;">
+            Course Management Access
+        </h2>
+        <p style="font-size: 13.5px; color: #64748b; margin-bottom: 22px; line-height: 1.55;">
+            पाठ्यक्रम प्रबंधन सुरक्षित है। इस पृष्ठ पर प्रवेश हेतु सुरक्षा पासवर्ड दर्ज करें।<br>
+            <span style="font-size: 12px; color: #94a3b8;">(Security verification required to view and modify course curriculum)</span>
+        </p>
+
+        {% if error %}
+        <div class="alert alert-danger" style="background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; padding: 11px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; text-align: left;">
+            <i class="fas fa-exclamation-triangle" style="font-size: 16px; flex-shrink: 0;"></i>
+            <span>{{ error }}</span>
+        </div>
+        {% endif %}
+
+        <form method="post" action="{{ target_url|default:request.get_full_path }}" id="courseLockForm" style="text-align: left;">
+            {% csrf_token %}
+            <div class="form-field" style="margin-bottom: 20px;">
+                <label for="courses_password" style="font-size: 13px; font-weight: 700; color: #1e293b; margin-bottom: 7px; display: block;">
+                    <i class="fas fa-key me-1 text-primary"></i> Enter Password / पासवर्ड दर्ज करें *
+                </label>
+                <div style="position: relative;">
+                    <input type="password" id="courses_password" name="courses_password" class="portal-input" placeholder="Enter security password" required autofocus autocomplete="current-password" style="width: 100%; padding-right: 42px; font-size: 14px; height: 44px; border-radius: 8px; border: 1.5px solid #cbd5e1; box-sizing: border-box;">
+                    <button type="button" id="togglePasswordBtn" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #64748b; cursor: pointer; padding: 6px;" title="Show/Hide Password" aria-label="Toggle password visibility">
+                        <i class="fas fa-eye" id="togglePasswordIcon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block" style="width: 100%; height: 44px; font-size: 14.5px; font-weight: 700; border-radius: 8px; background: #082B49; border-color: #082B49; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(8, 43, 73, 0.2); cursor: pointer;">
+                <i class="fas fa-unlock-alt"></i> Unlock Access &rarr;
+            </button>
+        </form>
+
+        <div style="margin-top: 24px; padding-top: 18px; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
+            <a href="{% url 'admin_dashboard' %}" class="link-text" style="color: #64748b; font-size: 13px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+            <a href="{% url 'home' %}" class="link-text" style="color: #64748b; font-size: 13px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                <i class="fas fa-home"></i> Home
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const passwordInput = document.getElementById('courses_password');
+        const toggleBtn = document.getElementById('togglePasswordBtn');
+        const toggleIcon = document.getElementById('togglePasswordIcon');
+
+        if (toggleBtn && passwordInput && toggleIcon) {
+            toggleBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    toggleIcon.classList.remove('fa-eye');
+                    toggleIcon.classList.add('fa-eye-slash');
+                } else {
+                    passwordInput.type = 'password';
+                    toggleIcon.classList.remove('fa-eye-slash');
+                    toggleIcon.classList.add('fa-eye');
+                }
+                passwordInput.focus();
+            });
+        }
+    });
+</script>
+{% endblock %}

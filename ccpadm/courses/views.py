@@ -1,3 +1,5 @@
+from functools import wraps
+
 from django.contrib import messages
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
@@ -82,7 +84,67 @@ def _manage_programs_url(params=None, edit_pk=None):
     return f'{base}?{urlencode(query)}'
 
 
+COURSES_MANAGE_PASSWORD = 'dns@2026'
+
+
+def courses_password_required(view_func):
+    """
+    Ensure the admin has entered the specific security password ('dns@2026')
+    to access course management. Unlocks for the session once verified.
+    """
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if not request.session.get('admin_user'):
+            return redirect('admin_login')
+
+        if not request.session.get('courses_manage_unlocked'):
+            if request.method == 'POST' and 'courses_password' in request.POST:
+                entered = request.POST.get('courses_password', '').strip()
+                if entered == COURSES_MANAGE_PASSWORD:
+                    request.session['courses_manage_unlocked'] = True
+                    messages.success(request, 'Course management unlocked successfully.')
+                    return redirect(request.get_full_path())
+                else:
+                    return render(request, 'courses/access_lock.html', {
+                        'error': 'Incorrect password. Access denied. (गलत पासवर्ड, कृपया पुनः प्रयास करें।)',
+                        'target_url': request.get_full_path(),
+                    })
+            return render(request, 'courses/access_lock.html', {
+                'target_url': request.get_full_path(),
+            })
+
+        return view_func(request, *args, **kwargs)
+
+    return wrapper
+
+
+def courses_mutation_guard(view_func):
+    """
+    Protect action views (add, edit, delete course, etc.) requiring the
+    course management password to be unlocked first.
+    """
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if not request.session.get('admin_user'):
+            return redirect('admin_login')
+        if not request.session.get('courses_manage_unlocked'):
+            messages.error(request, 'Please enter the course management password first.')
+            return redirect('manage_courses')
+        return view_func(request, *args, **kwargs)
+
+    return wrapper
+
+
 @admin_login_required
+def lock_courses(request):
+    """Re-lock course management so it prompts for password again."""
+    request.session.pop('courses_manage_unlocked', None)
+    messages.info(request, 'Course management is now locked.')
+    return redirect('manage_courses')
+
+
+@admin_login_required
+@courses_password_required
 def manage_courses(request):
     search = request.GET.get('search', '').strip()
     program_filter = request.GET.get('program', '').strip()
@@ -273,6 +335,7 @@ def manage_programs(request):
 
 
 @admin_login_required
+@courses_mutation_guard
 @require_http_methods(['POST'])
 def add_course(request):
     course = ProgramCourse.objects.create(
@@ -298,6 +361,7 @@ def add_course(request):
 
 
 @admin_login_required
+@courses_mutation_guard
 @require_http_methods(['POST'])
 def edit_course(request, pk):
     course = get_object_or_404(ProgramCourse, pk=pk)
@@ -389,6 +453,7 @@ def edit_program(request, pk):
 
 
 @admin_login_required
+@courses_mutation_guard
 @require_http_methods(['POST'])
 def toggle_show_department(request):
     program_name = request.POST.get('program', '').strip()
@@ -415,6 +480,7 @@ def toggle_show_department(request):
 
 
 @admin_login_required
+@courses_mutation_guard
 @require_http_methods(['POST'])
 def toggle_compulsory(request, pk):
     course = get_object_or_404(ProgramCourse, pk=pk)
@@ -428,6 +494,7 @@ def toggle_compulsory(request, pk):
 
 
 @admin_login_required
+@courses_mutation_guard
 @require_http_methods(['POST'])
 def delete_course(request, pk):
     ProgramCourse.objects.filter(pk=pk).delete()
@@ -463,6 +530,7 @@ def sync_programs(request):
 
 
 @admin_login_required
+@courses_mutation_guard
 @require_http_methods(['POST'])
 def import_ug_docx(request):
     uploaded = request.FILES.get('docx_file')

@@ -60,9 +60,11 @@ class ManageCoursesProgramFilterTestCase(TestCase):
             course_type_2='DSC',
         )
 
-    def _login_admin(self):
+    def _login_admin(self, unlock_courses=True):
         session = self.client.session
         session['admin_user'] = 'admin'
+        if unlock_courses:
+            session['courses_manage_unlocked'] = True
         session.save()
 
     def test_default_courses_page_is_blank_and_prompts_to_select_program(self):
@@ -132,3 +134,73 @@ class ManageCoursesProgramFilterTestCase(TestCase):
         self.assertIn('HNSC-01', content)
         self.assertIn('value="HNSC-01"', content)
         self.assertIn('value="I"', content)
+
+    def test_manage_courses_prompts_for_password_when_locked(self):
+        from django.urls import reverse
+
+        self._login_admin(unlock_courses=False)
+        response = self.client.get(reverse('manage_courses'))
+        self.assertEqual(response.status_code, 200)
+        content = response.content.decode('utf-8')
+        self.assertIn('Course Management Access', content)
+        self.assertIn('courses_password', content)
+        # Should not display the courses table while locked
+        self.assertNotIn('coursesFilterForm', content)
+
+    def test_manage_courses_rejects_wrong_password(self):
+        from django.urls import reverse
+
+        self._login_admin(unlock_courses=False)
+        response = self.client.post(reverse('manage_courses'), {
+            'courses_password': 'wrong-password',
+        })
+        self.assertEqual(response.status_code, 200)
+        content = response.content.decode('utf-8')
+        self.assertIn('Incorrect password', content)
+        self.assertFalse(self.client.session.get('courses_manage_unlocked', False))
+
+    def test_manage_courses_accepts_dns_password_and_unlocks(self):
+        from django.urls import reverse
+
+        self._login_admin(unlock_courses=False)
+        response = self.client.post(reverse('manage_courses'), {
+            'courses_password': 'dns@2026',
+        })
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(self.client.session.get('courses_manage_unlocked'))
+
+        # Following redirect leads directly to manage_courses unlocked view
+        redirect_resp = self.client.get(response.url)
+        self.assertEqual(redirect_resp.status_code, 200)
+        content = redirect_resp.content.decode('utf-8')
+        self.assertIn('Manage Courses', content)
+        self.assertIn('coursesFilterForm', content)
+
+    def test_lock_courses_endpoint(self):
+        from django.urls import reverse
+
+        self._login_admin(unlock_courses=True)
+        self.assertTrue(self.client.session.get('courses_manage_unlocked'))
+
+        resp = self.client.get(reverse('lock_courses'))
+        self.assertEqual(resp.status_code, 302)
+        self.assertFalse(self.client.session.get('courses_manage_unlocked', False))
+
+        # Subsequent GET to manage_courses shows the password prompt
+        locked_resp = self.client.get(reverse('manage_courses'))
+        self.assertEqual(locked_resp.status_code, 200)
+        content = locked_resp.content.decode('utf-8')
+        self.assertIn('Course Management Access', content)
+        self.assertIn('courses_password', content)
+
+    def test_course_actions_blocked_when_locked(self):
+        from django.urls import reverse
+
+        self._login_admin(unlock_courses=False)
+        resp = self.client.post(reverse('edit_course', kwargs={'pk': self.course_ba.pk}), {
+            'course_name': 'Hacked',
+        })
+        self.assertEqual(resp.status_code, 302)
+        self.assertIn('/courses/manage/', resp.url)
+        self.course_ba.refresh_from_db()
+        self.assertEqual(self.course_ba.course_name, 'Hindi Literature')

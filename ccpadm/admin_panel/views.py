@@ -362,6 +362,7 @@ def admin_login(request):
 
 def admin_logout(request):
     request.session.pop('admin_user', None)
+    request.session.pop('courses_manage_unlocked', None)
     return redirect('admin_login')
 
 

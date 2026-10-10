@@ -29,8 +29,11 @@ urlpatterns = [
     path('enrollments/export/excel/', views.export_enrollments_excel, name='export_enrollments_excel'),
     path('enrollments/bulk-status/', views.bulk_update_enrollment_status, name='bulk_update_enrollment_status'),
     path('nep-ug/', views.manage_nepug_enrollments, name='manage_nepug_enrollments'),
+    path('nep-ug/create/', views.admin_create_nepug, name='admin_create_nepug'),
     path('nep-ug/<int:pk>/status/', views.update_nepug_status, name='update_nepug_status'),
     path('nep-ug/bulk-status/', views.bulk_update_nepug_status, name='bulk_update_nepug_status'),
     path('nep-ug/edit/<int:pk>/', views.admin_edit_nepug, name='admin_edit_nepug'),
+    path('nep-ug/print/<int:pk>/', views.admin_print_nepug, name='admin_print_nepug'),
+    path('nep-ug/receipt/<int:pk>/', views.admin_receipt_nepug, name='admin_receipt_nepug'),
     path('nep-ug/export/excel/', views.export_nepug_excel, name='export_nepug_excel'),
 ]

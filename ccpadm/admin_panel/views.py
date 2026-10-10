@@ -1909,6 +1909,184 @@ def admin_edit_nepug(request, pk):
 
 
 @admin_login_required
+@require_http_methods(['GET', 'POST'])
+def admin_create_nepug(request):
+    """Admin entry creation for ex-students continuing into NEP UG (2nd, 3rd, 4th, 5th sem)."""
+    from datetime import datetime
+    from accounts.models import Student
+    from admissions.constants import MEDIUM_CHOICES, RELIGION_CHOICES
+    from admissions.models import NepUgAdmissionEnrollment, StudentAdmission, StudentEnrollment
+    from admissions.nep_ug_views import NEP_UG_PROGRAM_CHOICES, generate_nep_ug_application_number
+    from admissions.utils import generate_enrollment_number
+
+    initial_data = {}
+    lookup_reg = request.GET.get('reg_no', '').strip()
+    if lookup_reg:
+        std = Student.objects.filter(registration_no=lookup_reg).first()
+        adm = StudentAdmission.objects.filter(reg_no=lookup_reg).order_by('-submitted_date', '-created_date').first()
+        enr = StudentEnrollment.objects.filter(reg_no=lookup_reg).order_by('-submitted_date', '-created_at').first()
+        if std:
+            initial_data['reg_no'] = std.registration_no
+            initial_data['full_name'] = std.full_name
+            initial_data['email'] = std.email
+            initial_data['mobile'] = std.mobile
+            initial_data['aadhaar'] = std.aadhaar
+        if adm:
+            initial_data['father_name'] = adm.father_name
+            initial_data['mother_name'] = adm.mother_name
+            initial_data['gender'] = adm.gender
+            initial_data['category'] = adm.category
+            initial_data['dob'] = adm.dob.strftime('%Y-%m-%d') if adm.dob else ''
+            initial_data['medium'] = adm.medium
+            initial_data['corr_village'] = adm.corr_village or adm.perm_village
+            initial_data['corr_city'] = adm.corr_city or adm.perm_city
+            initial_data['corr_district'] = adm.corr_district or adm.perm_district
+            initial_data['corr_state'] = adm.corr_state or adm.perm_state
+            initial_data['corr_pin_code'] = adm.corr_pin_code or adm.perm_pin_code
+        if enr:
+            initial_data['previous_enrollment_no'] = enr.enrollment_no
+
+    if request.method == 'POST':
+        reg_no = request.POST.get('reg_no', '').strip()
+        full_name = request.POST.get('full_name', '').strip()
+        if not reg_no or not full_name:
+            messages.error(request, 'Registration No and Student Full Name are required.')
+            return render(request, 'admin_panel/create_nepug.html', {
+                'initial_data': request.POST.dict(),
+                'nep_program_choices': NEP_UG_PROGRAM_CHOICES,
+                'semester_choices': NepUgAdmissionEnrollment.SEMESTER_CHOICES,
+                'religion_choices': RELIGION_CHOICES,
+                'medium_choices': MEDIUM_CHOICES,
+                'status_choices': NepUgAdmissionEnrollment.STATUS_CHOICES,
+            })
+
+        student = Student.objects.filter(registration_no=reg_no).first()
+        if not student:
+            student = Student.objects.create(
+                registration_no=reg_no,
+                full_name=full_name,
+                email=request.POST.get('email', '').strip() or f'{reg_no.lower()}@college.local',
+                mobile=request.POST.get('mobile', '').strip() or '0000000000',
+                password='password123',
+                is_verified=True,
+            )
+
+        adm = StudentAdmission.objects.filter(reg_no=reg_no).first()
+        first_enr = StudentEnrollment.objects.filter(reg_no=reg_no).first()
+
+        semester = request.POST.get('semester', 'II').strip() or 'II'
+        program_type = request.POST.get('program_type', 'B.A.').strip()
+        academic_session = request.POST.get('academic_session', '2026-27').strip() or '2026-27'
+        previous_roll_no = request.POST.get('previous_roll_no', '').strip()
+        previous_enrollment_no = request.POST.get('previous_enrollment_no', '').strip()
+        previous_semester_result = request.POST.get('previous_semester_result', 'Pass').strip()
+        previous_semester_marks = request.POST.get('previous_semester_marks', '').strip()
+
+        dob_val = None
+        dob_str = request.POST.get('dob', '').strip()
+        if dob_str:
+            for fmt in ('%Y-%m-%d', '%d/%m/%Y', '%d-%m-%Y'):
+                try:
+                    dob_val = datetime.strptime(dob_str, fmt).date()
+                    break
+                except ValueError:
+                    pass
+
+        status = request.POST.get('status', 'Approved').strip() or 'Approved'
+        fee_amount = request.POST.get('fee_amount', '500').strip() or '500'
+        transaction_id = request.POST.get('transaction_id', '').strip()
+        payment_status = request.POST.get('payment_status', 'Paid').strip() or 'Paid'
+
+        app_no = generate_nep_ug_application_number()
+        enrol_no = previous_enrollment_no or generate_enrollment_number()
+
+        rec = NepUgAdmissionEnrollment.objects.create(
+            application_no=app_no,
+            reg_no=reg_no,
+            enrollment_no=enrol_no,
+            student=student,
+            admission=adm,
+            first_sem_enrollment=first_enr,
+            program_type=program_type,
+            semester=semester,
+            academic_session=academic_session,
+            previous_roll_no=previous_roll_no,
+            previous_enrollment_no=previous_enrollment_no,
+            previous_semester_result=previous_semester_result,
+            previous_semester_marks=previous_semester_marks,
+            full_name=full_name,
+            father_name=request.POST.get('father_name', '').strip(),
+            mother_name=request.POST.get('mother_name', '').strip(),
+            gender=request.POST.get('gender', '').strip(),
+            dob=dob_val,
+            category=request.POST.get('category', '').strip(),
+            nationality=request.POST.get('nationality', 'Indian').strip(),
+            religion=request.POST.get('religion', '').strip(),
+            blood_group=request.POST.get('blood_group', '').strip(),
+            mobile=request.POST.get('mobile', '').strip() or student.mobile,
+            email=request.POST.get('email', '').strip() or student.email,
+            aadhaar=request.POST.get('aadhaar', '').strip(),
+            apaar_id=request.POST.get('apaar_id', '').strip(),
+            medium=request.POST.get('medium', 'Hindi').strip(),
+            corr_village=request.POST.get('corr_village', '').strip(),
+            corr_city=request.POST.get('corr_city', '').strip(),
+            corr_district=request.POST.get('corr_district', '').strip(),
+            corr_state=request.POST.get('corr_state', 'Chhattisgarh').strip(),
+            corr_pin_code=request.POST.get('corr_pin_code', '').strip(),
+            fee_amount=fee_amount,
+            transaction_id=transaction_id,
+            payment_status=payment_status,
+            status=status,
+            is_submitted=(status in ('Approved', 'Submitted')),
+            submitted_date=timezone.now(),
+            admin_remarks=request.POST.get('admin_remarks', '').strip(),
+        )
+
+        messages.success(request, f'NEPUG record created successfully for {rec.full_name} ({rec.application_no})!')
+        return redirect('manage_nepug_enrollments')
+
+    return render(request, 'admin_panel/create_nepug.html', {
+        'initial_data': initial_data,
+        'nep_program_choices': NEP_UG_PROGRAM_CHOICES,
+        'semester_choices': NepUgAdmissionEnrollment.SEMESTER_CHOICES,
+        'religion_choices': RELIGION_CHOICES,
+        'medium_choices': MEDIUM_CHOICES,
+        'status_choices': NepUgAdmissionEnrollment.STATUS_CHOICES,
+    })
+
+
+@admin_login_required
+def admin_print_nepug(request, pk):
+    from admissions.models import NepUgAdmissionEnrollment
+    nep_record = get_object_or_404(NepUgAdmissionEnrollment, pk=pk)
+    return render(request, 'admissions/nep_ug_print.html', {
+        'student': nep_record.student,
+        'nep': nep_record,
+    })
+
+
+@admin_login_required
+def admin_receipt_nepug(request, pk):
+    from admissions.models import NepUgAdmissionEnrollment
+    nep_record = get_object_or_404(NepUgAdmissionEnrollment, pk=pk)
+    sub_date = nep_record.submitted_date or timezone.now()
+    deposit_date = sub_date.strftime('%d/%m/%Y at %I:%M %p')
+    month_year = sub_date.strftime('%b. / %Y').upper()
+    program_display = f"{nep_record.program_type} ({nep_record.semester_display})"
+
+    return render(request, 'admissions/nep_ug_receipt.html', {
+        'student': nep_record.student,
+        'nep': nep_record,
+        'program_display': program_display,
+        'deposit_date': deposit_date,
+        'month_year': month_year,
+        'fee_amount': nep_record.fee_amount or '500',
+        'transaction_id': nep_record.transaction_id or '',
+        'payment_status': nep_record.payment_status or ('Paid' if nep_record.transaction_id else 'Pending'),
+    })
+
+
+@admin_login_required
 def export_nepug_excel(request):
     """Export NEPUG applications to Excel (.xlsx) matching university format."""
     from io import BytesIO

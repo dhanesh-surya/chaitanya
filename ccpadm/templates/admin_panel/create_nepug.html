@@ -1,0 +1,296 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}New NEPUG Admission & Enrollment Entry - Admin Panel{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admission_form.css' %}">
+<style>
+.admin-nep-header {
+    background: linear-gradient(135deg, #082B49 0%, #0d416b 100%);
+    color: #ffffff;
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 15px rgba(8, 43, 73, 0.15);
+    border-left: 5px solid #0284c7;
+}
+.admin-nep-header h2 {
+    margin: 0 0 6px 0;
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: #ffffff;
+}
+.admin-nep-header p {
+    margin: 0;
+    color: #cbd5e1;
+    font-size: 0.95rem;
+}
+.nep-section-card {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 22px 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}
+.nep-section-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #082B49;
+    margin-bottom: 16px;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.lookup-box {
+    background: #f8fafc;
+    border: 1.5px dashed #0284c7;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="portal-page portal-page--wide">
+    <div class="portal-main">
+        <div class="admin-nep-header">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px;">
+                <div>
+                    <h2><i class="fas fa-user-plus"></i> New NEPUG Admission cum Enrollment Entry</h2>
+                    <p>
+                        Entry portal for ex-students continuing into <strong>2nd, 3rd, 4th, or 5th Semester</strong> (NEP UG Programs only).
+                    </p>
+                </div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <a href="{% url 'manage_nepug_enrollments' %}" class="btn btn-sm btn-light">
+                        <i class="fas fa-arrow-left"></i> Back to NEPUG List
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- QUICK LOOKUP FOR EX-STUDENTS -->
+        <div class="lookup-box">
+            <form method="get" action="{% url 'admin_create_nepug' %}" style="display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;">
+                <div style="flex: 1 1 280px;">
+                    <label for="lookupRegNo" style="display: block; font-size: 13px; font-weight: 700; color: #082B49; margin-bottom: 4px;">
+                        <i class="fas fa-search"></i> Pre-fill from Existing Student Registration No:
+                    </label>
+                    <input type="text" id="lookupRegNo" name="reg_no" value="{{ initial_data.reg_no|default:'' }}" class="form-control" placeholder="Enter Registration No (e.g. CCP2025...)" style="font-weight: 600;">
+                </div>
+                <div>
+                    <button type="submit" class="btn btn-primary" style="background: #0284c7; border-color: #0284c7; padding: 9px 20px; font-weight: 600;">
+                        <i class="fas fa-sync-alt"></i> Lookup &amp; Autofill
+                    </button>
+                    {% if initial_data.reg_no %}
+                    <a href="{% url 'admin_create_nepug' %}" class="btn btn-secondary btn-sm" style="padding: 9px 14px; margin-left: 6px;">Clear</a>
+                    {% endif %}
+                </div>
+            </form>
+            {% if initial_data.full_name %}
+            <div style="margin-top: 10px; font-size: 13px; color: #16a34a; font-weight: 600;">
+                <i class="fas fa-check-circle"></i> Student details matched for: {{ initial_data.full_name }} (Reg: {{ initial_data.reg_no }})
+            </div>
+            {% endif %}
+        </div>
+
+        <form method="post" action="{% url 'admin_create_nepug' %}">
+            {% csrf_token %}
+
+            <!-- SECTION 1: STATUS & ADMIN CONTROL -->
+            <div class="nep-section-card" style="border: 2px solid #0284c7; background: #f0f9ff;">
+                <div class="nep-section-title" style="color: #0369a1;">
+                    <i class="fas fa-tasks"></i> Administrative Status &amp; Fee Details
+                </div>
+                <div class="form-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
+                    <div class="form-group">
+                        <label class="form-label" style="font-weight: 700;">Status <span class="text-danger">*</span></label>
+                        <select name="status" class="form-control" style="font-weight: 700; background: #ffffff;">
+                            {% for s_val, s_lbl in status_choices %}
+                            <option value="{{ s_val }}" {% if initial_data.status == s_val or not initial_data.status and s_val == 'Approved' %}selected{% endif %}>{{ s_lbl }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Fee Amount (₹)</label>
+                        <input type="text" name="fee_amount" class="form-control" value="{{ initial_data.fee_amount|default:'500' }}">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Payment UTR / Transaction ID</label>
+                        <input type="text" name="transaction_id" class="form-control" value="{{ initial_data.transaction_id|default:'' }}" style="font-family: monospace; font-weight: 700;" placeholder="e.g. UTR / UPI Ref">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Payment Status</label>
+                        <select name="payment_status" class="form-control">
+                            <option value="Paid" {% if initial_data.payment_status == 'Paid' or not initial_data.payment_status %}selected{% endif %}>Paid</option>
+                            <option value="Pending" {% if initial_data.payment_status == 'Pending' %}selected{% endif %}>Pending</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 14px;">
+                    <label class="form-label">Admin Remarks / Instructions</label>
+                    <textarea name="admin_remarks" class="form-control" rows="2" placeholder="Administrative notes for this student...">{{ initial_data.admin_remarks|default:'' }}</textarea>
+                </div>
+            </div>
+
+            <!-- SECTION 2: PROGRAM & SEMESTER DETAILS -->
+            <div class="nep-section-card">
+                <div class="nep-section-title">
+                    <i class="fas fa-graduation-cap"></i> Program, Semester &amp; Examination Details
+                </div>
+                <div class="form-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
+                    <div class="form-group">
+                        <label class="form-label">Academic Session</label>
+                        <input type="text" name="academic_session" class="form-control" value="{{ initial_data.academic_session|default:'2026-27' }}">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Semester <span class="text-danger">*</span></label>
+                        <select name="semester" class="form-control" required style="font-weight: 600;">
+                            {% for sem_val, sem_label in semester_choices %}
+                            <option value="{{ sem_val }}" {% if initial_data.semester == sem_val %}selected{% endif %}>{{ sem_label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">NEP UG Program <span class="text-danger">*</span></label>
+                        <select name="program_type" class="form-control" required style="font-weight: 600;">
+                            {% for prog_val, prog_label in nep_program_choices %}
+                            <option value="{{ prog_val }}" {% if initial_data.program_type == prog_val %}selected{% endif %}>{{ prog_label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Previous Semester Roll No</label>
+                        <input type="text" name="previous_roll_no" class="form-control" value="{{ initial_data.previous_roll_no|default:'' }}" placeholder="Previous Sem Exam Roll No">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Previous Enrollment No</label>
+                        <input type="text" name="previous_enrollment_no" class="form-control" value="{{ initial_data.previous_enrollment_no|default:'' }}" placeholder="e.g. CCP2605XXXX">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Previous Semester Result</label>
+                        <select name="previous_semester_result" class="form-control">
+                            <option value="Pass" {% if initial_data.previous_semester_result == 'Pass' or not initial_data.previous_semester_result %}selected{% endif %}>Pass</option>
+                            <option value="ATKT" {% if initial_data.previous_semester_result == 'ATKT' %}selected{% endif %}>ATKT</option>
+                            <option value="Result Awaited" {% if initial_data.previous_semester_result == 'Result Awaited' %}selected{% endif %}>Result Awaited</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Previous Semester Marks / SGPA</label>
+                        <input type="text" name="previous_semester_marks" class="form-control" value="{{ initial_data.previous_semester_marks|default:'' }}" placeholder="Total marks or SGPA">
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 3: PERSONAL DETAILS -->
+            <div class="nep-section-card">
+                <div class="nep-section-title">
+                    <i class="fas fa-user"></i> Personal &amp; Contact Details
+                </div>
+                <div class="form-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
+                    <div class="form-group">
+                        <label class="form-label">Registration No <span class="text-danger">*</span></label>
+                        <input type="text" name="reg_no" class="form-control" value="{{ initial_data.reg_no|default:'' }}" required placeholder="Student Registration No">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Student Full Name <span class="text-danger">*</span></label>
+                        <input type="text" name="full_name" class="form-control" value="{{ initial_data.full_name|default:'' }}" required placeholder="Candidate Full Name">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Father's Name</label>
+                        <input type="text" name="father_name" class="form-control" value="{{ initial_data.father_name|default:'' }}">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Mother's Name</label>
+                        <input type="text" name="mother_name" class="form-control" value="{{ initial_data.mother_name|default:'' }}">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Gender</label>
+                        <select name="gender" class="form-control">
+                            <option value="Male" {% if initial_data.gender == 'Male' or initial_data.gender == 'M' %}selected{% endif %}>Male</option>
+                            <option value="Female" {% if initial_data.gender == 'Female' or initial_data.gender == 'F' %}selected{% endif %}>Female</option>
+                            <option value="Transgender" {% if initial_data.gender == 'Transgender' or initial_data.gender == 'T' %}selected{% endif %}>Transgender</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Date of Birth</label>
+                        <input type="date" name="dob" class="form-control" value="{{ initial_data.dob|default:'' }}">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Category</label>
+                        <select name="category" class="form-control">
+                            <option value="General" {% if initial_data.category == 'General' or initial_data.category == 'GEN' %}selected{% endif %}>General</option>
+                            <option value="OBC" {% if initial_data.category == 'OBC' %}selected{% endif %}>OBC</option>
+                            <option value="SC" {% if initial_data.category == 'SC' %}selected{% endif %}>SC</option>
+                            <option value="ST" {% if initial_data.category == 'ST' %}selected{% endif %}>ST</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Medium</label>
+                        <select name="medium" class="form-control">
+                            <option value="Hindi" {% if initial_data.medium == 'Hindi' or not initial_data.medium %}selected{% endif %}>Hindi</option>
+                            <option value="English" {% if initial_data.medium == 'English' %}selected{% endif %}>English</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Mobile Number</label>
+                        <input type="text" name="mobile" class="form-control" value="{{ initial_data.mobile|default:'' }}">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email Address</label>
+                        <input type="email" name="email" class="form-control" value="{{ initial_data.email|default:'' }}">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Aadhaar Number</label>
+                        <input type="text" name="aadhaar" class="form-control" value="{{ initial_data.aadhaar|default:'' }}">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">APAAR / ABC ID</label>
+                        <input type="text" name="apaar_id" class="form-control" value="{{ initial_data.apaar_id|default:'' }}">
+                    </div>
+                </div>
+
+                <h4 style="margin-top: 18px; margin-bottom: 10px; font-size: 13.5px; font-weight: 700; color: #475569;">
+                    Correspondence Address
+                </h4>
+                <div class="form-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px;">
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label class="form-label">Village / Street / House No</label>
+                        <input type="text" name="corr_village" class="form-control" value="{{ initial_data.corr_village|default:'' }}">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">City / Block</label>
+                        <input type="text" name="corr_city" class="form-control" value="{{ initial_data.corr_city|default:'' }}">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">District</label>
+                        <input type="text" name="corr_district" class="form-control" value="{{ initial_data.corr_district|default:'' }}">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">State</label>
+                        <input type="text" name="corr_state" class="form-control" value="{{ initial_data.corr_state|default:'Chhattisgarh' }}">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">PIN Code</label>
+                        <input type="text" name="corr_pin_code" class="form-control" value="{{ initial_data.corr_pin_code|default:'' }}">
+                    </div>
+                </div>
+            </div>
+
+            <!-- BUTTONS -->
+            <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px;">
+                <a href="{% url 'manage_nepug_enrollments' %}" class="btn btn-secondary" style="padding: 10px 24px;">Cancel</a>
+                <button type="submit" class="btn btn-primary" style="padding: 10px 30px; font-weight: 700; background: #082B49; border-color: #082B49;">
+                    <i class="fas fa-check"></i> Create NEPUG Record
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

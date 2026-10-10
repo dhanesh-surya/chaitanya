@@ -102,6 +102,9 @@
                     <a href="{% url 'export_nepug_excel' %}?search={{ search|urlencode }}&semester={{ semester_filter|urlencode }}&program={{ program_filter|urlencode }}&status={{ status_filter|urlencode }}" class="btn btn-sm btn-success" style="background: #16a34a; border-color: #15803d; color: #fff; font-weight: 600; padding: 7px 16px; display: inline-flex; align-items: center; gap: 6px;" title="Export filtered NEPUG list to Excel (.xlsx)">
                         <i class="fas fa-file-excel"></i> Export Excel
                     </a>
+                    <a href="{% url 'admin_create_nepug' %}" class="btn btn-sm btn-primary" style="background: #0284c7; border-color: #0284c7; color: #fff; font-weight: 600; padding: 7px 16px; display: inline-flex; align-items: center; gap: 6px;" title="Create new NEPUG entry for ex-student">
+                        <i class="fas fa-plus"></i> New NEPUG Entry
+                    </a>
                 </div>
             </form>
         </div>

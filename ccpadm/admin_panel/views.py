@@ -211,6 +211,7 @@ def _attach_admissions(students):
     reg_nos = [s.registration_no for s in students]
     admission_map = {}
     enrollment_map = {}
+    nep_map = {}
     if reg_nos:
         for adm in (
             StudentAdmission.objects.filter(reg_no__in=reg_nos)
@@ -224,18 +225,30 @@ def _attach_admissions(students):
         ):
             if enr.reg_no not in enrollment_map:
                 enrollment_map[enr.reg_no] = enr
+        from admissions.models import NepUgAdmissionEnrollment
+        for nep in (
+            NepUgAdmissionEnrollment.objects.filter(reg_no__in=reg_nos)
+            .order_by('-submitted_date', '-created_at')
+        ):
+            if nep.reg_no not in nep_map:
+                nep_map[nep.reg_no] = nep
+
     for student in students:
         admission = admission_map.get(student.registration_no)
         enrollment = enrollment_map.get(student.registration_no)
+        nep = nep_map.get(student.registration_no)
         student.latest_admission = admission
         student.latest_enrollment = enrollment
+        student.latest_nep_ug = nep
         student.father_name = (
             (admission.father_name if admission and admission.father_name else '')
             or (enrollment.father_name if enrollment and enrollment.father_name else '')
+            or (nep.father_name if nep and nep.father_name else '')
         )
         student.mother_name = (
             (admission.mother_name if admission and admission.mother_name else '')
             or (enrollment.mother_name if enrollment and enrollment.mother_name else '')
+            or (nep.mother_name if nep and nep.mother_name else '')
         )
         group_key = _admission_bsc_group_key(admission)
         student.bsc_group_key = group_key
@@ -1832,6 +1845,10 @@ def bulk_update_nepug_status(request):
 @admin_login_required
 @require_http_methods(['GET', 'POST'])
 def admin_edit_nepug(request, pk):
+    import base64
+    import json
+    from datetime import datetime
+    from accounts.models import Student
     from admissions.constants import MEDIUM_CHOICES, RELIGION_CHOICES
     from admissions.models import NepUgAdmissionEnrollment
     from admissions.nep_ug_views import NEP_UG_PROGRAM_CHOICES
@@ -1848,6 +1865,15 @@ def admin_edit_nepug(request, pk):
         record.previous_enrollment_no = request.POST.get('previous_enrollment_no', '').strip()
         record.previous_semester_result = request.POST.get('previous_semester_result', '').strip()
         record.previous_semester_marks = request.POST.get('previous_semester_marks', '').strip()
+        record.previous_exam_name = request.POST.get('previous_exam_name', '').strip()
+        record.previous_board = request.POST.get('previous_board', 'Shaheed Nandkumar Patel Vishwavidyalaya, Raigarh').strip()
+        py_str = request.POST.get('previous_year', '').strip()
+        record.previous_year = int(py_str) if py_str.isdigit() else None
+        record.previous_total_marks = request.POST.get('previous_total_marks', '').strip()
+        record.previous_obtained_marks = request.POST.get('previous_obtained_marks', '').strip()
+        record.previous_percentage = request.POST.get('previous_percentage', '').strip()
+        if not record.previous_semester_marks and record.previous_obtained_marks:
+            record.previous_semester_marks = record.previous_obtained_marks
 
         # Update personal & contact
         record.full_name = request.POST.get('full_name', '').strip()
@@ -1879,6 +1905,67 @@ def admin_edit_nepug(request, pk):
         record.corr_state = request.POST.get('corr_state', '').strip()
         record.corr_pin_code = request.POST.get('corr_pin_code', '').strip()
 
+        # Education 10th
+        record.class10 = request.POST.get('class10', '10th').strip() or '10th'
+        record.board10 = request.POST.get('board10', '').strip()
+        y10_str = request.POST.get('year10', '').strip()
+        record.year10 = int(y10_str) if y10_str.isdigit() else None
+        record.total_marks10 = request.POST.get('total_marks10', '').strip()
+        record.obtained10 = request.POST.get('obtained10', '').strip()
+        record.percentage10 = request.POST.get('percentage10', '').strip()
+        record.grade10 = request.POST.get('grade10', '').strip()
+
+        # Education 12th
+        record.class12 = request.POST.get('class12', '12th').strip() or '12th'
+        record.board12 = request.POST.get('board12', '').strip()
+        record.stream12 = request.POST.get('stream12', '').strip()
+        y12_str = request.POST.get('year12', '').strip()
+        record.year12 = int(y12_str) if y12_str.isdigit() else None
+        record.total_marks12 = request.POST.get('total_marks12', '').strip()
+        record.obtained12 = request.POST.get('obtained12', '').strip()
+        record.percentage12 = request.POST.get('percentage12', '').strip()
+        record.grade12 = request.POST.get('grade12', '').strip()
+
+        # Photo & Signature Upload
+        if 'photo_file' in request.FILES and request.FILES['photo_file']:
+            pf = request.FILES['photo_file']
+            ctype = pf.content_type or 'image/jpeg'
+            record.photo_base64 = f"data:{ctype};base64,{base64.b64encode(pf.read()).decode('utf-8')}"
+        elif request.POST.get('photo_base64'):
+            record.photo_base64 = request.POST.get('photo_base64').strip()
+
+        if 'signature_file' in request.FILES and request.FILES['signature_file']:
+            sf = request.FILES['signature_file']
+            ctype = sf.content_type or 'image/jpeg'
+            record.signature_base64 = f"data:{ctype};base64,{base64.b64encode(sf.read()).decode('utf-8')}"
+        elif request.POST.get('signature_base64'):
+            record.signature_base64 = request.POST.get('signature_base64').strip()
+
+        # Education JSON
+        education_list = []
+        if record.class10 or record.board10:
+            education_list.append({
+                'RowKey': '10', 'className': record.class10, 'board': record.board10,
+                'year': record.year10, 'totalMarks': record.total_marks10,
+                'obtained': record.obtained10, 'percentage': record.percentage10, 'grade': record.grade10,
+            })
+        if record.class12 or record.board12:
+            education_list.append({
+                'RowKey': '12', 'className': record.class12, 'board': record.board12,
+                'stream': record.stream12, 'year': record.year12, 'totalMarks': record.total_marks12,
+                'obtained': record.obtained12, 'percentage': record.percentage12, 'grade': record.grade12,
+            })
+        if record.previous_exam_name or record.previous_roll_no:
+            education_list.append({
+                'RowKey': 'ug', 'className': record.previous_exam_name or f"Semester Exam",
+                'board': record.previous_board, 'rollNo': record.previous_roll_no,
+                'enrollmentNo': record.previous_enrollment_no, 'year': record.previous_year,
+                'totalMarks': record.previous_total_marks,
+                'obtained': record.previous_obtained_marks or record.previous_semester_marks,
+                'percentage': record.previous_percentage, 'result': record.previous_semester_result,
+            })
+        record.education_json = json.dumps(education_list)
+
         # Payment & Status
         record.fee_amount = request.POST.get('fee_amount', '500').strip()
         record.transaction_id = request.POST.get('transaction_id', '').strip()
@@ -1890,7 +1977,12 @@ def admin_edit_nepug(request, pk):
             record.status = new_status
             if new_status == 'Approved':
                 record.is_submitted = True
-                Student.objects.filter(registration_no=record.reg_no).update(is_verified=True)
+                Student.objects.filter(registration_no=record.reg_no).update(
+                    is_verified=True,
+                    full_name=record.full_name,
+                    mobile=record.mobile,
+                    email=record.email,
+                )
             elif new_status == 'Draft':
                 record.is_submitted = False
 
@@ -1912,6 +2004,8 @@ def admin_edit_nepug(request, pk):
 @require_http_methods(['GET', 'POST'])
 def admin_create_nepug(request):
     """Admin entry creation for ex-students continuing into NEP UG (2nd, 3rd, 4th, 5th sem)."""
+    import base64
+    import json
     from datetime import datetime
     from accounts.models import Student
     from admissions.constants import MEDIUM_CHOICES, RELIGION_CHOICES
@@ -1925,12 +2019,17 @@ def admin_create_nepug(request):
         std = Student.objects.filter(registration_no=lookup_reg).first()
         adm = StudentAdmission.objects.filter(reg_no=lookup_reg).order_by('-submitted_date', '-created_date').first()
         enr = StudentEnrollment.objects.filter(reg_no=lookup_reg).order_by('-submitted_date', '-created_at').first()
+        nep = NepUgAdmissionEnrollment.objects.filter(reg_no=lookup_reg).order_by('-submitted_date', '-created_at').first()
+
         if std:
             initial_data['reg_no'] = std.registration_no
             initial_data['full_name'] = std.full_name
             initial_data['email'] = std.email
             initial_data['mobile'] = std.mobile
             initial_data['aadhaar'] = std.aadhaar
+            if std.program_type:
+                initial_data['program_type'] = std.program_type.replace(' - First Semester', '').replace(' First Semester', '').strip()
+
         if adm:
             initial_data['father_name'] = adm.father_name
             initial_data['mother_name'] = adm.mother_name
@@ -1943,8 +2042,80 @@ def admin_create_nepug(request):
             initial_data['corr_district'] = adm.corr_district or adm.perm_district
             initial_data['corr_state'] = adm.corr_state or adm.perm_state
             initial_data['corr_pin_code'] = adm.corr_pin_code or adm.perm_pin_code
+            if not initial_data.get('program_type') and adm.program_type:
+                initial_data['program_type'] = adm.program_type.replace(' - First Semester', '').replace(' First Semester', '').strip()
+
         if enr:
             initial_data['previous_enrollment_no'] = enr.enrollment_no
+            if not initial_data.get('program_type') and enr.program_type:
+                initial_data['program_type'] = enr.program_type.replace(' - First Semester', '').replace(' First Semester', '').strip()
+            if not initial_data.get('father_name') and enr.father_name:
+                initial_data['father_name'] = enr.father_name
+            if not initial_data.get('mother_name') and enr.mother_name:
+                initial_data['mother_name'] = enr.mother_name
+
+        # Helper to get first non-empty value across nep, enr, adm
+        def _get_val(attr, default=''):
+            for obj in (nep, enr, adm):
+                if obj and hasattr(obj, attr):
+                    val = getattr(obj, attr)
+                    if val is not None and str(val).strip() != '':
+                        return str(val)
+            return default
+
+        # 10th details prefill
+        initial_data['class10'] = _get_val('class10', '10th')
+        initial_data['board10'] = _get_val('board10', 'CGBSE')
+        initial_data['year10'] = _get_val('year10', '')
+        initial_data['total_marks10'] = _get_val('total_marks10', '')
+        initial_data['obtained10'] = _get_val('obtained10', '')
+        initial_data['percentage10'] = _get_val('percentage10', '')
+        initial_data['grade10'] = _get_val('grade10', '')
+
+        # 12th details prefill
+        initial_data['class12'] = _get_val('class12', '12th')
+        initial_data['board12'] = _get_val('board12', 'CGBSE')
+        initial_data['stream12'] = _get_val('stream12', '')
+        initial_data['year12'] = _get_val('year12', '')
+        initial_data['total_marks12'] = _get_val('total_marks12', '')
+        initial_data['obtained12'] = _get_val('obtained12', '')
+        initial_data['percentage12'] = _get_val('percentage12', '')
+        initial_data['grade12'] = _get_val('grade12', '')
+
+        # Previous UG Marksheet / Semester details prefill
+        if nep:
+            initial_data['previous_roll_no'] = nep.previous_roll_no
+            initial_data['previous_enrollment_no'] = nep.previous_enrollment_no or nep.enrollment_no
+            initial_data['previous_exam_name'] = nep.previous_exam_name or f"{nep.program_type} Semester {nep.semester}"
+            initial_data['previous_board'] = nep.previous_board or 'Shaheed Nandkumar Patel Vishwavidyalaya, Raigarh'
+            initial_data['previous_year'] = nep.previous_year or ''
+            initial_data['previous_total_marks'] = nep.previous_total_marks or ''
+            initial_data['previous_obtained_marks'] = nep.previous_obtained_marks or nep.previous_semester_marks or ''
+            initial_data['previous_percentage'] = nep.previous_percentage or ''
+            initial_data['previous_semester_result'] = nep.previous_semester_result or 'Pass'
+            initial_data['previous_semester_marks'] = nep.previous_semester_marks or ''
+        elif enr:
+            initial_data['previous_enrollment_no'] = enr.enrollment_no
+            initial_data['previous_exam_name'] = f"{enr.program_type} Semester {enr.semester}"
+            initial_data['previous_board'] = 'Shaheed Nandkumar Patel Vishwavidyalaya, Raigarh'
+            initial_data['previous_year'] = timezone.now().year
+        elif adm:
+            initial_data['previous_exam_name'] = f"{adm.program_type} Semester I"
+            initial_data['previous_board'] = 'Shaheed Nandkumar Patel Vishwavidyalaya, Raigarh'
+            initial_data['previous_year'] = timezone.now().year
+
+        # Photo & Signature prefill
+        photo_src = (nep.photo_base64 if nep and nep.photo_base64 else None) or \
+                    (enr.photo_base64 if enr and enr.photo_base64 else None) or \
+                    (adm.photo_base64 if adm and adm.photo_base64 else None)
+        if photo_src:
+            initial_data['photo_base64'] = photo_src
+
+        sig_src = (nep.signature_base64 if nep and nep.signature_base64 else None) or \
+                  (enr.signature_base64 if enr and enr.signature_base64 else None) or \
+                  (adm.signature_base64 if adm and adm.signature_base64 else None)
+        if sig_src:
+            initial_data['signature_base64'] = sig_src
 
     if request.method == 'POST':
         reg_no = request.POST.get('reg_no', '').strip()
@@ -1981,6 +2152,74 @@ def admin_create_nepug(request):
         previous_enrollment_no = request.POST.get('previous_enrollment_no', '').strip()
         previous_semester_result = request.POST.get('previous_semester_result', 'Pass').strip()
         previous_semester_marks = request.POST.get('previous_semester_marks', '').strip()
+        previous_exam_name = request.POST.get('previous_exam_name', '').strip()
+        previous_board = request.POST.get('previous_board', 'Shaheed Nandkumar Patel Vishwavidyalaya, Raigarh').strip()
+        py_str = request.POST.get('previous_year', '').strip()
+        previous_year = int(py_str) if py_str.isdigit() else None
+        previous_total_marks = request.POST.get('previous_total_marks', '').strip()
+        previous_obtained_marks = request.POST.get('previous_obtained_marks', '').strip()
+        previous_percentage = request.POST.get('previous_percentage', '').strip()
+        if not previous_semester_marks and previous_obtained_marks:
+            previous_semester_marks = previous_obtained_marks
+
+        # 10th details
+        class10 = request.POST.get('class10', '10th').strip() or '10th'
+        board10 = request.POST.get('board10', '').strip()
+        y10_str = request.POST.get('year10', '').strip()
+        year10 = int(y10_str) if y10_str.isdigit() else None
+        total_marks10 = request.POST.get('total_marks10', '').strip()
+        obtained10 = request.POST.get('obtained10', '').strip()
+        percentage10 = request.POST.get('percentage10', '').strip()
+        grade10 = request.POST.get('grade10', '').strip()
+
+        # 12th details
+        class12 = request.POST.get('class12', '12th').strip() or '12th'
+        board12 = request.POST.get('board12', '').strip()
+        stream12 = request.POST.get('stream12', '').strip()
+        y12_str = request.POST.get('year12', '').strip()
+        year12 = int(y12_str) if y12_str.isdigit() else None
+        total_marks12 = request.POST.get('total_marks12', '').strip()
+        obtained12 = request.POST.get('obtained12', '').strip()
+        percentage12 = request.POST.get('percentage12', '').strip()
+        grade12 = request.POST.get('grade12', '').strip()
+
+        # Handle Photo Upload
+        photo_base64 = request.POST.get('photo_base64', '').strip()
+        if 'photo_file' in request.FILES and request.FILES['photo_file']:
+            pf = request.FILES['photo_file']
+            ctype = pf.content_type or 'image/jpeg'
+            photo_base64 = f"data:{ctype};base64,{base64.b64encode(pf.read()).decode('utf-8')}"
+
+        # Handle Signature Upload
+        signature_base64 = request.POST.get('signature_base64', '').strip()
+        if 'signature_file' in request.FILES and request.FILES['signature_file']:
+            sf = request.FILES['signature_file']
+            ctype = sf.content_type or 'image/jpeg'
+            signature_base64 = f"data:{ctype};base64,{base64.b64encode(sf.read()).decode('utf-8')}"
+
+        # Build education_json
+        education_list = []
+        if class10 or board10:
+            education_list.append({
+                'RowKey': '10', 'className': class10, 'board': board10,
+                'year': year10, 'totalMarks': total_marks10,
+                'obtained': obtained10, 'percentage': percentage10, 'grade': grade10,
+            })
+        if class12 or board12:
+            education_list.append({
+                'RowKey': '12', 'className': class12, 'board': board12,
+                'stream': stream12, 'year': year12, 'totalMarks': total_marks12,
+                'obtained': obtained12, 'percentage': percentage12, 'grade': grade12,
+            })
+        if previous_exam_name or previous_roll_no:
+            education_list.append({
+                'RowKey': 'ug', 'className': previous_exam_name or f"Semester Exam",
+                'board': previous_board, 'rollNo': previous_roll_no,
+                'enrollmentNo': previous_enrollment_no, 'year': previous_year,
+                'totalMarks': previous_total_marks,
+                'obtained': previous_obtained_marks or previous_semester_marks,
+                'percentage': previous_percentage, 'result': previous_semester_result,
+            })
 
         dob_val = None
         dob_str = request.POST.get('dob', '').strip()
@@ -2014,6 +2253,30 @@ def admin_create_nepug(request):
             previous_enrollment_no=previous_enrollment_no,
             previous_semester_result=previous_semester_result,
             previous_semester_marks=previous_semester_marks,
+            previous_exam_name=previous_exam_name,
+            previous_board=previous_board,
+            previous_year=previous_year,
+            previous_total_marks=previous_total_marks,
+            previous_obtained_marks=previous_obtained_marks,
+            previous_percentage=previous_percentage,
+            class10=class10,
+            board10=board10,
+            year10=year10,
+            total_marks10=total_marks10,
+            obtained10=obtained10,
+            percentage10=percentage10,
+            grade10=grade10,
+            class12=class12,
+            board12=board12,
+            stream12=stream12,
+            year12=year12,
+            total_marks12=total_marks12,
+            obtained12=obtained12,
+            percentage12=percentage12,
+            grade12=grade12,
+            education_json=json.dumps(education_list),
+            photo_base64=photo_base64,
+            signature_base64=signature_base64,
             full_name=full_name,
             father_name=request.POST.get('father_name', '').strip(),
             mother_name=request.POST.get('mother_name', '').strip(),
@@ -2041,6 +2304,16 @@ def admin_create_nepug(request):
             submitted_date=timezone.now(),
             admin_remarks=request.POST.get('admin_remarks', '').strip(),
         )
+
+        # Sync Student model
+        student.is_verified = True
+        student.full_name = full_name
+        student.mobile = rec.mobile
+        student.email = rec.email
+        student.aadhaar = rec.aadhaar
+        if not student.program_type:
+            student.program_type = program_type
+        student.save()
 
         messages.success(request, f'NEPUG record created successfully for {rec.full_name} ({rec.application_no})!')
         return redirect('manage_nepug_enrollments')

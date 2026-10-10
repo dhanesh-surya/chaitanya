@@ -686,4 +686,131 @@ class NepUgAdmissionEnrollmentTestCase(TestCase):
             'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         )
 
+    def test_nep_ug_education_qualifications_and_photo_signature(self):
+        from accounts.models import AdminUser
+        from admissions.models import NepUgAdmissionEnrollment
+        import json
+
+        AdminUser.objects.create(username='admin', password='password123')
+        session = self.client.session
+        session['admin_user'] = 'admin'
+        session.save()
+
+        # Update student admission with education details and photo
+        self.admission.class10 = '10th'
+        self.admission.board10 = 'CGBSE'
+        self.admission.year10 = 2022
+        self.admission.total_marks10 = '600'
+        self.admission.obtained10 = '510'
+        self.admission.percentage10 = '85'
+        self.admission.class12 = '12th'
+        self.admission.board12 = 'CGBSE'
+        self.admission.year12 = 2024
+        self.admission.total_marks12 = '500'
+        self.admission.obtained12 = '420'
+        self.admission.percentage12 = '84'
+        self.admission.photo_base64 = 'data:image/jpeg;base64,mockphoto101'
+        self.admission.signature_base64 = 'data:image/jpeg;base64,mocksign101'
+        self.admission.save()
+
+        # 1. Lookup pre-fill check
+        lookup_res = self.client.get(reverse('admin_create_nepug') + f'?reg_no={self.student.registration_no}')
+        self.assertEqual(lookup_res.status_code, 200)
+        init_data = lookup_res.context['initial_data']
+        self.assertEqual(init_data['class10'], '10th')
+        self.assertEqual(init_data['board10'], 'CGBSE')
+        self.assertEqual(init_data['percentage10'], '85')
+        self.assertEqual(init_data['percentage12'], '84')
+        self.assertEqual(init_data['photo_base64'], 'data:image/jpeg;base64,mockphoto101')
+
+        # 2. POST create with previous UG marksheet & base64 photo/signature
+        payload = {
+            'reg_no': self.student.registration_no,
+            'full_name': 'Vikash Sharma',
+            'father_name': 'Sunil Sharma',
+            'mother_name': 'Geeta Sharma',
+            'gender': 'Male',
+            'dob': '2004-05-15',
+            'category': 'General',
+            'medium': 'Hindi',
+            'mobile': '9826100001',
+            'email': 'vikash@example.com',
+            'semester': 'II',
+            'program_type': 'B.Sc. Bio Group',
+            'academic_session': '2026-27',
+            'previous_roll_no': '26001234',
+            'previous_enrollment_no': 'CCP26059999',
+            'previous_semester_result': 'Pass',
+            'previous_semester_marks': '450/600',
+            # 10th
+            'class10': '10th',
+            'board10': 'CGBSE',
+            'year10': '2022',
+            'total_marks10': '600',
+            'obtained10': '510',
+            'percentage10': '85',
+            # 12th
+            'class12': '12th',
+            'board12': 'CGBSE',
+            'stream12': 'Science Bio',
+            'year12': '2024',
+            'total_marks12': '500',
+            'obtained12': '420',
+            'percentage12': '84',
+            # Previous UG Marksheet
+            'previous_exam_name': 'B.Sc. First Semester',
+            'previous_board': 'Autonomous Exam Cell, CSAC Pamgarh',
+            'previous_year': '2025',
+            'previous_total_marks': '600',
+            'previous_obtained_marks': '480',
+            'previous_percentage': '80.00',
+            # Photos
+            'photo_base64': 'data:image/jpeg;base64,mockphoto101',
+            'signature_base64': 'data:image/jpeg;base64,mocksign101',
+            'fee_amount': '500',
+            'transaction_id': 'UTR5544332211',
+            'payment_status': 'Paid',
+            'status': 'Approved',
+        }
+        res = self.client.post(reverse('admin_create_nepug'), payload)
+        self.assertEqual(res.status_code, 302)
+
+        record = NepUgAdmissionEnrollment.objects.filter(reg_no='NEP26001').first()
+        self.assertIsNotNone(record)
+        self.assertEqual(record.previous_exam_name, 'B.Sc. First Semester')
+        self.assertEqual(record.previous_board, 'Autonomous Exam Cell, CSAC Pamgarh')
+        self.assertEqual(record.previous_percentage, '80.00')
+        self.assertEqual(record.photo_base64, 'data:image/jpeg;base64,mockphoto101')
+        self.assertEqual(record.signature_base64, 'data:image/jpeg;base64,mocksign101')
+
+        # Check education_json structured data
+        edu_list = json.loads(record.education_json)
+        self.assertEqual(len(edu_list), 3)
+        self.assertEqual(edu_list[0]['className'], '10th')
+        self.assertEqual(edu_list[1]['className'], '12th')
+        self.assertEqual(edu_list[2]['className'], 'B.Sc. First Semester')
+
+        # 3. Verify student at /admission/enrollment/ sees NEP UG card without breaking Sem I
+        student_session = self.client.session
+        student_session['is_logged_in'] = True
+        student_session['reg_no'] = self.student.registration_no
+        student_session.save()
+
+        portal_res = self.client.get(reverse('enrollment_form'), follow=True)
+        self.assertEqual(portal_res.status_code, 200)
+        portal_content = portal_res.content.decode('utf-8')
+        self.assertIn('NEP UG Semester II', portal_content)
+        self.assertIn(record.application_no, portal_content)
+
+        # 4. Verify admin students list displays NEP UG badge and print slip link
+        admin_session = self.client.session
+        admin_session['admin_user'] = 'admin'
+        admin_session.save()
+
+        students_res = self.client.get(reverse('manage_students') + f'?search={self.student.registration_no}')
+        self.assertEqual(students_res.status_code, 200)
+        students_content = students_res.content.decode('utf-8')
+        self.assertIn('NEP Sem II: Approved', students_content)
+        self.assertIn(f'/admin/nep-ug/print/{record.pk}/', students_content)
+
 

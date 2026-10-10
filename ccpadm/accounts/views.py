@@ -243,10 +243,11 @@ def student_dashboard(request):
             s.get('name', '') for s in selected_subjects if isinstance(s, dict) and s.get('name')
         )
 
-    from admissions.models import StudentEnrollment, EnrollmentInstruction
+    from admissions.models import StudentEnrollment, EnrollmentInstruction, NepUgAdmissionEnrollment
     from .utils import get_student_sidebar_context
 
     enrollment = StudentEnrollment.objects.filter(reg_no=reg_no).order_by('-submitted_date', '-created_at').first()
+    nep_ug_enrollment = NepUgAdmissionEnrollment.objects.filter(reg_no=reg_no).order_by('-submitted_date', '-created_at').first()
     can_cancel_enrollment = bool(enrollment and enrollment.is_submitted and enrollment.status != 'Approved')
     try:
         enrollment_instruction = EnrollmentInstruction.objects.filter(is_active=True).order_by('-updated_at', '-id').first()
@@ -257,6 +258,7 @@ def student_dashboard(request):
         'student': student,
         'admission': admission,
         'enrollment': enrollment,
+        'nep_ug_enrollment': nep_ug_enrollment,
         'enrollment_instruction': enrollment_instruction,
         'can_cancel_enrollment': can_cancel_enrollment,
         'masked_aadhaar': mask_aadhaar(student.aadhaar),

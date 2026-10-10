@@ -335,6 +335,12 @@ class NepUgAdmissionEnrollment(models.Model):
     previous_enrollment_no = models.CharField(max_length=50, blank=True, help_text="Existing university enrollment number")
     previous_semester_result = models.CharField(max_length=50, blank=True, default='Pass', help_text="Result of previous semester (Pass / ATKT)")
     previous_semester_marks = models.CharField(max_length=50, blank=True, help_text="Marks / SGPA obtained in previous semester")
+    previous_exam_name = models.CharField(max_length=100, blank=True, help_text="Previous Exam / Semester (e.g., B.A. Sem I)")
+    previous_board = models.CharField(max_length=150, blank=True, default="Shaheed Nandkumar Patel Vishwavidyalaya, Raigarh", help_text="Previous Board/University")
+    previous_year = models.IntegerField(null=True, blank=True, help_text="Previous Exam Passing Year")
+    previous_total_marks = models.CharField(max_length=50, blank=True, help_text="Previous semester total marks")
+    previous_obtained_marks = models.CharField(max_length=50, blank=True, help_text="Previous semester marks obtained")
+    previous_percentage = models.CharField(max_length=20, blank=True, help_text="Previous semester percentage or SGPA")
 
     # Personal info
     full_name = models.CharField(max_length=150, blank=True)

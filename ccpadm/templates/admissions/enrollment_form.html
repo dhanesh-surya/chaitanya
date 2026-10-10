@@ -163,6 +163,27 @@
                 </div>
             </div>
             {% endif %}
+            {% if nep_ug_enrollment %}
+            <div class="alert alert-info" style="margin-bottom: 20px; border-left: 5px solid #0284c7; background: #f0f9ff; padding: 14px 18px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-layer-group" style="font-size: 22px; color: #0284c7;"></i>
+                    <div>
+                        <h5 style="margin: 0 0 2px; color: #0369a1; font-weight: 700; font-size: 14.5px;">NEP UG Semester {{ nep_ug_enrollment.semester }} Admission cum Enrollment Active</h5>
+                        <p style="margin: 0; color: #0c4a6e; font-size: 13px;">
+                            Application No: <strong>{{ nep_ug_enrollment.application_no }}</strong> | Program: <strong>{{ nep_ug_enrollment.program_type }}</strong> | Status: <span class="badge bg-success" style="font-size: 11px;">{{ nep_ug_enrollment.status }}</span>
+                        </p>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <a href="{% url 'nep_ug_print' nep_ug_enrollment.enrollment_no|default:nep_ug_enrollment.application_no %}" class="btn btn-sm btn-primary" style="background:#0284c7; border-color:#0284c7; font-weight:600;" target="_blank">
+                        <i class="fas fa-print me-1"></i> Print Sem {{ nep_ug_enrollment.semester }} Slip
+                    </a>
+                    <a href="{% url 'nep_ug_receipt' nep_ug_enrollment.enrollment_no|default:nep_ug_enrollment.application_no %}" class="btn btn-sm btn-success" style="font-weight:600;" target="_blank">
+                        <i class="fas fa-receipt me-1"></i> Fee Receipt
+                    </a>
+                </div>
+            </div>
+            {% endif %}
 
             <form method="post" action="{% url 'enrollment_form' %}" id="enrollmentForm" enctype="multipart/form-data">
                 {% csrf_token %}

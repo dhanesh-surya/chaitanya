@@ -52,6 +52,73 @@
     padding: 16px 20px;
     margin-bottom: 20px;
 }
+.media-upload-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    align-items: flex-start;
+}
+.media-upload-card {
+    background: #f8fafc;
+    border: 1.5px dashed #94a3b8;
+    border-radius: 8px;
+    padding: 16px;
+    flex: 1 1 260px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+.img-preview-box {
+    width: 140px;
+    height: 165px;
+    border: 2px solid #cbd5e1;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: #ffffff;
+    margin-bottom: 12px;
+}
+.img-preview-box img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+.sig-preview-box {
+    width: 200px;
+    height: 85px;
+    border: 2px solid #cbd5e1;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: #ffffff;
+    margin-bottom: 12px;
+}
+.sig-preview-box img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+.sub-card-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 16px 18px;
+    margin-bottom: 16px;
+}
+.sub-card-header {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #082B49;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
 </style>
 {% endblock %}
 
@@ -102,7 +169,7 @@
             {% endif %}
         </div>
 
-        <form method="post" action="{% url 'admin_create_nepug' %}">
+        <form method="post" action="{% url 'admin_create_nepug' %}" enctype="multipart/form-data">
             {% csrf_token %}
 
             <!-- SECTION 1: STATUS & ADMIN CONTROL -->
@@ -284,6 +351,172 @@
                         <input type="text" name="corr_pin_code" class="form-control" value="{{ initial_data.corr_pin_code|default:'' }}">
                     </div>
                 </div>
+            <!-- SECTION 4: EDUCATIONAL QUALIFICATIONS -->
+            <div class="nep-section-card">
+                <div class="nep-section-title">
+                    <i class="fas fa-book-reader"></i> Educational Qualifications &amp; Previous Marksheet Details
+                </div>
+
+                <!-- 4.1: 10th (High School) Details -->
+                <div class="sub-card-box">
+                    <div class="sub-card-header">
+                        <i class="fas fa-certificate text-primary"></i> 10th (High School) Details
+                    </div>
+                    <div class="form-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px;">
+                        <div class="form-group">
+                            <label class="form-label">Class</label>
+                            <input type="text" name="class10" class="form-control" value="{{ initial_data.class10|default:'10th' }}">
+                        </div>
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label class="form-label">Board / Council</label>
+                            <input type="text" name="board10" class="form-control" value="{{ initial_data.board10|default:'CGBSE' }}" placeholder="e.g. CGBSE / CBSE">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Passing Year</label>
+                            <input type="number" name="year10" class="form-control" value="{{ initial_data.year10|default:'' }}" placeholder="e.g. 2023">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Total Marks</label>
+                            <input type="number" id="total_marks10" name="total_marks10" class="form-control" value="{{ initial_data.total_marks10|default:'' }}" placeholder="e.g. 600" oninput="calcPercent('10')">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Obtained Marks</label>
+                            <input type="number" id="obtained10" name="obtained10" class="form-control" value="{{ initial_data.obtained10|default:'' }}" placeholder="e.g. 450" oninput="calcPercent('10')">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Percentage (%)</label>
+                            <input type="text" id="percentage10" name="percentage10" class="form-control" value="{{ initial_data.percentage10|default:'' }}" placeholder="e.g. 75.00">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Grade / Division</label>
+                            <input type="text" name="grade10" class="form-control" value="{{ initial_data.grade10|default:'' }}" placeholder="e.g. First / A">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4.2: 12th (Higher Secondary) Details -->
+                <div class="sub-card-box">
+                    <div class="sub-card-header">
+                        <i class="fas fa-university text-primary"></i> 12th (Higher Secondary) Details
+                    </div>
+                    <div class="form-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px;">
+                        <div class="form-group">
+                            <label class="form-label">Class</label>
+                            <input type="text" name="class12" class="form-control" value="{{ initial_data.class12|default:'12th' }}">
+                        </div>
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label class="form-label">Board / Council</label>
+                            <input type="text" name="board12" class="form-control" value="{{ initial_data.board12|default:'CGBSE' }}" placeholder="e.g. CGBSE / CBSE">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Stream / Subject Group</label>
+                            <input type="text" name="stream12" class="form-control" value="{{ initial_data.stream12|default:'' }}" placeholder="e.g. Arts / Biology / Maths / Commerce">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Passing Year</label>
+                            <input type="number" name="year12" class="form-control" value="{{ initial_data.year12|default:'' }}" placeholder="e.g. 2025">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Total Marks</label>
+                            <input type="number" id="total_marks12" name="total_marks12" class="form-control" value="{{ initial_data.total_marks12|default:'' }}" placeholder="e.g. 500" oninput="calcPercent('12')">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Obtained Marks</label>
+                            <input type="number" id="obtained12" name="obtained12" class="form-control" value="{{ initial_data.obtained12|default:'' }}" placeholder="e.g. 380" oninput="calcPercent('12')">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Percentage (%)</label>
+                            <input type="text" id="percentage12" name="percentage12" class="form-control" value="{{ initial_data.percentage12|default:'' }}" placeholder="e.g. 76.00">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Grade / Division</label>
+                            <input type="text" name="grade12" class="form-control" value="{{ initial_data.grade12|default:'' }}" placeholder="e.g. First / A">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4.3: Previous UG Marksheet / Semester Exam Details -->
+                <div class="sub-card-box" style="border: 1.5px solid #bae6fd; background: #f0f9ff;">
+                    <div class="sub-card-header" style="color: #0369a1;">
+                        <i class="fas fa-file-invoice text-info"></i> Previous UG Marksheet / Semester Exam Details
+                    </div>
+                    <div class="form-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px;">
+                        <div class="form-group">
+                            <label class="form-label">Previous Exam / Semester</label>
+                            <input type="text" name="previous_exam_name" class="form-control" value="{{ initial_data.previous_exam_name|default:'' }}" placeholder="e.g. B.A. First Semester">
+                        </div>
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label class="form-label">University / Examining Body</label>
+                            <input type="text" name="previous_board" class="form-control" value="{{ initial_data.previous_board|default:'Shaheed Nandkumar Patel Vishwavidyalaya, Raigarh' }}" placeholder="University Name">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Examination Year</label>
+                            <input type="number" name="previous_year" class="form-control" value="{{ initial_data.previous_year|default:'' }}" placeholder="e.g. 2026">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Total Marks</label>
+                            <input type="number" id="previous_total_marks" name="previous_total_marks" class="form-control" value="{{ initial_data.previous_total_marks|default:'' }}" placeholder="e.g. 600" oninput="calcPercent('ug')">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Marks Obtained</label>
+                            <input type="number" id="previous_obtained_marks" name="previous_obtained_marks" class="form-control" value="{{ initial_data.previous_obtained_marks|default:'' }}" placeholder="e.g. 420" oninput="calcPercent('ug')">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Percentage / SGPA / CGPA</label>
+                            <input type="text" id="previous_percentage" name="previous_percentage" class="form-control" value="{{ initial_data.previous_percentage|default:'' }}" placeholder="e.g. 70.00% or 7.2 SGPA">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 5: CANDIDATE PHOTO & SIGNATURE UPLOAD -->
+            <div class="nep-section-card">
+                <div class="nep-section-title">
+                    <i class="fas fa-portrait"></i> Candidate Photograph &amp; Signature Upload
+                </div>
+                <div class="media-upload-container">
+                    <!-- Photo Box -->
+                    <div class="media-upload-card">
+                        <label style="font-weight: 700; color: #082B49; margin-bottom: 8px;">
+                            <i class="fas fa-camera"></i> Student Photograph
+                        </label>
+                        <div class="img-preview-box" id="photoPreviewContainer">
+                            {% if initial_data.photo_base64 %}
+                            <img src="{{ initial_data.photo_base64 }}" alt="Student Photo" id="photoPreviewImg">
+                            {% else %}
+                            <div id="photoPlaceholder" style="color: #94a3b8; font-size: 11px; text-align: center; padding: 10px;">
+                                <i class="fas fa-user" style="font-size: 40px; margin-bottom: 6px; display: block;"></i>
+                                No Photo Uploaded
+                            </div>
+                            <img src="" alt="Student Photo" id="photoPreviewImg" style="display: none;">
+                            {% endif %}
+                        </div>
+                        <input type="file" name="photo_file" id="photoFileInput" accept="image/*" class="form-control" style="font-size: 12px; margin-bottom: 8px;" onchange="previewMediaFile(this, 'photo')">
+                        <input type="hidden" name="photo_base64" id="photoBase64Input" value="{{ initial_data.photo_base64|default:'' }}">
+                        <small class="text-muted" style="font-size: 11px;">Supported: JPG, JPEG, PNG (Passport size recommended)</small>
+                    </div>
+
+                    <!-- Signature Box -->
+                    <div class="media-upload-card">
+                        <label style="font-weight: 700; color: #082B49; margin-bottom: 8px;">
+                            <i class="fas fa-file-signature"></i> Student Signature
+                        </label>
+                        <div class="sig-preview-box" id="sigPreviewContainer">
+                            {% if initial_data.signature_base64 %}
+                            <img src="{{ initial_data.signature_base64 }}" alt="Student Signature" id="sigPreviewImg">
+                            {% else %}
+                            <div id="sigPlaceholder" style="color: #94a3b8; font-size: 11px; text-align: center; padding: 10px;">
+                                <i class="fas fa-pen-nib" style="font-size: 26px; margin-bottom: 4px; display: block;"></i>
+                                No Signature Uploaded
+                            </div>
+                            <img src="" alt="Student Signature" id="sigPreviewImg" style="display: none;">
+                            {% endif %}
+                        </div>
+                        <input type="file" name="signature_file" id="sigFileInput" accept="image/*" class="form-control" style="font-size: 12px; margin-bottom: 8px;" onchange="previewMediaFile(this, 'sig')">
+                        <input type="hidden" name="signature_base64" id="sigBase64Input" value="{{ initial_data.signature_base64|default:'' }}">
+                        <small class="text-muted" style="font-size: 11px;">Supported: JPG, JPEG, PNG (Clear signature on white background)</small>
+                    </div>
+                </div>
             </div>
 
             <!-- BUTTONS -->
@@ -296,4 +529,52 @@
         </form>
     </div>
 </div>
+
+<script>
+function calcPercent(prefix) {
+    let tot, obt, percEl;
+    if (prefix === '10') {
+        tot = parseFloat(document.getElementById('total_marks10').value);
+        obt = parseFloat(document.getElementById('obtained10').value);
+        percEl = document.getElementById('percentage10');
+    } else if (prefix === '12') {
+        tot = parseFloat(document.getElementById('total_marks12').value);
+        obt = parseFloat(document.getElementById('obtained12').value);
+        percEl = document.getElementById('percentage12');
+    } else if (prefix === 'ug') {
+        tot = parseFloat(document.getElementById('previous_total_marks').value);
+        obt = parseFloat(document.getElementById('previous_obtained_marks').value);
+        percEl = document.getElementById('previous_percentage');
+    }
+    if (tot > 0 && obt >= 0) {
+        let pct = ((obt / tot) * 100).toFixed(2);
+        if (percEl) percEl.value = pct;
+    }
+}
+
+function previewMediaFile(input, type) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const dataUrl = e.target.result;
+            if (type === 'photo') {
+                const img = document.getElementById('photoPreviewImg');
+                const ph = document.getElementById('photoPlaceholder');
+                img.src = dataUrl;
+                img.style.display = 'block';
+                if (ph) ph.style.display = 'none';
+                document.getElementById('photoBase64Input').value = dataUrl;
+            } else if (type === 'sig') {
+                const img = document.getElementById('sigPreviewImg');
+                const ph = document.getElementById('sigPlaceholder');
+                img.src = dataUrl;
+                img.style.display = 'block';
+                if (ph) ph.style.display = 'none';
+                document.getElementById('sigBase64Input').value = dataUrl;
+            }
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>
 {% endblock %}

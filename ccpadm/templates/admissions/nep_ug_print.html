@@ -487,7 +487,7 @@
                     <td>{{ nep.year10|default:"—" }}</td>
                     <td>{{ nep.total_marks10|default:"—" }}</td>
                     <td>{{ nep.obtained10|default:"—" }}</td>
-                    <td><strong>{{ nep.percentage10|default:"—" }}%</strong></td>
+                    <td><strong>{% if nep.percentage10 %}{{ nep.percentage10 }}%{% else %}—{% endif %}</strong></td>
                 </tr>
                 <tr>
                     <td><strong>12th (Higher Secondary)</strong></td>
@@ -495,8 +495,18 @@
                     <td>{{ nep.year12|default:"—" }}</td>
                     <td>{{ nep.total_marks12|default:"—" }}</td>
                     <td>{{ nep.obtained12|default:"—" }}</td>
-                    <td><strong>{{ nep.percentage12|default:"—" }}%</strong></td>
+                    <td><strong>{% if nep.percentage12 %}{{ nep.percentage12 }}%{% else %}—{% endif %}</strong></td>
                 </tr>
+                {% if nep.previous_exam_name or nep.previous_roll_no or nep.previous_obtained_marks or nep.previous_semester_marks %}
+                <tr>
+                    <td><strong>{{ nep.previous_exam_name|default:"Previous UG Marksheet" }}</strong></td>
+                    <td>{{ nep.previous_board|default:"SNPV, Raigarh" }}</td>
+                    <td>{{ nep.previous_year|default:"—" }}</td>
+                    <td>{{ nep.previous_total_marks|default:"—" }}</td>
+                    <td>{{ nep.previous_obtained_marks|default:nep.previous_semester_marks|default:"—" }}</td>
+                    <td><strong>{% if nep.previous_percentage %}{{ nep.previous_percentage }}{% if '%' not in nep.previous_percentage %}%{% endif %}{% else %}{{ nep.previous_semester_result|default:"Pass" }}{% endif %}</strong></td>
+                </tr>
+                {% endif %}
             </tbody>
         </table>
 

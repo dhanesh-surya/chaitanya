@@ -142,6 +142,13 @@
                             {% else %}
                             <span class="text-muted">No application</span>
                             {% endif %}
+                            {% if s.latest_nep_ug %}
+                            <div style="margin-top: 5px;">
+                                <a href="{% url 'admin_print_nepug' s.latest_nep_ug.pk %}" target="_blank" class="badge badge--compact" style="background:#0284c7; color:#fff; text-decoration:none; display:inline-flex; align-items:center; gap:4px;" title="View NEP UG Sem {{ s.latest_nep_ug.semester }} ({{ s.latest_nep_ug.status }})">
+                                    <i class="fas fa-layer-group"></i> NEP Sem {{ s.latest_nep_ug.semester }}: {{ s.latest_nep_ug.status }}
+                                </a>
+                            </div>
+                            {% endif %}
                         </td>
                         <td class="password-cell col-password">
                             <span class="student-password cell-clip cell-clip--mono" id="password-{{ s.pk }}" title="{{ s.password }}">{{ s.password }}</span>
@@ -184,6 +191,12 @@
                                     <a href="{% url 'admin_download_pdf' s.latest_admission.application_no %}"
                                        class="btn btn-sm btn-primary" title="Download PDF">
                                         <i class="fas fa-file-pdf"></i>
+                                    </a>
+                                    {% endif %}
+                                    {% if s.latest_nep_ug %}
+                                    <a href="{% url 'admin_print_nepug' s.latest_nep_ug.pk %}" target="_blank"
+                                       class="btn btn-sm btn-ghost" style="color: #0284c7;" title="Print NEPUG Sem {{ s.latest_nep_ug.semester }} Slip">
+                                        <i class="fas fa-file-invoice"></i>
                                     </a>
                                     {% endif %}
                                     {% if s.latest_admission and s.latest_admission.status == 'Submitted' %}

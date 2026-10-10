@@ -70,10 +70,15 @@ def enrollment_form(request):
     reg_no = request.session.get('reg_no')
     student = get_object_or_404(Student, registration_no=reg_no)
     existing_enrollment = StudentEnrollment.objects.filter(reg_no=reg_no).first()
+    from admissions.models import NepUgAdmissionEnrollment
+    nep_ug_enrollment = NepUgAdmissionEnrollment.objects.filter(reg_no=reg_no, is_submitted=True).order_by('-submitted_date', '-created_at').first()
 
-    if request.method == 'GET' and existing_enrollment and existing_enrollment.is_submitted:
-        if request.GET.get('edit') != '1':
-            return redirect('enrollment_print', enrollment_no=existing_enrollment.enrollment_no)
+    if request.method == 'GET':
+        if existing_enrollment and existing_enrollment.is_submitted:
+            if request.GET.get('edit') != '1':
+                return redirect('enrollment_print', enrollment_no=existing_enrollment.enrollment_no)
+        elif nep_ug_enrollment and nep_ug_enrollment.is_submitted and request.GET.get('new_first_sem') != '1':
+            return redirect('nep_ug_print', pk=nep_ug_enrollment.enrollment_no or nep_ug_enrollment.application_no)
 
     if request.method == 'POST':
         action = request.POST.get('action', 'submit')
@@ -449,6 +454,7 @@ def enrollment_form(request):
         'initial_courses_data': initial_courses_list,
         'religion_choices': RELIGION_CHOICES,
         'medium_choices': MEDIUM_CHOICES,
+        'nep_ug_enrollment': nep_ug_enrollment,
     }
     try:
         from admissions.models import EnrollmentInstruction
@@ -466,6 +472,8 @@ def enrollment_print(request, enrollment_no=None):
         return redirect('login')
 
     enrollment = None
+    from admissions.models import NepUgAdmissionEnrollment
+
     if enrollment_no:
         if str(enrollment_no).isdigit():
             enrollment = StudentEnrollment.objects.filter(
@@ -474,6 +482,13 @@ def enrollment_print(request, enrollment_no=None):
         else:
             enrollment = StudentEnrollment.objects.filter(enrollment_no=enrollment_no).first()
 
+        if not enrollment:
+            nep = NepUgAdmissionEnrollment.objects.filter(
+                models.Q(enrollment_no=enrollment_no) | models.Q(application_no=enrollment_no)
+            ).first()
+            if nep:
+                return redirect('nep_ug_print', pk=nep.enrollment_no or nep.application_no)
+
     if admin_user:
         if not enrollment:
             if enrollment_no:
@@ -481,6 +496,9 @@ def enrollment_print(request, enrollment_no=None):
             elif reg_no:
                 enrollment = StudentEnrollment.objects.filter(reg_no=reg_no, is_submitted=True).order_by('-submitted_date').first()
                 if not enrollment:
+                    nep = NepUgAdmissionEnrollment.objects.filter(reg_no=reg_no).order_by('-submitted_date', '-created_at').first()
+                    if nep:
+                        return redirect('admin_print_nepug', pk=nep.pk)
                     enrollment = get_object_or_404(StudentEnrollment, reg_no=reg_no)
             else:
                 messages.error(request, 'Enrollment record not found.')
@@ -490,10 +508,21 @@ def enrollment_print(request, enrollment_no=None):
         student = get_object_or_404(Student, registration_no=reg_no)
         if not enrollment:
             if enrollment_no:
-                enrollment = get_object_or_404(StudentEnrollment, enrollment_no=enrollment_no, reg_no=reg_no)
+                enrollment = StudentEnrollment.objects.filter(enrollment_no=enrollment_no, reg_no=reg_no).first()
+                if not enrollment:
+                    nep = NepUgAdmissionEnrollment.objects.filter(
+                        models.Q(enrollment_no=enrollment_no) | models.Q(application_no=enrollment_no),
+                        reg_no=reg_no
+                    ).first()
+                    if nep:
+                        return redirect('nep_ug_print', pk=nep.enrollment_no or nep.application_no)
+                    raise Http404("No StudentEnrollment matches the given query.")
             else:
                 enrollment = StudentEnrollment.objects.filter(reg_no=reg_no, is_submitted=True).order_by('-submitted_date').first()
                 if not enrollment:
+                    nep = NepUgAdmissionEnrollment.objects.filter(reg_no=reg_no, is_submitted=True).order_by('-submitted_date', '-created_at').first()
+                    if nep:
+                        return redirect('nep_ug_print', pk=nep.enrollment_no or nep.application_no)
                     messages.warning(request, 'No submitted enrollment application found. Please complete enrollment first.')
                     return redirect('enrollment_form')
         elif enrollment.reg_no != reg_no:
@@ -578,10 +607,15 @@ def enrollment_print(request, enrollment_no=None):
             logger.error(f'Error parsing enrolled courses: {e}')
             enrolled_courses = []
 
+    nep_ug_enrollment = NepUgAdmissionEnrollment.objects.filter(
+        reg_no=student.registration_no, is_submitted=True
+    ).order_by('-submitted_date', '-created_at').first()
+
     ctx = {
         'student': student,
         'enrollment': enrollment,
         'enrolled_courses': enrolled_courses,
+        'nep_ug_enrollment': nep_ug_enrollment,
     }
     if reg_no and not admin_user:
         ctx.update(get_student_sidebar_context(reg_no, active='enrollment'))
@@ -595,6 +629,8 @@ def enrollment_fee_receipt(request, enrollment_no=None):
         return redirect('login')
 
     enrollment = None
+    from admissions.models import NepUgAdmissionEnrollment
+
     if enrollment_no:
         if str(enrollment_no).isdigit():
             enrollment = StudentEnrollment.objects.filter(
@@ -603,6 +639,13 @@ def enrollment_fee_receipt(request, enrollment_no=None):
         else:
             enrollment = StudentEnrollment.objects.filter(enrollment_no=enrollment_no).first()
 
+        if not enrollment:
+            nep = NepUgAdmissionEnrollment.objects.filter(
+                models.Q(enrollment_no=enrollment_no) | models.Q(application_no=enrollment_no)
+            ).first()
+            if nep:
+                return redirect('nep_ug_receipt', pk=nep.enrollment_no or nep.application_no)
+
     if admin_user:
         if not enrollment:
             if enrollment_no:
@@ -610,6 +653,9 @@ def enrollment_fee_receipt(request, enrollment_no=None):
             elif reg_no:
                 enrollment = StudentEnrollment.objects.filter(reg_no=reg_no, is_submitted=True).order_by('-submitted_date').first()
                 if not enrollment:
+                    nep = NepUgAdmissionEnrollment.objects.filter(reg_no=reg_no).order_by('-submitted_date', '-created_at').first()
+                    if nep:
+                        return redirect('admin_receipt_nepug', pk=nep.pk)
                     enrollment = get_object_or_404(StudentEnrollment, reg_no=reg_no)
             else:
                 messages.error(request, 'Enrollment record not found.')
@@ -619,10 +665,21 @@ def enrollment_fee_receipt(request, enrollment_no=None):
         student = get_object_or_404(Student, registration_no=reg_no)
         if not enrollment:
             if enrollment_no:
-                enrollment = get_object_or_404(StudentEnrollment, enrollment_no=enrollment_no, reg_no=reg_no)
+                enrollment = StudentEnrollment.objects.filter(enrollment_no=enrollment_no, reg_no=reg_no).first()
+                if not enrollment:
+                    nep = NepUgAdmissionEnrollment.objects.filter(
+                        models.Q(enrollment_no=enrollment_no) | models.Q(application_no=enrollment_no),
+                        reg_no=reg_no
+                    ).first()
+                    if nep:
+                        return redirect('nep_ug_receipt', pk=nep.enrollment_no or nep.application_no)
+                    raise Http404("No StudentEnrollment matches the given query.")
             else:
                 enrollment = StudentEnrollment.objects.filter(reg_no=reg_no, is_submitted=True).order_by('-submitted_date').first()
                 if not enrollment:
+                    nep = NepUgAdmissionEnrollment.objects.filter(reg_no=reg_no, is_submitted=True).order_by('-submitted_date', '-created_at').first()
+                    if nep:
+                        return redirect('nep_ug_receipt', pk=nep.enrollment_no or nep.application_no)
                     messages.warning(request, 'No submitted enrollment application found. Please complete enrollment first.')
                     return redirect('enrollment_form')
         elif enrollment.reg_no != reg_no:

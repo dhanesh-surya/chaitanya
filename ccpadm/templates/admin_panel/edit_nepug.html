@@ -60,6 +60,9 @@
                     </p>
                 </div>
                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <a href="{% url 'nep_ug_enrollment_form' %}" class="btn btn-sm btn-ghost" style="color: #fff; border: 1px solid rgba(255,255,255,0.4);" target="_blank">
+                        <i class="fas fa-external-link-alt"></i> View Student Form
+                    </a>
                     <a href="{% url 'nep_ug_print' record.enrollment_no|default:record.application_no %}" class="btn btn-sm btn-ghost" style="color: #fff; border: 1px solid rgba(255,255,255,0.4);" target="_blank">
                         <i class="fas fa-print"></i> Print Slip
                     </a>

@@ -8,6 +8,9 @@
         <div class="page-header page-header--admin">
             <h2 class="page-title"><i class="fas fa-graduation-cap"></i> NEPUG — Admission cum Enrollment (2nd/3rd/4th/5th Sem)</h2>
             <nav class="page-actions page-actions--toolbar" aria-label="Admin navigation">
+                <a href="{% url 'nep_ug_enrollment_form' %}" class="page-action-btn" title="View Student NEPUG Form (/admission/nep-ug/)" target="_blank">
+                    <i class="fas fa-external-link-alt" aria-hidden="true"></i><span>Student Form</span>
+                </a>
                 {% include 'partials/admin_nav_actions.html' with active_page='nepug' %}
                 {% include 'partials/admin_nav_logout.html' %}
             </nav>
@@ -104,6 +107,9 @@
                     </a>
                     <a href="{% url 'admin_create_nepug' %}" class="btn btn-sm btn-primary" style="background: #0284c7; border-color: #0284c7; color: #fff; font-weight: 600; padding: 7px 16px; display: inline-flex; align-items: center; gap: 6px;" title="Create new NEPUG entry for ex-student">
                         <i class="fas fa-plus"></i> New NEPUG Entry
+                    </a>
+                    <a href="{% url 'nep_ug_enrollment_form' %}" class="btn btn-sm btn-outline-primary" style="font-weight: 600; padding: 7px 14px; display: inline-flex; align-items: center; gap: 6px;" target="_blank" title="Open Student NEP-UG Enrollment Page (/admission/nep-ug/)">
+                        <i class="fas fa-external-link-alt"></i> /admission/nep-ug/
                     </a>
                 </div>
             </form>

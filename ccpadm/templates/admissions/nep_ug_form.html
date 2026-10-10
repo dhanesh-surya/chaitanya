@@ -97,53 +97,57 @@
 {% endblock %}
 
 {% block content %}
-<div class="portal-page">
-    {% include 'partials/student_sidebar.html' %}
+<div class="portal-page portal-page--wide portal-page--form">
+    <div class="portal-layout">
+        {% include 'partials/student_sidebar.html' %}
 
-    <div class="portal-main">
-        <div class="page-header" style="margin-bottom: 20px;">
-            <div>
-                <h2 class="page-title" style="color: #082B49; display: flex; align-items: center; gap: 10px;">
-                    <i class="fas fa-graduation-cap text-primary"></i> NEP UG Admission cum Enrollment
-                    <span class="nep-badge-sem">Sem II / III / IV / V</span>
-                </h2>
-                <p class="page-subtitle" style="margin-top: 4px; color: #475569;">
-                    सत्र 2026-27 | राष्ट्रीय शिक्षा नीति (NEP 2020) स्नातक द्वितीय, तृतीय, चतुर्थ एवं पंचम सेमेस्टर प्रवेश एवं नामांकन
-                </p>
+        <div class="admission-main portal-main portal-main--form">
+            <div class="page-header" style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px;">
+                <div>
+                    <h2 class="page-title" style="color: #082B49; display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-graduation-cap text-primary"></i> NEP UG Admission cum Enrollment
+                        <span class="nep-badge-sem">Sem II / III / IV / V</span>
+                    </h2>
+                    <p class="page-subtitle" style="margin-top: 4px; color: #475569;">
+                        सत्र 2026-27 | राष्ट्रीय शिक्षा नीति (NEP 2020) स्नातक द्वितीय, तृतीय, चतुर्थ एवं पंचम सेमेस्टर प्रवेश एवं नामांकन
+                    </p>
+                </div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                    <a href="{% url 'manage_nepug_enrollments' %}" class="btn btn-sm btn-outline-primary" style="font-weight: 600; display: inline-flex; align-items: center; gap: 6px;" title="Go to Admin NEPUG section">
+                        <i class="fas fa-user-shield"></i> NEPUG Admin Section
+                    </a>
+                    {% if existing_nep and existing_nep.is_submitted %}
+                    <a href="{% url 'nep_ug_print_default' %}" class="btn btn-outline-primary" target="_blank">
+                        <i class="fas fa-print"></i> Print Slip
+                    </a>
+                    <a href="{% url 'nep_ug_receipt_default' %}" class="btn btn-outline-success" target="_blank">
+                        <i class="fas fa-receipt"></i> Fee Receipt
+                    </a>
+                    {% endif %}
+                </div>
             </div>
-            {% if existing_nep and existing_nep.is_submitted %}
-            <div>
-                <a href="{% url 'nep_ug_print_default' %}" class="btn btn-outline-primary" target="_blank">
-                    <i class="fas fa-print"></i> Print Slip
-                </a>
-                <a href="{% url 'nep_ug_receipt_default' %}" class="btn btn-outline-success ms-2" target="_blank">
-                    <i class="fas fa-receipt"></i> Fee Receipt
-                </a>
+
+            {% if existing_nep and existing_nep.is_submitted and existing_nep.status != 'Approved' %}
+            <div class="alert alert-info" style="border-left: 4px solid #0284c7; background: #f0f9ff; padding: 12px 18px; border-radius: 6px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                <div>
+                    <i class="fas fa-info-circle me-1"></i>
+                    <strong>Application Status: Submitted</strong> (Pending college admin approval).
+                </div>
+                <form method="post" action="{% url 'cancel_nep_ug_enrollment' %}" onsubmit="return confirm('Do you want to edit your application? It will be reset to Draft.');" style="margin: 0;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-outline-warning">
+                        <i class="fas fa-edit"></i> Edit Form
+                    </button>
+                </form>
+            </div>
+            {% elif existing_nep and existing_nep.status == 'Approved' %}
+            <div class="alert alert-success" style="border-left: 4px solid #16a34a; background: #f0fdf4; padding: 12px 18px; border-radius: 6px; margin-bottom: 20px;">
+                <i class="fas fa-check-circle me-1"></i>
+                <strong>Application Status: Approved / Accepted</strong>. Your admission and enrollment is locked.
             </div>
             {% endif %}
-        </div>
 
-        {% if existing_nep and existing_nep.is_submitted and existing_nep.status != 'Approved' %}
-        <div class="alert alert-info" style="border-left: 4px solid #0284c7; background: #f0f9ff; padding: 12px 18px; border-radius: 6px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
-            <div>
-                <i class="fas fa-info-circle me-1"></i>
-                <strong>Application Status: Submitted</strong> (Pending college admin approval).
-            </div>
-            <form method="post" action="{% url 'cancel_nep_ug_enrollment' %}" onsubmit="return confirm('Do you want to edit your application? It will be reset to Draft.');" style="margin: 0;">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-sm btn-outline-warning">
-                    <i class="fas fa-edit"></i> Edit Form
-                </button>
-            </form>
-        </div>
-        {% elif existing_nep and existing_nep.status == 'Approved' %}
-        <div class="alert alert-success" style="border-left: 4px solid #16a34a; background: #f0fdf4; padding: 12px 18px; border-radius: 6px; margin-bottom: 20px;">
-            <i class="fas fa-check-circle me-1"></i>
-            <strong>Application Status: Approved / Accepted</strong>. Your admission and enrollment is locked.
-        </div>
-        {% endif %}
-
-        <form method="post" action="{% url 'nep_ug_enrollment_form' %}" enctype="multipart/form-data" id="nepUgEnrollmentForm">
+            <form method="post" action="{% url 'nep_ug_enrollment_form' %}" enctype="multipart/form-data" id="nepUgEnrollmentForm">
             {% csrf_token %}
 
             <!-- SECTION 1: PROGRAM & SEMESTER DETAILS -->
@@ -473,8 +477,8 @@
                         <i class="fas fa-check-circle"></i> फॉर्म सबमिट करें (Submit Application)
                     </button>
                 </div>
-            </div>
         </form>
+        </div>
     </div>
 </div>
 

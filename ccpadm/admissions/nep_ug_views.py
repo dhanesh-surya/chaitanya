@@ -74,14 +74,16 @@ def _clean_ug_program_name(name):
     return n
 
 
+@student_login_required
+@require_http_methods(['GET', 'POST'])
 def nep_ug_enrollment_form(request):
-    # Only accessed by admin in admin section for ex-students
-    admin_user = request.session.get('admin_user')
-    if admin_user:
-        return redirect('manage_nepug_enrollments')
-    
-    messages.info(request, 'NEP UG (2nd-5th Sem) Admission & Enrollment is managed directly by the college administration.')
-    return redirect('student_dashboard')
+    reg_no = request.session.get('reg_no')
+    student = get_object_or_404(Student, registration_no=reg_no)
+    existing_nep = NepUgAdmissionEnrollment.objects.filter(reg_no=reg_no).first()
+
+    if request.method == 'GET' and existing_nep and existing_nep.is_submitted:
+        if request.GET.get('edit') != '1':
+            return redirect('nep_ug_print', enrollment_no=existing_nep.enrollment_no or existing_nep.application_no)
 
     admission = StudentAdmission.objects.filter(reg_no=reg_no).order_by('-submitted_date', '-created_date').first()
     first_sem_enrollment = StudentEnrollment.objects.filter(reg_no=reg_no).order_by('-submitted_date', '-created_at').first()

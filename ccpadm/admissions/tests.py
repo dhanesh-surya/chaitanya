@@ -563,16 +563,19 @@ class NepUgAdmissionEnrollmentTestCase(TestCase):
             is_submitted=True,
         )
 
-    def test_nep_ug_student_access_restricted(self):
-        # Student visiting /admission/nep-ug/ must be redirected away to dashboard
+    def test_nep_ug_student_access_and_render(self):
+        # Student visiting /admission/nep-ug/ renders form with left sidebar & right form
         session = self.client.session
         session['is_logged_in'] = True
         session['reg_no'] = self.student.registration_no
         session.save()
 
         response = self.client.get(reverse('nep_ug_enrollment_form'))
-        self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse('student_dashboard'))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('portal-layout', response.content.decode('utf-8'))
+        self.assertIn('portal-sidebar', response.content.decode('utf-8'))
+        self.assertIn('/admin/nep-ug/', response.content.decode('utf-8'))
+        self.assertEqual(response.context['initial_data']['full_name'], 'Vikash Sharma')
 
     def test_nep_ug_admin_create_and_print(self):
         from accounts.models import AdminUser

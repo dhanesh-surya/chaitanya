@@ -102,28 +102,51 @@
         {% include 'partials/student_sidebar.html' %}
 
         <div class="admission-main portal-main portal-main--form">
-            <div class="page-header" style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px;">
-                <div>
-                    <h2 class="page-title" style="color: #082B49; display: flex; align-items: center; gap: 10px;">
-                        <i class="fas fa-graduation-cap text-primary"></i> NEP UG Admission cum Enrollment
-                        <span class="nep-badge-sem">Sem II / III / IV / V</span>
-                    </h2>
-                    <p class="page-subtitle" style="margin-top: 4px; color: #475569;">
-                        सत्र 2026-27 | राष्ट्रीय शिक्षा नीति (NEP 2020) स्नातक द्वितीय, तृतीय, चतुर्थ एवं पंचम सेमेस्टर प्रवेश एवं नामांकन
-                    </p>
-                </div>
-                <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
-                    <a href="{% url 'manage_nepug_enrollments' %}" class="btn btn-sm btn-outline-primary" style="font-weight: 600; display: inline-flex; align-items: center; gap: 6px;" title="Go to Admin NEPUG section">
-                        <i class="fas fa-user-shield"></i> NEPUG Admin Section
-                    </a>
-                    {% if existing_nep and existing_nep.is_submitted %}
-                    <a href="{% url 'nep_ug_print_default' %}" class="btn btn-outline-primary" target="_blank">
-                        <i class="fas fa-print"></i> Print Slip
-                    </a>
-                    <a href="{% url 'nep_ug_receipt_default' %}" class="btn btn-outline-success" target="_blank">
-                        <i class="fas fa-receipt"></i> Fee Receipt
-                    </a>
-                    {% endif %}
+            <!-- REDESIGNED NEP UG HEADER CARD -->
+            <div class="nepug-hero-header mb-4" style="background: #ffffff; border-radius: 12px; padding: 22px 26px; box-shadow: 0 4px 20px rgba(8, 43, 73, 0.08); border: 1px solid #e2e8f0; border-left: 6px solid #082B49; margin-bottom: 22px;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+                    <div style="flex: 1 1 520px;">
+                        <!-- Top Meta Badges -->
+                        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px;">
+                            <span class="badge" style="background: #082B49; color: #ffffff; font-size: 11.5px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 5px;">
+                                <i class="fas fa-calendar-alt text-warning"></i> सत्र / Session 2026-27
+                            </span>
+                            <span class="badge" style="background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; font-size: 11.5px; font-weight: 700; padding: 4px 10px; border-radius: 4px; display: inline-flex; align-items: center; gap: 5px;">
+                                <i class="fas fa-graduation-cap"></i> Sem II / III / IV / V
+                            </span>
+                            <span class="badge" style="background: #fef3c7; color: #92400e; border: 1px solid #fde68a; font-size: 11px; font-weight: 700; padding: 4px 9px; border-radius: 4px;">
+                                NEP 2020 UG
+                            </span>
+                        </div>
+
+                        <!-- Main Title -->
+                        <h1 style="color: #082B49; font-size: 1.65rem; font-weight: 800; margin: 0 0 6px 0; display: flex; align-items: center; gap: 12px; line-height: 1.25;">
+                            <span style="display: inline-flex; align-items: center; justify-content: center; width: 42px; height: 42px; background: #e0f2fe; color: #082B49; border-radius: 8px; border: 1.5px solid #bae6fd; font-size: 1.25rem;">
+                                <i class="fas fa-university"></i>
+                            </span>
+                            <span>NEP UG Admission cum Enrollment</span>
+                        </h1>
+
+                        <!-- Subtitle with bilingual Hindi & English details -->
+                        <p style="color: #475569; font-size: 13.5px; margin-bottom: 0; font-weight: 500; line-height: 1.55;">
+                            राष्ट्रीय शिक्षा नीति (NEP 2020) स्नातक <strong>द्वितीय, तृतीय, चतुर्थ एवं पंचम सेमेस्टर</strong> हेतु ऑनलाइन प्रवेश एवं नामांकन आवेदन पत्र
+                        </p>
+                    </div>
+
+                    <!-- Right Action Buttons -->
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 4px;">
+                        <a href="{% url 'manage_nepug_enrollments' %}" class="btn btn-sm btn-outline-primary" style="font-weight: 700; padding: 8px 14px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; border: 1.5px solid #082B49; color: #082B49; background: #f8fafc;" title="College staff &amp; admin section">
+                            <i class="fas fa-user-shield" style="color: #0284c7;"></i> NEPUG Admin Section
+                        </a>
+                        {% if existing_nep and existing_nep.is_submitted %}
+                        <a href="{% url 'nep_ug_print_default' %}" class="btn btn-sm btn-outline-primary" style="font-weight: 600; padding: 8px 14px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px;" target="_blank">
+                            <i class="fas fa-print"></i> Print Slip
+                        </a>
+                        <a href="{% url 'nep_ug_receipt_default' %}" class="btn btn-sm btn-success" style="font-weight: 600; padding: 8px 14px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; background: #16a34a; border-color: #15803d; color: #ffffff;" target="_blank">
+                            <i class="fas fa-receipt"></i> Fee Receipt
+                        </a>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
 

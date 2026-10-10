@@ -368,7 +368,7 @@ def admin_logout(request):
 
 @admin_login_required
 def admin_dashboard(request):
-    from admissions.models import StudentEnrollment
+    from admissions.models import NepUgAdmissionEnrollment, StudentEnrollment
 
     show_verified = request.GET.get('show_verified') == '1'
     verified_students = Student.objects.filter(is_verified=True).count()
@@ -383,6 +383,9 @@ def admin_dashboard(request):
         'total_enrollments': StudentEnrollment.objects.count(),
         'submitted_enrollments': StudentEnrollment.objects.filter(is_submitted=True).count(),
         'approved_enrollments': StudentEnrollment.objects.filter(status='Approved').count(),
+        'total_nepug': NepUgAdmissionEnrollment.objects.count(),
+        'submitted_nepug': NepUgAdmissionEnrollment.objects.filter(is_submitted=True).count(),
+        'approved_nepug': NepUgAdmissionEnrollment.objects.filter(status='Approved').count(),
     }
     recent = StudentAdmission.objects.order_by('-submitted_date', '-created_date')[:20]
     recent_enrollments = StudentEnrollment.objects.order_by('-submitted_date', '-created_at')[:20]
@@ -1676,6 +1679,379 @@ def export_enrollments_excel(request):
     filename_parts.append(timezone.now().strftime('%Y%m%d'))
     filename = f"{'_'.join(filename_parts)}.xlsx"
 
+    response = HttpResponse(
+        buffer.getvalue(),
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    )
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    return response
+
+
+# ==============================================================================
+# NEP UG ADMISSION CUM ENROLLMENT (SEMESTERS II, III, IV, V) ADMIN VIEWS
+# ==============================================================================
+
+@admin_login_required
+def manage_nepug_enrollments(request):
+    """Admin management page for NEP UG Admission cum Enrollment (2nd/3rd/4th/5th sem)."""
+    from admissions.models import NepUgAdmissionEnrollment
+    from admissions.nep_ug_views import NEP_UG_PROGRAM_CHOICES
+
+    search = request.GET.get('search', '').strip()
+    program_filter = request.GET.get('program', '').strip()
+    if program_filter == 'ALL':
+        program_filter = ''
+    semester_filter = request.GET.get('semester', 'ALL').strip() or 'ALL'
+    status_filter = request.GET.get('status', 'ALL').strip() or 'ALL'
+
+    records = NepUgAdmissionEnrollment.objects.all().select_related('student')
+
+    if search:
+        records = records.filter(
+            Q(full_name__icontains=search)
+            | Q(reg_no__icontains=search)
+            | Q(application_no__icontains=search)
+            | Q(enrollment_no__icontains=search)
+            | Q(previous_roll_no__icontains=search)
+            | Q(previous_enrollment_no__icontains=search)
+            | Q(mobile__icontains=search)
+            | Q(email__icontains=search)
+            | Q(transaction_id__icontains=search)
+        )
+
+    if program_filter:
+        records = records.filter(program_type=program_filter)
+
+    if semester_filter != 'ALL':
+        records = records.filter(semester=semester_filter)
+
+    if status_filter != 'ALL':
+        records = records.filter(status=status_filter)
+
+    total_count = NepUgAdmissionEnrollment.objects.count()
+    submitted_count = NepUgAdmissionEnrollment.objects.filter(status='Submitted').count()
+    approved_count = NepUgAdmissionEnrollment.objects.filter(status='Approved').count()
+    draft_count = NepUgAdmissionEnrollment.objects.filter(status='Draft').count()
+
+    sem_counts = {
+        'II': NepUgAdmissionEnrollment.objects.filter(semester='II').count(),
+        'III': NepUgAdmissionEnrollment.objects.filter(semester='III').count(),
+        'IV': NepUgAdmissionEnrollment.objects.filter(semester='IV').count(),
+        'V': NepUgAdmissionEnrollment.objects.filter(semester='V').count(),
+    }
+
+    program_choices = [c[0] for c in NEP_UG_PROGRAM_CHOICES]
+
+    return render(request, 'admin_panel/nepug_enrollments.html', {
+        'records': records,
+        'search': search,
+        'program_filter': program_filter,
+        'semester_filter': semester_filter,
+        'status_filter': status_filter,
+        'program_choices': program_choices,
+        'semester_choices': NepUgAdmissionEnrollment.SEMESTER_CHOICES,
+        'total_count': total_count,
+        'submitted_count': submitted_count,
+        'approved_count': approved_count,
+        'draft_count': draft_count,
+        'sem_counts': sem_counts,
+        'filtered_count': records.count(),
+    })
+
+
+@admin_login_required
+@require_http_methods(['POST'])
+def update_nepug_status(request, pk):
+    from admissions.models import NepUgAdmissionEnrollment
+    from admissions.utils import generate_enrollment_number
+
+    record = get_object_or_404(NepUgAdmissionEnrollment, pk=pk)
+    new_status = request.POST.get('status', '').strip()
+    if new_status in ('Approved', 'Submitted', 'Draft'):
+        record.status = new_status
+        if new_status == 'Approved':
+            record.is_submitted = True
+            if not record.enrollment_no:
+                record.enrollment_no = record.previous_enrollment_no or generate_enrollment_number()
+            record.save(update_fields=['status', 'is_submitted', 'enrollment_no', 'updated_at'])
+            Student.objects.filter(registration_no=record.reg_no).update(is_verified=True)
+            messages.success(request, f'NEPUG application {record.application_no} for {record.full_name} has been Approved / Accepted.')
+        elif new_status == 'Draft':
+            record.is_submitted = False
+            record.save(update_fields=['status', 'is_submitted', 'updated_at'])
+            messages.success(request, f'NEPUG application {record.application_no} for {record.full_name} reset to Draft (student can now edit).')
+        else:
+            record.save(update_fields=['status', 'updated_at'])
+            messages.success(request, f'NEPUG status updated to {new_status}.')
+
+    next_url = request.POST.get('next') or request.META.get('HTTP_REFERER') or 'manage_nepug_enrollments'
+    return redirect(next_url)
+
+
+@admin_login_required
+@require_http_methods(['POST'])
+def bulk_update_nepug_status(request):
+    from admissions.models import NepUgAdmissionEnrollment
+    from admissions.utils import generate_enrollment_number
+
+    record_ids = request.POST.getlist('record_ids')
+    new_status = request.POST.get('status', '').strip()
+    valid_statuses = ('Approved', 'Draft')
+
+    if not record_ids:
+        messages.error(request, 'Select at least one NEPUG application.')
+        return redirect(request.META.get('HTTP_REFERER') or 'manage_nepug_enrollments')
+    if new_status not in valid_statuses:
+        messages.error(request, 'Choose a valid status (Approve or Reset to Draft).')
+        return redirect(request.META.get('HTTP_REFERER') or 'manage_nepug_enrollments')
+
+    records = NepUgAdmissionEnrollment.objects.filter(pk__in=record_ids)
+    count = 0
+    if new_status == 'Approved':
+        for rec in records:
+            rec.status = 'Approved'
+            rec.is_submitted = True
+            if not rec.enrollment_no:
+                rec.enrollment_no = rec.previous_enrollment_no or generate_enrollment_number()
+            rec.save(update_fields=['status', 'is_submitted', 'enrollment_no', 'updated_at'])
+            Student.objects.filter(registration_no=rec.reg_no).update(is_verified=True)
+            count += 1
+        messages.success(request, f'Successfully Approved & Accepted {count} NEPUG application(s).')
+    elif new_status == 'Draft':
+        for rec in records:
+            rec.status = 'Draft'
+            rec.is_submitted = False
+            rec.save(update_fields=['status', 'is_submitted', 'updated_at'])
+            count += 1
+        messages.success(request, f'Reset {count} NEPUG application(s) to Draft (students can now edit).')
+
+    next_url = request.POST.get('next') or request.META.get('HTTP_REFERER') or 'manage_nepug_enrollments'
+    return redirect(next_url)
+
+
+@admin_login_required
+@require_http_methods(['GET', 'POST'])
+def admin_edit_nepug(request, pk):
+    from admissions.constants import MEDIUM_CHOICES, RELIGION_CHOICES
+    from admissions.models import NepUgAdmissionEnrollment
+    from admissions.nep_ug_views import NEP_UG_PROGRAM_CHOICES
+
+    record = get_object_or_404(NepUgAdmissionEnrollment, pk=pk)
+
+    if request.method == 'POST':
+        # Update program & semester
+        record.program_type = request.POST.get('program_type', '').strip() or record.program_type
+        record.semester = request.POST.get('semester', '').strip() or record.semester
+        record.academic_session = request.POST.get('academic_session', '').strip() or record.academic_session
+        record.enrollment_no = request.POST.get('enrollment_no', '').strip() or record.enrollment_no
+        record.previous_roll_no = request.POST.get('previous_roll_no', '').strip()
+        record.previous_enrollment_no = request.POST.get('previous_enrollment_no', '').strip()
+        record.previous_semester_result = request.POST.get('previous_semester_result', '').strip()
+        record.previous_semester_marks = request.POST.get('previous_semester_marks', '').strip()
+
+        # Update personal & contact
+        record.full_name = request.POST.get('full_name', '').strip()
+        record.father_name = request.POST.get('father_name', '').strip()
+        record.mother_name = request.POST.get('mother_name', '').strip()
+        record.gender = request.POST.get('gender', '').strip()
+        record.category = request.POST.get('category', '').strip()
+        record.religion = request.POST.get('religion', '').strip()
+        record.blood_group = request.POST.get('blood_group', '').strip()
+        record.medium = request.POST.get('medium', '').strip()
+        record.mobile = request.POST.get('mobile', '').strip()
+        record.email = request.POST.get('email', '').strip()
+        record.aadhaar = request.POST.get('aadhaar', '').strip()
+        record.apaar_id = request.POST.get('apaar_id', '').strip()
+
+        dob_str = request.POST.get('dob', '').strip()
+        if dob_str:
+            for fmt in ('%Y-%m-%d', '%d/%m/%Y', '%d-%m-%Y'):
+                try:
+                    record.dob = datetime.strptime(dob_str, fmt).date()
+                    break
+                except ValueError:
+                    pass
+
+        # Address
+        record.corr_village = request.POST.get('corr_village', '').strip()
+        record.corr_city = request.POST.get('corr_city', '').strip()
+        record.corr_district = request.POST.get('corr_district', '').strip()
+        record.corr_state = request.POST.get('corr_state', '').strip()
+        record.corr_pin_code = request.POST.get('corr_pin_code', '').strip()
+
+        # Payment & Status
+        record.fee_amount = request.POST.get('fee_amount', '500').strip()
+        record.transaction_id = request.POST.get('transaction_id', '').strip()
+        record.payment_status = request.POST.get('payment_status', 'Paid').strip()
+        record.admin_remarks = request.POST.get('admin_remarks', '').strip()
+
+        new_status = request.POST.get('status', '').strip()
+        if new_status in ('Approved', 'Submitted', 'Draft'):
+            record.status = new_status
+            if new_status == 'Approved':
+                record.is_submitted = True
+                Student.objects.filter(registration_no=record.reg_no).update(is_verified=True)
+            elif new_status == 'Draft':
+                record.is_submitted = False
+
+        record.save()
+        messages.success(request, f'NEPUG record for {record.full_name} ({record.application_no}) updated successfully.')
+        return redirect('manage_nepug_enrollments')
+
+    return render(request, 'admin_panel/edit_nepug.html', {
+        'record': record,
+        'nep_program_choices': NEP_UG_PROGRAM_CHOICES,
+        'semester_choices': NepUgAdmissionEnrollment.SEMESTER_CHOICES,
+        'religion_choices': RELIGION_CHOICES,
+        'medium_choices': MEDIUM_CHOICES,
+        'status_choices': NepUgAdmissionEnrollment.STATUS_CHOICES,
+    })
+
+
+@admin_login_required
+def export_nepug_excel(request):
+    """Export NEPUG applications to Excel (.xlsx) matching university format."""
+    from io import BytesIO
+    import openpyxl
+    from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+    from openpyxl.utils import get_column_letter
+    from admissions.models import NepUgAdmissionEnrollment
+
+    search = request.GET.get('search', '').strip()
+    program_filter = request.GET.get('program', '').strip()
+    if program_filter == 'ALL':
+        program_filter = ''
+    semester_filter = request.GET.get('semester', 'ALL').strip() or 'ALL'
+    status_filter = request.GET.get('status', 'ALL').strip() or 'ALL'
+
+    records = NepUgAdmissionEnrollment.objects.all().select_related('student')
+
+    if search:
+        records = records.filter(
+            Q(full_name__icontains=search)
+            | Q(reg_no__icontains=search)
+            | Q(application_no__icontains=search)
+            | Q(enrollment_no__icontains=search)
+            | Q(previous_roll_no__icontains=search)
+            | Q(previous_enrollment_no__icontains=search)
+            | Q(mobile__icontains=search)
+            | Q(email__icontains=search)
+            | Q(transaction_id__icontains=search)
+        )
+
+    if program_filter:
+        records = records.filter(program_type=program_filter)
+
+    if semester_filter != 'ALL':
+        records = records.filter(semester=semester_filter)
+
+    if status_filter != 'ALL':
+        records = records.filter(status=status_filter)
+
+    records = records.order_by('semester', 'program_type', 'application_no')
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = 'NEPUG_Enrollments'
+    ws.views.sheetView[0].showGridLines = True
+
+    headers = [
+        'ApplicationNo',
+        'Univ_EnrolNo',
+        'Semester',
+        'Stud_nm',
+        'FatherName',
+        'MotherName',
+        'Medium',
+        'Category',
+        'Gender',
+        'DOB (MM/DD/YYYY)',
+        'Address',
+        'Mobile',
+        'Email',
+        'CLASS NAME',
+        'Prev Roll No',
+        'Prev Result',
+        'Prev Marks',
+        'UTR No',
+        'Fee Amount',
+        'Status',
+        'Submitted Date',
+    ]
+
+    header_font = Font(name='Calibri', size=11, bold=True, color='FFFFFF')
+    header_fill = PatternFill('solid', fgColor='082B49')
+    center_align = Alignment(horizontal='center', vertical='center')
+    left_align = Alignment(horizontal='left', vertical='center')
+
+    thin_border = Border(
+        left=Side(style='thin', color='CBD5E1'),
+        right=Side(style='thin', color='CBD5E1'),
+        top=Side(style='thin', color='CBD5E1'),
+        bottom=Side(style='thin', color='CBD5E1'),
+    )
+
+    ws.row_dimensions[1].height = 28
+    for col_idx, header in enumerate(headers, start=1):
+        cell = ws.cell(row=1, column=col_idx, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = center_align
+        cell.border = thin_border
+
+    center_col_indices = {1, 2, 3, 7, 8, 9, 10, 12, 15, 16, 18, 19, 20, 21}
+
+    for row_idx, rec in enumerate(records, start=2):
+        gender_val = _format_enrollment_gender(rec.gender)
+        dob_val = _format_enrollment_dob(rec.dob)
+        addr = _format_enrollment_address(rec)
+        sub_date = rec.submitted_date.strftime('%d/%m/%Y %I:%M %p') if rec.submitted_date else ''
+
+        row_data = [
+            rec.application_no or '',
+            rec.enrollment_no or rec.previous_enrollment_no or '',
+            rec.semester or '',
+            rec.full_name or '',
+            rec.father_name or '',
+            rec.mother_name or '',
+            rec.medium or '',
+            rec.category or '',
+            gender_val,
+            dob_val,
+            addr,
+            rec.mobile or '',
+            rec.email or '',
+            rec.program_type or '',
+            rec.previous_roll_no or '',
+            rec.previous_semester_result or '',
+            rec.previous_semester_marks or '',
+            rec.transaction_id or '',
+            rec.fee_amount or '500',
+            rec.status or '',
+            sub_date,
+        ]
+        ws.append(row_data)
+        ws.row_dimensions[row_idx].height = 20
+
+        for col_idx in range(1, len(headers) + 1):
+            cell = ws.cell(row=row_idx, column=col_idx)
+            cell.font = Font(name='Calibri', size=10)
+            cell.border = thin_border
+            if col_idx in center_col_indices:
+                cell.alignment = center_align
+            else:
+                cell.alignment = left_align
+
+    for col in ws.columns:
+        col_letter = get_column_letter(col[0].column)
+        max_len = max(len(str(cell.value or '')) for cell in col)
+        ws.column_dimensions[col_letter].width = max(max_len + 3, 12)
+
+    buffer = BytesIO()
+    wb.save(buffer)
+    buffer.seek(0)
+
+    filename = f"nepug_enrollments_{timezone.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
     response = HttpResponse(
         buffer.getvalue(),
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',

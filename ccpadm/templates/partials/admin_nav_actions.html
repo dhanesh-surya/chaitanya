@@ -26,6 +26,11 @@
     <i class="fas fa-id-card" aria-hidden="true"></i><span>Enrollments</span>
 </a>
 {% endif %}
+{% if active_page != 'nepug' %}
+<a href="{% url 'manage_nepug_enrollments' %}" class="page-action-btn" title="NEPUG Admission & Enrollment (Sem II, III, IV, V)">
+    <i class="fas fa-graduation-cap" aria-hidden="true"></i><span>NEPUG</span>
+</a>
+{% endif %}
 {% if active_page != 'attendance' %}
 <a href="{% url 'attendance_sheets' %}" class="page-action-btn" title="Attendance Sheets">
     <i class="fas fa-clipboard-user" aria-hidden="true"></i><span>Attendance</span>

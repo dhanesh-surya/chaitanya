@@ -298,3 +298,125 @@ class EnrollmentInstruction(models.Model):
 
     def __str__(self):
         return f"{self.college_title} - {self.title}"
+
+
+class NepUgAdmissionEnrollment(models.Model):
+    """
+    Admission cum Enrollment for continuing 2nd, 3rd, 4th, and 5th semester
+    students in NEP UG programs (B.A., B.Sc., B.Com, BCA, BBA).
+    """
+
+    STATUS_CHOICES = [
+        ('Draft', 'Draft'),
+        ('Submitted', 'Submitted'),
+        ('Approved', 'Approved'),
+    ]
+
+    SEMESTER_CHOICES = [
+        ('II', '2nd Semester (II)'),
+        ('III', '3rd Semester (III)'),
+        ('IV', '4th Semester (IV)'),
+        ('V', '5th Semester (V)'),
+    ]
+
+    application_no = models.CharField(max_length=50, unique=True, null=True, blank=True, db_index=True)
+    reg_no = models.CharField(max_length=50, db_index=True)
+    enrollment_no = models.CharField(max_length=50, null=True, blank=True, db_index=True)
+    student = models.ForeignKey('accounts.Student', on_delete=models.CASCADE, related_name='nep_ug_enrollments')
+    admission = models.ForeignKey(StudentAdmission, null=True, blank=True, on_delete=models.SET_NULL, related_name='nep_ug_enrollments')
+    first_sem_enrollment = models.ForeignKey(StudentEnrollment, null=True, blank=True, on_delete=models.SET_NULL, related_name='nep_ug_continuing_enrollments')
+
+    # Program & Semester Info
+    program_type = models.CharField(max_length=100, blank=True, help_text="NEP UG Program Name (e.g., B.A., B.Sc., B.Com, BCA)")
+    program_code = models.CharField(max_length=50, blank=True)
+    semester = models.CharField(max_length=20, default='II', choices=SEMESTER_CHOICES, db_index=True)
+    academic_session = models.CharField(max_length=50, default='2026-27', blank=True)
+    previous_roll_no = models.CharField(max_length=50, blank=True, help_text="Previous semester examination roll number")
+    previous_enrollment_no = models.CharField(max_length=50, blank=True, help_text="Existing university enrollment number")
+    previous_semester_result = models.CharField(max_length=50, blank=True, default='Pass', help_text="Result of previous semester (Pass / ATKT)")
+    previous_semester_marks = models.CharField(max_length=50, blank=True, help_text="Marks / SGPA obtained in previous semester")
+
+    # Personal info
+    full_name = models.CharField(max_length=150, blank=True)
+    father_name = models.CharField(max_length=150, blank=True)
+    mother_name = models.CharField(max_length=150, blank=True)
+    gender = models.CharField(max_length=10, blank=True)
+    category = models.CharField(max_length=20, blank=True)
+    nationality = models.CharField(max_length=50, default='Indian', blank=True)
+    religion = models.CharField(max_length=50, blank=True)
+    marital_status = models.CharField(max_length=20, blank=True)
+    blood_group = models.CharField(max_length=10, blank=True)
+    dob = models.DateField(null=True, blank=True)
+    mobile = models.CharField(max_length=15, blank=True)
+    email = models.CharField(max_length=100, blank=True)
+    aadhaar = models.CharField(max_length=12, blank=True)
+    apaar_id = models.CharField(max_length=20, blank=True)
+    medium = models.CharField(max_length=20, blank=True)
+    has_disability = models.BooleanField(null=True, blank=True)
+    disability_details = models.CharField(max_length=255, blank=True)
+    disability_percentage = models.CharField(max_length=10, blank=True)
+    disability_type = models.CharField(max_length=100, blank=True)
+    is_minority = models.BooleanField(null=True, blank=True)
+
+    # Addresses
+    perm_state = models.CharField(max_length=100, blank=True)
+    perm_district = models.CharField(max_length=100, blank=True)
+    perm_city = models.CharField(max_length=100, blank=True)
+    perm_village = models.CharField(max_length=150, blank=True)
+    perm_pin_code = models.CharField(max_length=10, blank=True)
+    corr_state = models.CharField(max_length=100, blank=True)
+    corr_district = models.CharField(max_length=100, blank=True)
+    corr_city = models.CharField(max_length=100, blank=True)
+    corr_village = models.CharField(max_length=150, blank=True)
+    corr_pin_code = models.CharField(max_length=10, blank=True)
+
+    # Education
+    class10 = models.CharField(max_length=50, blank=True)
+    board10 = models.CharField(max_length=150, blank=True)
+    year10 = models.IntegerField(null=True, blank=True)
+    total_marks10 = models.CharField(max_length=50, blank=True)
+    obtained10 = models.CharField(max_length=50, blank=True)
+    percentage10 = models.CharField(max_length=10, blank=True)
+    grade10 = models.CharField(max_length=20, blank=True)
+
+    class12 = models.CharField(max_length=50, blank=True)
+    board12 = models.CharField(max_length=150, blank=True)
+    stream12 = models.CharField(max_length=50, blank=True)
+    year12 = models.IntegerField(null=True, blank=True)
+    total_marks12 = models.CharField(max_length=50, blank=True)
+    obtained12 = models.CharField(max_length=50, blank=True)
+    percentage12 = models.CharField(max_length=10, blank=True)
+    grade12 = models.CharField(max_length=20, blank=True)
+    education_json = models.TextField(blank=True, null=True)
+
+    # Media & Subjects
+    photo_base64 = models.TextField(blank=True, null=True)
+    signature_base64 = models.TextField(blank=True, null=True)
+    selected_courses_json = models.TextField(blank=True, null=True, help_text="Future subject selections")
+
+    # Payment info
+    fee_amount = models.CharField(max_length=20, default='500', blank=True)
+    payment_status = models.CharField(max_length=20, default='Pending', blank=True)
+    transaction_id = models.CharField(max_length=100, blank=True)
+    payment_receipt = models.FileField(upload_to='uploads/nep_ug_receipts/', null=True, blank=True)
+    payment_receipt_base64 = models.TextField(blank=True, null=True)
+
+    # Status
+    status = models.CharField(max_length=20, default='Draft', choices=STATUS_CHOICES)
+    is_submitted = models.BooleanField(default=False)
+    submitted_date = models.DateTimeField(null=True, blank=True)
+    admin_remarks = models.TextField(blank=True, default='')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'NepUgAdmissionEnrollment'
+        ordering = ['-submitted_date', '-created_at']
+
+    def __str__(self):
+        return self.application_no or self.enrollment_no or f'NEPUG #{self.pk} ({self.reg_no} Sem {self.semester})'
+
+    @property
+    def semester_display(self):
+        mapping = dict(self.SEMESTER_CHOICES)
+        return mapping.get(self.semester, f'Semester {self.semester}')

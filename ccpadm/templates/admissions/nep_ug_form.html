@@ -1,0 +1,590 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}NEP UG Admission cum Enrollment (2nd/3rd/4th/5th Sem) - Chaitanya College{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admission_form.css' %}">
+<style>
+.nep-section-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.nep-section-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #082B49;
+    margin-bottom: 18px;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.nep-badge-sem {
+    background: #0284c7;
+    color: #ffffff;
+    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-weight: 600;
+}
+.img-preview-box {
+    width: 140px;
+    height: 160px;
+    border: 2px dashed #cbd5e1;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: #f8fafc;
+    margin-bottom: 8px;
+}
+.img-preview-box img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+.sig-preview-box {
+    width: 200px;
+    height: 80px;
+    border: 2px dashed #cbd5e1;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: #f8fafc;
+    margin-bottom: 8px;
+}
+.sig-preview-box img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+.payment-highlight-box {
+    background: #f0fdf4;
+    border: 1.5px solid #86efac;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+.qr-modal-backdrop {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 999999;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    backdrop-filter: blur(4px);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="portal-page">
+    {% include 'partials/student_sidebar.html' %}
+
+    <div class="portal-main">
+        <div class="page-header" style="margin-bottom: 20px;">
+            <div>
+                <h2 class="page-title" style="color: #082B49; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-graduation-cap text-primary"></i> NEP UG Admission cum Enrollment
+                    <span class="nep-badge-sem">Sem II / III / IV / V</span>
+                </h2>
+                <p class="page-subtitle" style="margin-top: 4px; color: #475569;">
+                    सत्र 2026-27 | राष्ट्रीय शिक्षा नीति (NEP 2020) स्नातक द्वितीय, तृतीय, चतुर्थ एवं पंचम सेमेस्टर प्रवेश एवं नामांकन
+                </p>
+            </div>
+            {% if existing_nep and existing_nep.is_submitted %}
+            <div>
+                <a href="{% url 'nep_ug_print_default' %}" class="btn btn-outline-primary" target="_blank">
+                    <i class="fas fa-print"></i> Print Slip
+                </a>
+                <a href="{% url 'nep_ug_receipt_default' %}" class="btn btn-outline-success ms-2" target="_blank">
+                    <i class="fas fa-receipt"></i> Fee Receipt
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
+        {% if existing_nep and existing_nep.is_submitted and existing_nep.status != 'Approved' %}
+        <div class="alert alert-info" style="border-left: 4px solid #0284c7; background: #f0f9ff; padding: 12px 18px; border-radius: 6px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+            <div>
+                <i class="fas fa-info-circle me-1"></i>
+                <strong>Application Status: Submitted</strong> (Pending college admin approval).
+            </div>
+            <form method="post" action="{% url 'cancel_nep_ug_enrollment' %}" onsubmit="return confirm('Do you want to edit your application? It will be reset to Draft.');" style="margin: 0;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-outline-warning">
+                    <i class="fas fa-edit"></i> Edit Form
+                </button>
+            </form>
+        </div>
+        {% elif existing_nep and existing_nep.status == 'Approved' %}
+        <div class="alert alert-success" style="border-left: 4px solid #16a34a; background: #f0fdf4; padding: 12px 18px; border-radius: 6px; margin-bottom: 20px;">
+            <i class="fas fa-check-circle me-1"></i>
+            <strong>Application Status: Approved / Accepted</strong>. Your admission and enrollment is locked.
+        </div>
+        {% endif %}
+
+        <form method="post" action="{% url 'nep_ug_enrollment_form' %}" enctype="multipart/form-data" id="nepUgEnrollmentForm">
+            {% csrf_token %}
+
+            <!-- SECTION 1: PROGRAM & SEMESTER DETAILS -->
+            <div class="nep-section-card">
+                <div class="nep-section-title">
+                    <i class="fas fa-layer-group text-primary"></i> 1. सत्र, सेमेस्टर एवं पाठ्यक्रम विवरण (Program &amp; Semester Details)
+                </div>
+                <div class="form-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;">
+                    <div class="form-group">
+                        <label class="form-label">शैक्षणिक सत्र (Academic Session) <span class="text-danger">*</span></label>
+                        <input type="text" name="academic_session" class="form-control" value="{{ initial_data.academic_session|default:'2026-27' }}" readonly style="background: #f8fafc; font-weight: 600;">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">प्रवेश / नामांकन सेमेस्टर (Semester) <span class="text-danger">*</span></label>
+                        <select name="semester" class="form-control" required style="font-weight: 600;">
+                            {% for sem_val, sem_label in semester_choices %}
+                            <option value="{{ sem_val }}" {% if initial_data.semester == sem_val %}selected{% endif %}>{{ sem_label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">NEP स्नातक कार्यक्रम (Program) <span class="text-danger">*</span></label>
+                        <select name="program_type" class="form-control" required style="font-weight: 600;">
+                            {% for prog_val, prog_label in nep_program_choices %}
+                            <option value="{{ prog_val }}" {% if initial_data.program_type == prog_val %}selected{% endif %}>{{ prog_label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">विश्वविद्यालय नामांकन क्रमांक (University Enrollment No)</label>
+                        <input type="text" name="previous_enrollment_no" class="form-control" value="{{ initial_data.previous_enrollment_no|default:'' }}" placeholder="e.g. CCP2605XXXX">
+                        <small class="text-muted">पूर्व में जारी नामांकन क्रमांक यदि उपलब्ध हो (Keep blank if not yet issued).</small>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">पूर्व सेमेस्टर परीक्षा रोल नंबर (Previous Sem Roll No) <span class="text-danger">*</span></label>
+                        <input type="text" name="previous_roll_no" class="form-control" value="{{ initial_data.previous_roll_no|default:'' }}" placeholder="Previous Semester Roll No" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">पूर्व सेमेस्टर परिणाम (Previous Sem Result) <span class="text-danger">*</span></label>
+                        <select name="previous_semester_result" class="form-control" required>
+                            <option value="Pass" {% if initial_data.previous_semester_result == 'Pass' %}selected{% endif %}>Pass</option>
+                            <option value="ATKT" {% if initial_data.previous_semester_result == 'ATKT' %}selected{% endif %}>ATKT</option>
+                            <option value="Result Awaited" {% if initial_data.previous_semester_result == 'Result Awaited' %}selected{% endif %}>Result Awaited</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">पूर्व सेमेस्टर प्राप्तांक / SGPA (Marks / SGPA)</label>
+                        <input type="text" name="previous_semester_marks" class="form-control" value="{{ initial_data.previous_semester_marks|default:'' }}" placeholder="e.g. 7.8 SGPA or 420/600">
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 2: PERSONAL & CONTACT DETAILS -->
+            <div class="nep-section-card">
+                <div class="nep-section-title">
+                    <i class="fas fa-user text-primary"></i> 2. व्यक्तिगत एवं संपर्क विवरण (Personal &amp; Contact Details)
+                </div>
+                <div class="form-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;">
+                    <div class="form-group">
+                        <label class="form-label">विद्यार्थी का नाम (Full Name) <span class="text-danger">*</span></label>
+                        <input type="text" name="full_name" class="form-control" value="{{ initial_data.full_name|default:'' }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">पिता का नाम (Father's Name) <span class="text-danger">*</span></label>
+                        <input type="text" name="father_name" class="form-control" value="{{ initial_data.father_name|default:'' }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">माता का नाम (Mother's Name) <span class="text-danger">*</span></label>
+                        <input type="text" name="mother_name" class="form-control" value="{{ initial_data.mother_name|default:'' }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">लिंग (Gender) <span class="text-danger">*</span></label>
+                        <select name="gender" class="form-control" required>
+                            <option value="">-- Select Gender --</option>
+                            <option value="Male" {% if initial_data.gender == 'Male' or initial_data.gender == 'M' %}selected{% endif %}>Male</option>
+                            <option value="Female" {% if initial_data.gender == 'Female' or initial_data.gender == 'F' %}selected{% endif %}>Female</option>
+                            <option value="Transgender" {% if initial_data.gender == 'Transgender' or initial_data.gender == 'T' %}selected{% endif %}>Transgender</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">जन्म तिथि (Date of Birth) <span class="text-danger">*</span></label>
+                        <input type="date" name="dob" class="form-control" value="{{ initial_data.dob|default:'' }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">वर्ग / जाति (Category) <span class="text-danger">*</span></label>
+                        <select name="category" class="form-control" required>
+                            <option value="">-- Select Category --</option>
+                            <option value="General" {% if initial_data.category == 'General' or initial_data.category == 'GEN' %}selected{% endif %}>General / UR</option>
+                            <option value="OBC" {% if initial_data.category == 'OBC' %}selected{% endif %}>OBC</option>
+                            <option value="SC" {% if initial_data.category == 'SC' %}selected{% endif %}>SC</option>
+                            <option value="ST" {% if initial_data.category == 'ST' %}selected{% endif %}>ST</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">माध्यम (Medium) <span class="text-danger">*</span></label>
+                        <select name="medium" class="form-control" required>
+                            <option value="Hindi" {% if initial_data.medium == 'Hindi' %}selected{% endif %}>Hindi</option>
+                            <option value="English" {% if initial_data.medium == 'English' %}selected{% endif %}>English</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">मोबाइल नंबर (Mobile No) <span class="text-danger">*</span></label>
+                        <input type="tel" name="mobile" class="form-control" value="{{ initial_data.mobile|default:'' }}" maxlength="10" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">ईमेल (Email ID) <span class="text-danger">*</span></label>
+                        <input type="email" name="email" class="form-control" value="{{ initial_data.email|default:'' }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">आधार क्रमांक (Aadhaar No)</label>
+                        <input type="text" name="aadhaar" class="form-control" value="{{ initial_data.aadhaar|default:'' }}" maxlength="12" placeholder="12 digit Aadhaar">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">APAAR / ABC ID</label>
+                        <input type="text" name="apaar_id" class="form-control" value="{{ initial_data.apaar_id|default:'' }}" placeholder="12 digit APAAR ID">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">रक्त समूह (Blood Group)</label>
+                        <input type="text" name="blood_group" class="form-control" value="{{ initial_data.blood_group|default:'' }}" placeholder="e.g. O+, B+, A+">
+                    </div>
+                </div>
+
+                <h4 style="margin-top: 20px; margin-bottom: 12px; font-size: 14px; font-weight: 700; color: #334155; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px;">
+                    पत्राचार एवं स्थायी पता (Address Details)
+                </h4>
+                <div class="form-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label class="form-label">गाँव / मोहल्ला / पता (Village / Street / House No) <span class="text-danger">*</span></label>
+                        <input type="text" name="corr_village" class="form-control" value="{{ initial_data.corr_village|default:initial_data.perm_village|default:'' }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">शहर / ब्लॉक (City / Block)</label>
+                        <input type="text" name="corr_city" class="form-control" value="{{ initial_data.corr_city|default:initial_data.perm_city|default:'' }}">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">जिला (District) <span class="text-danger">*</span></label>
+                        <input type="text" name="corr_district" class="form-control" value="{{ initial_data.corr_district|default:initial_data.perm_district|default:'Janjgir-Champa' }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">राज्य (State) <span class="text-danger">*</span></label>
+                        <input type="text" name="corr_state" class="form-control" value="{{ initial_data.corr_state|default:initial_data.perm_state|default:'Chhattisgarh' }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">पिन कोड (PIN Code) <span class="text-danger">*</span></label>
+                        <input type="text" name="corr_pin_code" class="form-control" value="{{ initial_data.corr_pin_code|default:initial_data.perm_pin_code|default:'' }}" maxlength="6" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 3: EDUCATIONAL QUALIFICATIONS (10th & 12th) -->
+            <div class="nep-section-card">
+                <div class="nep-section-title">
+                    <i class="fas fa-book-reader text-primary"></i> 3. पूर्व शैक्षणिक विवरण (Educational Details - 10th &amp; 12th)
+                </div>
+                <div class="table-responsive" style="overflow-x: auto;">
+                    <table class="table table-bordered" style="width: 100%; border-collapse: collapse; margin-bottom: 0;">
+                        <thead style="background: #f8fafc; font-size: 13px;">
+                            <tr>
+                                <th style="padding: 10px; border: 1px solid #e2e8f0;">Class</th>
+                                <th style="padding: 10px; border: 1px solid #e2e8f0;">Board / Council</th>
+                                <th style="padding: 10px; border: 1px solid #e2e8f0;">Passing Year</th>
+                                <th style="padding: 10px; border: 1px solid #e2e8f0;">Total Marks</th>
+                                <th style="padding: 10px; border: 1px solid #e2e8f0;">Obtained Marks</th>
+                                <th style="padding: 10px; border: 1px solid #e2e8f0;">Percentage (%)</th>
+                            </tr>
+                        </thead>
+                        <tbody style="font-size: 13px;">
+                            <tr>
+                                <td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: 600;">10th (High School)</td>
+                                <td style="padding: 8px; border: 1px solid #e2e8f0;">
+                                    <input type="text" name="board10" class="form-control" value="{{ initial_data.board10|default:'CGBSE' }}" placeholder="Board">
+                                </td>
+                                <td style="padding: 8px; border: 1px solid #e2e8f0;">
+                                    <input type="number" name="year10" class="form-control" value="{{ initial_data.year10|default:'' }}" placeholder="Year">
+                                </td>
+                                <td style="padding: 8px; border: 1px solid #e2e8f0;">
+                                    <input type="text" name="total_marks10" class="form-control" value="{{ initial_data.total_marks10|default:'' }}" placeholder="Total">
+                                </td>
+                                <td style="padding: 8px; border: 1px solid #e2e8f0;">
+                                    <input type="text" name="obtained10" class="form-control" value="{{ initial_data.obtained10|default:'' }}" placeholder="Obtained">
+                                </td>
+                                <td style="padding: 8px; border: 1px solid #e2e8f0;">
+                                    <input type="text" name="percentage10" class="form-control" value="{{ initial_data.percentage10|default:'' }}" placeholder="%">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: 600;">12th (Higher Secondary)</td>
+                                <td style="padding: 8px; border: 1px solid #e2e8f0;">
+                                    <input type="text" name="board12" class="form-control" value="{{ initial_data.board12|default:'CGBSE' }}" placeholder="Board">
+                                </td>
+                                <td style="padding: 8px; border: 1px solid #e2e8f0;">
+                                    <input type="number" name="year12" class="form-control" value="{{ initial_data.year12|default:'' }}" placeholder="Year">
+                                </td>
+                                <td style="padding: 8px; border: 1px solid #e2e8f0;">
+                                    <input type="text" name="total_marks12" class="form-control" value="{{ initial_data.total_marks12|default:'' }}" placeholder="Total">
+                                </td>
+                                <td style="padding: 8px; border: 1px solid #e2e8f0;">
+                                    <input type="text" name="obtained12" class="form-control" value="{{ initial_data.obtained12|default:'' }}" placeholder="Obtained">
+                                </td>
+                                <td style="padding: 8px; border: 1px solid #e2e8f0;">
+                                    <input type="text" name="percentage12" class="form-control" value="{{ initial_data.percentage12|default:'' }}" placeholder="%">
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- SECTION 4: PHOTO & SIGNATURE -->
+            <div class="nep-section-card">
+                <div class="nep-section-title">
+                    <i class="fas fa-camera text-primary"></i> 4. फ़ोटो एवं हस्ताक्षर (Photo &amp; Signature)
+                </div>
+                <div style="display: flex; gap: 32px; flex-wrap: wrap;">
+                    <div>
+                        <label class="form-label" style="font-weight: 600;">पासपोर्ट साइज़ फ़ोटो (Passport Photo)</label>
+                        <div class="img-preview-box" id="photoPreviewContainer">
+                            {% if initial_data.photo_base64 %}
+                            <img src="{{ initial_data.photo_base64 }}" alt="Student Photo" id="photoImg">
+                            {% else %}
+                            <span class="text-muted" id="photoPlaceholder"><i class="fas fa-user fa-3x"></i></span>
+                            <img src="" alt="Student Photo" id="photoImg" style="display: none;">
+                            {% endif %}
+                        </div>
+                        <input type="file" accept="image/*" class="form-control-file" onchange="handleImageUpload(this, 'photoBase64Input', 'photoImg', 'photoPlaceholder')" style="font-size: 12px;">
+                        <input type="hidden" name="photo_base64" id="photoBase64Input" value="{{ initial_data.photo_base64|default:'' }}">
+                    </div>
+
+                    <div>
+                        <label class="form-label" style="font-weight: 600;">विद्यार्थी के हस्ताक्षर (Student Signature)</label>
+                        <div class="sig-preview-box" id="sigPreviewContainer">
+                            {% if initial_data.signature_base64 %}
+                            <img src="{{ initial_data.signature_base64 }}" alt="Student Signature" id="sigImg">
+                            {% else %}
+                            <span class="text-muted" id="sigPlaceholder"><i class="fas fa-signature fa-2x"></i></span>
+                            <img src="" alt="Student Signature" id="sigImg" style="display: none;">
+                            {% endif %}
+                        </div>
+                        <input type="file" accept="image/*" class="form-control-file" onchange="handleImageUpload(this, 'sigBase64Input', 'sigImg', 'sigPlaceholder')" style="font-size: 12px;">
+                        <input type="hidden" name="signature_base64" id="sigBase64Input" value="{{ initial_data.signature_base64|default:'' }}">
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 5: SUBJECT SELECTION NOTICE (FUTURE READY) -->
+            <div class="nep-section-card" style="background: #f8fafc; border-left: 4px solid #0284c7;">
+                <div class="nep-section-title" style="color: #0369a1; border-bottom-color: #cbd5e1;">
+                    <i class="fas fa-book-open"></i> 5. पाठ्यक्रम एवं विषय आवंटन (Course &amp; Subject Allocation)
+                </div>
+                <div style="padding: 10px 0; color: #334155;">
+                    <div style="display: flex; align-items: flex-start; gap: 14px;">
+                        <i class="fas fa-info-circle text-primary" style="font-size: 24px; margin-top: 2px;"></i>
+                        <div>
+                            <h4 style="margin: 0 0 6px; font-size: 15px; font-weight: 700; color: #082B49;">
+                                विषय आवंटन बाद में अपडेट किया जाएगा (Subject Section will be updated later)
+                            </h4>
+                            <p style="margin: 0; font-size: 13.5px; line-height: 1.5; color: #475569;">
+                                राष्ट्रीय शिक्षा नीति (NEP 2020) के अंतर्गत आपके चयनित सेमेस्टर (II/III/IV/V) के मेजर/माइनर, मल्टीडिसिप्लिनरी (MDC), स्किल एन्हांसमेंट (SEC) एवं वैल्यू एडेड (VAC) विषयों का आवंटन कॉलेज कार्यालय द्वारा निर्धारित नियमों के अनुसार पोर्टल पर बाद में अपडेट किया जाएगा।
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <input type="hidden" name="selected_courses_json" value="{{ initial_data.selected_courses_json|default:'' }}">
+            </div>
+
+            <!-- SECTION 6: FEE PAYMENT (INR 500) -->
+            <div class="nep-section-card">
+                <div class="nep-section-title">
+                    <i class="fas fa-credit-card text-success"></i> 6. शुल्क भुगतान विवरण (Fee Payment Details - ₹500)
+                </div>
+
+                <div class="payment-highlight-box">
+                    <div>
+                        <div style="font-size: 12px; color: #15803d; font-weight: 700; text-transform: uppercase;">NEP UG Admission &amp; Enrollment Fee</div>
+                        <div style="font-size: 22px; font-weight: 800; color: #166534;">₹500.00</div>
+                        <small style="color: #15803d;">पंजाब नेशनल बैंक (PNB) UPI / QR कोड के माध्यम से भुगतान करें।</small>
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-success" onclick="openQrModal()" style="font-weight: 700; background: #16a34a; border-color: #15803d;">
+                            <i class="fas fa-qrcode"></i> PNB QR कोड देखें एवं भुगतान करें (Scan &amp; Pay)
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;">
+                    <div class="form-group">
+                        <label class="form-label">शुल्क राशि (Amount in ₹)</label>
+                        <input type="text" name="fee_amount" class="form-control" value="500" readonly style="background: #f8fafc; font-weight: 700; color: #15803d;">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">12-अंकीय ट्रांजेक्शन ID / UTR नंबर <span class="text-danger">*</span></label>
+                        <input type="text" name="transaction_id" id="transactionIdInput" class="form-control" value="{{ initial_data.transaction_id|default:'' }}" placeholder="12-digit UPI UTR / Transaction No" required style="font-family: monospace; font-weight: 700; letter-spacing: 1px;">
+                        <small class="text-muted">PhonePe, Google Pay, Paytm या PNB ONE से 12 अंकों का UTR दर्ज करें।</small>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">भुगतान रसीद / स्क्रीनशॉट (Payment Receipt / Screenshot)</label>
+                        <input type="file" name="payment_receipt" accept="image/*,application/pdf" class="form-control-file" onchange="previewPaymentReceipt(this)">
+                        {% if initial_data.payment_receipt_url %}
+                        <div class="mt-1">
+                            <a href="{{ initial_data.payment_receipt_url }}" target="_blank" class="text-primary" style="font-size: 12px;">
+                                <i class="fas fa-file-invoice"></i> View Uploaded Receipt
+                            </a>
+                        </div>
+                        {% endif %}
+                        <input type="hidden" name="payment_receipt_base64" id="receiptBase64Input" value="{{ initial_data.payment_receipt_base64|default:'' }}">
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 7: DECLARATION & SUBMISSION -->
+            <div class="nep-section-card" style="background: #fafafa;">
+                <div style="margin-bottom: 18px;">
+                    <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer; font-size: 13.5px; line-height: 1.5; color: #1e293b;">
+                        <input type="checkbox" required checked style="margin-top: 3px; width: 18px; height: 18px;">
+                        <span>
+                            मैं प्रमाणित करता/करती हूँ कि मेरे द्वारा दिए गए सभी विवरण सत्य एवं सही हैं। यदि कोई जानकारी असत्य पाई जाती है तो मेरा प्रवेश एवं नामांकन निरस्त किया जा सकेगा।
+                            (I hereby declare that all information given above is true and correct to the best of my knowledge).
+                        </span>
+                    </label>
+                </div>
+
+                <div style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: flex-end;">
+                    <button type="submit" name="action" value="save_draft" class="btn btn-secondary" style="padding: 10px 24px; font-weight: 600;">
+                        <i class="fas fa-save"></i> ड्राफ्ट सुरक्षित करें (Save Draft)
+                    </button>
+                    <button type="submit" name="action" value="submit" class="btn btn-primary" style="padding: 10px 28px; font-weight: 700; background: #082B49; border-color: #082B49;">
+                        <i class="fas fa-check-circle"></i> फॉर्म सबमिट करें (Submit Application)
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- PNB QR CODE MODAL -->
+<div id="pnbQrModal" class="qr-modal-backdrop">
+    <div style="background: #ffffff; border-radius: 12px; max-width: 440px; width: 100%; max-height: 92vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); border: 2px solid #082B49; position: relative;">
+        <!-- Modal Header -->
+        <div style="background: #082B49; color: #ffffff; padding: 14px 18px; border-top-left-radius: 10px; border-top-right-radius: 10px; display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-qrcode text-warning" style="font-size: 18px;"></i>
+                <span style="font-weight: 700; font-size: 15px;">PNB Scan &amp; Pay - ₹500</span>
+            </div>
+            <button type="button" onclick="closeQrModal()" style="background: transparent; border: none; color: #ffffff; font-size: 24px; cursor: pointer; line-height: 1; padding: 0 4px;" title="Close">&times;</button>
+        </div>
+
+        <!-- Modal Body -->
+        <div style="padding: 18px; text-align: center;">
+            <img src="{% static 'images/pnb_enrollment_qr.jpg' %}" alt="PNB Enrollment QR Code" style="width: 100%; max-width: 320px; height: auto; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 4px 8px rgba(0,0,0,0.08); display: block; margin: 0 auto 14px;">
+
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 16px; text-align: left; font-size: 12px;">
+                <div style="color: #64748b; font-size: 11px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.3px;">Beneficiary Merchant</div>
+                <div style="font-weight: 700; color: #082B49; font-size: 12.5px; line-height: 1.35;">
+                    PRINCIPAL CHAITANYA SCIENCE AND ARTS COLLEGE AN AUTONOMOUS COLLEGE PAMGARH
+                </div>
+                <div class="mt-2 pt-2 border-top" style="display: flex; align-items: center; justify-content: space-between;">
+                    <div>
+                        <span style="color: #64748b; font-size: 11px;">UPI ID:</span> <strong style="color: #082B49; font-family: monospace; font-size: 13px;">9827194555m@pnb</strong>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size: 11px;" id="modalCopyUpiBtn" onclick="copyUpiId()">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 8px;">
+                <button type="button" class="btn btn-secondary w-50" onclick="closeQrModal()">Close</button>
+                <button type="button" class="btn btn-primary w-50" onclick="proceedAfterPayment()" style="background: #082B49; border-color: #082B49;">Enter UTR No</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function openQrModal() {
+    const modal = document.getElementById('pnbQrModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function closeQrModal() {
+    const modal = document.getElementById('pnbQrModal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+}
+
+function proceedAfterPayment() {
+    closeQrModal();
+    const tx = document.getElementById('transactionIdInput');
+    if (tx) {
+        tx.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => tx.focus(), 300);
+    }
+}
+
+function copyUpiId() {
+    const upi = '9827194555m@pnb';
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(upi).then(() => {
+            const btn = document.getElementById('modalCopyUpiBtn');
+            if (btn) {
+                btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                setTimeout(() => { btn.innerHTML = '<i class="fas fa-copy"></i> Copy'; }, 2000);
+            }
+        });
+    } else {
+        prompt('Copy UPI ID:', upi);
+    }
+}
+
+function handleImageUpload(input, hiddenInputId, imgId, placeholderId) {
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById(hiddenInputId).value = e.target.result;
+            const img = document.getElementById(imgId);
+            img.src = e.target.result;
+            img.style.display = 'block';
+            const placeholder = document.getElementById(placeholderId);
+            if (placeholder) placeholder.style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+function previewPaymentReceipt(input) {
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('receiptBase64Input').value = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+}
+</script>
+{% endblock %}

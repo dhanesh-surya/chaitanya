@@ -1,0 +1,572 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>NEP UG Admission &amp; Enrollment - {{ nep.application_no }}</title>
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 8mm 12mm 8mm 12mm;
+        }
+        * { box-sizing: border-box; }
+        html, body {
+            margin: 0;
+            padding: 0;
+            background: #f8fafc;
+            color: #1e293b;
+            font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+            font-size: 11px;
+            line-height: 1.3;
+        }
+        body {
+            padding: 20px 10px;
+        }
+        .slip-card {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            padding: 20px 24px;
+            max-width: 850px;
+            min-height: 270mm;
+            margin: 0 auto;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.06);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+        .slip-body {
+            flex: 1 0 auto;
+        }
+        .slip-footer {
+            margin-top: auto;
+            flex-shrink: 0;
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        /* College Header */
+        .header-table {
+            width: 100%;
+            border-bottom: 2px solid #000;
+            margin-bottom: 6px;
+            border-collapse: collapse;
+        }
+        .header-table td {
+            vertical-align: middle;
+            padding: 2px 4px;
+        }
+        .logo-cell {
+            width: 72px;
+            text-align: center;
+        }
+        .logo-cell img {
+            width: 68px;
+            height: 68px;
+            object-fit: contain;
+            display: block;
+            margin: 0 auto;
+        }
+        .title-cell {
+            text-align: center;
+            padding: 0 8px;
+        }
+        .title-main {
+            font-size: 21px;
+            color: #800000;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 0 0 3px 0;
+            line-height: 1.2;
+        }
+        .title-ugc {
+            font-size: 11.5px;
+            color: #0b3d91;
+            font-weight: bold;
+            margin: 0 0 2px 0;
+        }
+        .title-address {
+            font-size: 11px;
+            color: #111;
+            margin: 0 0 3px 0;
+        }
+        .title-gold {
+            font-size: 10.5px;
+            color: #B8860B;
+            font-weight: bold;
+            margin: 1px 0;
+        }
+        .form-heading {
+            text-align: center;
+            font-size: 13.5px;
+            color: #800000;
+            font-weight: bold;
+            margin: 6px 0 8px 0;
+            letter-spacing: 0.3px;
+        }
+
+        /* Meta Information */
+        .meta-strip {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            padding: 6px 12px;
+            margin-bottom: 8px;
+            font-size: 11.5px;
+        }
+        .meta-strip .enr-num {
+            font-size: 13.5px;
+            font-weight: 800;
+            color: #082B49;
+            font-family: monospace;
+        }
+
+        /* Section Headings */
+        .section-heading {
+            background: #082B49;
+            color: #ffffff;
+            padding: 3.5px 8px;
+            font-size: 10.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin: 8px 0 3px 0;
+            border-radius: 2px;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        /* Tables */
+        table.info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 6px;
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+        table.info-table th, table.info-table td {
+            border: 1px solid #cbd5e1;
+            padding: 4px 7px;
+            font-size: 10.5px;
+            line-height: 1.25;
+            text-align: left;
+        }
+        table.info-table th {
+            background: #f8fafc;
+            color: #334155;
+            font-weight: 600;
+            width: 20%;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        table.personal-table {
+            width: calc(100% - 130px);
+        }
+
+        /* Photo & Signature */
+        .photo-sig-panel {
+            float: right;
+            width: 118px;
+            margin-left: 10px;
+            margin-bottom: 4px;
+            text-align: center;
+        }
+        .photo-box {
+            width: 118px;
+            height: 130px;
+            border: 1px solid #94a3b8;
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            margin-bottom: 4px;
+        }
+        .photo-box img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
+        }
+        .sig-box {
+            width: 118px;
+            height: 48px;
+            border: 1px solid #94a3b8;
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .sig-box img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        .photo-label {
+            font-size: 9px;
+            color: #64748b;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        .clearfix::after {
+            content: "";
+            clear: both;
+            display: table;
+        }
+
+        /* Signatures block */
+        .sig-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: 24px;
+            padding: 10px 10px 0 10px;
+            border-top: 1px dashed #cbd5e1;
+        }
+        .sig-col {
+            text-align: center;
+            width: 28%;
+        }
+        .sig-line {
+            border-bottom: 1px solid #334155;
+            margin-bottom: 4px;
+            min-height: 36px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+        .sig-line img {
+            max-height: 34px;
+            max-width: 130px;
+            object-fit: contain;
+        }
+        .sig-title {
+            font-size: 10.5px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .inst-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            padding: 6px 10px;
+            margin-top: 8px;
+            font-size: 9.5px;
+            color: #475569;
+            line-height: 1.35;
+        }
+        .inst-box ol {
+            margin: 2px 0 0 14px;
+            padding: 0;
+        }
+
+        /* Print Floating Toolbar */
+        .print-toolbar {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            background: #ffffff;
+            padding: 8px 14px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+        .btn-action {
+            background: #082B49;
+            color: #fff;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-action.btn-secondary {
+            background: #64748b;
+        }
+
+        @media print {
+            body {
+                background: #ffffff;
+                padding: 0;
+            }
+            .print-toolbar {
+                display: none !important;
+            }
+            .slip-card {
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="print-toolbar">
+    <button class="btn-action" onclick="window.print()">
+        <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/><path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2H5zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4V3zm1 5a2 2 0 0 0-2 2v1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v-1a2 2 0 0 0-2-2H5zm7 2v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"/></svg>
+        Print Slip
+    </button>
+    <a href="{% url 'nep_ug_receipt' nep.enrollment_no|default:nep.application_no %}" class="btn-action" style="background:#16a34a;" target="_blank">
+        Fee Receipt
+    </a>
+    <a href="{% url 'student_dashboard' %}" class="btn-action btn-secondary">
+        Dashboard
+    </a>
+</div>
+
+<div class="slip-card">
+    <div class="slip-body">
+        <!-- HEADER -->
+        <table class="header-table">
+            <tr>
+                <td class="logo-cell">
+                    <img src="{% static 'images/logo.png' %}" alt="Logo">
+                </td>
+                <td class="title-cell">
+                    <div class="title-main">Chaitanya Science and Arts College</div>
+                    <div class="title-ugc">Pamgarh, Dist. Janjgir-Champa (C.G.)</div>
+                    <div class="title-address">Affiliated to Shaheed Nandkumar Patel Vishwavidyalaya, Raigarh (C.G.)</div>
+                    <div class="title-gold">Accredited by NAAC with Grade 'B' | Recognized under 2(f) &amp; 12(B) of UGC Act</div>
+                </td>
+                <td class="logo-cell" style="width: 72px;"></td>
+            </tr>
+        </table>
+
+        <div class="form-heading">
+            NEP UG ADMISSION CUM ENROLLMENT SLIP (SEMESTER {{ nep.semester }})
+        </div>
+
+        <!-- META STRIP -->
+        <div class="meta-strip">
+            <div>
+                Application No: <span class="enr-num">{{ nep.application_no|default:"—" }}</span>
+            </div>
+            <div>
+                Registration No: <strong>{{ nep.reg_no }}</strong>
+            </div>
+            <div>
+                Enrollment No: <span class="enr-num">{{ nep.enrollment_no|default:"PENDING" }}</span>
+            </div>
+            <div>
+                Date: <strong>{{ nep.submitted_date|date:"d/m/Y"|default:nep.created_at|date:"d/m/Y" }}</strong>
+            </div>
+        </div>
+
+        <!-- SECTION 1: PROGRAM & SEMESTER DETAILS -->
+        <div class="section-heading">1. Program &amp; Semester Details</div>
+        <table class="info-table">
+            <tr>
+                <th>Academic Session</th>
+                <td><strong>{{ nep.academic_session|default:"2026-27" }}</strong></td>
+                <th>Semester</th>
+                <td><strong style="color: #082B49;">{{ nep.semester_display }}</strong></td>
+            </tr>
+            <tr>
+                <th>Program / Course</th>
+                <td><strong>{{ nep.program_type }}</strong></td>
+                <th>Medium of Instruction</th>
+                <td>{{ nep.medium|default:"Hindi" }}</td>
+            </tr>
+            <tr>
+                <th>Previous Roll No</th>
+                <td><strong>{{ nep.previous_roll_no|default:"—" }}</strong></td>
+                <th>Previous Enrollment No</th>
+                <td>{{ nep.previous_enrollment_no|default:"—" }}</td>
+            </tr>
+            <tr>
+                <th>Previous Sem Result</th>
+                <td><strong>{{ nep.previous_semester_result|default:"Pass" }}</strong></td>
+                <th>Marks / SGPA Obtained</th>
+                <td>{{ nep.previous_semester_marks|default:"—" }}</td>
+            </tr>
+        </table>
+
+        <!-- SECTION 2: PERSONAL & CONTACT WITH PHOTO -->
+        <div class="section-heading">2. Personal &amp; Contact Details</div>
+        <div class="clearfix">
+            <div class="photo-sig-panel">
+                <div class="photo-box">
+                    {% if nep.photo_base64 %}
+                    <img src="{{ nep.photo_base64 }}" alt="Student Photo">
+                    {% else %}
+                    <span style="color:#94a3b8; font-size:10px;">PHOTO</span>
+                    {% endif %}
+                </div>
+                <div class="sig-box">
+                    {% if nep.signature_base64 %}
+                    <img src="{{ nep.signature_base64 }}" alt="Student Signature">
+                    {% else %}
+                    <span style="color:#94a3b8; font-size:10px;">SIGNATURE</span>
+                    {% endif %}
+                </div>
+                <div class="photo-label">Candidate</div>
+            </div>
+
+            <table class="info-table personal-table">
+                <tr>
+                    <th>Student Name</th>
+                    <td colspan="3"><strong>{{ nep.full_name|upper }}</strong></td>
+                </tr>
+                <tr>
+                    <th>Father's Name</th>
+                    <td>{{ nep.father_name|upper }}</td>
+                    <th>Mother's Name</th>
+                    <td>{{ nep.mother_name|upper }}</td>
+                </tr>
+                <tr>
+                    <th>Date of Birth</th>
+                    <td>{{ nep.dob|date:"d/m/Y"|default:"—" }}</td>
+                    <th>Gender</th>
+                    <td>{{ nep.gender|default:"—" }}</td>
+                </tr>
+                <tr>
+                    <th>Category</th>
+                    <td>{{ nep.category|default:"—" }}</td>
+                    <th>Nationality / Religion</th>
+                    <td>{{ nep.nationality|default:"Indian" }} / {{ nep.religion|default:"—" }}</td>
+                </tr>
+                <tr>
+                    <th>Mobile Number</th>
+                    <td><strong>{{ nep.mobile|default:"—" }}</strong></td>
+                    <th>Email ID</th>
+                    <td>{{ nep.email|default:"—" }}</td>
+                </tr>
+                <tr>
+                    <th>Aadhaar Number</th>
+                    <td>{{ nep.aadhaar|default:"—" }}</td>
+                    <th>APAAR / ABC ID</th>
+                    <td>{{ nep.apaar_id|default:"—" }}</td>
+                </tr>
+                <tr>
+                    <th>Permanent Address</th>
+                    <td colspan="3">
+                        {{ nep.perm_village|default:nep.corr_village|default:"" }},
+                        {{ nep.perm_city|default:nep.corr_city|default:"" }},
+                        Dist: {{ nep.perm_district|default:nep.corr_district|default:"" }},
+                        State: {{ nep.perm_state|default:nep.corr_state|default:"" }} - {{ nep.perm_pin_code|default:nep.corr_pin_code|default:"" }}
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- SECTION 3: EDUCATIONAL QUALIFICATIONS -->
+        <div class="section-heading">3. Educational Details</div>
+        <table class="info-table">
+            <thead>
+                <tr style="background:#f8fafc;">
+                    <th style="width: 18%;">Examination</th>
+                    <th style="width: 32%;">Board / Council</th>
+                    <th style="width: 12%;">Year</th>
+                    <th style="width: 12%;">Total Marks</th>
+                    <th style="width: 14%;">Obtained Marks</th>
+                    <th style="width: 12%;">Percentage</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>10th (High School)</strong></td>
+                    <td>{{ nep.board10|default:"CGBSE" }}</td>
+                    <td>{{ nep.year10|default:"—" }}</td>
+                    <td>{{ nep.total_marks10|default:"—" }}</td>
+                    <td>{{ nep.obtained10|default:"—" }}</td>
+                    <td><strong>{{ nep.percentage10|default:"—" }}%</strong></td>
+                </tr>
+                <tr>
+                    <td><strong>12th (Higher Secondary)</strong></td>
+                    <td>{{ nep.board12|default:"CGBSE" }}</td>
+                    <td>{{ nep.year12|default:"—" }}</td>
+                    <td>{{ nep.total_marks12|default:"—" }}</td>
+                    <td>{{ nep.obtained12|default:"—" }}</td>
+                    <td><strong>{{ nep.percentage12|default:"—" }}%</strong></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- SECTION 4: COURSE & SUBJECT ALLOCATION NOTE -->
+        <div class="section-heading">4. Course &amp; Subject Details</div>
+        <table class="info-table">
+            <tr>
+                <th style="width: 25%;">NEP UG Structure</th>
+                <td>Under National Education Policy (NEP 2020), semester-wise Major, Minor, Multidisciplinary (MDC), SEC &amp; VAC allocation will be notified by the college.</td>
+            </tr>
+            <tr>
+                <th>Subject Allocation Status</th>
+                <td><strong style="color: #0284c7;">Allocation in progress by college administration.</strong></td>
+            </tr>
+        </table>
+
+        <!-- SECTION 5: FEE PAYMENT DETAILS -->
+        <div class="section-heading">5. Fee Payment Details (INR 500)</div>
+        <table class="info-table">
+            <tr>
+                <th>Fee Type</th>
+                <td>NEP UG Admission cum Enrollment Fee</td>
+                <th>Amount Paid</th>
+                <td><strong style="color: #16a34a; font-size: 12px;">₹{{ nep.fee_amount|default:"500" }}.00</strong></td>
+            </tr>
+            <tr>
+                <th>Payment Mode</th>
+                <td>Punjab National Bank (PNB) UPI / QR</td>
+                <th>Transaction / UTR ID</th>
+                <td><strong style="font-family: monospace; font-size: 11.5px; color: #082B49;">{{ nep.transaction_id|default:"—" }}</strong></td>
+            </tr>
+            <tr>
+                <th>Payment Status</th>
+                <td><strong style="color: #16a34a;">{{ nep.payment_status|default:"Paid" }}</strong></td>
+                <th>Receipt / Screenshot</th>
+                <td>{% if nep.payment_receipt or nep.payment_receipt_base64 %}Uploaded &amp; Verified{% else %}Verified via UTR{% endif %}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="slip-footer">
+        <!-- SIGNATURES -->
+        <div class="sig-section">
+            <div class="sig-col">
+                <div class="sig-line">
+                    {% if nep.signature_base64 %}
+                    <img src="{{ nep.signature_base64 }}" alt="Signature">
+                    {% endif %}
+                </div>
+                <div class="sig-title">Candidate's Signature</div>
+            </div>
+            <div class="sig-col">
+                <div class="sig-line"></div>
+                <div class="sig-title">Admission In-charge</div>
+            </div>
+            <div class="sig-col">
+                <div class="sig-line"></div>
+                <div class="sig-title">Principal's Signature &amp; Seal</div>
+            </div>
+        </div>
+
+        <div class="inst-box">
+            <strong>महत्वपूर्ण निर्देश (Instructions):</strong>
+            <ol>
+                <li>यह पर्ची सत्र 2026-27 के अंतर्गत राष्ट्रीय शिक्षा नीति स्नातक (NEP UG) के द्वितीय/तृतीय/चतुर्थ/पंचम सेमेस्टर में प्रवेश एवं नामांकन हेतु मान्य है।</li>
+                <li>विद्यार्थी इस पर्ची की दो प्रतियां अपने पास सुरक्षित रखें तथा एक प्रति आवश्यक दस्तावेजों सहित कॉलेज कार्यालय में जमा करें।</li>
+            </ol>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

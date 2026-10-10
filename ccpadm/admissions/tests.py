@@ -524,3 +524,160 @@ class CancelEnrollmentTestCase(TestCase):
         self.assertIn('id="enrollmentGuideModal"', content)
         self.assertIn('चरण 1', content)
 
+
+class NepUgAdmissionEnrollmentTestCase(TestCase):
+    def setUp(self):
+        self.student = Student.objects.create(
+            registration_no='NEP26001',
+            full_name='Vikash Sharma',
+            email='vikash@example.com',
+            mobile='9826100001',
+            password='password123',
+            program_type='B.Sc. First Semester',
+        )
+        self.admission = StudentAdmission.objects.create(
+            reg_no='NEP26001',
+            application_no='CCP26090001',
+            full_name='Vikash Sharma',
+            father_name='Sunil Sharma',
+            mother_name='Geeta Sharma',
+            gender='Male',
+            category='General',
+            dob='2004-05-15',
+            mobile='9826100001',
+            email='vikash@example.com',
+            program_type='B.Sc. First Semester',
+            status='Approved',
+            is_submitted=True,
+        )
+        self.first_sem_enrollment = StudentEnrollment.objects.create(
+            reg_no='NEP26001',
+            enrollment_no='CCP26059999',
+            student=self.student,
+            admission=self.admission,
+            full_name='Vikash Sharma',
+            father_name='Sunil Sharma',
+            mother_name='Geeta Sharma',
+            gender='Male',
+            status='Approved',
+            is_submitted=True,
+        )
+
+    def test_nep_ug_form_get_prepopulation(self):
+        session = self.client.session
+        session['is_logged_in'] = True
+        session['reg_no'] = self.student.registration_no
+        session.save()
+
+        response = self.client.get(reverse('nep_ug_enrollment_form'))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['initial_data']['full_name'], 'Vikash Sharma')
+        self.assertEqual(response.context['initial_data']['previous_enrollment_no'], 'CCP26059999')
+        self.assertEqual(response.context['initial_data']['semester'], 'II')
+
+    def test_nep_ug_form_post_submit_and_print(self):
+        from admissions.models import NepUgAdmissionEnrollment
+
+        session = self.client.session
+        session['is_logged_in'] = True
+        session['reg_no'] = self.student.registration_no
+        session.save()
+
+        payload = {
+            'action': 'submit',
+            'semester': 'II',
+            'program_type': 'B.Sc. Bio Group',
+            'academic_session': '2026-27',
+            'previous_roll_no': '26001234',
+            'previous_enrollment_no': 'CCP26059999',
+            'previous_semester_result': 'Pass',
+            'previous_semester_marks': '450/600',
+            'full_name': 'Vikash Sharma',
+            'father_name': 'Sunil Sharma',
+            'mother_name': 'Geeta Sharma',
+            'gender': 'Male',
+            'dob': '2004-05-15',
+            'category': 'General',
+            'medium': 'Hindi',
+            'mobile': '9826100001',
+            'email': 'vikash@example.com',
+            'corr_village': 'Pamgarh Main Road',
+            'corr_district': 'Janjgir-Champa',
+            'corr_state': 'Chhattisgarh',
+            'corr_pin_code': '495554',
+            'fee_amount': '500',
+            'transaction_id': 'UTR123456789012',
+        }
+        response = self.client.post(reverse('nep_ug_enrollment_form'), payload)
+        self.assertEqual(response.status_code, 302)
+
+        record = NepUgAdmissionEnrollment.objects.filter(reg_no='NEP26001').first()
+        self.assertIsNotNone(record)
+        self.assertEqual(record.status, 'Submitted')
+        self.assertTrue(record.is_submitted)
+        self.assertEqual(record.transaction_id, 'UTR123456789012')
+        self.assertEqual(record.enrollment_no, 'CCP26059999')
+        self.assertTrue(record.application_no.startswith('NEP'))
+
+        # Check Print Slip
+        print_res = self.client.get(reverse('nep_ug_print', kwargs={'enrollment_no': record.enrollment_no}))
+        self.assertEqual(print_res.status_code, 200)
+        self.assertIn('NEP UG ADMISSION CUM ENROLLMENT SLIP', print_res.content.decode('utf-8'))
+
+        # Check Receipt
+        receipt_res = self.client.get(reverse('nep_ug_receipt', kwargs={'enrollment_no': record.enrollment_no}))
+        self.assertEqual(receipt_res.status_code, 200)
+        self.assertIn('NEP UG FEE RECEIPT', receipt_res.content.decode('utf-8'))
+
+        # Check student cancellation before approval
+        cancel_res = self.client.post(reverse('cancel_nep_ug_enrollment'))
+        self.assertEqual(cancel_res.status_code, 302)
+        record.refresh_from_db()
+        self.assertEqual(record.status, 'Draft')
+        self.assertFalse(record.is_submitted)
+
+    def test_nep_ug_admin_management_and_export(self):
+        from accounts.models import AdminUser
+        from admissions.models import NepUgAdmissionEnrollment
+
+        AdminUser.objects.create(username='admin', password='password123')
+        session = self.client.session
+        session['admin_user'] = 'admin'
+        session.save()
+
+        rec = NepUgAdmissionEnrollment.objects.create(
+            student=self.student,
+            reg_no='NEP26001',
+            application_no='NEP26090001',
+            enrollment_no='CCP26059999',
+            program_type='B.Sc. Bio Group',
+            semester='II',
+            full_name='Vikash Sharma',
+            father_name='Sunil Sharma',
+            gender='Male',
+            status='Submitted',
+            is_submitted=True,
+            transaction_id='UTR123456789012',
+        )
+
+        # 1. Manage NEPUG list
+        list_res = self.client.get(reverse('manage_nepug_enrollments'))
+        self.assertEqual(list_res.status_code, 200)
+        self.assertIn('Vikash Sharma', list_res.content.decode('utf-8'))
+        self.assertIn('NEPUG', list_res.content.decode('utf-8'))
+
+        # 2. Update status
+        up_res = self.client.post(reverse('update_nepug_status', kwargs={'pk': rec.pk}), {'status': 'Approved'})
+        self.assertEqual(up_res.status_code, 302)
+        rec.refresh_from_db()
+        self.assertEqual(rec.status, 'Approved')
+
+        # 3. Export Excel
+        export_res = self.client.get(reverse('export_nepug_excel'))
+        self.assertEqual(export_res.status_code, 200)
+        self.assertEqual(
+            export_res['Content-Type'],
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+
+

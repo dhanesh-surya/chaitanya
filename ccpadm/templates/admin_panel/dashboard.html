@@ -55,6 +55,11 @@
                 <p>Verified Students</p>
                 <span class="stat-card__hint">{% if show_verified %}Click to hide{% else %}Click for details{% endif %}</span>
             </a>
+            <a href="{% url 'manage_nepug_enrollments' %}" class="stat-card stat-card--link" title="View NEPUG Admission & Enrollment (Sem II, III, IV, V)">
+                <h3 style="color: #082B49;"><i class="fas fa-graduation-cap"></i> {{ stats.total_nepug }}</h3>
+                <p>NEPUG (2nd-5th Sem)</p>
+                <span class="stat-card__hint">{{ stats.submitted_nepug }} Submitted | {{ stats.approved_nepug }} Approved</span>
+            </a>
             <a href="{% url 'attendance_sheets' %}" class="stat-card stat-card--link" title="Generate and export Internal Assessment Attendance Sheets">
                 <h3 style="color: #4f46e5;"><i class="fas fa-clipboard-user"></i></h3>
                 <p>Attendance Sheets</p>

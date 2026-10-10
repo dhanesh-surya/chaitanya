@@ -5,6 +5,7 @@ from .forms import AdmissionSubmitInstructionForm, EnrollmentInstructionForm
 from .models import (
     AdmissionSubmitInstruction,
     EnrollmentInstruction,
+    NepUgAdmissionEnrollment,
     StudentAdmission,
     StudentDocument,
     StudentEducation,
@@ -51,6 +52,44 @@ class StudentEnrollmentAdmin(admin.ModelAdmin):
         self.message_user(
             request,
             f'{updated} enrollment application(s) reset to Draft.',
+            messages.SUCCESS,
+        )
+
+
+@admin.register(NepUgAdmissionEnrollment)
+class NepUgAdmissionEnrollmentAdmin(admin.ModelAdmin):
+    list_display = (
+        'application_no',
+        'reg_no',
+        'enrollment_no',
+        'full_name',
+        'program_type',
+        'semester',
+        'previous_roll_no',
+        'status',
+        'is_submitted',
+        'submitted_date',
+    )
+    list_filter = ('status', 'is_submitted', 'semester', 'program_type')
+    search_fields = ('application_no', 'reg_no', 'enrollment_no', 'full_name', 'email', 'mobile', 'previous_roll_no', 'transaction_id')
+    readonly_fields = ('created_at', 'updated_at')
+    actions = ['approve_nepug_enrollment', 'reset_to_draft']
+
+    @admin.action(description='Approve selected NEPUG admission-enrollment applications')
+    def approve_nepug_enrollment(self, request, queryset):
+        updated = queryset.update(status='Approved', is_submitted=True)
+        self.message_user(
+            request,
+            f'{updated} NEPUG application(s) marked as Approved.',
+            messages.SUCCESS,
+        )
+
+    @admin.action(description='Reset selected NEPUG applications to Draft')
+    def reset_to_draft(self, request, queryset):
+        updated = queryset.update(status='Draft', is_submitted=False)
+        self.message_user(
+            request,
+            f'{updated} NEPUG application(s) reset to Draft.',
             messages.SUCCESS,
         )
 

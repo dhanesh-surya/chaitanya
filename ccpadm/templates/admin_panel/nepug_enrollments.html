@@ -1,0 +1,314 @@
+{% extends 'base.html' %}
+
+{% block title %}NEPUG - Manage Admission & Enrollment - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="portal-page portal-page--wide">
+    <div class="portal-main">
+        <div class="page-header page-header--admin">
+            <h2 class="page-title"><i class="fas fa-graduation-cap"></i> NEPUG — Admission cum Enrollment (2nd/3rd/4th/5th Sem)</h2>
+            <nav class="page-actions page-actions--toolbar" aria-label="Admin navigation">
+                {% include 'partials/admin_nav_actions.html' with active_page='nepug' %}
+                {% include 'partials/admin_nav_logout.html' %}
+            </nav>
+        </div>
+
+        <!-- STAT CARDS -->
+        <div class="stat-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: var(--space-lg);">
+            <a href="{% url 'manage_nepug_enrollments' %}" class="stat-card stat-card--link{% if status_filter == 'ALL' and semester_filter == 'ALL' and not program_filter and not search %} is-active{% endif %}">
+                <h3>{{ total_count }}</h3>
+                <p>Total NEPUG Applications</p>
+                <span class="stat-card__hint">View all</span>
+            </a>
+            <a href="{% url 'manage_nepug_enrollments' %}?status=Submitted{% if semester_filter != 'ALL' %}&semester={{ semester_filter }}{% endif %}{% if program_filter %}&program={{ program_filter|urlencode }}{% endif %}" class="stat-card stat-card--link{% if status_filter == 'Submitted' %} is-active{% endif %}" style="border-left: 4px solid #0284c7;">
+                <h3 style="color: #0284c7;">{{ submitted_count }}</h3>
+                <p>Pending Approval</p>
+                <span class="stat-card__hint">Requires review</span>
+            </a>
+            <a href="{% url 'manage_nepug_enrollments' %}?status=Approved{% if semester_filter != 'ALL' %}&semester={{ semester_filter }}{% endif %}{% if program_filter %}&program={{ program_filter|urlencode }}{% endif %}" class="stat-card stat-card--link{% if status_filter == 'Approved' %} is-active{% endif %}" style="border-left: 4px solid #16a34a;">
+                <h3 style="color: #16a34a;">{{ approved_count }}</h3>
+                <p>Approved / Accepted</p>
+                <span class="stat-card__hint">Enrollment locked</span>
+            </a>
+            <a href="{% url 'manage_nepug_enrollments' %}?status=Draft{% if semester_filter != 'ALL' %}&semester={{ semester_filter }}{% endif %}{% if program_filter %}&program={{ program_filter|urlencode }}{% endif %}" class="stat-card stat-card--link{% if status_filter == 'Draft' %} is-active{% endif %}" style="border-left: 4px solid #d97706;">
+                <h3 style="color: #d97706;">{{ draft_count }}</h3>
+                <p>Draft (In Progress)</p>
+                <span class="stat-card__hint">Editable by student</span>
+            </a>
+        </div>
+
+        <!-- SEMESTER BREAKDOWN PILLS -->
+        <div style="display: flex; gap: 10px; margin-bottom: var(--space-md); flex-wrap: wrap;">
+            <a href="{% url 'manage_nepug_enrollments' %}?semester=ALL{% if status_filter != 'ALL' %}&status={{ status_filter }}{% endif %}{% if program_filter %}&program={{ program_filter|urlencode }}{% endif %}" class="btn btn-sm {% if semester_filter == 'ALL' %}btn-primary{% else %}btn-ghost{% endif %}" style="border-radius: 20px; font-weight: 600;">
+                All Semesters ({{ total_count }})
+            </a>
+            <a href="{% url 'manage_nepug_enrollments' %}?semester=II{% if status_filter != 'ALL' %}&status={{ status_filter }}{% endif %}{% if program_filter %}&program={{ program_filter|urlencode }}{% endif %}" class="btn btn-sm {% if semester_filter == 'II' %}btn-primary{% else %}btn-ghost{% endif %}" style="border-radius: 20px; font-weight: 600;">
+                Sem II ({{ sem_counts.II }})
+            </a>
+            <a href="{% url 'manage_nepug_enrollments' %}?semester=III{% if status_filter != 'ALL' %}&status={{ status_filter }}{% endif %}{% if program_filter %}&program={{ program_filter|urlencode }}{% endif %}" class="btn btn-sm {% if semester_filter == 'III' %}btn-primary{% else %}btn-ghost{% endif %}" style="border-radius: 20px; font-weight: 600;">
+                Sem III ({{ sem_counts.III }})
+            </a>
+            <a href="{% url 'manage_nepug_enrollments' %}?semester=IV{% if status_filter != 'ALL' %}&status={{ status_filter }}{% endif %}{% if program_filter %}&program={{ program_filter|urlencode }}{% endif %}" class="btn btn-sm {% if semester_filter == 'IV' %}btn-primary{% else %}btn-ghost{% endif %}" style="border-radius: 20px; font-weight: 600;">
+                Sem IV ({{ sem_counts.IV }})
+            </a>
+            <a href="{% url 'manage_nepug_enrollments' %}?semester=V{% if status_filter != 'ALL' %}&status={{ status_filter }}{% endif %}{% if program_filter %}&program={{ program_filter|urlencode }}{% endif %}" class="btn btn-sm {% if semester_filter == 'V' %}btn-primary{% else %}btn-ghost{% endif %}" style="border-radius: 20px; font-weight: 600;">
+                Sem V ({{ sem_counts.V }})
+            </a>
+        </div>
+
+        <!-- FILTERS & SEARCH -->
+        <div class="filter-panel" style="margin-bottom: var(--space-md); padding: 1.25rem; background: #ffffff; border-radius: 8px; border: 1px solid var(--color-border); box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+            <form method="get" action="{% url 'manage_nepug_enrollments' %}" class="filter-grid" style="display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end;">
+                <div class="filter-field" style="flex: 1 1 200px;">
+                    <label for="nepugSearch" style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; color: var(--color-text-muted);">Search</label>
+                    <input type="text" id="nepugSearch" name="search" class="portal-input" value="{{ search }}" placeholder="Name, Reg No, Roll No, UTR..." style="width: 100%;">
+                </div>
+                <div class="filter-field" style="flex: 0 1 160px;">
+                    <label for="nepugSemester" style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; color: var(--color-text-muted);">Semester</label>
+                    <select id="nepugSemester" name="semester" class="portal-input" style="width: 100%;">
+                        <option value="ALL" {% if semester_filter == 'ALL' %}selected{% endif %}>All Semesters</option>
+                        {% for sem_val, sem_label in semester_choices %}
+                        <option value="{{ sem_val }}" {% if semester_filter == sem_val %}selected{% endif %}>{{ sem_label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-field" style="flex: 1 1 220px;">
+                    <label for="nepugProgram" style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; color: var(--color-text-muted);">NEP UG Program</label>
+                    <select id="nepugProgram" name="program" class="portal-input" style="width: 100%;">
+                        <option value="">-- All Programs --</option>
+                        {% for pt in program_choices %}
+                        <option value="{{ pt }}" {% if program_filter == pt %}selected{% endif %}>{{ pt }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-field" style="flex: 0 1 160px;">
+                    <label for="nepugStatus" style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; color: var(--color-text-muted);">Status</label>
+                    <select id="nepugStatus" name="status" class="portal-input" style="width: 100%;">
+                        <option value="ALL" {% if status_filter == 'ALL' %}selected{% endif %}>All Statuses</option>
+                        <option value="Submitted" {% if status_filter == 'Submitted' %}selected{% endif %}>Submitted (Pending)</option>
+                        <option value="Approved" {% if status_filter == 'Approved' %}selected{% endif %}>Approved / Accepted</option>
+                        <option value="Draft" {% if status_filter == 'Draft' %}selected{% endif %}>Draft (Editable)</option>
+                    </select>
+                </div>
+                <div class="filter-actions" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button type="submit" class="btn btn-primary btn-sm" style="background:#082B49; border-color:#082B49; padding: 7px 16px;">
+                        <i class="fas fa-filter"></i> Filter
+                    </button>
+                    {% if search or program_filter or status_filter != 'ALL' or semester_filter != 'ALL' %}
+                    <a href="{% url 'manage_nepug_enrollments' %}" class="btn btn-ghost btn-sm" style="padding: 7px 12px;" title="Reset filters">
+                        <i class="fas fa-times"></i> Reset
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'export_nepug_excel' %}?search={{ search|urlencode }}&semester={{ semester_filter|urlencode }}&program={{ program_filter|urlencode }}&status={{ status_filter|urlencode }}" class="btn btn-sm btn-success" style="background: #16a34a; border-color: #15803d; color: #fff; font-weight: 600; padding: 7px 16px; display: inline-flex; align-items: center; gap: 6px;" title="Export filtered NEPUG list to Excel (.xlsx)">
+                        <i class="fas fa-file-excel"></i> Export Excel
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- BULK ACTION BAR -->
+        <form method="post" action="{% url 'bulk_update_nepug_status' %}" id="bulkNepugActionForm" class="bulk-action-bar" hidden style="background: #f8fafc; border: 1.5px solid #0284c7; padding: 10px 16px; border-radius: 6px; margin-bottom: 12px; display: flex; align-items: center; gap: 12px;">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <span class="bulk-action-bar__count" id="bulkNepugSelectedCount" style="font-weight: 700; color: #082B49;">0 selected</span>
+            <select name="status" id="bulkNepugStatusSelect" class="portal-input" disabled style="min-width: 220px;" aria-label="Bulk NEPUG status action">
+                <option value="">Choose action...</option>
+                <option value="Approved">Accept / Approve Selected</option>
+                <option value="Draft">Reset to Draft (Allow Students to Edit)</option>
+            </select>
+            <button type="submit" class="btn btn-primary btn-sm" id="bulkNepugApplyBtn" disabled style="background: #16a34a; border-color: #15803d; color: #fff; font-weight: 600;">
+                <i class="fas fa-check-double" aria-hidden="true"></i> Apply to Selected
+            </button>
+        </form>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-xs); flex-wrap: wrap; gap: 10px;">
+            <p class="field-hint" style="margin-bottom: 0;">Showing <strong>{{ filtered_count }}</strong> NEPUG application(s)</p>
+            <div>
+                <a href="{% url 'export_nepug_excel' %}?search={{ search|urlencode }}&semester={{ semester_filter|urlencode }}&program={{ program_filter|urlencode }}&status={{ status_filter|urlencode }}" class="btn btn-sm" style="background: #107c41; border-color: #0b6a37; color: #fff; font-weight: 600; padding: 5px 12px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px;">
+                    <i class="fas fa-file-excel"></i> Export Excel (.xlsx)
+                </a>
+            </div>
+        </div>
+
+        <!-- NEPUG APPLICATIONS TABLE -->
+        <div class="table-wrap">
+            <table class="data-table" id="nepugTable">
+                <thead>
+                    <tr>
+                        <th style="width: 36px; text-align: center;">
+                            <input type="checkbox" id="selectAllNepug" title="Select all" style="cursor: pointer;">
+                        </th>
+                        <th>App / Enrol No</th>
+                        <th>Candidate Details</th>
+                        <th>Semester &amp; Program</th>
+                        <th>Previous Exam Info</th>
+                        <th>Contact</th>
+                        <th>Fee / UTR Details</th>
+                        <th>Status</th>
+                        <th>Submitted</th>
+                        <th style="text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rec in records %}
+                    <tr>
+                        <td style="text-align: center;">
+                            <input type="checkbox" name="record_ids" value="{{ rec.pk }}" class="nepug-row-check" form="bulkNepugActionForm" style="cursor: pointer;">
+                        </td>
+                        <td>
+                            <div><strong style="color: #082B49;">{{ rec.application_no|default:"—" }}</strong></div>
+                            <small class="text-muted">Enrol: {{ rec.enrollment_no|default:rec.previous_enrollment_no|default:"—" }}</small>
+                            <div><small class="text-muted">Reg: {{ rec.reg_no }}</small></div>
+                        </td>
+                        <td>
+                            <div style="font-weight: 700;">{{ rec.full_name }}</div>
+                            <small class="text-muted">F: {{ rec.father_name|default:"—" }}</small>
+                            <div>
+                                <span class="badge badge-secondary" style="font-size: 10.5px;">{{ rec.gender|default:"—" }}</span>
+                                <span class="badge badge-info" style="font-size: 10.5px;">{{ rec.category|default:"—" }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div>
+                                <span class="badge" style="background: #0284c7; color: #fff; font-weight: 700; font-size: 11px;">
+                                    Sem {{ rec.semester }}
+                                </span>
+                            </div>
+                            <div style="font-weight: 600; color: #0f172a; margin-top: 4px; font-size: 12.5px;">
+                                {{ rec.program_type }}
+                            </div>
+                            <small class="text-muted">Session: {{ rec.academic_session }}</small>
+                        </td>
+                        <td>
+                            <div>Roll: <strong>{{ rec.previous_roll_no|default:"—" }}</strong></div>
+                            <small class="text-muted">Result: {{ rec.previous_semester_result|default:"Pass" }}</small>
+                            {% if rec.previous_semester_marks %}
+                            <div><small class="text-muted">Marks: {{ rec.previous_semester_marks }}</small></div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div><i class="fas fa-phone-alt text-muted" style="font-size: 11px;"></i> {{ rec.mobile|default:"—" }}</div>
+                            <small class="text-muted"><i class="fas fa-envelope text-muted" style="font-size: 11px;"></i> {{ rec.email|default:"—" }}</small>
+                        </td>
+                        <td>
+                            <div><strong style="color: #166534;">₹{{ rec.fee_amount|default:"500" }}</strong></div>
+                            {% if rec.transaction_id %}
+                            <div style="font-family: monospace; font-size: 11.5px; font-weight: 700; color: #082B49;" title="Transaction ID / UTR">
+                                {{ rec.transaction_id }}
+                            </div>
+                            {% else %}
+                            <span class="badge badge-warning" style="font-size: 10.5px;">No UTR</span>
+                            {% endif %}
+                            {% if rec.payment_receipt %}
+                            <div>
+                                <a href="{{ rec.payment_receipt.url }}" target="_blank" class="text-primary" style="font-size: 11px;">
+                                    <i class="fas fa-file-invoice"></i> Receipt
+                                </a>
+                            </div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if rec.status == 'Approved' %}
+                            <span class="badge badge-success"><i class="fas fa-check-circle"></i> Approved</span>
+                            {% elif rec.status == 'Submitted' or rec.is_submitted %}
+                            <span class="badge badge-info"><i class="fas fa-clock"></i> Submitted</span>
+                            {% else %}
+                            <span class="badge badge-warning"><i class="fas fa-pencil-alt"></i> Draft</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <small class="text-muted">{{ rec.submitted_date|date:"d/m/Y"|default:rec.created_at|date:"d/m/Y" }}</small>
+                        </td>
+                        <td style="text-align: right; white-space: nowrap;">
+                            <div style="display: inline-flex; gap: 4px; align-items: center;">
+                                <a href="{% url 'nep_ug_print' rec.enrollment_no|default:rec.application_no %}" class="btn btn-ghost btn-sm" target="_blank" title="View / Print Slip">
+                                    <i class="fas fa-print"></i> Slip
+                                </a>
+                                <a href="{% url 'nep_ug_receipt' rec.enrollment_no|default:rec.application_no %}" class="btn btn-ghost btn-sm" target="_blank" title="Fee Receipt">
+                                    <i class="fas fa-receipt"></i>
+                                </a>
+                                <a href="{% url 'admin_edit_nepug' pk=rec.pk %}" class="btn btn-ghost btn-sm" title="Edit Application">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                {% if rec.status != 'Approved' %}
+                                <form method="post" action="{% url 'update_nepug_status' pk=rec.pk %}" style="display: inline; margin: 0;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="status" value="Approved">
+                                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                    <button type="submit" class="btn btn-sm btn-success" style="background:#16a34a; border-color:#15803d; padding: 4px 8px; font-size: 11.5px;" title="Approve / Accept application">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                </form>
+                                {% else %}
+                                <form method="post" action="{% url 'update_nepug_status' pk=rec.pk %}" style="display: inline; margin: 0;" onsubmit="return confirm('Reset application to Draft? The student will be able to edit.');">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="status" value="Draft">
+                                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                    <button type="submit" class="btn btn-sm btn-ghost" style="color: #d97706; padding: 4px 8px; font-size: 11.5px;" title="Reset to Draft">
+                                        <i class="fas fa-undo"></i>
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="10" style="text-align: center; padding: 32px; color: var(--color-text-muted);">
+                            <i class="fas fa-inbox fa-3x" style="margin-bottom: 12px; display: block; opacity: 0.4;"></i>
+                            No NEPUG admission cum enrollment applications found matching your criteria.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAll = document.getElementById('selectAllNepug');
+    const rowChecks = document.querySelectorAll('.nepug-row-check');
+    const bulkBar = document.getElementById('bulkNepugActionForm');
+    const countSpan = document.getElementById('bulkNepugSelectedCount');
+    const statusSelect = document.getElementById('bulkNepugStatusSelect');
+    const applyBtn = document.getElementById('bulkNepugApplyBtn');
+
+    function updateBulkBar() {
+        const checked = document.querySelectorAll('.nepug-row-check:checked');
+        const cnt = checked.length;
+        if (cnt > 0) {
+            bulkBar.hidden = false;
+            countSpan.textContent = cnt + ' selected';
+            statusSelect.disabled = false;
+            applyBtn.disabled = !statusSelect.value;
+        } else {
+            bulkBar.hidden = true;
+            statusSelect.disabled = true;
+            applyBtn.disabled = true;
+        }
+        if (selectAll) {
+            selectAll.checked = (rowChecks.length > 0 && cnt === rowChecks.length);
+        }
+    }
+
+    if (selectAll) {
+        selectAll.addEventListener('change', function() {
+            rowChecks.forEach(cb => cb.checked = selectAll.checked);
+            updateBulkBar();
+        });
+    }
+
+    rowChecks.forEach(cb => {
+        cb.addEventListener('change', updateBulkBar);
+    });
+
+    if (statusSelect) {
+        statusSelect.addEventListener('change', function() {
+            applyBtn.disabled = !this.value;
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -208,12 +208,13 @@ def mask_aadhaar(aadhaar):
 
 
 def get_student_sidebar_context(reg_no, active=''):
-    from admissions.models import StudentEnrollment
+    from admissions.models import NepUgAdmissionEnrollment, StudentEnrollment
     from admissions.services import get_editable_admission, get_printable_admission, is_admission_locked
 
     printable = get_printable_admission(reg_no)
     editable = get_editable_admission(reg_no)
     enrollment = StudentEnrollment.objects.filter(reg_no=reg_no, is_submitted=True).first()
+    nep_ug = NepUgAdmissionEnrollment.objects.filter(reg_no=reg_no, is_submitted=True).first()
     return {
         'sidebar_active': active,
         'admission_submitted': printable is not None,
@@ -221,6 +222,9 @@ def get_student_sidebar_context(reg_no, active=''):
         'sidebar_app_no': printable.application_no if printable else '',
         'enrollment_submitted': enrollment is not None,
         'enrollment_no': enrollment.enrollment_no if enrollment else '',
+        'nep_ug_submitted': nep_ug is not None,
+        'nep_ug_enrollment_no': (nep_ug.enrollment_no or nep_ug.application_no) if nep_ug else '',
+        'nep_ug_app_no': nep_ug.application_no if nep_ug else '',
     }
 
 

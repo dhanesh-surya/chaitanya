@@ -98,6 +98,11 @@
             font-weight: bold;
             margin: 1px 0;
         }
+        .title-sub {
+            font-size: 10.5px;
+            color: #0b3d91;
+            margin: 1px 0;
+        }
         .form-heading {
             text-align: center;
             font-size: 13.5px;
@@ -314,6 +319,44 @@
                 width: 100% !important;
                 max-width: 100% !important;
             }
+            .header-table {
+                width: 100% !important;
+                border-bottom: 2px solid #000 !important;
+                margin-bottom: 4px !important;
+            }
+            .header-table td {
+                padding: 1px 3px !important;
+            }
+            .logo-cell {
+                width: 58px !important;
+            }
+            .logo-cell img {
+                width: 54px !important;
+                height: 54px !important;
+            }
+            .title-cell {
+                padding: 0 4px !important;
+            }
+            .title-main {
+                font-size: 17px !important;
+                margin: 0 0 2px 0 !important;
+            }
+            .title-ugc {
+                font-size: 10px !important;
+                margin: 0 0 1px 0 !important;
+            }
+            .title-address {
+                font-size: 9.5px !important;
+                margin: 0 0 2px 0 !important;
+            }
+            .title-gold {
+                font-size: 9.5px !important;
+                margin: 1px 0 !important;
+            }
+            .title-sub {
+                font-size: 9.5px !important;
+                margin: 1px 0 !important;
+            }
         }
     </style>
 </head>
@@ -341,12 +384,15 @@
                     <img src="{% static 'images/logo.png' %}" alt="Logo">
                 </td>
                 <td class="title-cell">
-                    <div class="title-main">Chaitanya Science and Arts College</div>
-                    <div class="title-ugc">Pamgarh, Dist. Janjgir-Champa (C.G.)</div>
-                    <div class="title-address">Affiliated to Shaheed Nandkumar Patel Vishwavidyalaya, Raigarh (C.G.)</div>
-                    <div class="title-gold">Accredited by NAAC with Grade 'B' | Recognized under 2(f) &amp; 12(B) of UGC Act</div>
+                    <p class="title-main">CHAITANYA SCIENCE AND ARTS COLLEGE</p>
+                    <p class="title-ugc">(An Autonomous Institution Approved by UGC)</p>
+                    <p class="title-address">Pamgarh, Dist - Janjgir-Champa (C.G).</p>
+                    <p class="title-gold">ACCREDITED 'A' GRADE BY NAAC</p>
+                    <p class="title-sub">Affiliated to Shaheed Nandkumar Patel Vishwavidyalaya, Raigarh, Chhattisgarh</p>
                 </td>
-                <td class="logo-cell" style="width: 72px;"></td>
+                <td class="logo-cell">
+                    <img src="{% static 'images/NAAC.png' %}" alt="NAAC">
+                </td>
             </tr>
         </table>
 

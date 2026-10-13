@@ -9,11 +9,11 @@ def ensure_bank_utrs_seeded():
     from admissions.bank_statement_seed_data import BANK_STATEMENT_SEED_RECORDS
 
     try:
-        existing_count = BankStatementUTR.objects.count()
-        if existing_count >= len(BANK_STATEMENT_SEED_RECORDS):
-            return existing_count
-
         existing_utrs = set(BankStatementUTR.objects.values_list('utr_no', flat=True))
+        all_seed_utrs = {item['utr_no'].strip() for item in BANK_STATEMENT_SEED_RECORDS}
+        if all_seed_utrs.issubset(existing_utrs):
+            return len(existing_utrs)
+
         to_create = []
         for item in BANK_STATEMENT_SEED_RECORDS:
             utr = item['utr_no'].strip()

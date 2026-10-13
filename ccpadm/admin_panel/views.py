@@ -1170,8 +1170,15 @@ def upload_bank_statement(request):
     total_found = 0
     total_added = 0
 
+    MAX_FILE_SIZE = 25 * 1024 * 1024  # 25 MB
+
     for f in files:
         fname = f.name or 'Statement'
+        if getattr(f, 'size', 0) > MAX_FILE_SIZE:
+            mb_size = f.size / (1024 * 1024)
+            messages.error(request, f'File "{fname}" ({mb_size:.1f} MB) exceeds maximum allowed size limit of 25 MB.')
+            continue
+
         lower_name = fname.lower()
         try:
             if lower_name.endswith('.pdf'):

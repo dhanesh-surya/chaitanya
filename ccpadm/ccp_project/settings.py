@@ -153,7 +153,8 @@ else:
 SERVER_EMAIL = DEFAULT_FROM_EMAIL or 'noreply@localhost'
 
 SESSION_COOKIE_AGE = 3600
-DATA_UPLOAD_MAX_MEMORY_SIZE = 20 * 1024 * 1024
+DATA_UPLOAD_MAX_MEMORY_SIZE = 25 * 1024 * 1024  # 25 MB max request body size
+FILE_UPLOAD_MAX_MEMORY_SIZE = 25 * 1024 * 1024  # 25 MB max memory upload size
 
 LOGIN_URL = '/login/'
 STUDENT_SESSION_KEY = 'student_reg_no'

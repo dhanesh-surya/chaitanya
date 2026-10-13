@@ -461,9 +461,31 @@
                         <input type="text" name="fee_amount" class="form-control" value="500" readonly style="background: #f8fafc; font-weight: 700; color: #15803d;">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">12-अंकीय ट्रांजेक्शन ID / UTR नंबर <span class="text-danger">*</span></label>
-                        <input type="text" name="transaction_id" id="transactionIdInput" class="form-control" value="{{ initial_data.transaction_id|default:'' }}" placeholder="12-digit UPI UTR / Transaction No" required style="font-family: monospace; font-weight: 700; letter-spacing: 1px;">
-                        <small class="text-muted">PhonePe, Google Pay, Paytm या PNB ONE से 12 अंकों का UTR दर्ज करें।</small>
+                        <label class="form-label" style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>12-अंकीय ट्रांजेक्शन ID / UTR नंबर <span class="text-danger">*</span></span>
+                            <span id="nepUtrDigitBadge" class="badge" style="background: #e2e8f0; color: #475569; font-size: 11px; font-family: monospace; font-weight: 700;">0/12</span>
+                        </label>
+                        <div class="input-group">
+                            <input type="text"
+                                   name="transaction_id"
+                                   id="transactionIdInput"
+                                   class="form-control"
+                                   value="{{ initial_data.transaction_id|default:'' }}"
+                                   maxlength="12"
+                                   inputmode="numeric"
+                                   autocomplete="off"
+                                   placeholder="12-digit UPI UTR (e.g. 427819283741)"
+                                   required
+                                   style="font-family: monospace; font-weight: 700; letter-spacing: 1px;"
+                                   oninput="handleNepUtrInput(this)">
+                            <div class="input-group-append">
+                                <span class="input-group-text" id="nepUtrStatusIcon" style="background: #f8fafc;">
+                                    <i class="fas fa-keyboard text-muted"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <div id="nepUtrFeedback" style="font-size: 12px; font-weight: 600; margin-top: 5px; display: none;"></div>
+                        <small class="text-muted">केवल 12 अंकों का UTR नंबर मान्य है। किसी अन्य छात्र द्वारा पहले से उपयोग किया गया UTR स्वीकार नहीं होगा।</small>
                     </div>
                     <div class="form-group">
                         <label class="form-label">भुगतान रसीद / स्क्रीनशॉट (Payment Receipt / Screenshot)</label>
@@ -613,5 +635,121 @@ function previewPaymentReceipt(input) {
         }
     }
 }
+
+window.isNepUtrDuplicate = false;
+let nepUtrTimer = null;
+
+function handleNepUtrInput(input) {
+    if (!input) return;
+    input.value = input.value.replace(/\D/g, '').slice(0, 12);
+    const val = input.value;
+    const len = val.length;
+
+    const badge = document.getElementById('nepUtrDigitBadge');
+    const icon = document.getElementById('nepUtrStatusIcon');
+    const feedback = document.getElementById('nepUtrFeedback');
+
+    if (badge) {
+        badge.textContent = `${len}/12`;
+        badge.style.background = (len === 12) ? '#16a34a' : '#e2e8f0';
+        badge.style.color = (len === 12) ? '#ffffff' : '#475569';
+    }
+
+    if (len < 12) {
+        window.isNepUtrDuplicate = false;
+        input.style.borderColor = len > 0 ? '#d97706' : '';
+        input.style.backgroundColor = '';
+        if (icon) icon.innerHTML = '<i class="fas fa-ellipsis-h text-warning"></i>';
+        if (feedback) {
+            if (len > 0) {
+                feedback.style.display = 'block';
+                feedback.style.color = '#d97706';
+                feedback.innerHTML = `<i class="fas fa-exclamation-circle me-1"></i> ${12 - len} more digit(s) required`;
+            } else {
+                feedback.style.display = 'none';
+            }
+        }
+        return;
+    }
+
+    if (icon) icon.innerHTML = '<i class="fas fa-circle-notch fa-spin text-primary"></i>';
+    if (feedback) {
+        feedback.style.display = 'block';
+        feedback.style.color = '#0284c7';
+        feedback.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Verifying UTR...';
+    }
+
+    clearTimeout(nepUtrTimer);
+    nepUtrTimer = setTimeout(() => {
+        fetch(`/admission/api/check-utr/?utr=${encodeURIComponent(val)}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.is_duplicate) {
+                    window.isNepUtrDuplicate = true;
+                    input.style.borderColor = '#dc2626';
+                    input.style.backgroundColor = '#fef2f2';
+                    if (icon) icon.innerHTML = '<i class="fas fa-times-circle text-danger"></i>';
+                    if (feedback) {
+                        feedback.style.display = 'block';
+                        feedback.style.color = '#dc2626';
+                        feedback.innerHTML = `<i class="fas fa-ban me-1"></i> ${data.message}`;
+                    }
+                } else if (data.valid) {
+                    window.isNepUtrDuplicate = false;
+                    input.style.borderColor = '#16a34a';
+                    input.style.backgroundColor = '#f0fdf4';
+                    if (icon) icon.innerHTML = '<i class="fas fa-check-circle text-success"></i>';
+                    if (feedback) {
+                        feedback.style.display = 'block';
+                        feedback.style.color = '#16a34a';
+                        feedback.innerHTML = `<i class="fas fa-check-circle me-1"></i> ${data.message}`;
+                    }
+                } else {
+                    window.isNepUtrDuplicate = false;
+                    input.style.borderColor = '#dc2626';
+                    if (icon) icon.innerHTML = '<i class="fas fa-exclamation-triangle text-danger"></i>';
+                    if (feedback) {
+                        feedback.style.display = 'block';
+                        feedback.style.color = '#dc2626';
+                        feedback.innerHTML = `<i class="fas fa-exclamation-circle me-1"></i> ${data.message}`;
+                    }
+                }
+            })
+            .catch(() => {
+                window.isNepUtrDuplicate = false;
+            });
+    }, 200);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const tx = document.getElementById('transactionIdInput');
+    if (tx && tx.value) {
+        handleNepUtrInput(tx);
+    }
+
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', (e) => {
+            const txEl = document.getElementById('transactionIdInput');
+            if (txEl) {
+                const txVal = (txEl.value || '').replace(/\D/g, '');
+                if (txVal.length !== 12) {
+                    alert(`त्रुटि: UTR नंबर केवल 12 अंकों का होना चाहिए। (UTR Number must be exactly 12 digits).\nआपने ${txVal.length} अंक दर्ज किए हैं।`);
+                    e.preventDefault();
+                    txEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    txEl.focus();
+                    return false;
+                }
+                if (window.isNepUtrDuplicate) {
+                    alert(`त्रुटि: यह UTR नंबर (${txVal}) पहले से किसी अन्य आवेदन में उपयोग किया जा चुका है! डुप्लिकेट UTR स्वीकार नहीं किया जाएगा। (Duplicate UTR is not accepted).`);
+                    e.preventDefault();
+                    txEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    txEl.focus();
+                    return false;
+                }
+            }
+        });
+    }
+});
 </script>
 {% endblock %}

@@ -419,12 +419,29 @@
                             </h4>
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <label class="form-label" style="font-weight: 700; font-size: 13px; color: #1e293b;">
-                                        Transaction ID / UTR Number * <span class="text-danger">(Required)</span>
+                                    <label class="form-label" style="font-weight: 700; font-size: 13px; color: #1e293b; display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                        <span>Transaction ID / UTR Number * <span class="text-danger">(12 Digits Required)</span></span>
+                                        <span id="utrDigitBadge" class="badge" style="background: #e2e8f0; color: #475569; font-size: 11px; font-family: monospace; font-weight: 700;">0/12</span>
                                     </label>
-                                    <input type="text" name="transaction_id" id="transactionIdInput" class="form-control" value="{{ initial_data.transaction_id|default:'' }}" placeholder="e.g. 4278XXXXXXXX (12-digit UTR/Ref No.)" style="font-family: monospace; font-size: 14px; font-weight: 600;">
-                                    <div class="form-text" style="font-size: 11.5px; color: #64748b;">
-                                        Enter the 12-digit UTR or Reference ID received after paying ₹500 in your UPI app.
+                                    <div class="input-group">
+                                        <input type="text"
+                                               name="transaction_id"
+                                               id="transactionIdInput"
+                                               class="form-control"
+                                               value="{{ initial_data.transaction_id|default:'' }}"
+                                               maxlength="12"
+                                               inputmode="numeric"
+                                               autocomplete="off"
+                                               placeholder="Enter 12-digit UTR (e.g. 427819283741)"
+                                               style="font-family: monospace; font-size: 14.5px; font-weight: 700; letter-spacing: 1px;"
+                                               oninput="handleUtrInput(this)">
+                                        <span class="input-group-text" id="utrStatusIcon" style="background: #f8fafc;">
+                                            <i class="fas fa-keyboard text-muted"></i>
+                                        </span>
+                                    </div>
+                                    <div id="utrFeedback" style="font-size: 12px; font-weight: 600; margin-top: 5px; display: none;"></div>
+                                    <div class="form-text" style="font-size: 11.5px; color: #64748b; margin-top: 4px;">
+                                        Only 12-digit numeric UTR received after paying ₹500 is accepted. Duplicate / already-used UTRs will not be accepted.
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -1574,8 +1591,108 @@ window.ENROLLMENT_CONFIG = {
         }
     };
 
+    window.isUtrDuplicate = false;
+    let utrDebounceTimer = null;
+
+    window.handleUtrInput = function (input) {
+        if (!input) return;
+        // Strip non-numeric characters and cap at exactly 12 digits
+        input.value = input.value.replace(/\D/g, '').slice(0, 12);
+        const val = input.value;
+        const len = val.length;
+
+        const badge = document.getElementById('utrDigitBadge');
+        const icon = document.getElementById('utrStatusIcon');
+        const feedback = document.getElementById('utrFeedback');
+
+        if (badge) {
+            badge.textContent = `${len}/12`;
+            if (len === 12) {
+                badge.style.background = '#16a34a';
+                badge.style.color = '#ffffff';
+            } else {
+                badge.style.background = '#e2e8f0';
+                badge.style.color = '#475569';
+            }
+        }
+
+        if (len < 12) {
+            window.isUtrDuplicate = false;
+            input.style.borderColor = len > 0 ? '#d97706' : '';
+            input.style.backgroundColor = '';
+            if (icon) icon.innerHTML = '<i class="fas fa-ellipsis-h text-warning"></i>';
+            if (feedback) {
+                if (len > 0) {
+                    feedback.style.display = 'block';
+                    feedback.style.color = '#d97706';
+                    feedback.innerHTML = `<i class="fas fa-exclamation-circle me-1"></i> ${12 - len} more digit(s) required (12-digit UTR required)`;
+                } else {
+                    feedback.style.display = 'none';
+                }
+            }
+            return;
+        }
+
+        // len === 12: Check duplicate & validity via AJAX
+        if (icon) icon.innerHTML = '<i class="fas fa-circle-notch fa-spin text-primary"></i>';
+        if (feedback) {
+            feedback.style.display = 'block';
+            feedback.style.color = '#0284c7';
+            feedback.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Verifying UTR uniqueness &amp; bank status...';
+        }
+
+        clearTimeout(utrDebounceTimer);
+        utrDebounceTimer = setTimeout(() => {
+            fetch(`/admission/api/check-utr/?utr=${encodeURIComponent(val)}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.is_duplicate) {
+                        window.isUtrDuplicate = true;
+                        input.style.borderColor = '#dc2626';
+                        input.style.backgroundColor = '#fef2f2';
+                        if (icon) icon.innerHTML = '<i class="fas fa-times-circle text-danger"></i>';
+                        if (feedback) {
+                            feedback.style.display = 'block';
+                            feedback.style.color = '#dc2626';
+                            feedback.innerHTML = `<i class="fas fa-ban me-1"></i> ${data.message}`;
+                        }
+                    } else if (data.valid) {
+                        window.isUtrDuplicate = false;
+                        input.style.borderColor = '#16a34a';
+                        input.style.backgroundColor = '#f0fdf4';
+                        if (icon) icon.innerHTML = '<i class="fas fa-check-circle text-success"></i>';
+                        if (feedback) {
+                            feedback.style.display = 'block';
+                            feedback.style.color = '#16a34a';
+                            feedback.innerHTML = `<i class="fas fa-check-circle me-1"></i> ${data.message}`;
+                        }
+                    } else {
+                        window.isUtrDuplicate = false;
+                        input.style.borderColor = '#dc2626';
+                        input.style.backgroundColor = '';
+                        if (icon) icon.innerHTML = '<i class="fas fa-exclamation-triangle text-danger"></i>';
+                        if (feedback) {
+                            feedback.style.display = 'block';
+                            feedback.style.color = '#dc2626';
+                            feedback.innerHTML = `<i class="fas fa-exclamation-circle me-1"></i> ${data.message}`;
+                        }
+                    }
+                })
+                .catch(() => {
+                    window.isUtrDuplicate = false;
+                    if (icon) icon.innerHTML = '<i class="fas fa-check text-success"></i>';
+                    if (feedback) {
+                        feedback.style.display = 'block';
+                        feedback.style.color = '#16a34a';
+                        feedback.textContent = '12-digit UTR format valid.';
+                    }
+                });
+        }, 200);
+    };
+
     window.validatePaymentStep = function (e) {
-        const txId = (document.getElementById('transactionIdInput')?.value || '').trim();
+        const txRaw = (document.getElementById('transactionIdInput')?.value || '').trim();
+        const txId = txRaw.replace(/\D/g, '');
         const receiptInput = document.getElementById('paymentReceiptInput');
         const receiptBase64 = (document.getElementById('paymentReceiptBase64')?.value || '').trim();
         const hasExistingReceipt = (receiptInput?.dataset.hasExisting === '1') || receiptBase64.length > 0;
@@ -1584,6 +1701,28 @@ window.ENROLLMENT_CONFIG = {
 
         if (!txId) {
             alert('कृपया ₹500 का भुगतान करें और अपना 12 अंकों का Transaction ID / UTR Number दर्ज करें। (Please enter your Transaction ID / UTR Number).');
+            e.preventDefault();
+            const txElem = document.getElementById('transactionIdInput');
+            if (txElem) {
+                txElem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                txElem.focus();
+            }
+            return false;
+        }
+
+        if (txId.length !== 12) {
+            alert(`त्रुटि (Error): UTR नंबर केवल 12 अंकों का होना चाहिए। (UTR Number must be exactly 12 digits).\nआपने ${txId.length} अंक दर्ज किए हैं।`);
+            e.preventDefault();
+            const txElem = document.getElementById('transactionIdInput');
+            if (txElem) {
+                txElem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                txElem.focus();
+            }
+            return false;
+        }
+
+        if (window.isUtrDuplicate) {
+            alert(`त्रुटि (Error): यह UTR नंबर (${txId}) पहले से किसी अन्य आवेदन में उपयोग किया जा चुका है! डुप्लिकेट UTR स्वीकार नहीं किया जाएगा। (Duplicate UTR is not accepted).\nकृपया अपना स्वयं का 12 अंकों का UTR नंबर दर्ज करें।`);
             e.preventDefault();
             const txElem = document.getElementById('transactionIdInput');
             if (txElem) {
@@ -1636,14 +1775,37 @@ window.ENROLLMENT_CONFIG = {
         const action = e.submitter ? e.submitter.value : (e.target ? e.target.value : 'submit');
 
         if (action === 'submit') {
-            const txId = (document.getElementById('transactionIdInput')?.value || '').trim();
+            const txRaw = (document.getElementById('transactionIdInput')?.value || '').trim();
+            const txId = txRaw.replace(/\D/g, '');
             const receiptInput = document.getElementById('paymentReceiptInput');
             const receiptBase64 = (document.getElementById('paymentReceiptBase64')?.value || '').trim();
             const hasExistingReceipt = (receiptInput?.dataset.hasExisting === '1') || receiptBase64.length > 0;
             const hasNewFile = receiptInput && receiptInput.files && receiptInput.files.length > 0;
 
             if (!txId) {
-                alert('Please pay the ₹500 enrollment fee and enter your Transaction ID / UTR Number before submitting.');
+                alert('Please pay the ₹500 enrollment fee and enter your 12-digit Transaction ID / UTR Number before submitting.');
+                e.preventDefault();
+                const txElem = document.getElementById('transactionIdInput');
+                if (txElem) {
+                    txElem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    txElem.focus();
+                }
+                return false;
+            }
+
+            if (txId.length !== 12) {
+                alert(`Error: UTR Number must be exactly 12 digits (केवल 12 अंकों का UTR दर्ज करें). You entered ${txId.length} digits.`);
+                e.preventDefault();
+                const txElem = document.getElementById('transactionIdInput');
+                if (txElem) {
+                    txElem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    txElem.focus();
+                }
+                return false;
+            }
+
+            if (window.isUtrDuplicate) {
+                alert(`Error: UTR Number (${txId}) has already been used in another application! Duplicate UTR is not accepted.`);
                 e.preventDefault();
                 const txElem = document.getElementById('transactionIdInput');
                 if (txElem) {
@@ -1712,6 +1874,11 @@ window.ENROLLMENT_CONFIG = {
     }
 
     document.addEventListener('DOMContentLoaded', async () => {
+        const txInput = document.getElementById('transactionIdInput');
+        if (txInput && txInput.value) {
+            window.handleUtrInput(txInput);
+        }
+
         initBscSubjectGroups();
         setupBscGroupListeners();
 

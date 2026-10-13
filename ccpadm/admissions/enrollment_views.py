@@ -1,9 +1,10 @@
 import json
 import logging
+import re
 
 from django.db import models
 from django.contrib import messages
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -276,26 +277,60 @@ def enrollment_form(request):
 
         # Payment persistence
         enrollment.fee_amount = fee_amount
-        if transaction_id:
-            enrollment.transaction_id = transaction_id
+        clean_utr = re.sub(r'\D', '', transaction_id or '')
+
+        if action in ('save_payment', 'submit'):
+            if not clean_utr:
+                messages.error(request, 'Please complete the ₹500 fee payment and enter your 12-digit Transaction ID / UTR Number.')
+                return redirect('enrollment_form')
+            if len(clean_utr) != 12:
+                messages.error(
+                    request,
+                    f'Invalid UTR Number "{clean_utr}"! Transaction ID / UTR must be exactly 12 digits (केवल 12 अंकों का वैध UTR नंबर दर्ज करें). You entered {len(clean_utr)} digits.'
+                )
+                return redirect('enrollment_form')
+
+            from admissions.models import NepUgAdmissionEnrollment
+            dup_enr = StudentEnrollment.objects.filter(transaction_id=clean_utr).exclude(reg_no=reg_no).first()
+            dup_nep = NepUgAdmissionEnrollment.objects.filter(transaction_id=clean_utr).exclude(reg_no=reg_no).first()
+            if dup_enr or dup_nep:
+                dup_ref = (dup_enr.enrollment_no or dup_enr.reg_no) if dup_enr else (dup_nep.application_no or dup_nep.reg_no)
+                messages.error(
+                    request,
+                    f'UTR Number "{clean_utr}" has already been used in another application ({dup_ref}). '
+                    f'Duplicate UTR is not accepted (यह UTR नंबर पहले से उपयोग किया जा चुका है). '
+                    f'Please enter your own valid 12-digit transaction UTR.'
+                )
+                return redirect('enrollment_form')
+
+            enrollment.transaction_id = clean_utr
             enrollment.payment_status = 'Paid'
+        else:
+            if clean_utr:
+                if len(clean_utr) == 12:
+                    from admissions.models import NepUgAdmissionEnrollment
+                    dup_enr = StudentEnrollment.objects.filter(transaction_id=clean_utr).exclude(reg_no=reg_no).first()
+                    dup_nep = NepUgAdmissionEnrollment.objects.filter(transaction_id=clean_utr).exclude(reg_no=reg_no).first()
+                    if dup_enr or dup_nep:
+                        dup_ref = (dup_enr.enrollment_no or dup_enr.reg_no) if dup_enr else (dup_nep.application_no or dup_nep.reg_no)
+                        messages.error(
+                            request,
+                            f'UTR Number "{clean_utr}" is already used in application ({dup_ref}). Duplicate UTR is not accepted.'
+                        )
+                        return redirect('enrollment_form')
+                enrollment.transaction_id = clean_utr
+
         if payment_receipt_file:
             enrollment.payment_receipt = payment_receipt_file
         if payment_receipt_base64:
             enrollment.payment_receipt_base64 = payment_receipt_base64
 
         if action == 'save_payment':
-            if not enrollment.transaction_id:
-                messages.error(request, 'Please complete the ₹500 fee payment and enter your Transaction ID / UTR Number.')
-                return redirect('enrollment_form')
             enrollment.status = 'Draft'
             enrollment.save()
             messages.success(request, 'Payment details submitted successfully! Section 3 and Course selection are now unlocked.')
             return redirect(reverse('enrollment_form') + '?step=section3')
         elif action == 'submit':
-            if not enrollment.transaction_id:
-                messages.error(request, 'Please complete the ₹500 fee payment and enter your Transaction ID / UTR Number before submitting.')
-                return redirect('enrollment_form')
             if not enrollment.enrollment_no:
                 enrollment.enrollment_no = generate_enrollment_number()
             enrollment.status = 'Submitted'
@@ -743,5 +778,71 @@ def cancel_enrollment(request):
         'Enrollment application cancelled successfully. You can now edit any incorrect entries and re-submit your form.'
     )
     return redirect('enrollment_form')
+
+
+def check_utr_duplicate_api(request):
+    """
+    AJAX endpoint to validate UTR in real-time:
+    - Must be exactly 12 numeric digits
+    - Must not be used by another student in StudentEnrollment or NepUgAdmissionEnrollment
+    - Checks whether it is verified in BankStatementUTR
+    """
+    raw_utr = request.GET.get('utr', '').strip()
+    session_obj = getattr(request, 'session', {}) or {}
+    current_reg = request.GET.get('reg_no', '').strip() or session_obj.get('reg_no', '')
+    clean_utr = re.sub(r'\D', '', raw_utr)
+
+    if not clean_utr:
+        return JsonResponse({
+            'valid': False,
+            'is_12_digits': False,
+            'digits_entered': 0,
+            'message': 'Please enter the 12-digit UTR Number.',
+        })
+
+    digits_count = len(clean_utr)
+    if digits_count != 12:
+        return JsonResponse({
+            'valid': False,
+            'is_12_digits': False,
+            'digits_entered': digits_count,
+            'message': f'UTR must be exactly 12 digits ({digits_count}/12 digits entered).',
+        })
+
+    from admissions.models import NepUgAdmissionEnrollment, BankStatementUTR
+
+    dup_enr = StudentEnrollment.objects.filter(transaction_id=clean_utr).exclude(reg_no=current_reg).first()
+    dup_nep = NepUgAdmissionEnrollment.objects.filter(transaction_id=clean_utr).exclude(reg_no=current_reg).first()
+
+    if dup_enr or dup_nep:
+        dup_app = (dup_enr.enrollment_no or dup_enr.reg_no) if dup_enr else (dup_nep.application_no or dup_nep.reg_no)
+        return JsonResponse({
+            'valid': False,
+            'is_12_digits': True,
+            'is_duplicate': True,
+            'duplicate_app': dup_app,
+            'message': f'Error: This UTR ({clean_utr}) is already used in application {dup_app}! Duplicate UTR is not accepted.',
+        })
+
+    # Check bank statement
+    bank_rec = BankStatementUTR.objects.filter(utr_no=clean_utr).first()
+    bank_verified = bool(bank_rec)
+    bank_sender = bank_rec.sender_name if bank_rec else ''
+    bank_date = bank_rec.tran_date if bank_rec else ''
+
+    status_msg = f'Valid 12-digit UTR accepted.'
+    if bank_verified:
+        status_msg += f' (Bank Verified: {bank_sender} / {bank_date})'
+
+    return JsonResponse({
+        'valid': True,
+        'is_12_digits': True,
+        'is_duplicate': False,
+        'bank_verified': bank_verified,
+        'bank_sender': bank_sender,
+        'bank_date': bank_date,
+        'message': status_msg,
+    })
+
 
 

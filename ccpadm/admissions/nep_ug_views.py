@@ -1,6 +1,7 @@
 import base64
 import json
 import logging
+import re
 from datetime import datetime
 
 from django.db import models
@@ -255,9 +256,44 @@ def nep_ug_enrollment_form(request):
 
         # Payment
         nep_record.fee_amount = fee_amount
-        if transaction_id:
-            nep_record.transaction_id = transaction_id
+        clean_utr = re.sub(r'\D', '', transaction_id or '')
+
+        if action == 'submit':
+            if not clean_utr:
+                messages.error(request, 'कृपया ₹500 शुल्क भुगतान पूर्ण करें एवं अपना 12 अंकों का ट्रांजेक्शन ID / UTR नंबर दर्ज करें। (Please enter your 12-digit UTR before submitting).')
+                return redirect('nep_ug_enrollment_form')
+
+            if len(clean_utr) != 12:
+                messages.error(
+                    request,
+                    f'अमान्य UTR नंबर ({clean_utr})! UTR नंबर केवल 12 अंकों का होना चाहिए। (UTR must be exactly 12 digits). आपने {len(clean_utr)} अंक दर्ज किए हैं।'
+                )
+                return redirect('nep_ug_enrollment_form')
+
+            dup_nep = NepUgAdmissionEnrollment.objects.filter(transaction_id=clean_utr).exclude(reg_no=reg_no).first()
+            dup_enr = StudentEnrollment.objects.filter(transaction_id=clean_utr).exclude(reg_no=reg_no).first()
+            if dup_nep or dup_enr:
+                dup_ref = (dup_nep.application_no or dup_nep.reg_no) if dup_nep else (dup_enr.enrollment_no or dup_enr.reg_no)
+                messages.error(
+                    request,
+                    f'UTR नंबर "{clean_utr}" पहले से अन्य आवेदन ({dup_ref}) में उपयोग किया जा चुका है। '
+                    'डुप्लिकेट UTR स्वीकार नहीं किया जाएगा। कृपया अपना स्वयं का 12 अंकों का UTR नंबर दर्ज करें।'
+                )
+                return redirect('nep_ug_enrollment_form')
+
+            nep_record.transaction_id = clean_utr
             nep_record.payment_status = 'Paid'
+        else:
+            if clean_utr:
+                if len(clean_utr) == 12:
+                    dup_nep = NepUgAdmissionEnrollment.objects.filter(transaction_id=clean_utr).exclude(reg_no=reg_no).first()
+                    dup_enr = StudentEnrollment.objects.filter(transaction_id=clean_utr).exclude(reg_no=reg_no).first()
+                    if dup_nep or dup_enr:
+                        dup_ref = (dup_nep.application_no or dup_nep.reg_no) if dup_nep else (dup_enr.enrollment_no or dup_enr.reg_no)
+                        messages.error(request, f'UTR नंबर "{clean_utr}" पहले से उपयोग किया जा चुका है ({dup_ref})।')
+                        return redirect('nep_ug_enrollment_form')
+                nep_record.transaction_id = clean_utr
+
         if payment_receipt_file:
             nep_record.payment_receipt = payment_receipt_file
         if payment_receipt_base64:

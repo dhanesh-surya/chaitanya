@@ -22,6 +22,7 @@ urlpatterns = [
     path('nep-ug/receipt/<str:enrollment_no>/', nep_ug_views.nep_ug_fee_receipt, name='nep_ug_receipt'),
     path('nep-ug/cancel/', nep_ug_views.cancel_nep_ug_enrollment, name='cancel_nep_ug_enrollment'),
     path('api/courses/', views.courses_api, name='courses_api'),
+    path('api/check-utr/', enrollment_views.check_utr_duplicate_api, name='check_utr_duplicate_api'),
     path('api/save-draft/', views.save_draft_api, name='save_draft_api'),
     path('api/load-draft/', views.load_draft_api, name='load_draft_api'),
     path('api/submit/', views.submit_application, name='submit_application'),

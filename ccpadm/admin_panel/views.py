@@ -1159,6 +1159,7 @@ def upload_bank_statement(request):
     from admissions.models import BankStatementUTR
     from admissions.utr_verification import (
         import_bank_statement_records,
+        parse_and_import_bank_excel,
         parse_and_import_bank_pdf,
         parse_bank_statement_text,
     )
@@ -1171,9 +1172,14 @@ def upload_bank_statement(request):
 
     for f in files:
         fname = f.name or 'Statement'
+        lower_name = fname.lower()
         try:
-            if fname.lower().endswith('.pdf'):
+            if lower_name.endswith('.pdf'):
                 found, added = parse_and_import_bank_pdf(f, filename=fname)
+                total_found += found
+                total_added += added
+            elif lower_name.endswith(('.xlsx', '.xlsm')):
+                found, added = parse_and_import_bank_excel(f, filename=fname)
                 total_found += found
                 total_added += added
             else:
@@ -1193,15 +1199,19 @@ def upload_bank_statement(request):
         total_added += added
 
     total_db = BankStatementUTR.objects.count()
+    already_existed = max(0, total_found - total_added)
     if total_found > 0:
         messages.success(
             request,
-            f'Bank Statement processed! Extracted {total_found} UTR(s) ({total_added} new added). Total verified Bank UTRs in system: {total_db}.',
+            f'Bank Statement processed! Found {total_found} UTR(s) in statement '
+            f'({total_added} newly added, {already_existed} already in system — no duplicates created). '
+            f'Total verified Bank UTRs in system: {total_db}.',
         )
     else:
         messages.warning(
             request,
-            'No UPI/CR or 12-digit UTR numbers were found in the uploaded statement. Please ensure it is a text-searchable PNB statement PDF or paste Narration text.',
+            'No UPI/CR or 12-digit UTR numbers were found in the uploaded file. '
+            'If your PDF is a scanned image (non-selectable text), please upload the Excel (.xlsx) / CSV statement or paste the UTR numbers in the text box.',
         )
 
     next_url = request.POST.get('next') or request.META.get('HTTP_REFERER') or reverse('manage_enrollments')
@@ -1789,6 +1799,7 @@ def manage_nepug_enrollments(request):
         program_filter = ''
     semester_filter = request.GET.get('semester', 'ALL').strip() or 'ALL'
     status_filter = request.GET.get('status', 'ALL').strip() or 'ALL'
+    utr_filter = request.GET.get('utr_verify', 'ALL').strip().upper() or 'ALL'
 
     records = NepUgAdmissionEnrollment.objects.all().select_related('student')
 
@@ -1818,6 +1829,13 @@ def manage_nepug_enrollments(request):
     record_list = list(records)
     utr_stats = attach_utr_verification(record_list)
 
+    if utr_filter == 'VERIFIED':
+        record_list = [r for r in record_list if r.utr_verified]
+    elif utr_filter == 'UNVERIFIED':
+        record_list = [r for r in record_list if r.transaction_id and not r.utr_verified]
+    elif utr_filter == 'DUPLICATE':
+        record_list = [r for r in record_list if r.utr_is_duplicate]
+
     total_count = NepUgAdmissionEnrollment.objects.count()
     submitted_count = NepUgAdmissionEnrollment.objects.filter(status='Submitted').count()
     approved_count = NepUgAdmissionEnrollment.objects.filter(status='Approved').count()
@@ -1838,6 +1856,7 @@ def manage_nepug_enrollments(request):
         'program_filter': program_filter,
         'semester_filter': semester_filter,
         'status_filter': status_filter,
+        'utr_filter': utr_filter,
         'utr_verified_count': utr_stats['verified_count'],
         'utr_unverified_count': utr_stats['unverified_count'],
         'utr_duplicate_count': utr_stats['duplicate_count'],

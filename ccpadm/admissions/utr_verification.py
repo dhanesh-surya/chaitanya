@@ -75,7 +75,8 @@ def normalize_student_utr(raw_utr):
 
 def parse_bank_statement_text(text, source_name='Uploaded Statement'):
     """
-    Extract UTR records from bank statement text (PNB Narration column or raw UTR list).
+    Extract UTR records from bank statement text (PNB Narration column, IMPS/NEFT, or raw UTR list).
+    Handles line-wraps/spaces inside PDF table cells and always catches standalone 12-digit UTRs.
     """
     if not text:
         return []
@@ -83,8 +84,20 @@ def parse_bank_statement_text(text, source_name='Uploaded Statement'):
     records = []
     seen_utrs = set()
 
-    # 1. Match PNB UPI/CR/<UTR>/<Name>/<Bank>/<UPI_ID> format
-    for m in re.finditer(r'UPI/CR/(\d{8,18})(?:/([^/\n\r]*))?(?:/([^/\n\r]*))?(?:/([^\s\n\r]*))?', text, flags=re.IGNORECASE):
+    # Pre-normalize PDF line breaks inside "UPI/CR/<digits>" where pypdf wraps numbers across lines
+    normalized_text = re.sub(
+        r'(UPI\s*[/\-]\s*(?:CR|DR)\s*[/\-]\s*\d{4,11})\s*\n\s*(\d{1,10})',
+        r'\1\2',
+        text,
+        flags=re.IGNORECASE,
+    )
+
+    # 1. Match PNB UPI/CR/<UTR>/<Name>/<Bank>/<UPI_ID> format (allowing optional whitespace around slashes)
+    upi_pattern = re.compile(
+        r'UPI\s*[/\-]\s*(?:CR|DR)\s*[/\-]\s*(\d{8,18})(?:\s*/\s*([^/\n\r]*))?(?:\s*/\s*([^/\n\r]*))?(?:\s*/\s*([^\s\n\r]*))?',
+        flags=re.IGNORECASE,
+    )
+    for m in upi_pattern.finditer(normalized_text):
         utr = m.group(1).strip()
         if utr in seen_utrs:
             continue
@@ -94,16 +107,16 @@ def parse_bank_statement_text(text, source_name='Uploaded Statement'):
         bank = (m.group(3) or '').strip()
         rest = (m.group(4) or '').strip()
 
-        date_m = re.search(r'(\d{2}-\d{2}-\d{4})$', rest)
+        date_m = re.search(r'(\d{2}[/\-]\d{2}[/\-]\d{4})$', rest)
         tran_date = ''
         if date_m:
-            tran_date = date_m.group(1)
+            tran_date = date_m.group(1).replace('/', '-')
             rest = rest[:-10].strip()
         else:
-            window = text[max(0, m.start() - 50):min(len(text), m.end() + 30)]
-            dm = re.search(r'(\d{2}-\d{2}-\d{4})', window)
+            window = normalized_text[max(0, m.start() - 60):min(len(normalized_text), m.end() + 40)]
+            dm = re.search(r'(\d{2}[/\-]\d{2}[/\-]\d{4})', window)
             if dm:
-                tran_date = dm.group(1)
+                tran_date = dm.group(1).replace('/', '-')
 
         upi_id = rest.split('/')[0] if '/' in rest else rest
         narration = f'UPI/CR/{utr}/{sender}/{bank}/{rest}'.rstrip('/')
@@ -112,23 +125,48 @@ def parse_bank_statement_text(text, source_name='Uploaded Statement'):
             'utr_no': utr,
             'tran_date': tran_date,
             'amount': '500.00',
-            'sender_name': sender,
-            'bank_code': bank,
-            'upi_id': upi_id,
+            'sender_name': sender[:150],
+            'bank_code': bank[:50],
+            'upi_id': upi_id[:150],
             'narration': narration[:500],
             'statement_source': source_name[:200],
         })
 
-    # 2. Match NEFT IN::<UTR>/<Sender> format
-    for m in re.finditer(r'NEFT\s+IN::([A-Z0-9]{10,22})(?:/([^/\n\r]*))?', text, flags=re.IGNORECASE):
+    # 2. Match IMPS / generic UPI patterns (e.g. IMPS/P2A/<UTR>/<Sender> or UPI/<UTR>/...)
+    imps_pattern = re.compile(
+        r'(?:IMPS\s*[/\-]\s*(?:P2A|P2M|IN|CR)?\s*[/\-]?|UPI\s*[/\-])\s*(\d{10,16})(?:\s*/\s*([^/\n\r]*))?',
+        flags=re.IGNORECASE,
+    )
+    for m in imps_pattern.finditer(normalized_text):
+        utr = m.group(1).strip()
+        if utr in seen_utrs:
+            continue
+        seen_utrs.add(utr)
+        sender = (m.group(2) or '').strip()
+        window = normalized_text[max(0, m.start() - 60):min(len(normalized_text), m.end() + 40)]
+        dm = re.search(r'(\d{2}[/\-]\d{2}[/\-]\d{4})', window)
+        tran_date = dm.group(1).replace('/', '-') if dm else ''
+        records.append({
+            'utr_no': utr,
+            'tran_date': tran_date,
+            'amount': '500.00',
+            'sender_name': sender[:150],
+            'bank_code': '',
+            'upi_id': '',
+            'narration': m.group(0).strip()[:500],
+            'statement_source': source_name[:200],
+        })
+
+    # 3. Match NEFT / RTGS IN::<UTR>/<Sender> format
+    for m in re.finditer(r'(?:NEFT|RTGS)[\s:_\-/]*(?:IN)?[\s:_\-/]*([A-Z]{4}[A-Z0-9]{8,18})(?:/([^/\n\r]*))?', normalized_text, flags=re.IGNORECASE):
         utr = m.group(1).strip().upper()
         if utr in seen_utrs:
             continue
         seen_utrs.add(utr)
         sender = (m.group(2) or '').strip()
-        window = text[max(0, m.start() - 50):min(len(text), m.end() + 40)]
-        dm = re.search(r'(\d{2}-\d{2}-\d{4})', window)
-        tran_date = dm.group(1) if dm else ''
+        window = normalized_text[max(0, m.start() - 60):min(len(normalized_text), m.end() + 40)]
+        dm = re.search(r'(\d{2}[/\-]\d{2}[/\-]\d{4})', window)
+        tran_date = dm.group(1).replace('/', '-') if dm else ''
         records.append({
             'utr_no': utr,
             'tran_date': tran_date,
@@ -136,67 +174,113 @@ def parse_bank_statement_text(text, source_name='Uploaded Statement'):
             'sender_name': sender[:150],
             'bank_code': utr[:4],
             'upi_id': '',
-            'narration': m.group(0)[:500],
+            'narration': m.group(0).strip()[:500],
             'statement_source': source_name[:200],
         })
 
-    # 3. If no UPI/CR or NEFT patterns found, check if user pasted/uploaded raw 12-digit UTR numbers
-    if not records:
-        for m in re.finditer(r'\b(\d{12})\b', text):
-            utr = m.group(1)
-            if utr not in seen_utrs:
-                seen_utrs.add(utr)
-                records.append({
-                    'utr_no': utr,
-                    'tran_date': '',
-                    'amount': '500.00',
-                    'sender_name': '',
-                    'bank_code': '',
-                    'upi_id': '',
-                    'narration': f'UPI/CR/{utr}',
-                    'statement_source': source_name[:200],
-                })
+    # 4. Always scan for any remaining 12-digit UTR numbers in the text that weren't caught above
+    # (Skip common 16-digit account numbers because \b\d{12}\b only matches exact 12-digit tokens)
+    for m in re.finditer(r'\b(\d{12})\b', normalized_text):
+        utr = m.group(1)
+        if utr not in seen_utrs:
+            seen_utrs.add(utr)
+            window = normalized_text[max(0, m.start() - 60):min(len(normalized_text), m.end() + 60)]
+            dm = re.search(r'(\d{2}[/\-]\d{2}[/\-]\d{4})', window)
+            tran_date = dm.group(1).replace('/', '-') if dm else ''
+            records.append({
+                'utr_no': utr,
+                'tran_date': tran_date,
+                'amount': '500.00',
+                'sender_name': '',
+                'bank_code': '',
+                'upi_id': '',
+                'narration': f'UTR/{utr}',
+                'statement_source': source_name[:200],
+            })
 
     return records
 
 
 def import_bank_statement_records(records):
-    """Save parsed bank statement UTR records into the database. Returns (total_parsed, newly_added)."""
+    """
+    Save parsed bank statement UTR records into the database.
+    Safe to run repeatedly on the same statement:
+    - Existing UTRs are never duplicated.
+    - If an existing UTR had missing sender_name/tran_date and the re-upload has them, it updates them.
+    Returns (total_parsed, newly_added).
+    """
     from admissions.models import BankStatementUTR
 
     if not records:
         return 0, 0
 
     ensure_bank_utrs_seeded()
-    existing_utrs = set(BankStatementUTR.objects.values_list('utr_no', flat=True))
+    existing_objs = {obj.utr_no: obj for obj in BankStatementUTR.objects.all()}
     to_create = []
+    to_update = []
+
     for item in records:
         utr = (item.get('utr_no') or '').strip()
-        if utr and utr not in existing_utrs:
-            existing_utrs.add(utr)
-            to_create.append(
-                BankStatementUTR(
-                    utr_no=utr,
-                    tran_date=item.get('tran_date', ''),
-                    amount=item.get('amount', '500.00'),
-                    sender_name=item.get('sender_name', ''),
-                    bank_code=item.get('bank_code', ''),
-                    upi_id=item.get('upi_id', ''),
-                    narration=item.get('narration', ''),
-                    statement_source=item.get('statement_source', 'Uploaded Statement'),
-                )
+        if not utr:
+            continue
+        if utr not in existing_objs:
+            new_obj = BankStatementUTR(
+                utr_no=utr,
+                tran_date=item.get('tran_date', ''),
+                amount=item.get('amount', '500.00'),
+                sender_name=item.get('sender_name', ''),
+                bank_code=item.get('bank_code', ''),
+                upi_id=item.get('upi_id', ''),
+                narration=item.get('narration', ''),
+                statement_source=item.get('statement_source', 'Uploaded Statement'),
             )
+            existing_objs[utr] = new_obj
+            to_create.append(new_obj)
+        else:
+            # Enrich existing record if it was missing sender_name or tran_date
+            obj = existing_objs[utr]
+            changed = False
+            if not obj.sender_name and item.get('sender_name'):
+                obj.sender_name = item['sender_name']
+                changed = True
+            if not obj.tran_date and item.get('tran_date'):
+                obj.tran_date = item['tran_date']
+                changed = True
+            if (not obj.narration or obj.narration.startswith('UTR/')) and item.get('narration') and not item['narration'].startswith('UTR/'):
+                obj.narration = item['narration']
+                changed = True
+            if changed and obj.pk:
+                to_update.append(obj)
+
     if to_create:
         BankStatementUTR.objects.bulk_create(to_create, ignore_conflicts=True)
+    if to_update:
+        BankStatementUTR.objects.bulk_update(to_update, ['sender_name', 'tran_date', 'narration'])
     return len(records), len(to_create)
 
 
 def parse_and_import_bank_pdf(pdf_file, filename='Bank_Statement.pdf'):
-    """Read a PDF file, extract all UPI/CR & NEFT UTRs, and store in BankStatementUTR."""
+    """Read a PDF file, extract all UPI/CR, IMPS, NEFT & 12-digit UTRs, and store in BankStatementUTR."""
     import pypdf
 
     reader = pypdf.PdfReader(pdf_file)
     full_text = '\n'.join((page.extract_text() or '') for page in reader.pages)
+    records = parse_bank_statement_text(full_text, source_name=filename)
+    return import_bank_statement_records(records)
+
+
+def parse_and_import_bank_excel(excel_file, filename='Bank_Statement.xlsx'):
+    """Read an Excel (.xlsx) bank statement, extract all UTRs from all sheets/rows, and store in BankStatementUTR."""
+    import openpyxl
+
+    wb = openpyxl.load_workbook(excel_file, data_only=True)
+    lines = []
+    for sheet in wb.worksheets:
+        for row in sheet.iter_rows(values_only=True):
+            row_str = ' '.join(str(cell).strip() for cell in row if cell is not None and str(cell).strip())
+            if row_str:
+                lines.append(row_str)
+    full_text = '\n'.join(lines)
     records = parse_bank_statement_text(full_text, source_name=filename)
     return import_bank_statement_records(records)
 

@@ -89,12 +89,12 @@
                     <button type="button" onclick="document.getElementById('bankStatementUploadPanel').hidden = true" style="background: none; border: none; font-size: 16px; color: #64748b; cursor: pointer;">&times;</button>
                 </div>
                 <p style="font-size: 12px; color: #475569; margin-bottom: 12px;">
-                    Automatically extracts UTR numbers following <code>UPI/CR/&lt;12-digit UTR&gt;/...</code> from the <strong>Narration</strong> column and verifies all student enrollments against them.
+                    Automatically extracts UTR numbers (<code>UPI/CR/&lt;12-digit UTR&gt;/...</code>, IMPS, NEFT, or standalone 12-digit UTRs) from the <strong>Narration</strong> column. <strong>Safe to re-upload the same statement anytime</strong> — existing UTRs are skipped without duplicates and only missing/new UTRs are added.
                 </p>
                 <div style="display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-start;">
                     <div style="flex: 1 1 260px;">
-                        <label style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; color: #1e293b;">Select Bank Statement PDF(s):</label>
-                        <input type="file" name="statement_files" accept=".pdf,.txt,.csv" multiple class="portal-input" style="width: 100%; padding: 6px;">
+                        <label style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; color: #1e293b;">Select Bank Statement (PDF / Excel / CSV):</label>
+                        <input type="file" name="statement_files" accept=".pdf,.xlsx,.xlsm,.csv,.txt" multiple class="portal-input" style="width: 100%; padding: 6px;">
                     </div>
                     <div style="flex: 2 1 320px;">
                         <label style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; color: #1e293b;">Or Paste Statement Narration / UTR Lines (Optional):</label>

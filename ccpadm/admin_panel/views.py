@@ -1090,12 +1090,14 @@ def bulk_update_enrollment_status(request):
 @admin_login_required
 def manage_enrollments(request):
     from admissions.models import StudentEnrollment
+    from admissions.utr_verification import attach_utr_verification
 
     search = request.GET.get('search', '').strip()
     program_filter = request.GET.get('program', '').strip()
     if program_filter == 'ALL':
         program_filter = ''
     status_filter = request.GET.get('status', 'ALL').strip() or 'ALL'
+    utr_filter = request.GET.get('utr_verify', 'ALL').strip().upper() or 'ALL'
 
     enrollments = StudentEnrollment.objects.all().select_related('student')
 
@@ -1115,6 +1117,16 @@ def manage_enrollments(request):
     if status_filter != 'ALL':
         enrollments = enrollments.filter(status=status_filter)
 
+    enrollment_list = list(enrollments)
+    utr_stats = attach_utr_verification(enrollment_list)
+
+    if utr_filter == 'VERIFIED':
+        enrollment_list = [e for e in enrollment_list if e.utr_verified]
+    elif utr_filter == 'UNVERIFIED':
+        enrollment_list = [e for e in enrollment_list if e.transaction_id and not e.utr_verified]
+    elif utr_filter == 'DUPLICATE':
+        enrollment_list = [e for e in enrollment_list if e.utr_is_duplicate]
+
     total_count = StudentEnrollment.objects.count()
     submitted_count = StudentEnrollment.objects.filter(status='Submitted').count()
     approved_count = StudentEnrollment.objects.filter(status='Approved').count()
@@ -1123,17 +1135,78 @@ def manage_enrollments(request):
     program_types = get_program_names(active_only=False)
 
     return render(request, 'admin_panel/enrollments.html', {
-        'enrollments': enrollments,
+        'enrollments': enrollment_list,
         'search': search,
         'program_filter': program_filter,
         'status_filter': status_filter,
+        'utr_filter': utr_filter,
+        'utr_verified_count': utr_stats['verified_count'],
+        'utr_unverified_count': utr_stats['unverified_count'],
+        'utr_duplicate_count': utr_stats['duplicate_count'],
+        'bank_utr_total': utr_stats['bank_utr_total'],
         'program_types': program_types,
         'total_count': total_count,
         'submitted_count': submitted_count,
         'approved_count': approved_count,
         'draft_count': draft_count,
-        'filtered_count': enrollments.count(),
+        'filtered_count': len(enrollment_list),
     })
+
+
+@admin_login_required
+@require_http_methods(['POST'])
+def upload_bank_statement(request):
+    from admissions.models import BankStatementUTR
+    from admissions.utr_verification import (
+        import_bank_statement_records,
+        parse_and_import_bank_pdf,
+        parse_bank_statement_text,
+    )
+
+    files = request.FILES.getlist('statement_files')
+    pasted_text = request.POST.get('statement_text', '').strip()
+
+    total_found = 0
+    total_added = 0
+
+    for f in files:
+        fname = f.name or 'Statement'
+        try:
+            if fname.lower().endswith('.pdf'):
+                found, added = parse_and_import_bank_pdf(f, filename=fname)
+                total_found += found
+                total_added += added
+            else:
+                raw_bytes = f.read()
+                text_content = raw_bytes.decode('utf-8', errors='ignore')
+                recs = parse_bank_statement_text(text_content, source_name=fname)
+                found, added = import_bank_statement_records(recs)
+                total_found += found
+                total_added += added
+        except Exception as exc:
+            messages.error(request, f'Could not parse {fname}: {exc}')
+
+    if pasted_text:
+        recs = parse_bank_statement_text(pasted_text, source_name='Manual Paste')
+        found, added = import_bank_statement_records(recs)
+        total_found += found
+        total_added += added
+
+    total_db = BankStatementUTR.objects.count()
+    if total_found > 0:
+        messages.success(
+            request,
+            f'Bank Statement processed! Extracted {total_found} UTR(s) ({total_added} new added). Total verified Bank UTRs in system: {total_db}.',
+        )
+    else:
+        messages.warning(
+            request,
+            'No UPI/CR or 12-digit UTR numbers were found in the uploaded statement. Please ensure it is a text-searchable PNB statement PDF or paste Narration text.',
+        )
+
+    next_url = request.POST.get('next') or request.META.get('HTTP_REFERER') or reverse('manage_enrollments')
+    return redirect(next_url)
+
 
 
 @admin_login_required
@@ -1741,6 +1814,10 @@ def manage_nepug_enrollments(request):
     if status_filter != 'ALL':
         records = records.filter(status=status_filter)
 
+    from admissions.utr_verification import attach_utr_verification
+    record_list = list(records)
+    utr_stats = attach_utr_verification(record_list)
+
     total_count = NepUgAdmissionEnrollment.objects.count()
     submitted_count = NepUgAdmissionEnrollment.objects.filter(status='Submitted').count()
     approved_count = NepUgAdmissionEnrollment.objects.filter(status='Approved').count()
@@ -1756,11 +1833,15 @@ def manage_nepug_enrollments(request):
     program_choices = [c[0] for c in NEP_UG_PROGRAM_CHOICES]
 
     return render(request, 'admin_panel/nepug_enrollments.html', {
-        'records': records,
+        'records': record_list,
         'search': search,
         'program_filter': program_filter,
         'semester_filter': semester_filter,
         'status_filter': status_filter,
+        'utr_verified_count': utr_stats['verified_count'],
+        'utr_unverified_count': utr_stats['unverified_count'],
+        'utr_duplicate_count': utr_stats['duplicate_count'],
+        'bank_utr_total': utr_stats['bank_utr_total'],
         'program_choices': program_choices,
         'semester_choices': NepUgAdmissionEnrollment.SEMESTER_CHOICES,
         'total_count': total_count,
@@ -1768,7 +1849,7 @@ def manage_nepug_enrollments(request):
         'approved_count': approved_count,
         'draft_count': draft_count,
         'sem_counts': sem_counts,
-        'filtered_count': records.count(),
+        'filtered_count': len(record_list),
     })
 
 

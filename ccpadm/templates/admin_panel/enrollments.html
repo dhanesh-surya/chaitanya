@@ -36,14 +36,87 @@
             </a>
         </div>
 
+        <!-- BANK STATEMENT AUTO-VERIFICATION BAR -->
+        <div style="margin-bottom: var(--space-md); padding: 14px 18px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 8px; border: 1px solid #bae6fd; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 8px; color: #082B49; font-weight: 700; font-size: 13.5px;">
+                    <i class="fas fa-university" style="color: #0284c7; font-size: 16px;"></i>
+                    <span>Bank Statement Auto-Check:</span>
+                    <span class="badge" style="background: #082B49; color: #fff; font-size: 11px; padding: 3px 8px;">{{ bank_utr_total }} Bank UTRs Active</span>
+                </div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <a href="{% url 'manage_enrollments' %}?status={{ status_filter|urlencode }}&program={{ program_filter|urlencode }}&search={{ search|urlencode }}&utr_verify=VERIFIED"
+                       class="badge" style="background: {% if utr_filter == 'VERIFIED' %}#15803d{% else %}#dcfce7{% endif %}; color: {% if utr_filter == 'VERIFIED' %}#fff{% else %}#15803d{% endif %}; border: 1px solid #86efac; text-decoration: none; font-size: 11.5px; padding: 5px 10px;">
+                        <i class="fas fa-check-circle"></i> Bank Verified: {{ utr_verified_count }}
+                    </a>
+                    <a href="{% url 'manage_enrollments' %}?status={{ status_filter|urlencode }}&program={{ program_filter|urlencode }}&search={{ search|urlencode }}&utr_verify=UNVERIFIED"
+                       class="badge" style="background: {% if utr_filter == 'UNVERIFIED' %}#b91c1c{% else %}#fee2e2{% endif %}; color: {% if utr_filter == 'UNVERIFIED' %}#fff{% else %}#b91c1c{% endif %}; border: 1px solid #fca5a5; text-decoration: none; font-size: 11.5px; padding: 5px 10px;">
+                        <i class="fas fa-times-circle"></i> Not in Statement: {{ utr_unverified_count }}
+                    </a>
+                    {% if utr_duplicate_count > 0 %}
+                    <a href="{% url 'manage_enrollments' %}?status={{ status_filter|urlencode }}&program={{ program_filter|urlencode }}&search={{ search|urlencode }}&utr_verify=DUPLICATE"
+                       class="badge" style="background: {% if utr_filter == 'DUPLICATE' %}#b45309{% else %}#fef3c7{% endif %}; color: {% if utr_filter == 'DUPLICATE' %}#fff{% else %}#b45309{% endif %}; border: 1px solid #fde68a; text-decoration: none; font-size: 11.5px; padding: 5px 10px;">
+                        <i class="fas fa-exclamation-triangle"></i> Duplicate UTR: {{ utr_duplicate_count }}
+                    </a>
+                    {% endif %}
+                    {% if utr_filter != 'ALL' %}
+                    <a href="{% url 'manage_enrollments' %}?status={{ status_filter|urlencode }}&program={{ program_filter|urlencode }}&search={{ search|urlencode }}"
+                       class="badge" style="background: #fff; color: #334155; border: 1px solid #cbd5e1; text-decoration: none; font-size: 11px; padding: 5px 8px;">
+                        <i class="fas fa-times"></i> Show All
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button type="button" id="selectVerifiedUtrBtn" class="btn btn-sm" style="background: #16a34a; color: #fff; font-weight: 600; font-size: 12px; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer;" title="Automatically select all rows with Bank-Verified UTRs">
+                    <i class="fas fa-check-double"></i> Select All Bank-Verified
+                </button>
+                <button type="button" onclick="document.getElementById('bankStatementUploadPanel').hidden = !document.getElementById('bankStatementUploadPanel').hidden" class="btn btn-sm" style="background: #082B49; color: #fff; font-weight: 600; font-size: 12px; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer;">
+                    <i class="fas fa-file-pdf"></i> Upload Bank Statement PDF
+                </button>
+            </div>
+        </div>
+
+        <!-- COLLAPSIBLE BANK STATEMENT UPLOAD PANEL -->
+        <div id="bankStatementUploadPanel" hidden style="margin-bottom: var(--space-md); padding: 16px 20px; background: #ffffff; border-radius: 8px; border: 2px solid #0284c7; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+            <form method="post" action="{% url 'upload_bank_statement' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <h4 style="margin: 0; font-size: 14.5px; color: #082B49; font-weight: 700;">
+                        <i class="fas fa-file-upload text-primary"></i> Upload PNB Bank Statement (PDF) or Paste Narration Text
+                    </h4>
+                    <button type="button" onclick="document.getElementById('bankStatementUploadPanel').hidden = true" style="background: none; border: none; font-size: 16px; color: #64748b; cursor: pointer;">&times;</button>
+                </div>
+                <p style="font-size: 12px; color: #475569; margin-bottom: 12px;">
+                    Automatically extracts UTR numbers following <code>UPI/CR/&lt;12-digit UTR&gt;/...</code> from the <strong>Narration</strong> column and verifies all student enrollments against them.
+                </p>
+                <div style="display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-start;">
+                    <div style="flex: 1 1 260px;">
+                        <label style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; color: #1e293b;">Select Bank Statement PDF(s):</label>
+                        <input type="file" name="statement_files" accept=".pdf,.txt,.csv" multiple class="portal-input" style="width: 100%; padding: 6px;">
+                    </div>
+                    <div style="flex: 2 1 320px;">
+                        <label style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; color: #1e293b;">Or Paste Statement Narration / UTR Lines (Optional):</label>
+                        <textarea name="statement_text" rows="2" class="portal-input" placeholder="e.g. UPI/CR/491984771896/MUKESH/SBIN/..." style="width: 100%; font-family: monospace; font-size: 11.5px;"></textarea>
+                    </div>
+                    <div style="align-self: flex-end;">
+                        <button type="submit" class="btn btn-primary btn-sm" style="background: #0284c7; border-color: #0284c7; padding: 9px 18px; font-weight: 700;">
+                            <i class="fas fa-bolt"></i> Extract &amp; Verify UTRs
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
         <!-- FILTERS & SEARCH -->
         <div class="filter-panel" style="margin-bottom: var(--space-md); padding: 1.25rem; background: #ffffff; border-radius: 8px; border: 1px solid var(--color-border); box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
             <form method="get" action="{% url 'manage_enrollments' %}" class="filter-grid" style="display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end;">
                 <div class="filter-field" style="flex: 1 1 200px;">
                     <label for="enrollmentSearch" style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; color: var(--color-text-muted);">Search</label>
-                    <input type="text" id="enrollmentSearch" name="search" class="portal-input" value="{{ search }}" placeholder="Name, Reg No, Enrollment No, Mobile..." style="width: 100%;">
+                    <input type="text" id="enrollmentSearch" name="search" class="portal-input" value="{{ search }}" placeholder="Name, Reg No, Enrollment No, UTR..." style="width: 100%;">
                 </div>
-                <div class="filter-field" style="flex: 1 1 220px;">
+                <div class="filter-field" style="flex: 1 1 200px;">
                     <label for="enrollmentProgram" style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; color: var(--color-text-muted);">Program</label>
                     <select id="enrollmentProgram" name="program" class="portal-input" style="width: 100%;">
                         <option value="">-- All Programs --</option>
@@ -52,7 +125,7 @@
                         {% endfor %}
                     </select>
                 </div>
-                <div class="filter-field" style="flex: 0 1 160px;">
+                <div class="filter-field" style="flex: 0 1 150px;">
                     <label for="enrollmentStatus" style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; color: var(--color-text-muted);">Status</label>
                     <select id="enrollmentStatus" name="status" class="portal-input" style="width: 100%;">
                         <option value="ALL" {% if status_filter == 'ALL' %}selected{% endif %}>All Statuses</option>
@@ -61,11 +134,20 @@
                         <option value="Draft" {% if status_filter == 'Draft' %}selected{% endif %}>Draft (Editable)</option>
                     </select>
                 </div>
+                <div class="filter-field" style="flex: 0 1 175px;">
+                    <label for="enrollmentUtrVerify" style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; color: var(--color-text-muted);">Bank UTR Verification</label>
+                    <select id="enrollmentUtrVerify" name="utr_verify" class="portal-input" style="width: 100%;">
+                        <option value="ALL" {% if utr_filter == 'ALL' %}selected{% endif %}>All UTR Statuses</option>
+                        <option value="VERIFIED" {% if utr_filter == 'VERIFIED' %}selected{% endif %}>✅ Bank Verified Only</option>
+                        <option value="UNVERIFIED" {% if utr_filter == 'UNVERIFIED' %}selected{% endif %}>❌ Not in Statement</option>
+                        <option value="DUPLICATE" {% if utr_filter == 'DUPLICATE' %}selected{% endif %}>⚠️ Duplicate UTRs</option>
+                    </select>
+                </div>
                 <div class="filter-actions" style="display: flex; gap: 8px; flex-wrap: wrap;">
                     <button type="submit" class="btn btn-primary btn-sm" style="background:#082B49; border-color:#082B49; padding: 7px 16px;">
                         <i class="fas fa-filter"></i> Filter
                     </button>
-                    {% if search or program_filter or status_filter != 'ALL' %}
+                    {% if search or program_filter or status_filter != 'ALL' or utr_filter != 'ALL' %}
                     <a href="{% url 'manage_enrollments' %}" class="btn btn-ghost btn-sm" style="padding: 7px 12px;" title="Reset filters">
                         <i class="fas fa-times"></i> Reset
                     </a>
@@ -117,7 +199,7 @@
                         <th>Student Name &amp; Father's Name</th>
                         <th>Reg No</th>
                         <th>Program &amp; Sem</th>
-                        <th>Status</th>
+                        <th style="min-width: 195px;">Status &amp; Bank UTR Check</th>
                         <th>Submitted Date</th>
                         <th style="min-width: 200px;">Actions &amp; Approvals</th>
                     </tr>
@@ -127,7 +209,7 @@
                     <tr>
                         <td class="col-select" style="text-align: center;">
                             <label class="table-checkbox">
-                                <input type="checkbox" class="enrollment-row-select" value="{{ e.pk }}" aria-label="Select {{ e.full_name }}">
+                                <input type="checkbox" class="enrollment-row-select" value="{{ e.pk }}" data-utr-verified="{% if e.utr_verified and not e.utr_is_duplicate %}true{% else %}false{% endif %}" aria-label="Select {{ e.full_name }}">
                             </label>
                         </td>
                         <td>
@@ -177,9 +259,38 @@
                                     <i class="fas fa-check"></i> Paid ₹{{ e.fee_amount|default:"500" }}
                                 </span>
                             </div>
-                            <div style="font-size: 10px; font-family: monospace; color: #082B49; margin-top: 2px;" title="Transaction ID">
-                                {{ e.transaction_id }}
+                            <div style="font-size: 11px; font-family: monospace; font-weight: 700; color: #082B49; margin-top: 3px;" title="Student Entered UTR / Transaction ID">
+                                UTR: {{ e.transaction_id }}
                             </div>
+
+                            <!-- AUTO BANK STATEMENT VERIFICATION RESULT -->
+                            {% if e.utr_verified %}
+                            <div style="margin-top: 3px;">
+                                <span class="badge" style="background: #059669; color: #ffffff; font-size: 10px; padding: 2px 7px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;" title="Matched in Bank Statement: {{ e.bank_utr_record.narration }}">
+                                    <i class="fas fa-check-double"></i> Bank Verified
+                                </span>
+                            </div>
+                            <div style="font-size: 10px; color: #065f46; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 4px; padding: 2px 5px; margin-top: 2px; line-height: 1.3;" title="{{ e.bank_utr_record.narration }}">
+                                <strong>{{ e.bank_utr_record.sender_name|default:"UPI" }}</strong>
+                                {% if e.bank_utr_record.bank_code %}({{ e.bank_utr_record.bank_code }}){% endif %}
+                                {% if e.bank_utr_record.tran_date %}&bull; {{ e.bank_utr_record.tran_date }}{% endif %}
+                            </div>
+                            {% else %}
+                            <div style="margin-top: 3px;">
+                                <span class="badge" style="background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; font-size: 10px; padding: 2px 7px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;" title="UTR {{ e.transaction_id }} was not found in the loaded PNB bank statements">
+                                    <i class="fas fa-times-circle"></i> Not in Bank Statement
+                                </span>
+                            </div>
+                            {% endif %}
+
+                            {% if e.utr_is_duplicate %}
+                            <div style="margin-top: 3px;">
+                                <span class="badge" style="background: #fef3c7; color: #b45309; border: 1px solid #fde68a; font-size: 10px; padding: 2px 6px; border-radius: 4px;" title="Used by: {{ e.utr_duplicate_info }}">
+                                    <i class="fas fa-exclamation-triangle"></i> Duplicate UTR ({{ e.utr_duplicate_count }}x)
+                                </span>
+                            </div>
+                            {% endif %}
+
                             {% if e.payment_receipt %}
                             <div style="margin-top: 2px;">
                                 <a href="{{ e.payment_receipt.url }}" target="_blank" style="font-size: 10.5px; color: #2563eb; font-weight: 600; text-decoration: none;">
@@ -288,6 +399,25 @@
             selectAll.indeterminate = count > 0 && count < allRows.length;
             selectAll.checked = allRows.length > 0 && count === allRows.length;
         }
+    }
+
+    const selectVerifiedBtn = document.getElementById('selectVerifiedUtrBtn');
+    if (selectVerifiedBtn) {
+        selectVerifiedBtn.addEventListener('click', function () {
+            let matchedCount = 0;
+            rowChecks().forEach((cb) => {
+                const isVerified = cb.getAttribute('data-utr-verified') === 'true';
+                cb.checked = isVerified;
+                if (isVerified) matchedCount++;
+            });
+            if (matchedCount > 0 && bulkStatus) {
+                bulkStatus.value = 'Approved';
+            }
+            syncBulkControls();
+            if (matchedCount === 0) {
+                window.alert('No Bank-Verified UTR rows found on the current view.');
+            }
+        });
     }
 
     if (selectAll) {

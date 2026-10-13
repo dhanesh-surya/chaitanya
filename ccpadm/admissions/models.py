@@ -426,3 +426,23 @@ class NepUgAdmissionEnrollment(models.Model):
     def semester_display(self):
         mapping = dict(self.SEMESTER_CHOICES)
         return mapping.get(self.semester, f'Semester {self.semester}')
+
+
+class BankStatementUTR(models.Model):
+    """Stores verified UTR numbers extracted from official bank statement PDFs."""
+    utr_no = models.CharField(max_length=50, unique=True, db_index=True)
+    tran_date = models.CharField(max_length=25, blank=True)
+    amount = models.CharField(max_length=25, default='500.00')
+    sender_name = models.CharField(max_length=150, blank=True)
+    bank_code = models.CharField(max_length=50, blank=True)
+    upi_id = models.CharField(max_length=150, blank=True)
+    narration = models.CharField(max_length=500, blank=True)
+    statement_source = models.CharField(max_length=200, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'Admissions_BankStatementUTR'
+        ordering = ['-tran_date', '-created_at']
+
+    def __str__(self):
+        return f'{self.utr_no} ({self.sender_name} - ₹{self.amount})'

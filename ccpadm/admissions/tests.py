@@ -814,3 +814,114 @@ class NepUgAdmissionEnrollmentTestCase(TestCase):
         self.assertIn(f'/admin/nep-ug/print/{record.pk}/', students_content)
 
 
+class BankStatementUTRVerificationTestCase(TestCase):
+    def setUp(self):
+        from accounts.models import AdminUser
+        AdminUser.objects.create(username='admin', password='password123')
+        session = self.client.session
+        session['admin_user'] = 'admin'
+        session.save()
+
+        self.s1 = Student.objects.create(
+            registration_no='UTR_S1',
+            full_name='Mukesh Kumar',
+            email='mukesh@example.com',
+            mobile='9584248904',
+            password='password123',
+        )
+        self.s2 = Student.objects.create(
+            registration_no='UTR_S2',
+            full_name='Fake UTR Student',
+            email='fake@example.com',
+            mobile='9000000001',
+            password='password123',
+        )
+        self.s3 = Student.objects.create(
+            registration_no='UTR_S3',
+            full_name='Zero Omitted Student',
+            email='zero@example.com',
+            mobile='9000000002',
+            password='password123',
+        )
+
+    def test_auto_utr_verification_on_manage_enrollments(self):
+        # 1. Valid UTR from PNB statement (07-10-2026: UPI/CR/491984771896/MUKESH/SBIN/...)
+        StudentEnrollment.objects.create(
+            enrollment_no='CCP26050101',
+            reg_no=self.s1.registration_no,
+            student=self.s1,
+            full_name='Mukesh Kumar',
+            transaction_id='491984771896',
+            status='Submitted',
+            is_submitted=True,
+        )
+        # 2. Invalid UTR not in bank statement
+        StudentEnrollment.objects.create(
+            enrollment_no='CCP26050102',
+            reg_no=self.s2.registration_no,
+            student=self.s2,
+            full_name='Fake UTR Student',
+            transaction_id='999999999999',
+            status='Submitted',
+            is_submitted=True,
+        )
+        # 3. Valid UTR from PNB statement (03-10-2026: 054768300757) entered without leading zero
+        StudentEnrollment.objects.create(
+            enrollment_no='CCP26050103',
+            reg_no=self.s3.registration_no,
+            student=self.s3,
+            full_name='Zero Omitted Student',
+            transaction_id='54768300757',
+            status='Submitted',
+            is_submitted=True,
+        )
+
+        res = self.client.get(reverse('manage_enrollments') + '?status=Submitted')
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.context['utr_verified_count'], 2)
+        self.assertEqual(res.context['utr_unverified_count'], 1)
+        self.assertGreaterEqual(res.context['bank_utr_total'], 540)
+
+        content = res.content.decode('utf-8')
+        self.assertIn('Bank Verified', content)
+        self.assertIn('MUKESH', content)
+        self.assertIn('BHUPENDR', content)
+        self.assertIn('Not in Bank Statement', content)
+
+        # Filter by VERIFIED only
+        res_ver = self.client.get(reverse('manage_enrollments') + '?status=Submitted&utr_verify=VERIFIED')
+        self.assertEqual(res_ver.status_code, 200)
+        self.assertEqual(res_ver.context['filtered_count'], 2)
+
+        # Filter by UNVERIFIED only
+        res_unver = self.client.get(reverse('manage_enrollments') + '?status=Submitted&utr_verify=UNVERIFIED')
+        self.assertEqual(res_unver.status_code, 200)
+        self.assertEqual(res_unver.context['filtered_count'], 1)
+
+    def test_upload_new_bank_statement_narration_verifies_pending_utr(self):
+        enr = StudentEnrollment.objects.create(
+            enrollment_no='CCP26050201',
+            reg_no=self.s2.registration_no,
+            student=self.s2,
+            full_name='New Statement Student',
+            transaction_id='778899001122',
+            status='Submitted',
+            is_submitted=True,
+        )
+
+        # Initially unverified
+        res1 = self.client.get(reverse('manage_enrollments') + '?status=Submitted')
+        self.assertEqual(res1.context['utr_unverified_count'], 1)
+
+        # Admin uploads/pastes new bank statement narration line
+        upload_res = self.client.post(reverse('upload_bank_statement'), {
+            'statement_text': '12-10-2026 500.00 210000.00 Cr. UPI/CR/778899001122/RAMESH K/SBIN/ramesh@ybl/Pay',
+            'next': reverse('manage_enrollments') + '?status=Submitted',
+        }, follow=True)
+        self.assertEqual(upload_res.status_code, 200)
+        self.assertEqual(upload_res.context['utr_verified_count'], 1)
+        self.assertEqual(upload_res.context['utr_unverified_count'], 0)
+        self.assertIn('RAMESH K', upload_res.content.decode('utf-8'))
+
+
+

@@ -9,10 +9,10 @@
             <h2 class="page-title"><i class="fas fa-users"></i> Registered Students</h2>
             <nav class="page-actions page-actions--toolbar" aria-label="Admin navigation">
                 {% include 'partials/admin_nav_actions.html' with active_page='students' %}
-                <a href="{% url 'export_students_excel' %}?search={{ search|urlencode }}&program={{ program_filter|urlencode }}&verified={{ verified_filter|urlencode }}&group={{ group_filter|urlencode }}" class="page-action-btn page-action-btn--accent" title="Export as Excel spreadsheet (.xlsx)">
+                <a href="{% url 'export_students_excel' %}?search={{ search|urlencode }}&program={{ program_filter|urlencode }}&verified={{ verified_filter|urlencode }}&group={{ group_filter|urlencode }}&enrollment_status={{ enrollment_status_filter|urlencode }}" class="page-action-btn page-action-btn--accent" title="Export as Excel spreadsheet (.xlsx)">
                     <i class="fas fa-file-excel" aria-hidden="true"></i><span>Export Excel</span>
                 </a>
-                <a href="{% url 'export_students_csv' %}?search={{ search|urlencode }}&program={{ program_filter|urlencode }}&verified={{ verified_filter|urlencode }}&group={{ group_filter|urlencode }}" class="page-action-btn" title="Export as CSV">
+                <a href="{% url 'export_students_csv' %}?search={{ search|urlencode }}&program={{ program_filter|urlencode }}&verified={{ verified_filter|urlencode }}&group={{ group_filter|urlencode }}&enrollment_status={{ enrollment_status_filter|urlencode }}" class="page-action-btn" title="Export as CSV">
                     <i class="fas fa-file-csv" aria-hidden="true"></i><span>Export CSV</span>
                 </a>
                 {% include 'partials/admin_nav_logout.html' %}
@@ -40,6 +40,23 @@
                 <option>Subject Group (B.Sc. only)</option>
             </select>
             {% endif %}
+            <select name="enrollment_status" class="portal-input" id="enrollmentStatusFilter" aria-label="Filter by enrollment status" onchange="this.form.submit()">
+                <option value="ALL" {% if enrollment_status_filter == 'ALL' or not enrollment_status_filter %}selected{% endif %}>
+                    All Enrollment {% if enrollment_counts.total %}({{ enrollment_counts.total }}){% endif %}
+                </option>
+                <option value="Approved" {% if enrollment_status_filter == 'Approved' %}selected{% endif %}>
+                    Approved / Accepted {% if enrollment_counts.approved %}({{ enrollment_counts.approved }}){% endif %}
+                </option>
+                <option value="Submitted" {% if enrollment_status_filter == 'Submitted' %}selected{% endif %}>
+                    Submitted {% if enrollment_counts.submitted %}({{ enrollment_counts.submitted }}){% endif %}
+                </option>
+                <option value="Draft" {% if enrollment_status_filter == 'Draft' %}selected{% endif %}>
+                    Draft {% if enrollment_counts.draft %}({{ enrollment_counts.draft }}){% endif %}
+                </option>
+                <option value="Not Enrolled" {% if enrollment_status_filter == 'Not Enrolled' %}selected{% endif %}>
+                    Not Enrolled {% if enrollment_counts.not_enrolled %}({{ enrollment_counts.not_enrolled }}){% endif %}
+                </option>
+            </select>
             <select name="verified" class="portal-input">
                 <option value="ALL" {% if verified_filter == 'ALL' %}selected{% endif %}>All Verification</option>
                 <option value="YES" {% if verified_filter == 'YES' %}selected{% endif %}>Verified Only</option>
@@ -49,7 +66,17 @@
         </form>
 
         {% if program_filter or search %}
-        <p class="field-hint" style="margin-bottom: var(--space-md);">{{ total_count }} student(s) found</p>
+        <p class="field-hint" style="margin-bottom: var(--space-md); display:flex; flex-wrap:wrap; align-items:center; gap:8px;">
+            <span><strong>{{ total_count }}</strong> student(s) found</span>
+            {% if enrollment_status_filter and enrollment_status_filter != 'ALL' %}
+            <span class="badge badge--compact" style="background:#e0f2fe; color:#0369a1; font-weight:600;">
+                Enrollment: {{ enrollment_status_filter }}
+            </span>
+            <a href="{% url 'manage_students' %}?search={{ search|urlencode }}&program={{ program_filter|urlencode }}&verified={{ verified_filter|urlencode }}&group={{ group_filter|urlencode }}&enrollment_status=ALL" style="font-size:0.78rem; text-decoration:none; color:#dc2626;">
+                <i class="fas fa-times"></i> Clear enrollment filter
+            </a>
+            {% endif %}
+        </p>
         {% else %}
         <p class="field-hint" style="margin-bottom: var(--space-md);">Please select a program to view student details</p>
         {% endif %}
@@ -60,6 +87,7 @@
             <input type="hidden" name="program" value="{{ program_filter }}">
             <input type="hidden" name="verified" value="{{ verified_filter }}">
             <input type="hidden" name="group" value="{{ group_filter }}">
+            <input type="hidden" name="enrollment_status" value="{{ enrollment_status_filter }}">
             <span class="bulk-action-bar__count" id="bulkSelectedCount">0 selected</span>
             <select name="action" id="bulkActionSelect" class="portal-input" disabled aria-label="Bulk student action">
                 <option value="">Choose action...</option>
@@ -89,6 +117,7 @@
                         <th class="col-contact">Contact</th>
                         <th class="col-program">Program</th>
                         <th class="col-admission">Admission</th>
+                        <th class="col-enrollment">Enrollment</th>
                         <th class="col-password">Password</th>
                         <th class="col-verified">Verified</th>
                         <th class="col-actions">Actions</th>
@@ -142,12 +171,51 @@
                             {% else %}
                             <span class="text-muted">No application</span>
                             {% endif %}
+                        </td>
+                        <td class="col-enrollment">
+                            {% if s.enrollment_status == 'Approved' %}
+                                <span class="badge badge--compact badge-success" title="Enrollment Approved / Accepted">
+                                    <i class="fas fa-check-circle"></i> Approved
+                                </span>
+                            {% elif s.enrollment_status == 'Submitted' %}
+                                <span class="badge badge--compact badge-info" title="Enrollment Submitted">
+                                    <i class="fas fa-clock"></i> Submitted
+                                </span>
+                            {% elif s.enrollment_status == 'Draft' %}
+                                <span class="badge badge--compact badge-warning" title="Enrollment Draft">
+                                    <i class="fas fa-pencil-alt"></i> Draft
+                                </span>
+                            {% else %}
+                                <span class="badge badge--compact" style="background:#f1f5f9; color:#64748b; border:1px solid #cbd5e1;" title="Not Enrolled">
+                                    Not Enrolled
+                                </span>
+                            {% endif %}
+
+                            {% if s.enrollment_no %}
+                                <small class="cell-exact cell-exact--mono" style="font-weight:600; color:#1e3a8a;" title="Enrollment No: {{ s.enrollment_no }}">
+                                    {{ s.enrollment_no }}
+                                </small>
+                            {% endif %}
+
+                            {% if s.enrollment_semester %}
+                                <small class="text-muted" style="display:block; font-size:11px;">
+                                    Sem {{ s.enrollment_semester }}
+                                </small>
+                            {% endif %}
+
+                            {% if s.latest_enrollment %}
+                                <div style="margin-top: 4px;">
+                                    <a href="{% url 'manage_enrollments' %}?search={{ s.registration_no }}" target="_blank" class="text-muted" style="font-size:11px; text-decoration:none; display:inline-flex; align-items:center; gap:3px;" title="View 1st Sem Enrollment ({{ s.latest_enrollment.status }})">
+                                        <i class="fas fa-id-card"></i> 1st Sem ({{ s.latest_enrollment.status }})
+                                    </a>
+                                </div>
+                            {% endif %}
                             {% if s.latest_nep_ug %}
-                            <div style="margin-top: 5px;">
-                                <a href="{% url 'admin_print_nepug' s.latest_nep_ug.pk %}" target="_blank" class="badge badge--compact" style="background:#0284c7; color:#fff; text-decoration:none; display:inline-flex; align-items:center; gap:4px;" title="View NEP UG Sem {{ s.latest_nep_ug.semester }} ({{ s.latest_nep_ug.status }})">
-                                    <i class="fas fa-layer-group"></i> NEP Sem {{ s.latest_nep_ug.semester }}: {{ s.latest_nep_ug.status }}
-                                </a>
-                            </div>
+                                <div style="margin-top: 2px;">
+                                    <a href="{% url 'manage_nepug_enrollments' %}?search={{ s.registration_no }}" target="_blank" class="text-muted" style="font-size:11px; text-decoration:none; display:inline-flex; align-items:center; gap:3px;" title="View NEP UG Sem {{ s.latest_nep_ug.semester }} ({{ s.latest_nep_ug.status }})">
+                                        <i class="fas fa-layer-group"></i> NEP Sem {{ s.latest_nep_ug.semester }} ({{ s.latest_nep_ug.status }})
+                                    </a>
+                                </div>
                             {% endif %}
                         </td>
                         <td class="password-cell col-password">
@@ -160,6 +228,7 @@
                                 <input type="hidden" name="program" value="{{ program_filter }}">
                                 <input type="hidden" name="verified" value="{{ verified_filter }}">
                                 <input type="hidden" name="group" value="{{ group_filter }}">
+                                <input type="hidden" name="enrollment_status" value="{{ enrollment_status_filter }}">
                                 <button type="submit" class="btn btn-sm {% if s.is_verified %}btn-success{% else %}btn-ghost{% endif %}" title="Toggle verification">
                                     {% if s.is_verified %}<i class="fas fa-check-circle"></i> Yes{% else %}<i class="fas fa-times-circle"></i> No{% endif %}
                                 </button>
@@ -168,7 +237,7 @@
                         <td class="col-actions">
                             <div class="action-grid">
                                 <div class="action-grid__icons">
-                                    <a href="{% url 'manage_students' %}?edit={{ s.pk }}&search={{ search|urlencode }}&program={{ program_filter|urlencode }}&verified={{ verified_filter|urlencode }}&group={{ group_filter|urlencode }}"
+                                    <a href="{% url 'manage_students' %}?edit={{ s.pk }}&search={{ search|urlencode }}&program={{ program_filter|urlencode }}&verified={{ verified_filter|urlencode }}&group={{ group_filter|urlencode }}&enrollment_status={{ enrollment_status_filter|urlencode }}"
                                        class="btn btn-sm btn-secondary" title="Edit student">
                                         <i class="fas fa-edit"></i>
                                     </a>
@@ -179,6 +248,7 @@
                                         <input type="hidden" name="program" value="{{ program_filter }}">
                                         <input type="hidden" name="verified" value="{{ verified_filter }}">
                                         <input type="hidden" name="group" value="{{ group_filter }}">
+                                        <input type="hidden" name="enrollment_status" value="{{ enrollment_status_filter }}">
                                         <button type="submit" class="btn btn-sm btn-ghost" title="Reset password">
                                             <i class="fas fa-key"></i>
                                         </button>
@@ -191,6 +261,12 @@
                                     <a href="{% url 'admin_download_pdf' s.latest_admission.application_no %}"
                                        class="btn btn-sm btn-primary" title="Download PDF">
                                         <i class="fas fa-file-pdf"></i>
+                                    </a>
+                                    {% endif %}
+                                    {% if s.latest_enrollment and s.latest_enrollment.enrollment_no %}
+                                    <a href="{% url 'enrollment_print' s.latest_enrollment.enrollment_no %}" target="_blank"
+                                       class="btn btn-sm btn-ghost" style="color: #10b981;" title="Print 1st Sem Enrollment Slip">
+                                        <i class="fas fa-id-badge"></i>
                                     </a>
                                     {% endif %}
                                     {% if s.latest_nep_ug %}
@@ -212,6 +288,7 @@
                                         <input type="hidden" name="program" value="{{ program_filter }}">
                                         <input type="hidden" name="verified" value="{{ verified_filter }}">
                                         <input type="hidden" name="group" value="{{ group_filter }}">
+                                        <input type="hidden" name="enrollment_status" value="{{ enrollment_status_filter }}">
                                         <button type="submit" class="btn btn-sm btn-danger" title="Delete student">
                                             <i class="fas fa-trash"></i>
                                         </button>
@@ -223,7 +300,7 @@
                                 <div class="action-grid__select">
                                     <form method="post" action="{% url 'update_admission_status' s.latest_admission.pk %}" class="inline-form action-grid__select-form">
                                         {% csrf_token %}
-                                        <input type="hidden" name="next" value="{% url 'manage_students' %}?search={{ search|urlencode }}&amp;program={{ program_filter|urlencode }}&amp;verified={{ verified_filter|urlencode }}&amp;group={{ group_filter|urlencode }}">
+                                        <input type="hidden" name="next" value="{% url 'manage_students' %}?search={{ search|urlencode }}&amp;program={{ program_filter|urlencode }}&amp;verified={{ verified_filter|urlencode }}&amp;group={{ group_filter|urlencode }}&amp;enrollment_status={{ enrollment_status_filter|urlencode }}">
                                         <select name="status" class="portal-input portal-input--compact portal-input--full" onchange="this.form.submit()" aria-label="Application action for {{ s.registration_no }}">
                                             <option value="">Application...</option>
                                             <option value="Rejected">Reject</option>
@@ -240,17 +317,17 @@
                     {% empty %}
                     <tr class="empty-row">
                         {% if not program_filter and not search %}
-                        <td colspan="10" style="text-align: center; padding: 3rem 1rem; color: var(--color-text-muted);">
+                        <td colspan="11" style="text-align: center; padding: 3rem 1rem; color: var(--color-text-muted);">
                             <i class="fas fa-graduation-cap" style="font-size: 2.2rem; margin-bottom: 0.75rem; display: block; opacity: 0.4;"></i>
                             <strong style="font-size: 1.05rem;">No Program Selected</strong>
                             <div style="margin-top: 0.35rem;">Please select a program from the dropdown above to see details.</div>
                         </td>
                         {% elif not program_filter and search %}
-                        <td colspan="10" style="text-align: center; padding: 2rem 1rem; color: var(--color-text-muted);">
+                        <td colspan="11" style="text-align: center; padding: 2rem 1rem; color: var(--color-text-muted);">
                             No students found matching "{{ search }}".
                         </td>
                         {% else %}
-                        <td colspan="10" style="text-align: center; padding: 2rem 1rem; color: var(--color-text-muted);">
+                        <td colspan="11" style="text-align: center; padding: 2rem 1rem; color: var(--color-text-muted);">
                             No students found for {{ program_filter }}.
                         </td>
                         {% endif %}
@@ -271,6 +348,7 @@
             <input type="hidden" name="program" value="{{ program_filter }}">
             <input type="hidden" name="verified" value="{{ verified_filter }}">
             <input type="hidden" name="group" value="{{ group_filter }}">
+            <input type="hidden" name="enrollment_status" value="{{ enrollment_status_filter }}">
 
             <div class="form-field">
                 <label>Registration No</label>
@@ -328,7 +406,7 @@
                 <button type="submit" class="btn btn-secondary">
                     <i class="fas fa-save"></i> Save Changes
                 </button>
-                <a href="{% url 'manage_students' %}?search={{ search|urlencode }}&program={{ program_filter|urlencode }}&verified={{ verified_filter|urlencode }}&group={{ group_filter|urlencode }}" class="btn btn-ghost">
+                <a href="{% url 'manage_students' %}?search={{ search|urlencode }}&program={{ program_filter|urlencode }}&verified={{ verified_filter|urlencode }}&group={{ group_filter|urlencode }}&enrollment_status={{ enrollment_status_filter|urlencode }}" class="btn btn-ghost">
                     Cancel Edit
                 </a>
             </div>

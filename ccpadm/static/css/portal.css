@@ -1955,19 +1955,23 @@ h3.college-title-main {
 .data-table--students .col-name { width: 8%; }
 .data-table--students .col-father { width: 8%; }
 .data-table--students .col-contact {
-    width: 15%;
-    min-width: 168px;
+    width: 13%;
+    min-width: 140px;
 }
-.data-table--students .col-program { width: 11%; }
+.data-table--students .col-program { width: 10%; }
 .data-table--students .col-admission {
-    width: 10%;
-    min-width: 108px;
+    width: 9%;
+    min-width: 95px;
+}
+.data-table--students .col-enrollment {
+    width: 11%;
+    min-width: 115px;
 }
 .data-table--students .col-password { width: 7%; }
 .data-table--students .col-verified { width: 6%; }
 .data-table--students .col-actions {
-    width: 15%;
-    min-width: 148px;
+    width: 14%;
+    min-width: 140px;
 }
 
 .data-table--students .cell-exact {

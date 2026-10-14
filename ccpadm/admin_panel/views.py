@@ -54,11 +54,13 @@ def _students_filter_params(request):
         program = ''
     verified = (source.get('verified') or 'ALL').strip() or 'ALL'
     group = (source.get('group') or 'ALL').strip() or 'ALL'
+    enrollment_status = (source.get('enrollment_status') or 'ALL').strip() or 'ALL'
     return {
         'search': source.get('search', '').strip(),
         'program': program,
         'verified': verified,
         'group': group,
+        'enrollment_status': enrollment_status,
     }
 
 
@@ -108,6 +110,87 @@ def _filter_students_by_group(students, group_filter='ALL'):
                 result.append(student)
         elif key == group_filter:
             result.append(student)
+    return result
+
+
+def _pick_active_enrollment(enrollment, nep):
+    """
+    Return (chosen_record, status, enrollment_no, semester)
+    comparing 1st-sem StudentEnrollment and continuing NepUgAdmissionEnrollment.
+    """
+    if not enrollment and not nep:
+        return None, 'Not Enrolled', '', ''
+    if enrollment and not nep:
+        status = enrollment.status or ('Submitted' if enrollment.is_submitted else 'Draft')
+        enr_no = enrollment.enrollment_no or ''
+        sem = enrollment.semester or 'I'
+        return enrollment, status, enr_no, sem
+    if nep and not enrollment:
+        status = nep.status or ('Submitted' if nep.is_submitted else 'Draft')
+        enr_no = nep.enrollment_no or nep.previous_enrollment_no or ''
+        sem = nep.semester or 'II'
+        return nep, status, enr_no, sem
+
+    # Both exist: prioritize Approved > Submitted > Draft, then latest created/submitted
+    status_rank = {'Approved': 3, 'Submitted': 2, 'Draft': 1}
+    enr_rank = status_rank.get(enrollment.status, 0)
+    nep_rank = status_rank.get(nep.status, 0)
+    if nep_rank > enr_rank:
+        chosen = nep
+    elif enr_rank > nep_rank:
+        chosen = enrollment
+    else:
+        nep_date = nep.submitted_date or nep.created_at
+        enr_date = enrollment.submitted_date or enrollment.created_at
+        if nep_date and enr_date and nep_date >= enr_date:
+            chosen = nep
+        else:
+            chosen = enrollment
+
+    status = chosen.status or ('Submitted' if chosen.is_submitted else 'Draft')
+    enr_no = (
+        getattr(chosen, 'enrollment_no', '')
+        or getattr(chosen, 'previous_enrollment_no', '')
+        or getattr(enrollment, 'enrollment_no', '')
+        or ''
+    )
+    sem = getattr(chosen, 'semester', '') or ('II' if chosen == nep else 'I')
+    return chosen, status, enr_no, sem
+
+
+def _filter_students_by_enrollment_status(students, enrollment_status='ALL'):
+    """Filter student list by enrollment status: ALL, Approved, Submitted, Draft, Not Enrolled."""
+    if not enrollment_status or enrollment_status == 'ALL':
+        return students
+    result = []
+    for s in students:
+        status = getattr(s, 'enrollment_status', 'Not Enrolled')
+        if enrollment_status == 'Approved':
+            if (
+                status == 'Approved'
+                or (s.latest_enrollment and s.latest_enrollment.status == 'Approved')
+                or (s.latest_nep_ug and s.latest_nep_ug.status == 'Approved')
+            ):
+                result.append(s)
+        elif enrollment_status == 'Submitted':
+            if (
+                status == 'Submitted'
+                or (s.latest_enrollment and s.latest_enrollment.status == 'Submitted')
+                or (s.latest_nep_ug and s.latest_nep_ug.status == 'Submitted')
+            ):
+                result.append(s)
+        elif enrollment_status == 'Draft':
+            if (
+                status == 'Draft'
+                or (s.latest_enrollment and s.latest_enrollment.status == 'Draft')
+                or (s.latest_nep_ug and s.latest_nep_ug.status == 'Draft')
+            ):
+                result.append(s)
+        elif enrollment_status == 'Not Enrolled':
+            if status == 'Not Enrolled' and not s.latest_enrollment and not s.latest_nep_ug:
+                result.append(s)
+        elif status == enrollment_status:
+            result.append(s)
     return result
 
 
@@ -240,6 +323,13 @@ def _attach_admissions(students):
         student.latest_admission = admission
         student.latest_enrollment = enrollment
         student.latest_nep_ug = nep
+
+        active_rec, enr_status, enr_no, enr_sem = _pick_active_enrollment(enrollment, nep)
+        student.enrollment_record = active_rec
+        student.enrollment_status = enr_status
+        student.enrollment_no = enr_no
+        student.enrollment_semester = enr_sem
+
         student.father_name = (
             (admission.father_name if admission and admission.father_name else '')
             or (enrollment.father_name if enrollment and enrollment.father_name else '')
@@ -419,14 +509,45 @@ def manage_students(request):
     verified_filter = params['verified']
     group_filter = _normalize_group_filter(params['group'], program_filter)
     params['group'] = group_filter
+    enrollment_status_filter = params['enrollment_status']
     edit_pk = request.GET.get('edit', '').strip()
 
-    students = _filter_students_by_group(
+    all_students = _filter_students_by_group(
         _attach_admissions(
             list(_get_students_queryset(search, program_filter, verified_filter))
         ),
         group_filter,
     )
+
+    enrollment_counts = {
+        'total': len(all_students),
+        'approved': sum(
+            1 for s in all_students
+            if getattr(s, 'enrollment_status', '') == 'Approved'
+            or (s.latest_enrollment and s.latest_enrollment.status == 'Approved')
+            or (s.latest_nep_ug and s.latest_nep_ug.status == 'Approved')
+        ),
+        'submitted': sum(
+            1 for s in all_students
+            if getattr(s, 'enrollment_status', '') == 'Submitted'
+            or (s.latest_enrollment and s.latest_enrollment.status == 'Submitted')
+            or (s.latest_nep_ug and s.latest_nep_ug.status == 'Submitted')
+        ),
+        'draft': sum(
+            1 for s in all_students
+            if getattr(s, 'enrollment_status', '') == 'Draft'
+            or (s.latest_enrollment and s.latest_enrollment.status == 'Draft')
+            or (s.latest_nep_ug and s.latest_nep_ug.status == 'Draft')
+        ),
+        'not_enrolled': sum(
+            1 for s in all_students
+            if getattr(s, 'enrollment_status', 'Not Enrolled') == 'Not Enrolled'
+            and not s.latest_enrollment
+            and not s.latest_nep_ug
+        ),
+    }
+
+    students = _filter_students_by_enrollment_status(all_students, enrollment_status_filter)
 
     edit_student = None
     if edit_pk:
@@ -446,6 +567,8 @@ def manage_students(request):
         'program_filter': program_filter,
         'verified_filter': verified_filter,
         'group_filter': group_filter,
+        'enrollment_status_filter': enrollment_status_filter,
+        'enrollment_counts': enrollment_counts,
         'program_types': program_types,
         'subject_group_choices': subject_group_choices,
         'show_group_filter': show_group_filter,
@@ -753,21 +876,26 @@ def export_students_csv(request):
         messages.warning(request, 'Please select a program before exporting CSV.')
         return redirect('manage_students')
     group_filter = _normalize_group_filter(params['group'], params['program'])
-    students = _filter_students_by_group(
-        _attach_admissions(
-            list(_get_students_queryset(params['search'], params['program'], params['verified']))
+    enrollment_status_filter = params.get('enrollment_status', 'ALL')
+    students = _filter_students_by_enrollment_status(
+        _filter_students_by_group(
+            _attach_admissions(
+                list(_get_students_queryset(params['search'], params['program'], params['verified']))
+            ),
+            group_filter,
         ),
-        group_filter,
+        enrollment_status_filter,
     )
 
     response = HttpResponse(content_type='text/csv')
-    filename = f"Students_{params['program'] or 'All'}.csv".replace(' ', '_').replace('/', '_')
+    enr_suffix = f"_{enrollment_status_filter}" if enrollment_status_filter and enrollment_status_filter != 'ALL' else ""
+    filename = f"Students_{params['program'] or 'All'}{enr_suffix}.csv".replace(' ', '_').replace('/', '_')
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
     writer = csv.writer(response)
     writer.writerow([
         'Registration No', 'Full Name', "Father's Name", "Mother's Name", 'Email', 'Mobile', 'Aadhaar',
         'Program', 'Subject Group', 'DSC Courses', 'Course', 'Selected Courses / Paper Name',
-        'Application No', 'Verified', 'Registered On',
+        'Application No', 'Verified', 'Enrollment Status', 'Enrollment No', 'Semester', 'Registered On',
     ])
     for s in students:
         admission = getattr(s, 'latest_admission', None)
@@ -788,6 +916,9 @@ def export_students_csv(request):
             _format_selected_courses_for_export(s),
             (admission.application_no if admission else '') or '',
             'Yes' if s.is_verified else 'No',
+            getattr(s, 'enrollment_status', 'Not Enrolled') or 'Not Enrolled',
+            getattr(s, 'enrollment_no', '') or '',
+            getattr(s, 'enrollment_semester', '') or '',
             s.created_date.strftime('%d-%m-%Y %H:%M') if s.created_date else '',
         ])
     return response
@@ -807,11 +938,15 @@ def export_students_excel(request):
         return redirect('manage_students')
 
     group_filter = _normalize_group_filter(params['group'], params['program'])
-    students = _filter_students_by_group(
-        _attach_admissions(
-            list(_get_students_queryset(params['search'], params['program'], params['verified']))
+    enrollment_status_filter = params.get('enrollment_status', 'ALL')
+    students = _filter_students_by_enrollment_status(
+        _filter_students_by_group(
+            _attach_admissions(
+                list(_get_students_queryset(params['search'], params['program'], params['verified']))
+            ),
+            group_filter,
         ),
-        group_filter,
+        enrollment_status_filter,
     )
 
     wb = openpyxl.Workbook()
@@ -834,6 +969,9 @@ def export_students_excel(request):
         'Selected Courses / Paper Name',
         'Application No',
         'Verified',
+        'Enrollment Status',
+        'Enrollment No',
+        'Semester',
         'Registered On',
     ]
 
@@ -882,6 +1020,9 @@ def export_students_excel(request):
             _format_selected_courses_for_export(s),
             (admission.application_no if admission else '') or '',
             'Yes' if s.is_verified else 'No',
+            getattr(s, 'enrollment_status', 'Not Enrolled') or 'Not Enrolled',
+            getattr(s, 'enrollment_no', '') or '',
+            getattr(s, 'enrollment_semester', '') or '',
             s.created_date.strftime('%d-%m-%Y %H:%M') if s.created_date else '',
         ]
 
@@ -895,7 +1036,7 @@ def export_students_excel(request):
             if fill_to_apply.fill_type:
                 cell.fill = fill_to_apply
 
-            if col_idx in (1, 6, 7, 13, 14, 15):
+            if col_idx in (1, 6, 7, 13, 14, 15, 16, 17, 18):
                 cell.alignment = data_align_center
             else:
                 cell.alignment = data_align_left
@@ -913,7 +1054,8 @@ def export_students_excel(request):
     wb.save(output)
     output.seek(0)
 
-    filename = f"Students_{params['program'] or 'All'}.xlsx".replace(' ', '_').replace('/', '_')
+    enr_suffix = f"_{enrollment_status_filter}" if enrollment_status_filter and enrollment_status_filter != 'ALL' else ""
+    filename = f"Students_{params['program'] or 'All'}{enr_suffix}.xlsx".replace(' ', '_').replace('/', '_')
     response = HttpResponse(
         output.getvalue(),
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',

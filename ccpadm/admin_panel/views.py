@@ -2221,6 +2221,19 @@ def admin_edit_nepug(request, pk):
         record.payment_status = request.POST.get('payment_status', 'Paid').strip()
         record.admin_remarks = request.POST.get('admin_remarks', '').strip()
 
+        # Payment Receipt Upload
+        if 'payment_receipt' in request.FILES and request.FILES['payment_receipt']:
+            record.payment_receipt = request.FILES['payment_receipt']
+            try:
+                content = request.FILES['payment_receipt'].read()
+                request.FILES['payment_receipt'].seek(0)
+                ctype = getattr(request.FILES['payment_receipt'], 'content_type', '') or 'image/jpeg'
+                record.payment_receipt_base64 = f"data:{ctype};base64,{base64.b64encode(content).decode('utf-8')}"
+            except Exception:
+                pass
+        elif request.POST.get('payment_receipt_base64'):
+            record.payment_receipt_base64 = request.POST.get('payment_receipt_base64').strip()
+
         new_status = request.POST.get('status', '').strip()
         if new_status in ('Approved', 'Submitted', 'Draft'):
             record.status = new_status
@@ -2366,6 +2379,31 @@ def admin_create_nepug(request):
         if sig_src:
             initial_data['signature_base64'] = sig_src
 
+        # Payment receipt prefill
+        receipt_url = ''
+        receipt_base64 = ''
+        if nep:
+            if nep.payment_receipt:
+                receipt_url = nep.payment_receipt.url
+            if nep.payment_receipt_base64:
+                receipt_base64 = nep.payment_receipt_base64
+            if nep.transaction_id and not initial_data.get('transaction_id'):
+                initial_data['transaction_id'] = nep.transaction_id
+            if nep.fee_amount and not initial_data.get('fee_amount'):
+                initial_data['fee_amount'] = nep.fee_amount
+        elif enr:
+            if enr.payment_receipt:
+                receipt_url = enr.payment_receipt.url
+            if enr.payment_receipt_base64:
+                receipt_base64 = enr.payment_receipt_base64
+            if enr.transaction_id and not initial_data.get('transaction_id'):
+                initial_data['transaction_id'] = enr.transaction_id
+            if enr.fee_amount and not initial_data.get('fee_amount'):
+                initial_data['fee_amount'] = enr.fee_amount
+
+        initial_data['payment_receipt_url'] = receipt_url
+        initial_data['payment_receipt_base64'] = receipt_base64
+
     if request.method == 'POST':
         reg_no = request.POST.get('reg_no', '').strip()
         full_name = request.POST.get('full_name', '').strip()
@@ -2445,6 +2483,18 @@ def admin_create_nepug(request):
             sf = request.FILES['signature_file']
             ctype = sf.content_type or 'image/jpeg'
             signature_base64 = f"data:{ctype};base64,{base64.b64encode(sf.read()).decode('utf-8')}"
+
+        # Handle Receipt Upload
+        payment_receipt_file = request.FILES.get('payment_receipt')
+        payment_receipt_base64 = request.POST.get('payment_receipt_base64', '').strip()
+        if payment_receipt_file and not payment_receipt_base64:
+            try:
+                content = payment_receipt_file.read()
+                payment_receipt_file.seek(0)
+                ctype = getattr(payment_receipt_file, 'content_type', '') or 'image/jpeg'
+                payment_receipt_base64 = f"data:{ctype};base64,{base64.b64encode(content).decode('utf-8')}"
+            except Exception:
+                pass
 
         # Build education_json
         education_list = []
@@ -2548,6 +2598,8 @@ def admin_create_nepug(request):
             fee_amount=fee_amount,
             transaction_id=transaction_id,
             payment_status=payment_status,
+            payment_receipt=payment_receipt_file,
+            payment_receipt_base64=payment_receipt_base64,
             status=status,
             is_submitted=(status in ('Approved', 'Submitted')),
             submitted_date=timezone.now(),

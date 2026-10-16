@@ -201,6 +201,31 @@
                             <option value="Pending" {% if initial_data.payment_status == 'Pending' %}selected{% endif %}>Pending</option>
                         </select>
                     </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label class="form-label" style="font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-file-invoice text-primary"></i> Payment Receipt / Screenshot
+                        </label>
+                        <div style="background: #ffffff; border: 1.5px dashed #0284c7; border-radius: 8px; padding: 14px 18px;">
+                            <div style="display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap;">
+                                <div style="flex: 1 1 260px;">
+                                    <input type="file" name="payment_receipt" id="paymentReceiptInput" accept="image/*,application/pdf" class="form-control" onchange="previewAdminPaymentReceipt(this)" style="padding: 6px 10px; font-size: 13px;">
+                                    <input type="hidden" name="payment_receipt_base64" id="receiptBase64Input" value="{{ initial_data.payment_receipt_base64|default:'' }}">
+                                    <small class="text-muted" style="display: block; margin-top: 5px;">
+                                        Supported formats: JPG, JPEG, PNG, PDF. Max size: 25 MB.
+                                    </small>
+                                </div>
+                                <div id="receiptPreviewBox" style="{% if initial_data.payment_receipt_url or initial_data.payment_receipt_base64 %}display: block;{% else %}display: none;{% endif %}">
+                                    {% if initial_data.payment_receipt_url %}
+                                    <a href="{{ initial_data.payment_receipt_url }}" target="_blank" class="btn btn-sm btn-outline-primary" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; margin-bottom: 6px;">
+                                        <i class="fas fa-external-link-alt"></i> View Uploaded Receipt
+                                    </a>
+                                    {% endif %}
+                                    <div id="receiptPdfBadge" style="display: none; padding: 6px 10px; background: #fee2e2; border-radius: 6px; font-size: 12px; font-weight: 600; color: #991b1b;"></div>
+                                    <img id="receiptPreviewImg" src="{% if initial_data.payment_receipt_url %}{{ initial_data.payment_receipt_url }}{% elif initial_data.payment_receipt_base64 %}{{ initial_data.payment_receipt_base64 }}{% endif %}" alt="Receipt Preview" style="max-height: 110px; max-width: 220px; object-fit: contain; border-radius: 6px; border: 1px solid #cbd5e1; {% if not initial_data.payment_receipt_url and not initial_data.payment_receipt_base64 %}display: none;{% else %}display: block;{% endif %}">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="form-group" style="margin-top: 14px;">
@@ -574,6 +599,42 @@ function previewMediaFile(input, type) {
             }
         };
         reader.readAsDataURL(input.files[0]);
+    }
+}
+
+function previewAdminPaymentReceipt(input) {
+    const previewBox = document.getElementById('receiptPreviewBox');
+    const previewImg = document.getElementById('receiptPreviewImg');
+    const base64Input = document.getElementById('receiptBase64Input');
+    const pdfBadge = document.getElementById('receiptPdfBadge');
+
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                if (base64Input) base64Input.value = e.target.result;
+                if (previewImg) {
+                    previewImg.src = e.target.result;
+                    previewImg.style.display = 'block';
+                }
+                if (pdfBadge) pdfBadge.style.display = 'none';
+                if (previewBox) previewBox.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        } else if (file.type === 'application/pdf') {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                if (base64Input) base64Input.value = e.target.result;
+                if (previewImg) previewImg.style.display = 'none';
+                if (pdfBadge) {
+                    pdfBadge.style.display = 'inline-block';
+                    pdfBadge.innerHTML = '<i class="fas fa-file-pdf text-danger"></i> PDF Selected: ' + file.name;
+                }
+                if (previewBox) previewBox.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
     }
 }
 </script>

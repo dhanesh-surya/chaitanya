@@ -187,7 +187,7 @@
                                     <input type="file" name="payment_receipt" id="paymentReceiptInput" accept="image/*,application/pdf" class="form-control" onchange="previewAdminPaymentReceipt(this)" style="padding: 6px 10px; font-size: 13px;">
                                     <input type="hidden" name="payment_receipt_base64" id="receiptBase64Input" value="{{ record.payment_receipt_base64|default:'' }}">
                                     <small class="text-muted" style="display: block; margin-top: 5px;">
-                                        Supported formats: JPG, JPEG, PNG, PDF. Max size: 25 MB.
+                                        Supported formats: JPG, JPEG, PNG, PDF. Max size: 500 KB.
                                     </small>
                                 </div>
                                 <div id="receiptPreviewBox" style="{% if record.payment_receipt or record.payment_receipt_base64 %}display: block;{% else %}display: none;{% endif %}">
@@ -584,6 +584,11 @@ function previewAdminPaymentReceipt(input) {
 
     if (input.files && input.files[0]) {
         const file = input.files[0];
+        if (file.size > 500 * 1024) {
+            alert('File size exceeds the 500 KB limit. Please choose a smaller file under 500 KB.');
+            input.value = '';
+            return;
+        }
         if (file.type.startsWith('image/')) {
             const reader = new FileReader();
             reader.onload = function(e) {

@@ -490,6 +490,7 @@
                     <div class="form-group">
                         <label class="form-label">भुगतान रसीद / स्क्रीनशॉट (Payment Receipt / Screenshot)</label>
                         <input type="file" name="payment_receipt" accept="image/*,application/pdf" class="form-control-file" onchange="previewPaymentReceipt(this)">
+                        <small class="text-muted" style="display: block; margin-top: 4px;">Supported formats: JPG, JPEG, PNG, PDF. Max size: 500 KB.</small>
                         {% if initial_data.payment_receipt_url %}
                         <div class="mt-1">
                             <a href="{{ initial_data.payment_receipt_url }}" target="_blank" class="text-primary" style="font-size: 12px;">
@@ -626,13 +627,19 @@ function handleImageUpload(input, hiddenInputId, imgId, placeholderId) {
 function previewPaymentReceipt(input) {
     if (input.files && input.files[0]) {
         const file = input.files[0];
-        if (file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById('receiptBase64Input').value = e.target.result;
-            };
-            reader.readAsDataURL(file);
+        if (file.size > 500 * 1024) {
+            alert('File size exceeds the 500 KB limit. Please choose a smaller file under 500 KB.');
+            input.value = '';
+            const b64 = document.getElementById('receiptBase64Input');
+            if (b64) b64.value = '';
+            return;
         }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const b64 = document.getElementById('receiptBase64Input');
+            if (b64) b64.value = e.target.result;
+        };
+        reader.readAsDataURL(file);
     }
 }
 

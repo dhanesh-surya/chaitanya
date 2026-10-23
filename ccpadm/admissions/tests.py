@@ -114,7 +114,7 @@ class EnrollmentViewsTestCase(TestCase):
             'program_code': 'CCBA01',
             'selected_courses_json': courses_json,
             'fee_amount': '500',
-            'transaction_id': 'TXN1234567890',
+            'transaction_id': '123456789012',
         }
         response = self.client.post(reverse('enrollment_form'), payload)
         self.assertEqual(response.status_code, 302)
@@ -244,7 +244,7 @@ class EnrollmentViewsTestCase(TestCase):
             'percentage_grad': '80',
             'grade_grad': 'First',
             'fee_amount': '500',
-            'transaction_id': 'TXN9988776655',
+            'transaction_id': '998877665544',
             # Even if program_type/selected_courses_json omitted because selects/inputs were disabled:
         }
         res_post = self.client.post(reverse('enrollment_form'), post_payload)
@@ -478,7 +478,7 @@ class CancelEnrollmentTestCase(TestCase):
         # Step 2: POST save_payment with UTR and checkbox
         res2 = self.client.post(reverse('enrollment_form'), {
             'action': 'save_payment',
-            'transaction_id': 'UTR998877665544',
+            'transaction_id': '998877665544',
             'fee_amount': '500',
             'info_correctness': 'on',
         })
@@ -492,7 +492,7 @@ class CancelEnrollmentTestCase(TestCase):
         content3 = res3.content.decode('utf-8')
         self.assertIn('id="section3Card"', content3)
         self.assertIn('Section E: Enrolled Program', content3)
-        self.assertIn('UTR: <strong style="font-family: monospace; color: #082B49;">UTR998877665544</strong>', content3)
+        self.assertIn('UTR: <strong style="font-family: monospace; color: #082B49;">998877665544</strong>', content3)
 
 
     def test_enrollment_form_header_visibility_and_instructions_modal(self):
@@ -527,6 +527,7 @@ class CancelEnrollmentTestCase(TestCase):
 
 class NepUgAdmissionEnrollmentTestCase(TestCase):
     def setUp(self):
+        super().setUp()
         self.student = Student.objects.create(
             registration_no='NEP26001',
             full_name='Vikash Sharma',
@@ -810,12 +811,13 @@ class NepUgAdmissionEnrollmentTestCase(TestCase):
         students_res = self.client.get(reverse('manage_students') + f'?search={self.student.registration_no}')
         self.assertEqual(students_res.status_code, 200)
         students_content = students_res.content.decode('utf-8')
-        self.assertIn('NEP Sem II: Approved', students_content)
+        self.assertIn('NEP Sem II (Approved)', students_content)
         self.assertIn(f'/admin/nep-ug/print/{record.pk}/', students_content)
 
 
 class BankStatementUTRVerificationTestCase(TestCase):
     def setUp(self):
+        super().setUp()
         from accounts.models import AdminUser
         AdminUser.objects.create(username='admin', password='password123')
         session = self.client.session

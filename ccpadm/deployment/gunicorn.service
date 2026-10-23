@@ -11,6 +11,9 @@ EnvironmentFile=-/home/ubuntu/django_ccp/.env
 ExecStart=/home/ubuntu/django_ccp/venv/bin/gunicorn \
           --access-logfile - \
           --workers 3 \
+          --timeout 120 \
+          --max-requests 500 \
+          --max-requests-jitter 50 \
           --bind unix:/run/gunicorn.sock \
           ccp_project.wsgi:application
 

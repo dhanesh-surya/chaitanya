@@ -1,17 +1,34 @@
 import re
+import time
 from collections import defaultdict
 from django.db import OperationalError, ProgrammingError
+
+_BANK_UTRS_ALREADY_SEEDED = False
+_LOOKUP_CACHE = None
+_LOOKUP_CACHE_TIME = 0
+
+
+def invalidate_bank_utr_cache():
+    global _BANK_UTRS_ALREADY_SEEDED, _LOOKUP_CACHE, _LOOKUP_CACHE_TIME
+    _BANK_UTRS_ALREADY_SEEDED = False
+    _LOOKUP_CACHE = None
+    _LOOKUP_CACHE_TIME = 0
 
 
 def ensure_bank_utrs_seeded():
     """Ensure the pre-loaded PNB bank statement UTRs are present in the database."""
+    global _BANK_UTRS_ALREADY_SEEDED
     from admissions.models import BankStatementUTR
     from admissions.bank_statement_seed_data import BANK_STATEMENT_SEED_RECORDS
+
+    if _BANK_UTRS_ALREADY_SEEDED:
+        return BankStatementUTR.objects.count()
 
     try:
         existing_utrs = set(BankStatementUTR.objects.values_list('utr_no', flat=True))
         all_seed_utrs = {item['utr_no'].strip() for item in BANK_STATEMENT_SEED_RECORDS}
         if all_seed_utrs.issubset(existing_utrs):
+            _BANK_UTRS_ALREADY_SEEDED = True
             return len(existing_utrs)
 
         to_create = []
@@ -256,6 +273,7 @@ def import_bank_statement_records(records):
         BankStatementUTR.objects.bulk_create(to_create, ignore_conflicts=True)
     if to_update:
         BankStatementUTR.objects.bulk_update(to_update, ['sender_name', 'tran_date', 'narration'])
+    invalidate_bank_utr_cache()
     return len(records), len(to_create)
 
 
@@ -288,7 +306,13 @@ def parse_and_import_bank_excel(excel_file, filename='Bank_Statement.xlsx'):
 def get_bank_utr_lookup():
     """
     Returns (exact_map, stripped_zero_map, total_bank_utrs) for fast in-memory verification.
+    Cached for 60 seconds in worker memory to eliminate repetitive DB queries.
     """
+    global _LOOKUP_CACHE, _LOOKUP_CACHE_TIME
+    now = time.time()
+    if _LOOKUP_CACHE is not None and (now - _LOOKUP_CACHE_TIME) < 60:
+        return _LOOKUP_CACHE
+
     from admissions.models import BankStatementUTR
 
     ensure_bank_utrs_seeded()
@@ -303,7 +327,10 @@ def get_bank_utr_lookup():
                 stripped_map[stripped] = rec
     except (OperationalError, ProgrammingError):
         pass
-    return exact_map, stripped_map, len(exact_map)
+
+    _LOOKUP_CACHE = (exact_map, stripped_map, len(exact_map))
+    _LOOKUP_CACHE_TIME = now
+    return _LOOKUP_CACHE
 
 
 def match_utr_against_bank(raw_utr, exact_map, stripped_map):

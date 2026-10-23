@@ -1241,7 +1241,11 @@ def manage_enrollments(request):
     status_filter = request.GET.get('status', 'ALL').strip() or 'ALL'
     utr_filter = request.GET.get('utr_verify', 'ALL').strip().upper() or 'ALL'
 
-    enrollments = StudentEnrollment.objects.all().select_related('student')
+    enrollments = (
+        StudentEnrollment.objects.all()
+        .select_related('student')
+        .defer('photo_base64', 'signature_base64', 'payment_receipt_base64', 'education_json', 'selected_courses_json')
+    )
 
     if search:
         enrollments = enrollments.filter(
@@ -1821,7 +1825,11 @@ def export_enrollments_excel(request):
         program_filter = ''
     status_filter = request.GET.get('status', 'ALL').strip() or 'ALL'
 
-    enrollments = StudentEnrollment.objects.all().select_related('student', 'admission')
+    enrollments = (
+        StudentEnrollment.objects.all()
+        .select_related('student', 'admission')
+        .defer('photo_base64', 'signature_base64', 'payment_receipt_base64')
+    )
 
     if search:
         enrollments = enrollments.filter(
@@ -1950,7 +1958,11 @@ def manage_nepug_enrollments(request):
     status_filter = request.GET.get('status', 'ALL').strip() or 'ALL'
     utr_filter = request.GET.get('utr_verify', 'ALL').strip().upper() or 'ALL'
 
-    records = NepUgAdmissionEnrollment.objects.all().select_related('student')
+    records = (
+        NepUgAdmissionEnrollment.objects.all()
+        .select_related('student')
+        .defer('photo_base64', 'signature_base64', 'payment_receipt_base64', 'education_json', 'selected_courses_json')
+    )
 
     if search:
         records = records.filter(
@@ -2676,7 +2688,11 @@ def export_nepug_excel(request):
     semester_filter = request.GET.get('semester', 'ALL').strip() or 'ALL'
     status_filter = request.GET.get('status', 'ALL').strip() or 'ALL'
 
-    records = NepUgAdmissionEnrollment.objects.all().select_related('student')
+    records = (
+        NepUgAdmissionEnrollment.objects.all()
+        .select_related('student')
+        .defer('photo_base64', 'signature_base64', 'payment_receipt_base64')
+    )
 
     if search:
         records = records.filter(

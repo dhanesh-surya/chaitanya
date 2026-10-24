@@ -959,9 +959,9 @@ def export_students_excel(request):
         'Full Name',
         "Father's Name",
         "Mother's Name",
-        'Email',
+        'E-mail',
         'Mobile',
-        'Aadhaar',
+        'Aadhar No',
         'Program',
         'Subject Group',
         'DSC Courses',
@@ -1791,6 +1791,9 @@ def build_enrollment_export_row(enrollment):
     subjects = _format_enrollment_subjects(enrollment)
     utr_no = (enrollment.transaction_id or getattr(adm, 'transaction_id', '') or '').strip()
 
+    aadhaar_val = enrollment.aadhaar or (getattr(adm, 'aadhaar', '') or '')
+    email_val = enrollment.email or (enrollment.student.email if enrollment.student else '') or (getattr(adm, 'email', '') or '')
+
     return [
         admission_no,
         univ_enrol_no,
@@ -1803,6 +1806,8 @@ def build_enrollment_export_row(enrollment):
         dob_val,
         address,
         mobile,
+        email_val,
+        aadhaar_val,
         class_name,
         subject_codes,
         subjects,
@@ -1866,6 +1871,8 @@ def export_enrollments_excel(request):
         'DOB (MM/DD/YYYY)',
         'Address',
         'Mobile',
+        'E-mail',
+        'Aadhar No',
         'CLASS NAME',
         'SUBJECT CODE',
         'SUBJECTS',
@@ -1899,7 +1906,8 @@ def export_enrollments_excel(request):
             cell = ws.cell(row=row_num, column=col_idx, value=val)
             cell.font = Font(name='Calibri', size=10)
             cell.border = thin_border
-            if col_idx in (8, 9, 11, 15):  # Gender, DOB, Mobile, UTR No
+            # Col 8=Gender, Col 9=DOB, Col 11=Mobile, Col 13=Aadhar No, Col 17=UTR No
+            if col_idx in (8, 9, 11, 13, 17):
                 cell.alignment = center_align
             else:
                 cell.alignment = left_align
@@ -1910,14 +1918,15 @@ def export_enrollments_excel(request):
         max_len = max(len(str(cell.value or '')) for cell in col)
         ws.column_dimensions[col_letter].width = max(max_len + 3, 12)
 
+    # Cap wide columns: Address=J(10), Subject Codes=O(15), Subjects=P(16)
     if ws.column_dimensions.get('J'):
         ws.column_dimensions['J'].width = min(max(ws.column_dimensions['J'].width, 30), 50)
-    if ws.column_dimensions.get('M'):
-        ws.column_dimensions['M'].width = min(max(ws.column_dimensions['M'].width, 24), 45)
-    if ws.column_dimensions.get('N'):
-        ws.column_dimensions['N'].width = min(max(ws.column_dimensions['N'].width, 35), 65)
     if ws.column_dimensions.get('O'):
-        ws.column_dimensions['O'].width = min(max(ws.column_dimensions['O'].width, 18), 32)
+        ws.column_dimensions['O'].width = min(max(ws.column_dimensions['O'].width, 24), 45)
+    if ws.column_dimensions.get('P'):
+        ws.column_dimensions['P'].width = min(max(ws.column_dimensions['P'].width, 35), 65)
+    if ws.column_dimensions.get('Q'):
+        ws.column_dimensions['Q'].width = min(max(ws.column_dimensions['Q'].width, 18), 32)
 
     buffer = BytesIO()
     wb.save(buffer)

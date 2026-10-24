@@ -9,15 +9,114 @@
             <h2 class="page-title"><i class="fas fa-users"></i> Registered Students</h2>
             <nav class="page-actions page-actions--toolbar" aria-label="Admin navigation">
                 {% include 'partials/admin_nav_actions.html' with active_page='students' %}
-                <a href="{% url 'export_students_excel' %}?search={{ search|urlencode }}&program={{ program_filter|urlencode }}&verified={{ verified_filter|urlencode }}&group={{ group_filter|urlencode }}&enrollment_status={{ enrollment_status_filter|urlencode }}" class="page-action-btn page-action-btn--accent" title="Export as Excel spreadsheet (.xlsx)">
+                <button type="button" class="page-action-btn page-action-btn--accent" id="toggleExportFiltersBtn"
+                        title="Set export filters and download Excel"
+                        onclick="document.getElementById('exportFiltersPanel').classList.toggle('export-filters-panel--open')">
                     <i class="fas fa-file-excel" aria-hidden="true"></i><span>Export Excel</span>
-                </a>
+                    <i class="fas fa-chevron-down" style="margin-left:4px; font-size:0.75em;" id="exportFilterChevron"></i>
+                </button>
                 <a href="{% url 'export_students_csv' %}?search={{ search|urlencode }}&program={{ program_filter|urlencode }}&verified={{ verified_filter|urlencode }}&group={{ group_filter|urlencode }}&enrollment_status={{ enrollment_status_filter|urlencode }}" class="page-action-btn" title="Export as CSV">
                     <i class="fas fa-file-csv" aria-hidden="true"></i><span>Export CSV</span>
                 </a>
                 {% include 'partials/admin_nav_logout.html' %}
             </nav>
         </div>
+
+        <!-- Export Filters Panel -->
+        <div id="exportFiltersPanel" class="export-filters-panel" style="display:none; background:#f0f7ff; border:1.5px solid #bfdbfe; border-radius:10px; padding:1.1rem 1.4rem 1rem; margin-bottom:1rem;">
+            <form method="get" action="{% url 'export_students_excel' %}" id="exportFiltersForm">
+                {# Forward all current page filters #}
+                <input type="hidden" name="search"            value="{{ search }}">
+                <input type="hidden" name="program"           value="{{ program_filter }}">
+                <input type="hidden" name="verified"          value="{{ verified_filter }}">
+                <input type="hidden" name="group"             value="{{ group_filter }}">
+                <input type="hidden" name="enrollment_status" value="{{ enrollment_status_filter }}">
+
+                <div style="display:flex; flex-wrap:wrap; gap:10px; align-items:flex-end;">
+                    <div>
+                        <label style="display:block; font-size:11.5px; font-weight:600; color:#1e40af; margin-bottom:3px;">Gender</label>
+                        <select name="gender" class="portal-input" style="min-width:130px;">
+                            <option value="ALL">All Genders</option>
+                            <option value="MALE">Male</option>
+                            <option value="FEMALE">Female</option>
+                            <option value="OTHER">Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:11.5px; font-weight:600; color:#1e40af; margin-bottom:3px;">Category</label>
+                        <select name="category" class="portal-input" style="min-width:130px;">
+                            <option value="ALL">All Categories</option>
+                            <option value="General">General</option>
+                            <option value="OBC">OBC</option>
+                            <option value="SC">SC</option>
+                            <option value="ST">ST</option>
+                            <option value="EWS">EWS</option>
+                            <option value="PwD">PwD</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:11.5px; font-weight:600; color:#1e40af; margin-bottom:3px;">Admission Status</label>
+                        <select name="admission_status" class="portal-input" style="min-width:150px;">
+                            <option value="ALL">All Statuses</option>
+                            <option value="Approved">Approved</option>
+                            <option value="Submitted">Submitted</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Draft">Draft</option>
+                            <option value="Rejected">Rejected</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:11.5px; font-weight:600; color:#1e40af; margin-bottom:3px;">Medium</label>
+                        <select name="medium" class="portal-input" style="min-width:130px;">
+                            <option value="ALL">All Mediums</option>
+                            <option value="Hindi">Hindi</option>
+                            <option value="English">English</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:11.5px; font-weight:600; color:#1e40af; margin-bottom:3px;">Semester</label>
+                        <select name="semester" class="portal-input" style="min-width:110px;">
+                            <option value="ALL">All Semesters</option>
+                            <option value="I">Semester I</option>
+                            <option value="II">Semester II</option>
+                            <option value="III">Semester III</option>
+                            <option value="IV">Semester IV</option>
+                            <option value="V">Semester V</option>
+                            <option value="VI">Semester VI</option>
+                        </select>
+                    </div>
+                    <div style="display:flex; gap:8px; padding-top:2px;">
+                        <button type="submit" class="btn btn-primary btn-sm" style="background:#1d4ed8; color:#fff; border:none; padding:6px 18px; border-radius:6px; font-weight:600; cursor:pointer;">
+                            <i class="fas fa-download"></i> Download Excel
+                        </button>
+                        <button type="button" class="btn btn-ghost btn-sm" style="padding:6px 12px;"
+                                onclick="document.getElementById('exportFiltersPanel').style.display='none';">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+                <p style="margin:6px 0 0; font-size:11.5px; color:#6b7280;">
+                    <i class="fas fa-info-circle" style="color:#3b82f6;"></i>
+                    Export filters apply on top of your current page filters (Program, Enrollment Status, Verified, Group).
+                    Leave filters as "All" to export everything matching the page selection.
+                </p>
+            </form>
+        </div>
+
+        <script>
+        (function() {
+            var btn = document.getElementById('toggleExportFiltersBtn');
+            var panel = document.getElementById('exportFiltersPanel');
+            var chevron = document.getElementById('exportFilterChevron');
+            if (btn && panel) {
+                btn.addEventListener('click', function() {
+                    var isOpen = panel.style.display !== 'none';
+                    panel.style.display = isOpen ? 'none' : 'block';
+                    if (chevron) chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
+                });
+            }
+        })();
+        </script>
 
         <form method="get" class="filter-bar" id="studentsFilterForm">
             <input type="text" name="search" value="{{ search }}" class="portal-input" placeholder="Search name, email, mobile, reg no...">

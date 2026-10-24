@@ -924,9 +924,68 @@ def export_students_csv(request):
     return response
 
 
+def _filter_students_for_export(students, gender='ALL', category='ALL', admission_status='ALL',
+                                medium='ALL', semester='ALL'):
+    """Apply additional post-attach filters for the student Excel export."""
+    gender = (gender or 'ALL').strip().upper()
+    category = (category or 'ALL').strip()
+    admission_status = (admission_status or 'ALL').strip()
+    medium = (medium or 'ALL').strip()
+    semester = (semester or 'ALL').strip()
+
+    if all(f == 'ALL' for f in (gender, category, admission_status, medium, semester)):
+        return students
+
+    result = []
+    for s in students:
+        admission = getattr(s, 'latest_admission', None)
+
+        # Gender — from admission, fallback to enrollment
+        if gender != 'ALL':
+            adm_gender = (getattr(admission, 'gender', '') or '').strip().upper()
+            enr = getattr(s, 'latest_enrollment', None) or getattr(s, 'latest_nep_ug', None)
+            enr_gender = (getattr(enr, 'gender', '') or '').strip().upper()
+            student_gender = adm_gender or enr_gender
+            if student_gender != gender:
+                continue
+
+        # Category — from admission, fallback to enrollment
+        if category != 'ALL':
+            adm_cat = (getattr(admission, 'category', '') or '').strip()
+            enr = getattr(s, 'latest_enrollment', None) or getattr(s, 'latest_nep_ug', None)
+            enr_cat = (getattr(enr, 'category', '') or '').strip()
+            student_cat = adm_cat or enr_cat
+            if student_cat.upper() != category.upper():
+                continue
+
+        # Admission status — from the latest admission record
+        if admission_status != 'ALL':
+            adm_st = (getattr(admission, 'status', '') or '').strip()
+            if adm_st.lower() != admission_status.lower():
+                continue
+
+        # Medium — from admission, fallback to enrollment
+        if medium != 'ALL':
+            adm_med = (getattr(admission, 'medium', '') or '').strip()
+            enr = getattr(s, 'latest_enrollment', None) or getattr(s, 'latest_nep_ug', None)
+            enr_med = (getattr(enr, 'medium', '') or '').strip()
+            student_med = adm_med or enr_med
+            if student_med.upper() != medium.upper():
+                continue
+
+        # Semester — from active enrollment record
+        if semester != 'ALL':
+            student_sem = (getattr(s, 'enrollment_semester', '') or '').strip().upper()
+            if student_sem != semester.upper():
+                continue
+
+        result.append(s)
+    return result
+
+
 @admin_login_required
 def export_students_excel(request):
-    """Export student list as an Excel (.xlsx) file with full details including Father & Mother name."""
+    """Export student list as an Excel (.xlsx) file with full details and export-specific filters."""
     from io import BytesIO
     import openpyxl
     from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
@@ -937,16 +996,31 @@ def export_students_excel(request):
         messages.warning(request, 'Please select a program before exporting Excel.')
         return redirect('manage_students')
 
+    # Extra export-only filters (not shown on the main student list)
+    gender_filter        = (request.GET.get('gender', 'ALL') or 'ALL').strip()
+    category_filter      = (request.GET.get('category', 'ALL') or 'ALL').strip()
+    adm_status_filter    = (request.GET.get('admission_status', 'ALL') or 'ALL').strip()
+    medium_filter        = (request.GET.get('medium', 'ALL') or 'ALL').strip()
+    semester_filter      = (request.GET.get('semester', 'ALL') or 'ALL').strip()
+
     group_filter = _normalize_group_filter(params['group'], params['program'])
     enrollment_status_filter = params.get('enrollment_status', 'ALL')
-    students = _filter_students_by_enrollment_status(
-        _filter_students_by_group(
-            _attach_admissions(
-                list(_get_students_queryset(params['search'], params['program'], params['verified']))
+
+    students = _filter_students_for_export(
+        _filter_students_by_enrollment_status(
+            _filter_students_by_group(
+                _attach_admissions(
+                    list(_get_students_queryset(params['search'], params['program'], params['verified']))
+                ),
+                group_filter,
             ),
-            group_filter,
+            enrollment_status_filter,
         ),
-        enrollment_status_filter,
+        gender=gender_filter,
+        category=category_filter,
+        admission_status=adm_status_filter,
+        medium=medium_filter,
+        semester=semester_filter,
     )
 
     wb = openpyxl.Workbook()
@@ -962,12 +1036,16 @@ def export_students_excel(request):
         'E-mail',
         'Mobile',
         'Aadhar No',
+        'Gender',
+        'Category',
+        'Medium',
         'Program',
         'Subject Group',
         'DSC Courses',
         'Course',
         'Selected Courses / Paper Name',
         'Application No',
+        'Admission Status',
         'Verified',
         'Enrollment Status',
         'Enrollment No',
@@ -1002,8 +1080,14 @@ def export_students_excel(request):
 
     for row_idx, s in enumerate(students, 2):
         admission = getattr(s, 'latest_admission', None)
+        enr = getattr(s, 'latest_enrollment', None) or getattr(s, 'latest_nep_ug', None)
         father = getattr(s, 'father_name', '') or (admission.father_name if admission else '')
         mother = getattr(s, 'mother_name', '') or (admission.mother_name if admission else '')
+
+        gender_val   = (getattr(admission, 'gender', '') or getattr(enr, 'gender', '') or '').strip()
+        category_val = (getattr(admission, 'category', '') or getattr(enr, 'category', '') or '').strip()
+        medium_val   = (getattr(admission, 'medium', '') or getattr(enr, 'medium', '') or '').strip()
+        adm_status   = (getattr(admission, 'status', '') or '').strip()
 
         row_data = [
             s.registration_no,
@@ -1013,12 +1097,16 @@ def export_students_excel(request):
             s.email or '',
             s.mobile or '',
             s.aadhaar or '',
+            gender_val,
+            category_val,
+            medium_val,
             s.program_type,
             getattr(s, 'bsc_group_label', '') or '',
             getattr(s, 'dsc_courses_display', '') or '',
             s.course_name,
             _format_selected_courses_for_export(s),
             (admission.application_no if admission else '') or '',
+            adm_status,
             'Yes' if s.is_verified else 'No',
             getattr(s, 'enrollment_status', 'Not Enrolled') or 'Not Enrolled',
             getattr(s, 'enrollment_no', '') or '',
@@ -1036,7 +1124,9 @@ def export_students_excel(request):
             if fill_to_apply.fill_type:
                 cell.fill = fill_to_apply
 
-            if col_idx in (1, 6, 7, 13, 14, 15, 16, 17, 18):
+            # Centre: Reg No, Mobile, Aadhar No, Gender, Category, App No, Adm Status,
+            #         Verified, Enrollment Status, Enrollment No, Semester, Registered On
+            if col_idx in (1, 6, 7, 8, 9, 16, 17, 18, 19, 20, 21, 22):
                 cell.alignment = data_align_center
             else:
                 cell.alignment = data_align_left
@@ -1054,8 +1144,22 @@ def export_students_excel(request):
     wb.save(output)
     output.seek(0)
 
-    enr_suffix = f"_{enrollment_status_filter}" if enrollment_status_filter and enrollment_status_filter != 'ALL' else ""
-    filename = f"Students_{params['program'] or 'All'}{enr_suffix}.xlsx".replace(' ', '_').replace('/', '_')
+    # Build a descriptive filename from active filters
+    parts = [params['program'] or 'All']
+    if enrollment_status_filter and enrollment_status_filter != 'ALL':
+        parts.append(enrollment_status_filter)
+    if gender_filter != 'ALL':
+        parts.append(gender_filter.title())
+    if category_filter != 'ALL':
+        parts.append(category_filter)
+    if adm_status_filter != 'ALL':
+        parts.append(adm_status_filter)
+    if medium_filter != 'ALL':
+        parts.append(medium_filter)
+    if semester_filter != 'ALL':
+        parts.append(f'Sem{semester_filter}')
+    filename = f"Students_{'_'.join(parts)}.xlsx".replace(' ', '_').replace('/', '_')
+
     response = HttpResponse(
         output.getvalue(),
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',

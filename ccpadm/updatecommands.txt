@@ -1,5 +1,6 @@
 cd /home/ubuntu/django_ccp/chaitanya/ccpadm
 source venv/bin/activate
 git pull origin main
+python manage.py migrate
 python manage.py collectstatic --noinput
-sudo systemctl restart gunicorn
+sudo systemctl restart ccpadm

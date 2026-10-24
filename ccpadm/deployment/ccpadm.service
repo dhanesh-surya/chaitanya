@@ -1,0 +1,20 @@
+[Unit]
+Description=CCPADM Gunicorn Service
+After=network.target
+
+[Service]
+User=ubuntu
+Group=www-data
+WorkingDirectory=/home/ubuntu/django_ccp/chaitanya/ccpadm
+EnvironmentFile=-/home/ubuntu/django_ccp/chaitanya/ccpadm/.env
+ExecStart=/home/ubuntu/django_ccp/chaitanya/ccpadm/venv/bin/gunicorn \
+          --access-logfile - \
+          --workers 3 \
+          --timeout 120 \
+          --max-requests 500 \
+          --max-requests-jitter 50 \
+          --bind unix:/run/gunicorn.sock \
+          ccp_project.wsgi:application
+
+[Install]
+WantedBy=multi-user.target

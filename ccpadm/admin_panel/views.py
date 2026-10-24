@@ -1898,6 +1898,20 @@ def build_enrollment_export_row(enrollment):
     aadhaar_val = enrollment.aadhaar or (getattr(adm, 'aadhaar', '') or '')
     email_val = enrollment.email or (enrollment.student.email if enrollment.student else '') or (getattr(adm, 'email', '') or '')
 
+    if enrollment.status == 'Approved':
+        status_val = 'Approved'
+    elif enrollment.status == 'Submitted' or enrollment.is_submitted:
+        status_val = 'Submitted'
+    else:
+        status_val = 'Draft'
+
+    if enrollment.submitted_date:
+        submitted_date_val = enrollment.submitted_date.strftime('%d/%m/%Y %H:%M')
+    elif (enrollment.is_submitted or enrollment.status == 'Approved') and enrollment.created_at:
+        submitted_date_val = enrollment.created_at.strftime('%d/%m/%Y %H:%M')
+    else:
+        submitted_date_val = ''
+
     return [
         admission_no,
         univ_enrol_no,
@@ -1916,6 +1930,8 @@ def build_enrollment_export_row(enrollment):
         subject_codes,
         subjects,
         utr_no,
+        status_val,
+        submitted_date_val,
     ]
 
 
@@ -1981,6 +1997,8 @@ def export_enrollments_excel(request):
         'SUBJECT CODE',
         'SUBJECTS',
         'UTR No',
+        'Enrollment Status',
+        'Submitted Date',
     ]
 
     header_font = Font(name='Calibri', size=11, bold=True, color='FFFFFF')
@@ -2010,8 +2028,8 @@ def export_enrollments_excel(request):
             cell = ws.cell(row=row_num, column=col_idx, value=val)
             cell.font = Font(name='Calibri', size=10)
             cell.border = thin_border
-            # Col 8=Gender, Col 9=DOB, Col 11=Mobile, Col 13=Aadhar No, Col 17=UTR No
-            if col_idx in (8, 9, 11, 13, 17):
+            # Col 8=Gender, Col 9=DOB, Col 11=Mobile, Col 13=Aadhar No, Col 17=UTR No, Col 18=Enrollment Status, Col 19=Submitted Date
+            if col_idx in (8, 9, 11, 13, 17, 18, 19):
                 cell.alignment = center_align
             else:
                 cell.alignment = left_align

@@ -34,6 +34,11 @@
                 <p>Draft (Editable)</p>
                 <span class="stat-card__hint">In progress</span>
             </a>
+            <a href="{% url 'manage_students' %}?{% if program_filter %}program={{ program_filter|urlencode }}&{% endif %}{% if group_filter and group_filter != 'ALL' %}group={{ group_filter|urlencode }}&{% endif %}enrollment_status=Not+Enrolled" target="_blank" class="stat-card stat-card--link" style="border-left: 4px solid #ef4444;" title="View admitted students who have not yet submitted an enrollment application">
+                <h3 style="color: #ef4444;">{{ program_remaining_count }}</h3>
+                <p>Remaining to Enroll</p>
+                <span class="stat-card__hint" style="color: #dc2626;"><i class="fas fa-external-link-alt" style="font-size: 10px;"></i> View Not Enrolled</span>
+            </a>
         </div>
 
         <!-- BANK STATEMENT AUTO-VERIFICATION BAR -->
@@ -188,8 +193,49 @@
             </button>
         </form>
 
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-xs); flex-wrap: wrap; gap: 10px;">
-            <p class="field-hint" style="margin-bottom: 0;">Showing <strong>{{ filtered_count }}</strong> enrollment application(s)</p>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-sm); flex-wrap: wrap; gap: 12px; padding: 10px 14px; background: #ffffff; border: 1px solid var(--color-border); border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12.5px;">
+                <span class="field-hint" style="margin-bottom: 0; font-weight: 700; color: #082B49;">
+                    <i class="fas fa-file-signature text-primary"></i> Showing <strong>{{ filtered_count }}</strong> enrollment application(s)
+                </span>
+
+                <span style="color: #cbd5e1; margin: 0 2px;">|</span>
+
+                <span class="badge" style="background: #dcfce7; color: #15803d; border: 1px solid #86efac; font-size: 11.5px; padding: 3px 8px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;" title="Approved enrollment forms">
+                    <i class="fas fa-check-circle"></i> Approved: <strong>{{ view_approved_count }}</strong>
+                </span>
+
+                <span class="badge" style="background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; font-size: 11.5px; padding: 3px 8px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;" title="Submitted enrollment forms awaiting approval">
+                    <i class="fas fa-clock"></i> Pending: <strong>{{ view_submitted_count }}</strong>
+                </span>
+
+                {% if view_draft_count > 0 %}
+                <span class="badge" style="background: #fef3c7; color: #b45309; border: 1px solid #fde68a; font-size: 11.5px; padding: 3px 8px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;" title="Draft enrollment forms">
+                    <i class="fas fa-edit"></i> Draft: <strong>{{ view_draft_count }}</strong>
+                </span>
+                {% endif %}
+
+                <span style="color: #cbd5e1; margin: 0 2px;">|</span>
+
+                <span style="font-size: 12px; color: #475569; display: inline-flex; align-items: center; gap: 4px;" title="Total admitted / registered students for {% if program_filter %}{{ program_filter }}{% else %}all programs{% endif %}">
+                    <i class="fas fa-user-graduate" style="color: #0284c7;"></i> Total Admitted: <strong>{{ program_total_students }}</strong>
+                </span>
+
+                <span class="badge" style="background: {% if program_remaining_count > 0 %}#fee2e2{% else %}#f1f5f9{% endif %}; color: {% if program_remaining_count > 0 %}#b91c1c{% else %}#475569{% endif %}; border: 1px solid {% if program_remaining_count > 0 %}#fca5a5{% else %}#cbd5e1{% endif %}; font-size: 11.5px; padding: 3px 8px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;" title="Admitted students who have not yet submitted an enrollment form">
+                    <i class="fas fa-user-clock"></i> Remaining to Enroll: <strong>{{ program_remaining_count }}</strong>
+                </span>
+
+                {% if program_remaining_count > 0 %}
+                <a href="{% url 'manage_students' %}?{% if program_filter %}program={{ program_filter|urlencode }}&{% endif %}{% if group_filter and group_filter != 'ALL' %}group={{ group_filter|urlencode }}&{% endif %}enrollment_status=Not+Enrolled" 
+                   target="_blank" 
+                   class="btn btn-sm" 
+                   style="padding: 2px 8px; font-size: 11px; font-weight: 600; color: #b91c1c; background: #fff5f5; border: 1px solid #fca5a5; border-radius: 4px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;"
+                   title="Open list of {{ program_remaining_count }} remaining student(s) who haven't enrolled yet">
+                    <i class="fas fa-external-link-alt" style="font-size: 9px;"></i> View {{ program_remaining_count }} Not Enrolled
+                </a>
+                {% endif %}
+            </div>
+
             <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
                 <a href="{% url 'export_enrollments_excel' %}?search={{ search|urlencode }}&program={{ program_filter|urlencode }}&status={{ status_filter|urlencode }}&utr_verify={{ utr_filter|urlencode }}{% if group_filter and group_filter != 'ALL' %}&group={{ group_filter|urlencode }}{% endif %}" class="btn btn-sm" style="background: #107c41; border-color: #0b6a37; color: #fff; font-weight: 600; padding: 5px 12px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px;" title="Export filtered enrollments to Excel (.xlsx)">
                     <i class="fas fa-file-excel"></i> Export Excel

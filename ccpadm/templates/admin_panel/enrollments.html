@@ -14,22 +14,22 @@
         </div>
 
         <div class="stat-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: var(--space-lg);">
-            <a href="{% url 'manage_enrollments' %}" class="stat-card stat-card--link{% if status_filter == 'ALL' and not program_filter and not search %} is-active{% endif %}">
+            <a href="{% url 'manage_enrollments' %}" class="stat-card stat-card--link{% if status_filter == 'ALL' and not program_filter and not search and group_filter == 'ALL' %} is-active{% endif %}">
                 <h3>{{ total_count }}</h3>
                 <p>Total Enrollments</p>
                 <span class="stat-card__hint">View all</span>
             </a>
-            <a href="{% url 'manage_enrollments' %}?status=Submitted{% if program_filter %}&program={{ program_filter|urlencode }}{% endif %}" class="stat-card stat-card--link{% if status_filter == 'Submitted' %} is-active{% endif %}" style="border-left: 4px solid #0284c7;">
+            <a href="{% url 'manage_enrollments' %}?status=Submitted{% if program_filter %}&program={{ program_filter|urlencode }}{% endif %}{% if group_filter and group_filter != 'ALL' %}&group={{ group_filter|urlencode }}{% endif %}" class="stat-card stat-card--link{% if status_filter == 'Submitted' %} is-active{% endif %}" style="border-left: 4px solid #0284c7;">
                 <h3 style="color: #0284c7;">{{ submitted_count }}</h3>
                 <p>Pending Approval</p>
                 <span class="stat-card__hint">Requires review</span>
             </a>
-            <a href="{% url 'manage_enrollments' %}?status=Approved{% if program_filter %}&program={{ program_filter|urlencode }}{% endif %}" class="stat-card stat-card--link{% if status_filter == 'Approved' %} is-active{% endif %}" style="border-left: 4px solid #16a34a;">
+            <a href="{% url 'manage_enrollments' %}?status=Approved{% if program_filter %}&program={{ program_filter|urlencode }}{% endif %}{% if group_filter and group_filter != 'ALL' %}&group={{ group_filter|urlencode }}{% endif %}" class="stat-card stat-card--link{% if status_filter == 'Approved' %} is-active{% endif %}" style="border-left: 4px solid #16a34a;">
                 <h3 style="color: #16a34a;">{{ approved_count }}</h3>
                 <p>Approved / Accepted</p>
                 <span class="stat-card__hint">Enrollment locked</span>
             </a>
-            <a href="{% url 'manage_enrollments' %}?status=Draft{% if program_filter %}&program={{ program_filter|urlencode }}{% endif %}" class="stat-card stat-card--link{% if status_filter == 'Draft' %} is-active{% endif %}" style="border-left: 4px solid #d97706;">
+            <a href="{% url 'manage_enrollments' %}?status=Draft{% if program_filter %}&program={{ program_filter|urlencode }}{% endif %}{% if group_filter and group_filter != 'ALL' %}&group={{ group_filter|urlencode }}{% endif %}" class="stat-card stat-card--link{% if status_filter == 'Draft' %} is-active{% endif %}" style="border-left: 4px solid #d97706;">
                 <h3 style="color: #d97706;">{{ draft_count }}</h3>
                 <p>Draft (Editable)</p>
                 <span class="stat-card__hint">In progress</span>
@@ -45,22 +45,22 @@
                     <span class="badge" style="background: #082B49; color: #fff; font-size: 11px; padding: 3px 8px;">{{ bank_utr_total }} Bank UTRs Active</span>
                 </div>
                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                    <a href="{% url 'manage_enrollments' %}?status={{ status_filter|urlencode }}&program={{ program_filter|urlencode }}&search={{ search|urlencode }}&utr_verify=VERIFIED"
+                    <a href="{% url 'manage_enrollments' %}?status={{ status_filter|urlencode }}&program={{ program_filter|urlencode }}&search={{ search|urlencode }}&utr_verify=VERIFIED{% if group_filter and group_filter != 'ALL' %}&group={{ group_filter|urlencode }}{% endif %}"
                        class="badge" style="background: {% if utr_filter == 'VERIFIED' %}#15803d{% else %}#dcfce7{% endif %}; color: {% if utr_filter == 'VERIFIED' %}#fff{% else %}#15803d{% endif %}; border: 1px solid #86efac; text-decoration: none; font-size: 11.5px; padding: 5px 10px;">
                         <i class="fas fa-check-circle"></i> Bank Verified: {{ utr_verified_count }}
                     </a>
-                    <a href="{% url 'manage_enrollments' %}?status={{ status_filter|urlencode }}&program={{ program_filter|urlencode }}&search={{ search|urlencode }}&utr_verify=UNVERIFIED"
+                    <a href="{% url 'manage_enrollments' %}?status={{ status_filter|urlencode }}&program={{ program_filter|urlencode }}&search={{ search|urlencode }}&utr_verify=UNVERIFIED{% if group_filter and group_filter != 'ALL' %}&group={{ group_filter|urlencode }}{% endif %}"
                        class="badge" style="background: {% if utr_filter == 'UNVERIFIED' %}#b91c1c{% else %}#fee2e2{% endif %}; color: {% if utr_filter == 'UNVERIFIED' %}#fff{% else %}#b91c1c{% endif %}; border: 1px solid #fca5a5; text-decoration: none; font-size: 11.5px; padding: 5px 10px;">
                         <i class="fas fa-times-circle"></i> Not in Statement: {{ utr_unverified_count }}
                     </a>
                     {% if utr_duplicate_count > 0 %}
-                    <a href="{% url 'manage_enrollments' %}?status={{ status_filter|urlencode }}&program={{ program_filter|urlencode }}&search={{ search|urlencode }}&utr_verify=DUPLICATE"
+                    <a href="{% url 'manage_enrollments' %}?status={{ status_filter|urlencode }}&program={{ program_filter|urlencode }}&search={{ search|urlencode }}&utr_verify=DUPLICATE{% if group_filter and group_filter != 'ALL' %}&group={{ group_filter|urlencode }}{% endif %}"
                        class="badge" style="background: {% if utr_filter == 'DUPLICATE' %}#b45309{% else %}#fef3c7{% endif %}; color: {% if utr_filter == 'DUPLICATE' %}#fff{% else %}#b45309{% endif %}; border: 1px solid #fde68a; text-decoration: none; font-size: 11.5px; padding: 5px 10px;">
                         <i class="fas fa-exclamation-triangle"></i> Duplicate UTR: {{ utr_duplicate_count }}
                     </a>
                     {% endif %}
                     {% if utr_filter != 'ALL' %}
-                    <a href="{% url 'manage_enrollments' %}?status={{ status_filter|urlencode }}&program={{ program_filter|urlencode }}&search={{ search|urlencode }}"
+                    <a href="{% url 'manage_enrollments' %}?status={{ status_filter|urlencode }}&program={{ program_filter|urlencode }}&search={{ search|urlencode }}{% if group_filter and group_filter != 'ALL' %}&group={{ group_filter|urlencode }}{% endif %}"
                        class="badge" style="background: #fff; color: #334155; border: 1px solid #cbd5e1; text-decoration: none; font-size: 11px; padding: 5px 8px;">
                         <i class="fas fa-times"></i> Show All
                     </a>
@@ -118,13 +118,25 @@
                 </div>
                 <div class="filter-field" style="flex: 1 1 200px;">
                     <label for="enrollmentProgram" style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; color: var(--color-text-muted);">Program</label>
-                    <select id="enrollmentProgram" name="program" class="portal-input" style="width: 100%;">
+                    <select id="enrollmentProgram" name="program" class="portal-input" style="width: 100%;" onchange="this.form.submit()">
                         <option value="">-- All Programs --</option>
                         {% for pt in program_types %}
                         <option value="{{ pt }}" {% if program_filter == pt %}selected{% endif %}>{{ pt }}</option>
                         {% endfor %}
                     </select>
                 </div>
+                {% if show_group_filter %}
+                <div class="filter-field" style="flex: 0 1 190px;">
+                    <label for="enrollmentGroup" style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; color: var(--color-text-muted);">Subject Group</label>
+                    <select id="enrollmentGroup" name="group" class="portal-input" style="width: 100%;" onchange="this.form.submit()">
+                        <option value="ALL" {% if group_filter == 'ALL' %}selected{% endif %}>All Subject Groups</option>
+                        <option value="NONE" {% if group_filter == 'NONE' %}selected{% endif %}>No group selected</option>
+                        {% for g in subject_group_choices %}
+                        <option value="{{ g.key }}" {% if group_filter == g.key %}selected{% endif %}>{{ g.label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
                 <div class="filter-field" style="flex: 0 1 150px;">
                     <label for="enrollmentStatus" style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; color: var(--color-text-muted);">Status</label>
                     <select id="enrollmentStatus" name="status" class="portal-input" style="width: 100%;">
@@ -147,12 +159,12 @@
                     <button type="submit" class="btn btn-primary btn-sm" style="background:#082B49; border-color:#082B49; padding: 7px 16px;">
                         <i class="fas fa-filter"></i> Filter
                     </button>
-                    {% if search or program_filter or status_filter != 'ALL' or utr_filter != 'ALL' %}
+                    {% if search or program_filter or status_filter != 'ALL' or utr_filter != 'ALL' or group_filter != 'ALL' %}
                     <a href="{% url 'manage_enrollments' %}" class="btn btn-ghost btn-sm" style="padding: 7px 12px;" title="Reset filters">
                         <i class="fas fa-times"></i> Reset
                     </a>
                     {% endif %}
-                    <a href="{% url 'export_enrollments_excel' %}?search={{ search|urlencode }}&program={{ program_filter|urlencode }}&status={{ status_filter|urlencode }}" class="btn btn-sm btn-success" style="background: #16a34a; border-color: #15803d; color: #fff; font-weight: 600; padding: 7px 16px; display: inline-flex; align-items: center; gap: 6px;" title="Export filtered enrollments to Excel (.xlsx)">
+                    <a href="{% url 'export_enrollments_excel' %}?search={{ search|urlencode }}&program={{ program_filter|urlencode }}&status={{ status_filter|urlencode }}&utr_verify={{ utr_filter|urlencode }}{% if group_filter and group_filter != 'ALL' %}&group={{ group_filter|urlencode }}{% endif %}" class="btn btn-sm btn-success" style="background: #16a34a; border-color: #15803d; color: #fff; font-weight: 600; padding: 7px 16px; display: inline-flex; align-items: center; gap: 6px;" title="Export filtered enrollments to Excel (.xlsx)">
                         <i class="fas fa-file-excel"></i> Export Excel
                     </a>
                 </div>
@@ -163,6 +175,8 @@
         <form method="post" action="{% url 'bulk_update_enrollment_status' %}" id="bulkEnrollmentActionForm" class="bulk-action-bar" hidden style="background: #f8fafc; border: 1.5px solid #0284c7; padding: 10px 16px; border-radius: 6px; margin-bottom: 12px; display: flex; align-items: center; gap: 12px;">
             {% csrf_token %}
             <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <input type="hidden" name="group" value="{{ group_filter }}">
+            <input type="hidden" name="utr_verify" value="{{ utr_filter }}">
             <span class="bulk-action-bar__count" id="bulkEnrollmentSelectedCount" style="font-weight: 700; color: #082B49;">0 selected</span>
             <select name="status" id="bulkEnrollmentStatusSelect" class="portal-input" disabled style="min-width: 220px;" aria-label="Bulk enrollment status action">
                 <option value="">Choose action...</option>
@@ -177,7 +191,7 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-xs); flex-wrap: wrap; gap: 10px;">
             <p class="field-hint" style="margin-bottom: 0;">Showing <strong>{{ filtered_count }}</strong> enrollment application(s)</p>
             <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                <a href="{% url 'export_enrollments_excel' %}?search={{ search|urlencode }}&program={{ program_filter|urlencode }}&status={{ status_filter|urlencode }}" class="btn btn-sm" style="background: #107c41; border-color: #0b6a37; color: #fff; font-weight: 600; padding: 5px 12px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px;" title="Export filtered enrollments to Excel (.xlsx)">
+                <a href="{% url 'export_enrollments_excel' %}?search={{ search|urlencode }}&program={{ program_filter|urlencode }}&status={{ status_filter|urlencode }}&utr_verify={{ utr_filter|urlencode }}{% if group_filter and group_filter != 'ALL' %}&group={{ group_filter|urlencode }}{% endif %}" class="btn btn-sm" style="background: #107c41; border-color: #0b6a37; color: #fff; font-weight: 600; padding: 5px 12px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px;" title="Export filtered enrollments to Excel (.xlsx)">
                     <i class="fas fa-file-excel"></i> Export Excel
                 </a>
                 <div class="field-hint text-muted" style="font-size: 11.5px;">
@@ -242,7 +256,18 @@
                         <td><span style="font-family: monospace; font-weight: 600;">{{ e.reg_no }}</span></td>
                         <td>
                             <div>{{ e.program_type|default:"—" }}</div>
-                            <span class="badge badge-secondary" style="font-size: 10.5px;">Sem {{ e.semester }}</span>
+                            <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-top: 3px; align-items: center;">
+                                <span class="badge badge-secondary" style="font-size: 10.5px;">Sem {{ e.semester }}</span>
+                                {% if e.bsc_group_label %}
+                                <span class="badge" style="background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; font-weight: 600; font-size: 10.5px;" title="Subject Group: {{ e.bsc_group_label }}">
+                                    <i class="fas fa-layer-group" style="font-size: 9.5px;"></i> {{ e.bsc_group_label }}
+                                </span>
+                                {% elif e.is_bsc %}
+                                <span class="badge" style="background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; font-weight: 500; font-size: 10.5px;" title="No Subject Group selected">
+                                    No Group
+                                </span>
+                                {% endif %}
+                            </div>
                         </td>
                         <td>
                             {% if e.status == 'Approved' %}

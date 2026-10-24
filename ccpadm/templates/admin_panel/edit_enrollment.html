@@ -513,8 +513,14 @@
                         <label>B.Sc. Subject Group</label>
                         <select name="bsc_subject_group">
                             <option value="">-- Choose Group --</option>
-                            {% for grp in bsc_subject_groups %}
-                            <option value="{{ grp.name }}" {% if current_bsc_group == grp.name %}selected{% endif %}>{{ grp.name }}</option>
+                            {% for section in bsc_subject_groups %}
+                                <optgroup label="{{ section.heading }}">
+                                    {% for grp in section.groups %}
+                                    <option value="{{ grp.key }}" {% if current_bsc_group == grp.key or current_bsc_group == grp.label or current_bsc_group == grp.full_name %}selected{% endif %}>
+                                        {{ grp.full_name|default:grp.label }} ({{ grp.department_label }})
+                                    </option>
+                                    {% endfor %}
+                                </optgroup>
                             {% endfor %}
                         </select>
                     </div>

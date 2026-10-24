@@ -1344,11 +1344,12 @@ def manage_enrollments(request):
         program_filter = ''
     status_filter = request.GET.get('status', 'ALL').strip() or 'ALL'
     utr_filter = request.GET.get('utr_verify', 'ALL').strip().upper() or 'ALL'
+    group_filter = _normalize_group_filter(request.GET.get('group', 'ALL'), program_filter)
 
     enrollments = (
         StudentEnrollment.objects.all()
-        .select_related('student')
-        .defer('photo_base64', 'signature_base64', 'payment_receipt_base64', 'education_json', 'selected_courses_json')
+        .select_related('student', 'admission')
+        .defer('photo_base64', 'signature_base64', 'payment_receipt_base64', 'education_json')
     )
 
     if search:
@@ -1368,6 +1369,28 @@ def manage_enrollments(request):
         enrollments = enrollments.filter(status=status_filter)
 
     enrollment_list = list(enrollments)
+
+    # Attach B.Sc. Subject Group to each enrollment
+    adm_map = {}
+    missing_reg_nos = [e.reg_no for e in enrollment_list if not getattr(e, 'admission', None) and e.reg_no]
+    if missing_reg_nos:
+        for adm in StudentAdmission.objects.filter(reg_no__in=missing_reg_nos).order_by('-submitted_date', '-created_date'):
+            if adm.reg_no not in adm_map:
+                adm_map[adm.reg_no] = adm
+
+    for e in enrollment_list:
+        adm = getattr(e, 'admission', None) or adm_map.get(e.reg_no)
+        g_key, g_label = _enrollment_bsc_group(e, adm=adm)
+        e.bsc_group_key = g_key
+        e.bsc_group_label = g_label
+        e.is_bsc = is_bsc_program(e.program_type or '')
+
+    if group_filter != 'ALL':
+        if group_filter == 'NONE':
+            enrollment_list = [e for e in enrollment_list if not e.bsc_group_key]
+        else:
+            enrollment_list = [e for e in enrollment_list if e.bsc_group_key == group_filter]
+
     utr_stats = attach_utr_verification(enrollment_list)
 
     if utr_filter == 'VERIFIED':
@@ -1383,12 +1406,17 @@ def manage_enrollments(request):
     draft_count = StudentEnrollment.objects.filter(status='Draft').count()
 
     program_types = get_program_names(active_only=False)
+    subject_group_choices = _subject_group_filter_choices(program_filter)
+    show_group_filter = bool(subject_group_choices)
 
     return render(request, 'admin_panel/enrollments.html', {
         'enrollments': enrollment_list,
         'search': search,
         'program_filter': program_filter,
         'status_filter': status_filter,
+        'group_filter': group_filter,
+        'subject_group_choices': subject_group_choices,
+        'show_group_filter': show_group_filter,
         'utr_filter': utr_filter,
         'utr_verified_count': utr_stats['verified_count'],
         'utr_unverified_count': utr_stats['unverified_count'],
@@ -1621,6 +1649,20 @@ def admin_edit_enrollment(request, pk):
                 enrollment.selected_courses_json = json.dumps(course_list)
         elif raw_courses_json:
             enrollment.selected_courses_json = raw_courses_json
+        elif bsc_subject_group:
+            try:
+                data = json.loads(enrollment.selected_courses_json or '{}')
+                if isinstance(data, dict):
+                    data['bsc_subject_group'] = bsc_subject_group
+                    enrollment.selected_courses_json = json.dumps(data)
+                elif isinstance(data, list):
+                    enrollment.selected_courses_json = json.dumps({
+                        'bsc_subject_group': bsc_subject_group,
+                        'courses': data,
+                        'subjects': data,
+                    })
+            except Exception:
+                enrollment.selected_courses_json = json.dumps({'bsc_subject_group': bsc_subject_group})
 
         # 7. Status, Remarks & Admin Action
         new_status = request.POST.get('status', 'Submitted').strip()
@@ -1693,6 +1735,9 @@ def admin_edit_enrollment(request, pk):
                         selected_course_codes.append((c.get('code') or c.get('course_code')).strip().upper())
         except Exception:
             pass
+
+    if not current_bsc_group:
+        current_bsc_group, _ = _enrollment_bsc_group(enrollment, admission)
 
     # Annotate courses for convenient template checking
     annotated_courses = []
@@ -1868,6 +1913,36 @@ def _format_enrollment_subjects(enrollment):
     return ''
 
 
+def _enrollment_bsc_group(enrollment, adm=None):
+    """
+    Extract (group_key, group_label) for a StudentEnrollment record.
+    Checks enrollment.selected_courses_json first, then attached or fetched admission.
+    """
+    program = enrollment.program_type or ''
+    group_key = ''
+    if enrollment.selected_courses_json:
+        _, group_key = parse_selected_subjects_payload(enrollment.selected_courses_json)
+        if not group_key:
+            try:
+                data = json.loads(enrollment.selected_courses_json)
+                if isinstance(data, dict):
+                    group_key = (data.get('bsc_subject_group') or data.get('BScSubjectGroup') or '').strip()
+            except Exception:
+                pass
+
+    if not group_key:
+        if adm is None:
+            adm = getattr(enrollment, 'admission', None)
+        if not adm and enrollment.reg_no:
+            from admissions.models import StudentAdmission
+            adm = StudentAdmission.objects.filter(reg_no=enrollment.reg_no).order_by('-submitted_date', '-created_date').first()
+        if adm and adm.selected_subjects_json:
+            _, group_key = parse_selected_subjects_payload(adm.selected_subjects_json)
+
+    group_label = format_bsc_group_display_name(group_key, program) if group_key else ''
+    return group_key, group_label
+
+
 def build_enrollment_export_row(enrollment):
     adm = enrollment.admission
     if not adm and enrollment.reg_no:
@@ -1891,6 +1966,7 @@ def build_enrollment_export_row(enrollment):
     address = _format_enrollment_address(enrollment)
     mobile = enrollment.mobile or (enrollment.student.mobile if enrollment.student else '')
     class_name = enrollment.program_type or ''
+    _, group_label = _enrollment_bsc_group(enrollment, adm=adm)
     subject_codes = _format_enrollment_subject_codes(enrollment)
     subjects = _format_enrollment_subjects(enrollment)
     utr_no = (enrollment.transaction_id or getattr(adm, 'transaction_id', '') or '').strip()
@@ -1927,6 +2003,7 @@ def build_enrollment_export_row(enrollment):
         email_val,
         aadhaar_val,
         class_name,
+        group_label,
         subject_codes,
         subjects,
         utr_no,
@@ -1949,6 +2026,8 @@ def export_enrollments_excel(request):
     if program_filter == 'ALL':
         program_filter = ''
     status_filter = request.GET.get('status', 'ALL').strip() or 'ALL'
+    utr_filter = request.GET.get('utr_verify', 'ALL').strip().upper() or 'ALL'
+    group_filter = _normalize_group_filter(request.GET.get('group', 'ALL'), program_filter)
 
     enrollments = (
         StudentEnrollment.objects.all()
@@ -1973,6 +2052,27 @@ def export_enrollments_excel(request):
         enrollments = enrollments.filter(status=status_filter)
 
     enrollments = enrollments.order_by('program_type', 'enrollment_no', 'full_name')
+    enrollment_list = list(enrollments)
+
+    if group_filter != 'ALL':
+        filtered = []
+        for enr in enrollment_list:
+            g_key, _ = _enrollment_bsc_group(enr)
+            if group_filter == 'NONE' and not g_key:
+                filtered.append(enr)
+            elif g_key == group_filter:
+                filtered.append(enr)
+        enrollment_list = filtered
+
+    if utr_filter in ('VERIFIED', 'UNVERIFIED', 'DUPLICATE'):
+        from admissions.utr_verification import attach_utr_verification
+        attach_utr_verification(enrollment_list)
+        if utr_filter == 'VERIFIED':
+            enrollment_list = [e for e in enrollment_list if e.utr_verified]
+        elif utr_filter == 'UNVERIFIED':
+            enrollment_list = [e for e in enrollment_list if e.transaction_id and not e.utr_verified]
+        elif utr_filter == 'DUPLICATE':
+            enrollment_list = [e for e in enrollment_list if e.utr_is_duplicate]
 
     wb = openpyxl.Workbook()
     ws = wb.active
@@ -1994,6 +2094,7 @@ def export_enrollments_excel(request):
         'E-mail',
         'Aadhar No',
         'CLASS NAME',
+        'Subject Group',
         'SUBJECT CODE',
         'SUBJECTS',
         'UTR No',
@@ -2021,15 +2122,15 @@ def export_enrollments_excel(request):
         cell.border = thin_border
 
     row_num = 2
-    for enr in enrollments:
+    for enr in enrollment_list:
         row_data = build_enrollment_export_row(enr)
         ws.row_dimensions[row_num].height = 20
         for col_idx, val in enumerate(row_data, start=1):
             cell = ws.cell(row=row_num, column=col_idx, value=val)
             cell.font = Font(name='Calibri', size=10)
             cell.border = thin_border
-            # Col 8=Gender, Col 9=DOB, Col 11=Mobile, Col 13=Aadhar No, Col 17=UTR No, Col 18=Enrollment Status, Col 19=Submitted Date
-            if col_idx in (8, 9, 11, 13, 17, 18, 19):
+            # Col 8=Gender, Col 9=DOB, Col 11=Mobile, Col 13=Aadhar No, Col 15=Subject Group, Col 18=UTR No, Col 19=Enrollment Status, Col 20=Submitted Date
+            if col_idx in (8, 9, 11, 13, 15, 18, 19, 20):
                 cell.alignment = center_align
             else:
                 cell.alignment = left_align
@@ -2040,15 +2141,17 @@ def export_enrollments_excel(request):
         max_len = max(len(str(cell.value or '')) for cell in col)
         ws.column_dimensions[col_letter].width = max(max_len + 3, 12)
 
-    # Cap wide columns: Address=J(10), Subject Codes=O(15), Subjects=P(16)
+    # Cap wide columns: Address=J(10), Subject Group=O(15), Subject Codes=P(16), Subjects=Q(17), UTR No=R(18)
     if ws.column_dimensions.get('J'):
         ws.column_dimensions['J'].width = min(max(ws.column_dimensions['J'].width, 30), 50)
     if ws.column_dimensions.get('O'):
-        ws.column_dimensions['O'].width = min(max(ws.column_dimensions['O'].width, 24), 45)
+        ws.column_dimensions['O'].width = min(max(ws.column_dimensions['O'].width, 18), 35)
     if ws.column_dimensions.get('P'):
-        ws.column_dimensions['P'].width = min(max(ws.column_dimensions['P'].width, 35), 65)
+        ws.column_dimensions['P'].width = min(max(ws.column_dimensions['P'].width, 24), 45)
     if ws.column_dimensions.get('Q'):
-        ws.column_dimensions['Q'].width = min(max(ws.column_dimensions['Q'].width, 18), 32)
+        ws.column_dimensions['Q'].width = min(max(ws.column_dimensions['Q'].width, 35), 65)
+    if ws.column_dimensions.get('R'):
+        ws.column_dimensions['R'].width = min(max(ws.column_dimensions['R'].width, 18), 32)
 
     buffer = BytesIO()
     wb.save(buffer)
@@ -2058,6 +2161,8 @@ def export_enrollments_excel(request):
     if program_filter:
         safe_prog = re.sub(r'[^\w\-]+', '_', program_filter).strip('_')
         filename_parts.append(safe_prog)
+    if group_filter != 'ALL':
+        filename_parts.append(group_filter)
     if status_filter != 'ALL':
         filename_parts.append(status_filter.lower())
     filename_parts.append(timezone.now().strftime('%Y%m%d'))

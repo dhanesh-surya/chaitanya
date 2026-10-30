@@ -14,10 +14,10 @@
         </div>
 
         <div class="stat-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: var(--space-lg);">
-            <a href="{% url 'manage_enrollments' %}" class="stat-card stat-card--link{% if status_filter == 'ALL' and not program_filter and not search and group_filter == 'ALL' %} is-active{% endif %}">
+            <a href="{% url 'manage_enrollments' %}?show_all=1" class="stat-card stat-card--link{% if show_all and status_filter == 'ALL' and not program_filter and not search and group_filter == 'ALL' %} is-active{% endif %}">
                 <h3>{{ total_count }}</h3>
                 <p>Total Enrollments</p>
-                <span class="stat-card__hint">View all</span>
+                <span class="stat-card__hint">Click to load all</span>
             </a>
             <a href="{% url 'manage_enrollments' %}?status=Submitted{% if program_filter %}&program={{ program_filter|urlencode }}{% endif %}{% if group_filter and group_filter != 'ALL' %}&group={{ group_filter|urlencode }}{% endif %}" class="stat-card stat-card--link{% if status_filter == 'Submitted' %} is-active{% endif %}" style="border-left: 4px solid #0284c7;">
                 <h3 style="color: #0284c7;">{{ submitted_count }}</h3>
@@ -176,6 +176,7 @@
             </form>
         </div>
 
+        {% if has_filter %}
         <!-- BULK ACTION BAR -->
         <form method="post" action="{% url 'bulk_update_enrollment_status' %}" id="bulkEnrollmentActionForm" class="bulk-action-bar" hidden style="background: #f8fafc; border: 1.5px solid #0284c7; padding: 10px 16px; border-radius: 6px; margin-bottom: 12px; display: flex; align-items: center; gap: 12px;">
             {% csrf_token %}
@@ -419,13 +420,14 @@
                     <tr class="empty-row">
                         <td colspan="8" style="text-align: center; padding: 3rem 1rem; color: var(--color-text-muted);">
                             <i class="fas fa-id-card" style="font-size: 2.2rem; margin-bottom: 0.75rem; display: block; opacity: 0.4;"></i>
-                            <strong style="font-size: 1.05rem;">No Enrollment Applications Found</strong>
+                            <strong style="font-size: 1.05rem;">No Matching Applications Found</strong>
                             <div style="margin-top: 0.35rem;">
-                                {% if search or program_filter or status_filter != 'ALL' %}
-                                Try clearing the search or filters to see all enrollments.
-                                {% else %}
-                                No students have enrolled yet.
-                                {% endif %}
+                                No enrollment applications match your selected filters.
+                            </div>
+                            <div style="margin-top: 1rem;">
+                                <a href="{% url 'manage_enrollments' %}" class="btn btn-sm btn-ghost" style="border: 1px solid #cbd5e1;">
+                                    <i class="fas fa-times"></i> Clear Filters
+                                </a>
                             </div>
                         </td>
                     </tr>
@@ -433,6 +435,33 @@
                 </tbody>
             </table>
         </div>
+        {% else %}
+        <div style="background: #ffffff; border: 1.5px dashed #cbd5e1; border-radius: 10px; padding: 3rem 1.5rem; text-align: center; margin-top: 1rem;">
+            <div style="width: 56px; height: 56px; line-height: 56px; border-radius: 50%; background: #eff6ff; color: #0284c7; margin: 0 auto 1.25rem; font-size: 24px;">
+                <i class="fas fa-filter"></i>
+            </div>
+            <h3 style="font-size: 1.25rem; color: #0f172a; margin-bottom: 0.5rem; font-weight: 700;">Apply a Filter to View Enrollments</h3>
+            <p style="color: #64748b; max-width: 580px; margin: 0 auto 1.5rem; font-size: 14px; line-height: 1.5;">
+                To optimize system performance and prevent server timeouts, enrollment applications are loaded on demand. Select a filter from the controls above or choose one of the quick options below:
+            </p>
+            <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                <a href="{% url 'manage_enrollments' %}?status=Submitted" class="btn btn-sm btn-primary" style="background: #0284c7; border-color: #0284c7; font-weight: 600; padding: 8px 16px;">
+                    <i class="fas fa-clock"></i> View Pending Approval ({{ submitted_count }})
+                </a>
+                <a href="{% url 'manage_enrollments' %}?status=Approved" class="btn btn-sm btn-success" style="background: #16a34a; border-color: #15803d; color: #fff; font-weight: 600; padding: 8px 16px;">
+                    <i class="fas fa-check-circle"></i> View Approved ({{ approved_count }})
+                </a>
+                {% if draft_count > 0 %}
+                <a href="{% url 'manage_enrollments' %}?status=Draft" class="btn btn-sm btn-ghost" style="border: 1px solid #cbd5e1; font-weight: 600; padding: 8px 16px;">
+                    <i class="fas fa-edit text-warning"></i> View Drafts ({{ draft_count }})
+                </a>
+                {% endif %}
+                <a href="{% url 'manage_enrollments' %}?show_all=1" class="btn btn-sm btn-ghost" style="border: 1px solid #cbd5e1; font-weight: 600; padding: 8px 16px; color: #475569;" title="Load all enrollment records">
+                    <i class="fas fa-list"></i> Load All Enrollments ({{ total_count }})
+                </a>
+            </div>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

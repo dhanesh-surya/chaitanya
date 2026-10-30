@@ -1345,60 +1345,89 @@ def manage_enrollments(request):
     status_filter = request.GET.get('status', 'ALL').strip() or 'ALL'
     utr_filter = request.GET.get('utr_verify', 'ALL').strip().upper() or 'ALL'
     group_filter = _normalize_group_filter(request.GET.get('group', 'ALL'), program_filter)
+    show_all = request.GET.get('show_all', '').strip() in ('1', 'true', 'yes')
 
-    enrollments = (
-        StudentEnrollment.objects.all()
-        .select_related('student', 'admission')
-        .defer('photo_base64', 'signature_base64', 'payment_receipt_base64', 'education_json')
+    # Do not load all enrollment records by default; require a filter or explicit show_all
+    has_filter = bool(
+        search
+        or program_filter
+        or (status_filter and status_filter != 'ALL')
+        or (utr_filter and utr_filter != 'ALL')
+        or (group_filter and group_filter != 'ALL')
+        or show_all
     )
 
-    if search:
-        enrollments = enrollments.filter(
-            Q(full_name__icontains=search)
-            | Q(reg_no__icontains=search)
-            | Q(enrollment_no__icontains=search)
-            | Q(mobile__icontains=search)
-            | Q(email__icontains=search)
-            | Q(transaction_id__icontains=search)
+    if has_filter:
+        enrollments = (
+            StudentEnrollment.objects.all()
+            .select_related('student', 'admission')
+            .defer('photo_base64', 'signature_base64', 'payment_receipt_base64', 'education_json')
         )
 
-    if program_filter:
-        enrollments = enrollments.filter(program_type=program_filter)
+        if search:
+            enrollments = enrollments.filter(
+                Q(full_name__icontains=search)
+                | Q(reg_no__icontains=search)
+                | Q(enrollment_no__icontains=search)
+                | Q(mobile__icontains=search)
+                | Q(email__icontains=search)
+                | Q(transaction_id__icontains=search)
+            )
 
-    if status_filter != 'ALL':
-        enrollments = enrollments.filter(status=status_filter)
+        if program_filter:
+            enrollments = enrollments.filter(program_type=program_filter)
 
-    enrollment_list = list(enrollments)
+        if status_filter != 'ALL':
+            enrollments = enrollments.filter(status=status_filter)
 
-    # Attach B.Sc. Subject Group to each enrollment
-    adm_map = {}
-    missing_reg_nos = [e.reg_no for e in enrollment_list if not getattr(e, 'admission', None) and e.reg_no]
-    if missing_reg_nos:
-        for adm in StudentAdmission.objects.filter(reg_no__in=missing_reg_nos).order_by('-submitted_date', '-created_date'):
-            if adm.reg_no not in adm_map:
-                adm_map[adm.reg_no] = adm
+        enrollment_list = list(enrollments)
 
-    for e in enrollment_list:
-        adm = getattr(e, 'admission', None) or adm_map.get(e.reg_no)
-        g_key, g_label = _enrollment_bsc_group(e, adm=adm)
-        e.bsc_group_key = g_key
-        e.bsc_group_label = g_label
-        e.is_bsc = is_bsc_program(e.program_type or '')
+        # Attach B.Sc. Subject Group to each enrollment
+        adm_map = {}
+        missing_reg_nos = [e.reg_no for e in enrollment_list if not getattr(e, 'admission', None) and e.reg_no]
+        if missing_reg_nos:
+            for adm in StudentAdmission.objects.filter(reg_no__in=missing_reg_nos).order_by('-submitted_date', '-created_date'):
+                if adm.reg_no not in adm_map:
+                    adm_map[adm.reg_no] = adm
 
-    if group_filter != 'ALL':
-        if group_filter == 'NONE':
-            enrollment_list = [e for e in enrollment_list if not e.bsc_group_key]
-        else:
-            enrollment_list = [e for e in enrollment_list if e.bsc_group_key == group_filter]
+        for e in enrollment_list:
+            adm = getattr(e, 'admission', None) or adm_map.get(e.reg_no)
+            g_key, g_label = _enrollment_bsc_group(e, adm=adm)
+            e.bsc_group_key = g_key
+            e.bsc_group_label = g_label
+            e.is_bsc = is_bsc_program(e.program_type or '')
 
-    utr_stats = attach_utr_verification(enrollment_list)
+        if group_filter != 'ALL':
+            if group_filter == 'NONE':
+                enrollment_list = [e for e in enrollment_list if not e.bsc_group_key]
+            else:
+                enrollment_list = [e for e in enrollment_list if e.bsc_group_key == group_filter]
 
-    if utr_filter == 'VERIFIED':
-        enrollment_list = [e for e in enrollment_list if e.utr_verified]
-    elif utr_filter == 'UNVERIFIED':
-        enrollment_list = [e for e in enrollment_list if e.transaction_id and not e.utr_verified]
-    elif utr_filter == 'DUPLICATE':
-        enrollment_list = [e for e in enrollment_list if e.utr_is_duplicate]
+        utr_stats = attach_utr_verification(enrollment_list)
+
+        if utr_filter == 'VERIFIED':
+            enrollment_list = [e for e in enrollment_list if e.utr_verified]
+        elif utr_filter == 'UNVERIFIED':
+            enrollment_list = [e for e in enrollment_list if e.transaction_id and not e.utr_verified]
+        elif utr_filter == 'DUPLICATE':
+            enrollment_list = [e for e in enrollment_list if e.utr_is_duplicate]
+
+        # Counts for currently rendered table view
+        view_approved_count = sum(1 for e in enrollment_list if e.status == 'Approved')
+        view_submitted_count = sum(1 for e in enrollment_list if e.status == 'Submitted' or (e.is_submitted and e.status != 'Approved'))
+        view_draft_count = sum(1 for e in enrollment_list if e.status == 'Draft')
+    else:
+        from admissions.models import BankStatementUTR
+        enrollment_list = []
+        utr_stats = {
+            'verified_count': 0,
+            'unverified_count': 0,
+            'duplicate_count': 0,
+            'bank_utr_total': BankStatementUTR.objects.count(),
+        }
+        view_approved_count = 0
+        view_submitted_count = 0
+        view_draft_count = 0
 
     # Scope for stat cards & summary info (scoped to program and group if selected)
     scope_enrollments = StudentEnrollment.objects.all()
@@ -1412,11 +1441,11 @@ def manage_enrollments(request):
         stud_qs = stud_qs.filter(program_type=program_filter)
         adm_qs = adm_qs.filter(program_type=program_filter)
 
-    stud_reg_nos = set(stud_qs.values_list('registration_no', flat=True))
-    adm_reg_nos = set(adm_qs.values_list('reg_no', flat=True))
-    all_eligible_reg_nos = stud_reg_nos | adm_reg_nos
-
     if group_filter != 'ALL' and program_filter:
+        stud_reg_nos = set(stud_qs.values_list('registration_no', flat=True))
+        adm_reg_nos = set(adm_qs.values_list('reg_no', flat=True))
+        all_eligible_reg_nos = stud_reg_nos | adm_reg_nos
+
         filtered_regs = set()
         for adm in StudentAdmission.objects.filter(reg_no__in=all_eligible_reg_nos).only('reg_no', 'selected_subjects_json'):
             _, k = parse_selected_subjects_payload(adm.selected_subjects_json)
@@ -1428,29 +1457,43 @@ def manage_enrollments(request):
         submitted_count = sum(1 for e in scope_list if e.status == 'Submitted')
         approved_count = sum(1 for e in scope_list if e.status == 'Approved')
         draft_count = sum(1 for e in scope_list if e.status == 'Draft')
-    else:
+        program_total_students = len(all_eligible_reg_nos)
+        from admissions.models import NepUgAdmissionEnrollment
+        enrolled_reg_nos = set(
+            StudentEnrollment.objects.filter(reg_no__in=all_eligible_reg_nos).values_list('reg_no', flat=True)
+        )
+        nep_reg_nos = set(
+            NepUgAdmissionEnrollment.objects.filter(reg_no__in=all_eligible_reg_nos).values_list('reg_no', flat=True)
+        )
+        program_enrolled_count = len(enrolled_reg_nos | nep_reg_nos)
+        program_remaining_count = max(0, program_total_students - program_enrolled_count)
+    elif program_filter:
         total_count = scope_enrollments.count()
         submitted_count = scope_enrollments.filter(status='Submitted').count()
         approved_count = scope_enrollments.filter(status='Approved').count()
         draft_count = scope_enrollments.filter(status='Draft').count()
-
-    program_total_students = len(all_eligible_reg_nos)
-
-    # Count how many of these eligible students have an enrollment or NEP enrollment
-    enrolled_reg_nos = set(
-        StudentEnrollment.objects.filter(reg_no__in=all_eligible_reg_nos).values_list('reg_no', flat=True)
-    )
-    from admissions.models import NepUgAdmissionEnrollment
-    nep_reg_nos = set(
-        NepUgAdmissionEnrollment.objects.filter(reg_no__in=all_eligible_reg_nos).values_list('reg_no', flat=True)
-    )
-    program_enrolled_count = len(enrolled_reg_nos | nep_reg_nos)
-    program_remaining_count = max(0, program_total_students - program_enrolled_count)
-
-    # Counts for currently rendered table view (respecting status_filter, search, utr_filter)
-    view_approved_count = sum(1 for e in enrollment_list if e.status == 'Approved')
-    view_submitted_count = sum(1 for e in enrollment_list if e.status == 'Submitted' or (e.is_submitted and e.status != 'Approved'))
-    view_draft_count = sum(1 for e in enrollment_list if e.status == 'Draft')
+        stud_reg_nos = set(stud_qs.values_list('registration_no', flat=True))
+        adm_reg_nos = set(adm_qs.values_list('reg_no', flat=True))
+        all_eligible_reg_nos = stud_reg_nos | adm_reg_nos
+        program_total_students = len(all_eligible_reg_nos)
+        from admissions.models import NepUgAdmissionEnrollment
+        enrolled_reg_nos = set(
+            StudentEnrollment.objects.filter(reg_no__in=all_eligible_reg_nos).values_list('reg_no', flat=True)
+        )
+        nep_reg_nos = set(
+            NepUgAdmissionEnrollment.objects.filter(reg_no__in=all_eligible_reg_nos).values_list('reg_no', flat=True)
+        )
+        program_enrolled_count = len(enrolled_reg_nos | nep_reg_nos)
+        program_remaining_count = max(0, program_total_students - program_enrolled_count)
+    else:
+        # Global counts - ultra fast queries without loading large sets into Python memory
+        total_count = StudentEnrollment.objects.count()
+        submitted_count = StudentEnrollment.objects.filter(status='Submitted').count()
+        approved_count = StudentEnrollment.objects.filter(status='Approved').count()
+        draft_count = StudentEnrollment.objects.filter(status='Draft').count()
+        program_total_students = StudentAdmission.objects.filter(is_submitted=True).count() or Student.objects.count()
+        program_enrolled_count = total_count
+        program_remaining_count = max(0, program_total_students - program_enrolled_count)
 
     program_types = get_program_names(active_only=False)
     subject_group_choices = _subject_group_filter_choices(program_filter)
@@ -1458,6 +1501,8 @@ def manage_enrollments(request):
 
     return render(request, 'admin_panel/enrollments.html', {
         'enrollments': enrollment_list,
+        'has_filter': has_filter,
+        'show_all': show_all,
         'search': search,
         'program_filter': program_filter,
         'status_filter': status_filter,

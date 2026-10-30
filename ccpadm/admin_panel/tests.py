@@ -128,14 +128,23 @@ class ManageStudentsProgramFilterTestCase(TestCase):
         )
 
         self._login_admin()
-        # View all
+        # Default view without filters should not load enrollment list (prevents 502/timeouts)
         resp = self.client.get(reverse('manage_enrollments'))
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(len(resp.context['enrollments']), 2)
+        self.assertFalse(resp.context['has_filter'])
+        self.assertEqual(len(resp.context['enrollments']), 0)
         content = resp.content.decode('utf-8')
         self.assertIn('Manage Student Enrollments', content)
-        self.assertIn('Amit Verma', content)
-        self.assertIn('Priya Singh', content)
+        self.assertIn('Apply a Filter to View Enrollments', content)
+
+        # View all with show_all=1
+        resp_all = self.client.get(reverse('manage_enrollments') + '?show_all=1')
+        self.assertEqual(resp_all.status_code, 200)
+        self.assertTrue(resp_all.context['has_filter'])
+        self.assertEqual(len(resp_all.context['enrollments']), 2)
+        content_all = resp_all.content.decode('utf-8')
+        self.assertIn('Amit Verma', content_all)
+        self.assertIn('Priya Singh', content_all)
 
         # Filter by program
         resp_prog = self.client.get(reverse('manage_enrollments') + '?program=B.Sc.+First+Semester')
@@ -374,10 +383,15 @@ class ExportEnrollmentsExcelTestCase(TestCase):
             'DOB (MM/DD/YYYY)',
             'Address',
             'Mobile',
+            'E-mail',
+            'Aadhar No',
             'CLASS NAME',
+            'Subject Group',
             'SUBJECT CODE',
             'SUBJECTS',
             'UTR No',
+            'Enrollment Status',
+            'Submitted Date',
         ]
         actual_headers = [ws.cell(row=1, column=col).value for col in range(1, len(expected_headers) + 1)]
         self.assertEqual(actual_headers, expected_headers)
@@ -398,23 +412,23 @@ class ExportEnrollmentsExcelTestCase(TestCase):
         self.assertEqual(rohan_row[8], '04/15/2003')  # DOB: MM/DD/YYYY
         self.assertIn('Pamgarh', rohan_row[9])  # Address
         self.assertEqual(rohan_row[10], '9876543210')  # Mobile
-        self.assertEqual(rohan_row[11], 'B.A. First Semester')  # CLASS NAME
-        self.assertIn('HNSC-01', rohan_row[12])  # SUBJECT CODE
-        self.assertIn('HISC-01', rohan_row[12])
-        self.assertIn('Hindi Sahitya Ka Itihas', rohan_row[13])  # SUBJECTS
-        self.assertIn('Ancient Indian History', rohan_row[13])
-        self.assertEqual(rohan_row[14], 'UTR998877665544')  # UTR No
+        self.assertEqual(rohan_row[13], 'B.A. First Semester')  # CLASS NAME
+        self.assertIn('HNSC-01', rohan_row[15])  # SUBJECT CODE
+        self.assertIn('HISC-01', rohan_row[15])
+        self.assertIn('Hindi Sahitya Ka Itihas', rohan_row[16])  # SUBJECTS
+        self.assertIn('Ancient Indian History', rohan_row[16])
+        self.assertEqual(rohan_row[17], 'UTR998877665544')  # UTR No
 
         # Find row for Kavita Patel (Female)
         kavita_row = next(r for r in rows if r[2] == 'Kavita Patel')
         self.assertEqual(kavita_row[1], 'CCP26059002')  # Univ_EnrolNo
         self.assertEqual(kavita_row[7], 'F')  # Gender: F for Female
         self.assertEqual(kavita_row[8], '10/22/2004')  # DOB: MM/DD/YYYY
-        self.assertEqual(kavita_row[11], 'B.Sc. First Semester')  # CLASS NAME
-        self.assertIn('CHSC-01T', kavita_row[12])  # SUBJECT CODE
-        self.assertIn('BOSC-01T', kavita_row[12])
-        self.assertIn('Fundamental Chemistry-I', kavita_row[13])  # SUBJECTS
-        self.assertEqual(kavita_row[14], 'UTR123456789012')  # UTR No
+        self.assertEqual(kavita_row[13], 'B.Sc. First Semester')  # CLASS NAME
+        self.assertIn('CHSC-01T', kavita_row[15])  # SUBJECT CODE
+        self.assertIn('BOSC-01T', kavita_row[15])
+        self.assertIn('Fundamental Chemistry-I', kavita_row[16])  # SUBJECTS
+        self.assertEqual(kavita_row[17], 'UTR123456789012')  # UTR No
 
     def test_export_enrollments_excel_filtering(self):
         from io import BytesIO
@@ -429,7 +443,7 @@ class ExportEnrollmentsExcelTestCase(TestCase):
         ws = wb.active
         rows = list(ws.iter_rows(min_row=2, values_only=True))
         # Should only contain B.A. First Semester
-        self.assertTrue(all(r[11] == 'B.A. First Semester' for r in rows))
+        self.assertTrue(all(r[13] == 'B.A. First Semester' for r in rows))
         self.assertTrue(any(r[2] == 'Rohan Sahu' for r in rows))
         self.assertFalse(any(r[2] == 'Kavita Patel' for r in rows))
 
@@ -452,11 +466,11 @@ class ExportEnrollmentsExcelTestCase(TestCase):
         rows = list(ws.iter_rows(min_row=2, values_only=True))
         self.assertEqual(len(rows), 1)
         self.assertEqual(rows[0][2], 'Rohan Sahu')
-        self.assertEqual(rows[0][14], 'UTR998877665544')
+        self.assertEqual(rows[0][17], 'UTR998877665544')
 
     def test_manage_enrollments_has_edit_button(self):
         self._login_admin()
-        resp = self.client.get(reverse('manage_enrollments'))
+        resp = self.client.get(reverse('manage_enrollments') + '?show_all=1')
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, 'View &amp; Edit Form')
         self.assertContains(resp, reverse('admin_edit_enrollment', args=[self.enr_m.pk]))

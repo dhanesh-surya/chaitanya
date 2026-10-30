@@ -298,12 +298,14 @@ def _attach_admissions(students):
     if reg_nos:
         for adm in (
             StudentAdmission.objects.filter(reg_no__in=reg_nos)
+            .defer('photo_base64', 'signature_base64', 'education_json')
             .order_by('-submitted_date', '-created_date')
         ):
             if adm.reg_no not in admission_map:
                 admission_map[adm.reg_no] = adm
         for enr in (
             StudentEnrollment.objects.filter(reg_no__in=reg_nos)
+            .defer('photo_base64', 'signature_base64', 'payment_receipt_base64', 'education_json', 'selected_courses_json')
             .order_by('-submitted_date', '-created_at')
         ):
             if enr.reg_no not in enrollment_map:
@@ -311,6 +313,7 @@ def _attach_admissions(students):
         from admissions.models import NepUgAdmissionEnrollment
         for nep in (
             NepUgAdmissionEnrollment.objects.filter(reg_no__in=reg_nos)
+            .defer('photo_base64', 'signature_base64', 'payment_receipt_base64', 'education_json', 'selected_courses_json')
             .order_by('-submitted_date', '-created_at')
         ):
             if nep.reg_no not in nep_map:
@@ -360,7 +363,9 @@ def _program_group_label(program_type):
 def _build_verified_students_by_program():
     """Group verified students by program (class) for admin dashboard."""
     verified = list(
-        Student.objects.filter(is_verified=True).order_by('program_type', 'full_name', 'registration_no')
+        Student.objects.filter(is_verified=True)
+        .only('id', 'registration_no', 'full_name', 'email', 'mobile', 'course_name', 'program_type', 'created_date')
+        .order_by('program_type', 'full_name', 'registration_no')
     )
     _attach_admissions(verified)
 
@@ -471,27 +476,58 @@ def admin_logout(request):
 
 @admin_login_required
 def admin_dashboard(request):
+    from django.db.models import Count, Q
     from admissions.models import NepUgAdmissionEnrollment, StudentEnrollment
 
     show_verified = request.GET.get('show_verified') == '1'
-    verified_students = Student.objects.filter(is_verified=True).count()
+
+    adm_counts = StudentAdmission.objects.aggregate(
+        total=Count('id'),
+        pending=Count('id', filter=Q(status='Pending')),
+        approved=Count('id', filter=Q(status='Approved')),
+        rejected=Count('id', filter=Q(status='Rejected')),
+        submitted=Count('id', filter=Q(status='Submitted')),
+    )
+    stud_counts = Student.objects.aggregate(
+        total=Count('id'),
+        verified=Count('id', filter=Q(is_verified=True)),
+    )
+    enr_counts = StudentEnrollment.objects.aggregate(
+        total=Count('id'),
+        submitted=Count('id', filter=Q(is_submitted=True)),
+        approved=Count('id', filter=Q(status='Approved')),
+    )
+    nep_counts = NepUgAdmissionEnrollment.objects.aggregate(
+        total=Count('id'),
+        submitted=Count('id', filter=Q(is_submitted=True)),
+        approved=Count('id', filter=Q(status='Approved')),
+    )
+
     stats = {
-        'total_admissions': StudentAdmission.objects.count(),
-        'pending': StudentAdmission.objects.filter(status='Pending').count(),
-        'approved': StudentAdmission.objects.filter(status='Approved').count(),
-        'rejected': StudentAdmission.objects.filter(status='Rejected').count(),
-        'submitted': StudentAdmission.objects.filter(status='Submitted').count(),
-        'students': Student.objects.count(),
-        'verified_students': verified_students,
-        'total_enrollments': StudentEnrollment.objects.count(),
-        'submitted_enrollments': StudentEnrollment.objects.filter(is_submitted=True).count(),
-        'approved_enrollments': StudentEnrollment.objects.filter(status='Approved').count(),
-        'total_nepug': NepUgAdmissionEnrollment.objects.count(),
-        'submitted_nepug': NepUgAdmissionEnrollment.objects.filter(is_submitted=True).count(),
-        'approved_nepug': NepUgAdmissionEnrollment.objects.filter(status='Approved').count(),
+        'total_admissions': adm_counts['total'] or 0,
+        'pending': adm_counts['pending'] or 0,
+        'approved': adm_counts['approved'] or 0,
+        'rejected': adm_counts['rejected'] or 0,
+        'submitted': adm_counts['submitted'] or 0,
+        'students': stud_counts['total'] or 0,
+        'verified_students': stud_counts['verified'] or 0,
+        'total_enrollments': enr_counts['total'] or 0,
+        'submitted_enrollments': enr_counts['submitted'] or 0,
+        'approved_enrollments': enr_counts['approved'] or 0,
+        'total_nepug': nep_counts['total'] or 0,
+        'submitted_nepug': nep_counts['submitted'] or 0,
+        'approved_nepug': nep_counts['approved'] or 0,
     }
-    recent = StudentAdmission.objects.order_by('-submitted_date', '-created_date')[:20]
-    recent_enrollments = StudentEnrollment.objects.order_by('-submitted_date', '-created_at')[:20]
+    recent = list(
+        StudentAdmission.objects.only(
+            'id', 'application_no', 'full_name', 'reg_no', 'program_type', 'status', 'submitted_date', 'created_date'
+        ).order_by('-submitted_date', '-created_date')[:20]
+    )
+    recent_enrollments = list(
+        StudentEnrollment.objects.only(
+            'id', 'enrollment_no', 'full_name', 'reg_no', 'program_type', 'status', 'is_submitted', 'submitted_date', 'created_at'
+        ).order_by('-submitted_date', '-created_at')[:20]
+    )
     return render(request, 'admin_panel/dashboard.html', {
         'stats': stats,
         'recent': recent,

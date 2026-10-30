@@ -13,6 +13,8 @@ ENV/
 *.log
 local_settings.py
 media/
+*.sqlite3*
+
 
 
 # Environment / secrets

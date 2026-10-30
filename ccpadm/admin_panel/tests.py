@@ -723,6 +723,89 @@ class ExportEnrollmentsExcelTestCase(TestCase):
         self.assertIn('Ramesh Sahu', geo_content)
 
 
+class AdminDashboardPerformanceTestCase(TestCase):
+    def setUp(self):
+        self.admin = AdminUser.objects.create(
+            username='admin',
+            password='adminpassword',
+        )
+        self.student = Student.objects.create(
+            registration_no='REGDASH001',
+            full_name='Dashboard Test Student',
+            email='dash@example.com',
+            program_type='B.Sc. First Semester',
+            is_verified=True,
+        )
+        from admissions.models import StudentAdmission, StudentEnrollment, NepUgAdmissionEnrollment
+        self.admission = StudentAdmission.objects.create(
+            reg_no='REGDASH001',
+            application_no='APP-DASH-001',
+            full_name='Dashboard Test Student',
+            program_type='B.Sc. First Semester',
+            status='Submitted',
+            photo_base64='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+            signature_base64='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+        )
+        self.enrollment = StudentEnrollment.objects.create(
+            reg_no='REGDASH001',
+            enrollment_no='CCP26059998',
+            student=self.student,
+            full_name='Dashboard Test Student',
+            program_type='B.Sc. First Semester',
+            status='Submitted',
+            is_submitted=True,
+            photo_base64='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+            signature_base64='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+            payment_receipt_base64='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+        )
+        self.nep = NepUgAdmissionEnrollment.objects.create(
+            reg_no='REGDASH001',
+            application_no='NEP-DASH-001',
+            enrollment_no='CCP26059997',
+            student=self.student,
+            full_name='Dashboard Test Student',
+            program_type='B.Sc. Bio Group',
+            semester='II',
+            status='Submitted',
+            is_submitted=True,
+        )
+
+    def _login(self):
+        session = self.client.session
+        session['admin_user'] = 'admin'
+        session.save()
+
+    def test_dashboard_unauthenticated_redirects(self):
+        resp = self.client.get(reverse('admin_dashboard'))
+        self.assertEqual(resp.status_code, 302)
+        self.assertIn(reverse('admin_login'), resp.url)
+
+    def test_dashboard_loads_fast_and_accurate_stats(self):
+        self._login()
+        resp = self.client.get(reverse('admin_dashboard'))
+        self.assertEqual(resp.status_code, 200)
+        stats = resp.context['stats']
+        self.assertEqual(stats['total_admissions'], 1)
+        self.assertEqual(stats['submitted'], 1)
+        self.assertEqual(stats['total_enrollments'], 1)
+        self.assertEqual(stats['submitted_enrollments'], 1)
+        self.assertEqual(stats['total_nepug'], 1)
+        self.assertEqual(stats['submitted_nepug'], 1)
+        self.assertEqual(stats['students'], 1)
+        self.assertEqual(stats['verified_students'], 1)
+        self.assertEqual(len(resp.context['recent']), 1)
+        self.assertEqual(len(resp.context['recent_enrollments']), 1)
+
+    def test_dashboard_show_verified_renders_grouped_program(self):
+        self._login()
+        resp = self.client.get(reverse('admin_dashboard') + '?show_verified=1')
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(resp.context['show_verified'])
+        self.assertEqual(len(resp.context['verified_by_program']), 1)
+        self.assertEqual(resp.context['verified_by_program'][0]['count'], 1)
+        self.assertIn('REGDASH001', resp.content.decode('utf-8'))
+
+
 
 
 

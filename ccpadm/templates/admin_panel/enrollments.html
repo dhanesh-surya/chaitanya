@@ -160,16 +160,39 @@
                         <option value="DUPLICATE" {% if utr_filter == 'DUPLICATE' %}selected{% endif %}>⚠️ Duplicate UTRs</option>
                     </select>
                 </div>
-                <div class="filter-actions" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <div class="filter-field" style="flex: 0 1 140px;">
+                    <label for="enrollmentDateType" style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; color: var(--color-text-muted);">Date By</label>
+                    <select id="enrollmentDateType" name="date_type" class="portal-input" style="width: 100%;">
+                        <option value="approved" {% if date_type == 'approved' %}selected{% endif %}>Approval Date</option>
+                        <option value="submitted" {% if date_type == 'submitted' %}selected{% endif %}>Submitted Date</option>
+                    </select>
+                </div>
+                <div class="filter-field" style="flex: 0 1 150px;">
+                    <label for="enrollmentDateFrom" style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; color: var(--color-text-muted);">From Date</label>
+                    <input type="date" id="enrollmentDateFrom" name="date_from" class="portal-input" value="{{ date_from }}" style="width: 100%;">
+                </div>
+                <div class="filter-field" style="flex: 0 1 155px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                        <label for="enrollmentDateTo" style="font-size: 12px; font-weight: 600; margin: 0; color: var(--color-text-muted);">To Date</label>
+                        <button type="button" onclick="setEnrollmentDateToToday()" class="text-xs" style="background: none; border: none; color: #0284c7; cursor: pointer; padding: 0; font-weight: 600; text-decoration: underline;" title="Set To Date to current date">
+                            Current Date
+                        </button>
+                    </div>
+                    <input type="date" id="enrollmentDateTo" name="date_to" class="portal-input" value="{{ date_to }}" style="width: 100%;">
+                </div>
+                <div class="filter-actions" style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
                     <button type="submit" class="btn btn-primary btn-sm" style="background:#082B49; border-color:#082B49; padding: 7px 16px;">
                         <i class="fas fa-filter"></i> Filter
                     </button>
-                    {% if search or program_filter or status_filter != 'ALL' or utr_filter != 'ALL' or group_filter != 'ALL' %}
+                    <button type="button" onclick="setEnrollmentDateRangeToday()" class="btn btn-ghost btn-sm" style="padding: 7px 10px; font-size: 11.5px; border: 1px solid #cbd5e1;" title="Set Date Range to Today">
+                        <i class="fas fa-calendar-day"></i> Today
+                    </button>
+                    {% if search or program_filter or status_filter != 'ALL' or utr_filter != 'ALL' or group_filter != 'ALL' or date_from or date_to %}
                     <a href="{% url 'manage_enrollments' %}" class="btn btn-ghost btn-sm" style="padding: 7px 12px;" title="Reset filters">
                         <i class="fas fa-times"></i> Reset
                     </a>
                     {% endif %}
-                    <a href="{% url 'export_enrollments_excel' %}?search={{ search|urlencode }}&program={{ program_filter|urlencode }}&status={{ status_filter|urlencode }}&utr_verify={{ utr_filter|urlencode }}{% if group_filter and group_filter != 'ALL' %}&group={{ group_filter|urlencode }}{% endif %}" class="btn btn-sm btn-success" style="background: #16a34a; border-color: #15803d; color: #fff; font-weight: 600; padding: 7px 16px; display: inline-flex; align-items: center; gap: 6px;" title="Export filtered enrollments to Excel (.xlsx)">
+                    <a href="{% url 'export_enrollments_excel' %}?search={{ search|urlencode }}&program={{ program_filter|urlencode }}&status={{ status_filter|urlencode }}&utr_verify={{ utr_filter|urlencode }}&date_from={{ date_from|urlencode }}&date_to={{ date_to|urlencode }}&date_type={{ date_type|urlencode }}{% if group_filter and group_filter != 'ALL' %}&group={{ group_filter|urlencode }}{% endif %}" class="btn btn-sm btn-success" style="background: #16a34a; border-color: #15803d; color: #fff; font-weight: 600; padding: 7px 16px; display: inline-flex; align-items: center; gap: 6px;" title="Export filtered enrollments to Excel (.xlsx)">
                         <i class="fas fa-file-excel"></i> Export Excel
                     </a>
                 </div>
@@ -319,6 +342,15 @@
                         <td>
                             {% if e.status == 'Approved' %}
                             <span class="badge badge-success"><i class="fas fa-check-circle"></i> Approved</span>
+                            {% if e.approved_date %}
+                            <div style="font-size: 10px; color: #16a34a; font-weight: 600; margin-top: 2px;" title="Approved on {{ e.approved_date|date:'d/m/Y H:i' }}">
+                                <i class="fas fa-calendar-check"></i> {{ e.approved_date|date:"d/m/Y H:i" }}
+                            </div>
+                            {% elif e.updated_at %}
+                            <div style="font-size: 10px; color: #16a34a; font-weight: 600; margin-top: 2px;" title="Approved on {{ e.updated_at|date:'d/m/Y H:i' }}">
+                                <i class="fas fa-calendar-check"></i> {{ e.updated_at|date:"d/m/Y H:i" }}
+                            </div>
+                            {% endif %}
                             {% elif e.status == 'Submitted' or e.is_submitted %}
                             <span class="badge badge-info"><i class="fas fa-clock"></i> Submitted</span>
                             {% else %}
@@ -563,5 +595,23 @@
 
     syncBulkControls();
 })();
+
+function setEnrollmentDateToToday() {
+    const d = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const today = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+    const toInput = document.getElementById('enrollmentDateTo');
+    if (toInput) toInput.value = today;
+}
+
+function setEnrollmentDateRangeToday() {
+    const d = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const today = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+    const fromInput = document.getElementById('enrollmentDateFrom');
+    const toInput = document.getElementById('enrollmentDateTo');
+    if (fromInput) fromInput.value = today;
+    if (toInput) toInput.value = today;
+}
 </script>
 {% endblock %}

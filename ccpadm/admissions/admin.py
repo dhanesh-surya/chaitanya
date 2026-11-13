@@ -39,7 +39,8 @@ class StudentEnrollmentAdmin(admin.ModelAdmin):
 
     @admin.action(description='Accept / Approve selected enrollment applications')
     def approve_enrollment(self, request, queryset):
-        updated = queryset.update(status='Approved', is_submitted=True)
+        from django.utils import timezone
+        updated = queryset.update(status='Approved', is_submitted=True, approved_date=timezone.now())
         self.message_user(
             request,
             f'{updated} enrollment application(s) marked as Approved / Accepted.',
@@ -48,7 +49,7 @@ class StudentEnrollmentAdmin(admin.ModelAdmin):
 
     @admin.action(description='Reset selected enrollments to Draft (Allow student to edit)')
     def reset_to_draft(self, request, queryset):
-        updated = queryset.update(status='Draft', is_submitted=False)
+        updated = queryset.update(status='Draft', is_submitted=False, approved_date=None)
         self.message_user(
             request,
             f'{updated} enrollment application(s) reset to Draft.',

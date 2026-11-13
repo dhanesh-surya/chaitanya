@@ -31,7 +31,6 @@ from courses.utils import (
 
 from .constants import MEDIUM_CHOICES, RELIGION_CHOICES
 from .models import StudentAdmission
-from .pdf import render_admission_pdf
 from .services import (
     admission_to_form_dict,
     build_submit_payload,
@@ -326,6 +325,7 @@ def download_pdf(request, app_no):
         messages.error(request, 'Submitted application not found.')
         return redirect('student_dashboard')
     try:
+        from .pdf import render_admission_pdf
         pdf_buffer = render_admission_pdf(admission, request)
     except Exception as exc:
         messages.error(request, f'PDF generation failed: {exc}')

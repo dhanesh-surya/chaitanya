@@ -184,6 +184,7 @@ class ManageStudentsProgramFilterTestCase(TestCase):
         self.assertEqual(e.status, 'Approved')
         self.assertTrue(e.is_submitted)
         self.assertIsNotNone(e.enrollment_no)  # Auto-generated on approval!
+        self.assertIsNotNone(e.approved_date)  # Approved date recorded!
         self.student_bsc.refresh_from_db()
         self.assertTrue(self.student_bsc.is_verified)
 
@@ -196,6 +197,7 @@ class ManageStudentsProgramFilterTestCase(TestCase):
         e.refresh_from_db()
         self.assertEqual(e.status, 'Draft')
         self.assertFalse(e.is_submitted)
+        self.assertIsNone(e.approved_date)
 
     def test_admin_bulk_approve_enrollments(self):
         from admissions.models import StudentEnrollment
@@ -234,11 +236,95 @@ class ManageStudentsProgramFilterTestCase(TestCase):
         self.assertTrue(e2.is_submitted)
         self.assertIsNotNone(e1.enrollment_no)
         self.assertIsNotNone(e2.enrollment_no)
+        self.assertIsNotNone(e1.approved_date)
+        self.assertIsNotNone(e2.approved_date)
 
         self.student_bsc.refresh_from_db()
         self.student_ba.refresh_from_db()
         self.assertTrue(self.student_bsc.is_verified)
         self.assertTrue(self.student_ba.is_verified)
+
+    def test_enrollments_date_range_filter_approved_date(self):
+        from datetime import datetime, time
+        from django.utils.timezone import get_current_timezone, make_aware
+        from admissions.models import StudentEnrollment
+
+        tz = get_current_timezone()
+        d_nov10 = make_aware(datetime(2026, 11, 10, 10, 30), tz)
+        d_nov12 = make_aware(datetime(2026, 11, 12, 14, 0), tz)
+
+        e1 = StudentEnrollment.objects.create(
+            reg_no='BSC001',
+            student=self.student_bsc,
+            full_name='Amit Verma',
+            program_type='B.Sc. First Semester',
+            status='Approved',
+            is_submitted=True,
+            approved_date=d_nov10,
+        )
+        e2 = StudentEnrollment.objects.create(
+            reg_no='BA001',
+            student=self.student_ba,
+            full_name='Priya Singh',
+            program_type='B.A. First Semester',
+            status='Approved',
+            is_submitted=True,
+            approved_date=d_nov12,
+        )
+
+        self._login_admin()
+        # Filter for Nov 10 only
+        resp_nov10 = self.client.get(reverse('manage_enrollments') + '?date_from=2026-11-10&date_to=2026-11-10&date_type=approved')
+        self.assertEqual(resp_nov10.status_code, 200)
+        self.assertTrue(resp_nov10.context['has_filter'])
+        self.assertEqual(len(resp_nov10.context['enrollments']), 1)
+        self.assertEqual(resp_nov10.context['enrollments'][0].reg_no, 'BSC001')
+
+        # Filter for Nov 11 to Nov 13
+        resp_nov12 = self.client.get(reverse('manage_enrollments') + '?date_from=2026-11-11&date_to=2026-11-13&date_type=approved')
+        self.assertEqual(resp_nov12.status_code, 200)
+        self.assertEqual(len(resp_nov12.context['enrollments']), 1)
+        self.assertEqual(resp_nov12.context['enrollments'][0].reg_no, 'BA001')
+
+        # Filter for Nov 09 to Nov 13 (both)
+        resp_both = self.client.get(reverse('manage_enrollments') + '?date_from=2026-11-09&date_to=2026-11-13&date_type=approved')
+        self.assertEqual(resp_both.status_code, 200)
+        self.assertEqual(len(resp_both.context['enrollments']), 2)
+
+    def test_enrollments_date_range_filter_submitted_date(self):
+        from datetime import datetime
+        from django.utils.timezone import get_current_timezone, make_aware
+        from admissions.models import StudentEnrollment
+
+        tz = get_current_timezone()
+        d_oct25 = make_aware(datetime(2026, 10, 25, 9, 0), tz)
+        d_nov05 = make_aware(datetime(2026, 11, 5, 16, 0), tz)
+
+        e1 = StudentEnrollment.objects.create(
+            reg_no='BSC001',
+            student=self.student_bsc,
+            full_name='Amit Verma',
+            program_type='B.Sc. First Semester',
+            status='Submitted',
+            is_submitted=True,
+            submitted_date=d_oct25,
+        )
+        e2 = StudentEnrollment.objects.create(
+            reg_no='BA001',
+            student=self.student_ba,
+            full_name='Priya Singh',
+            program_type='B.A. First Semester',
+            status='Submitted',
+            is_submitted=True,
+            submitted_date=d_nov05,
+        )
+
+        self._login_admin()
+        # Filter for Oct 20 to Oct 30 submitted date
+        resp_oct = self.client.get(reverse('manage_enrollments') + '?date_from=2026-10-20&date_to=2026-10-30&date_type=submitted')
+        self.assertEqual(resp_oct.status_code, 200)
+        self.assertEqual(len(resp_oct.context['enrollments']), 1)
+        self.assertEqual(resp_oct.context['enrollments'][0].reg_no, 'BSC001')
 
 
 class ExportEnrollmentsExcelTestCase(TestCase):
@@ -391,6 +477,7 @@ class ExportEnrollmentsExcelTestCase(TestCase):
             'SUBJECTS',
             'UTR No',
             'Enrollment Status',
+            'Approved Date',
             'Submitted Date',
         ]
         actual_headers = [ws.cell(row=1, column=col).value for col in range(1, len(expected_headers) + 1)]
@@ -446,6 +533,28 @@ class ExportEnrollmentsExcelTestCase(TestCase):
         self.assertTrue(all(r[13] == 'B.A. First Semester' for r in rows))
         self.assertTrue(any(r[2] == 'Rohan Sahu' for r in rows))
         self.assertFalse(any(r[2] == 'Kavita Patel' for r in rows))
+
+    def test_export_enrollments_excel_date_range_filtering(self):
+        from io import BytesIO
+        import openpyxl
+        from datetime import datetime
+        from django.utils.timezone import get_current_timezone, make_aware
+
+        tz = get_current_timezone()
+        self.enr_m.approved_date = make_aware(datetime(2026, 11, 1, 12, 0), tz)
+        self.enr_m.save()
+        self.enr_f.approved_date = make_aware(datetime(2026, 11, 15, 12, 0), tz)
+        self.enr_f.save()
+
+        self._login_admin()
+        resp = self.client.get(reverse('export_enrollments_excel') + '?date_from=2026-11-01&date_to=2026-11-05&date_type=approved')
+        self.assertEqual(resp.status_code, 200)
+
+        wb = openpyxl.load_workbook(BytesIO(resp.content))
+        ws = wb.active
+        rows = list(ws.iter_rows(min_row=2, values_only=True))
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0][2], 'Rohan Sahu')
 
     def test_search_enrollments_by_utr_in_manager_and_export(self):
         from io import BytesIO

@@ -1312,14 +1312,17 @@ def update_enrollment_status(request, pk):
         enrollment.status = new_status
         if new_status == 'Approved':
             enrollment.is_submitted = True
+            if not enrollment.approved_date:
+                enrollment.approved_date = timezone.now()
             if not enrollment.enrollment_no:
                 enrollment.enrollment_no = generate_enrollment_number()
-            enrollment.save(update_fields=['status', 'is_submitted', 'enrollment_no'])
+            enrollment.save(update_fields=['status', 'is_submitted', 'enrollment_no', 'approved_date'])
             Student.objects.filter(registration_no=enrollment.reg_no).update(is_verified=True)
             messages.success(request, f'Enrollment {enrollment.enrollment_no} for {enrollment.full_name} has been Approved / Accepted.')
         elif new_status == 'Draft':
             enrollment.is_submitted = False
-            enrollment.save(update_fields=['status', 'is_submitted'])
+            enrollment.approved_date = None
+            enrollment.save(update_fields=['status', 'is_submitted', 'approved_date'])
             messages.success(request, f'Enrollment {enrollment.enrollment_no or enrollment.reg_no} for {enrollment.full_name} reset to Draft (student can now edit).')
         else:
             enrollment.save(update_fields=['status'])
@@ -1348,12 +1351,15 @@ def bulk_update_enrollment_status(request):
     enrollments = StudentEnrollment.objects.filter(pk__in=enrollment_ids)
     count = 0
     if new_status == 'Approved':
+        now = timezone.now()
         for enr in enrollments:
             enr.status = 'Approved'
             enr.is_submitted = True
+            if not enr.approved_date:
+                enr.approved_date = now
             if not enr.enrollment_no:
                 enr.enrollment_no = generate_enrollment_number()
-            enr.save(update_fields=['status', 'is_submitted', 'enrollment_no'])
+            enr.save(update_fields=['status', 'is_submitted', 'enrollment_no', 'approved_date'])
             Student.objects.filter(registration_no=enr.reg_no).update(is_verified=True)
             count += 1
         messages.success(request, f'Successfully Approved & Accepted {count} enrollment application(s).')
@@ -1361,12 +1367,72 @@ def bulk_update_enrollment_status(request):
         for enr in enrollments:
             enr.status = 'Draft'
             enr.is_submitted = False
-            enr.save(update_fields=['status', 'is_submitted'])
+            enr.approved_date = None
+            enr.save(update_fields=['status', 'is_submitted', 'approved_date'])
             count += 1
         messages.success(request, f'Reset {count} enrollment application(s) to Draft (students can now edit).')
 
     next_url = request.POST.get('next') or request.META.get('HTTP_REFERER') or 'admin_dashboard'
     return redirect(next_url)
+
+
+def _parse_date_range_filter(date_from_str, date_to_str, date_type='approved'):
+    """
+    Parses date_from and date_to (YYYY-MM-DD) into timezone-aware datetime bounds
+    and returns (start_dt, end_dt, date_q, clean_from, clean_to, clean_type).
+    """
+    from datetime import datetime, time
+    from django.utils.timezone import get_current_timezone, make_aware
+
+    tz = get_current_timezone()
+    start_dt = None
+    end_dt = None
+    clean_from = ''
+    clean_to = ''
+    clean_type = 'submitted' if (date_type or '').strip().lower() == 'submitted' else 'approved'
+
+    if date_from_str:
+        try:
+            d_from = datetime.strptime(date_from_str.strip(), '%Y-%m-%d').date()
+            start_dt = make_aware(datetime.combine(d_from, time.min), tz)
+            clean_from = d_from.strftime('%Y-%m-%d')
+        except (ValueError, TypeError):
+            pass
+
+    if date_to_str:
+        try:
+            d_to = datetime.strptime(date_to_str.strip(), '%Y-%m-%d').date()
+            end_dt = make_aware(datetime.combine(d_to, time.max), tz)
+            clean_to = d_to.strftime('%Y-%m-%d')
+        except (ValueError, TypeError):
+            pass
+
+    date_q = Q()
+    if clean_type == 'approved':
+        if start_dt and end_dt:
+            date_q = (
+                Q(approved_date__range=(start_dt, end_dt))
+                | (Q(approved_date__isnull=True, status='Approved') & Q(updated_at__range=(start_dt, end_dt)))
+            )
+        elif start_dt:
+            date_q = (
+                Q(approved_date__gte=start_dt)
+                | (Q(approved_date__isnull=True, status='Approved') & Q(updated_at__gte=start_dt))
+            )
+        elif end_dt:
+            date_q = (
+                Q(approved_date__lte=end_dt)
+                | (Q(approved_date__isnull=True, status='Approved') & Q(updated_at__lte=end_dt))
+            )
+    else:  # 'submitted'
+        if start_dt and end_dt:
+            date_q = Q(submitted_date__range=(start_dt, end_dt))
+        elif start_dt:
+            date_q = Q(submitted_date__gte=start_dt)
+        elif end_dt:
+            date_q = Q(submitted_date__lte=end_dt)
+
+    return start_dt, end_dt, date_q, clean_from, clean_to, clean_type
 
 
 @admin_login_required
@@ -1383,6 +1449,15 @@ def manage_enrollments(request):
     group_filter = _normalize_group_filter(request.GET.get('group', 'ALL'), program_filter)
     show_all = request.GET.get('show_all', '').strip() in ('1', 'true', 'yes')
 
+    date_from = request.GET.get('date_from', '').strip()
+    date_to = request.GET.get('date_to', '').strip()
+    date_type = request.GET.get('date_type', 'approved').strip()
+
+    start_dt, end_dt, date_q, date_from, date_to, date_type = _parse_date_range_filter(
+        date_from, date_to, date_type
+    )
+    has_date_filter = bool(date_from or date_to)
+
     # Do not load all enrollment records by default; require a filter or explicit show_all
     has_filter = bool(
         search
@@ -1390,6 +1465,7 @@ def manage_enrollments(request):
         or (status_filter and status_filter != 'ALL')
         or (utr_filter and utr_filter != 'ALL')
         or (group_filter and group_filter != 'ALL')
+        or has_date_filter
         or show_all
     )
 
@@ -1415,6 +1491,9 @@ def manage_enrollments(request):
 
         if status_filter != 'ALL':
             enrollments = enrollments.filter(status=status_filter)
+
+        if date_q:
+            enrollments = enrollments.filter(date_q)
 
         enrollment_list = list(enrollments)
 
@@ -1562,6 +1641,10 @@ def manage_enrollments(request):
         'view_approved_count': view_approved_count,
         'view_submitted_count': view_submitted_count,
         'view_draft_count': view_draft_count,
+        'date_from': date_from,
+        'date_to': date_to,
+        'date_type': date_type,
+        'has_date_filter': has_date_filter,
     })
 
 
@@ -1806,6 +1889,8 @@ def admin_edit_enrollment(request, pk):
         if new_status == 'Approved':
             enrollment.status = 'Approved'
             enrollment.is_submitted = True
+            if not enrollment.approved_date:
+                enrollment.approved_date = timezone.now()
             if not enrollment.enrollment_no:
                 enrollment.enrollment_no = generate_enrollment_number()
             student.is_verified = True
@@ -1813,6 +1898,7 @@ def admin_edit_enrollment(request, pk):
         elif new_status == 'Draft':
             enrollment.status = 'Draft'
             enrollment.is_submitted = False
+            enrollment.approved_date = None
         else:  # 'Submitted'
             enrollment.status = 'Submitted'
             enrollment.is_submitted = True
@@ -2115,6 +2201,13 @@ def build_enrollment_export_row(enrollment):
     else:
         status_val = 'Draft'
 
+    if enrollment.approved_date:
+        approved_date_val = enrollment.approved_date.strftime('%d/%m/%Y %H:%M')
+    elif enrollment.status == 'Approved' and enrollment.updated_at:
+        approved_date_val = enrollment.updated_at.strftime('%d/%m/%Y %H:%M')
+    else:
+        approved_date_val = ''
+
     if enrollment.submitted_date:
         submitted_date_val = enrollment.submitted_date.strftime('%d/%m/%Y %H:%M')
     elif (enrollment.is_submitted or enrollment.status == 'Approved') and enrollment.created_at:
@@ -2142,6 +2235,7 @@ def build_enrollment_export_row(enrollment):
         subjects,
         utr_no,
         status_val,
+        approved_date_val,
         submitted_date_val,
     ]
 
@@ -2162,6 +2256,13 @@ def export_enrollments_excel(request):
     status_filter = request.GET.get('status', 'ALL').strip() or 'ALL'
     utr_filter = request.GET.get('utr_verify', 'ALL').strip().upper() or 'ALL'
     group_filter = _normalize_group_filter(request.GET.get('group', 'ALL'), program_filter)
+    date_from = request.GET.get('date_from', '').strip()
+    date_to = request.GET.get('date_to', '').strip()
+    date_type = request.GET.get('date_type', 'approved').strip()
+
+    start_dt, end_dt, date_q, date_from, date_to, date_type = _parse_date_range_filter(
+        date_from, date_to, date_type
+    )
 
     enrollments = (
         StudentEnrollment.objects.all()
@@ -2184,6 +2285,9 @@ def export_enrollments_excel(request):
 
     if status_filter != 'ALL':
         enrollments = enrollments.filter(status=status_filter)
+
+    if date_q:
+        enrollments = enrollments.filter(date_q)
 
     enrollments = enrollments.order_by('program_type', 'enrollment_no', 'full_name')
     enrollment_list = list(enrollments)
@@ -2233,6 +2337,7 @@ def export_enrollments_excel(request):
         'SUBJECTS',
         'UTR No',
         'Enrollment Status',
+        'Approved Date',
         'Submitted Date',
     ]
 

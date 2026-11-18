@@ -55,12 +55,16 @@ def _students_filter_params(request):
     verified = (source.get('verified') or 'ALL').strip() or 'ALL'
     group = (source.get('group') or 'ALL').strip() or 'ALL'
     enrollment_status = (source.get('enrollment_status') or 'ALL').strip() or 'ALL'
+    date_from = (source.get('date_from') or '').strip()
+    date_to = (source.get('date_to') or '').strip()
     return {
         'search': source.get('search', '').strip(),
         'program': program,
         'verified': verified,
         'group': group,
         'enrollment_status': enrollment_status,
+        'date_from': date_from,
+        'date_to': date_to,
     }
 
 
@@ -163,34 +167,115 @@ def _filter_students_by_enrollment_status(students, enrollment_status='ALL'):
     if not enrollment_status or enrollment_status == 'ALL':
         return students
     result = []
+    norm = enrollment_status.strip().lower()
     for s in students:
         status = getattr(s, 'enrollment_status', 'Not Enrolled')
-        if enrollment_status == 'Approved':
+        if norm in ('approved',):
             if (
                 status == 'Approved'
                 or (s.latest_enrollment and s.latest_enrollment.status == 'Approved')
                 or (s.latest_nep_ug and s.latest_nep_ug.status == 'Approved')
             ):
                 result.append(s)
-        elif enrollment_status == 'Submitted':
+        elif norm in ('submitted', 'enrollment submitted'):
             if (
                 status == 'Submitted'
                 or (s.latest_enrollment and s.latest_enrollment.status == 'Submitted')
                 or (s.latest_nep_ug and s.latest_nep_ug.status == 'Submitted')
             ):
                 result.append(s)
-        elif enrollment_status == 'Draft':
+        elif norm in ('draft',):
             if (
                 status == 'Draft'
                 or (s.latest_enrollment and s.latest_enrollment.status == 'Draft')
                 or (s.latest_nep_ug and s.latest_nep_ug.status == 'Draft')
             ):
                 result.append(s)
-        elif enrollment_status == 'Not Enrolled':
+        elif norm in ('not enrolled', 'not_enrolled'):
             if status == 'Not Enrolled' and not s.latest_enrollment and not s.latest_nep_ug:
                 result.append(s)
-        elif status == enrollment_status:
+        elif status.lower() == norm:
             result.append(s)
+    return result
+
+
+def _filter_students_by_date_range(students, date_from_str='', date_to_str='', enrollment_status='ALL'):
+    """Filter students by date range matching enrollment/registration/admission date."""
+    from datetime import datetime, time
+    from django.utils.timezone import get_current_timezone, make_aware, is_aware
+
+    if not date_from_str and not date_to_str:
+        return students
+
+    tz = get_current_timezone()
+    start_dt = None
+    end_dt = None
+
+    if date_from_str:
+        try:
+            d_from = datetime.strptime(date_from_str.strip(), '%Y-%m-%d').date()
+            start_dt = make_aware(datetime.combine(d_from, time.min), tz)
+        except (ValueError, TypeError):
+            pass
+
+    if date_to_str:
+        try:
+            d_to = datetime.strptime(date_to_str.strip(), '%Y-%m-%d').date()
+            end_dt = make_aware(datetime.combine(d_to, time.max), tz)
+        except (ValueError, TypeError):
+            pass
+
+    if not start_dt and not end_dt:
+        return students
+
+    norm_enr = (enrollment_status or 'ALL').strip().lower()
+    result = []
+    for s in students:
+        admission = getattr(s, 'latest_admission', None)
+        enr = getattr(s, 'latest_enrollment', None) or getattr(s, 'latest_nep_ug', None)
+
+        target_dt = None
+        if norm_enr in ('submitted', 'enrollment submitted'):
+            target_dt = (
+                getattr(enr, 'submitted_date', None)
+                or getattr(enr, 'created_at', None)
+            )
+        elif norm_enr == 'approved':
+            target_dt = (
+                getattr(enr, 'approved_date', None)
+                or getattr(enr, 'updated_at', None)
+            )
+        elif norm_enr == 'draft':
+            target_dt = getattr(enr, 'created_at', None)
+        elif norm_enr in ('not enrolled', 'not_enrolled'):
+            target_dt = (
+                getattr(admission, 'submitted_date', None)
+                or getattr(admission, 'created_date', None)
+                or getattr(s, 'created_date', None)
+            )
+        else:
+            # ALL: check enrollment submitted/approved/created first, then admission, then student created_date
+            target_dt = (
+                getattr(enr, 'submitted_date', None)
+                or getattr(enr, 'created_at', None)
+                or getattr(admission, 'submitted_date', None)
+                or getattr(admission, 'created_date', None)
+                or getattr(s, 'created_date', None)
+            )
+
+        if not target_dt:
+            continue
+
+        if not is_aware(target_dt):
+            target_dt = make_aware(target_dt, tz)
+
+        if start_dt and target_dt < start_dt:
+            continue
+        if end_dt and target_dt > end_dt:
+            continue
+
+        result.append(s)
+
     return result
 
 
@@ -240,8 +325,93 @@ def _export_course_name_only(label):
     return name
 
 
+def _format_enrollment_subject_codes(enrollment):
+    import json
+    from courses.models import ProgramCourse
+
+    courses = []
+    if enrollment.selected_courses_json:
+        try:
+            data = json.loads(enrollment.selected_courses_json)
+            if isinstance(data, list):
+                courses = data
+            elif isinstance(data, dict):
+                courses = data.get('courses') or data.get('subjects') or []
+        except Exception:
+            courses = []
+
+    codes = []
+    for c in courses:
+        if not isinstance(c, dict):
+            continue
+        code = (c.get('code') or c.get('course_code') or '').strip()
+        name = (c.get('name') or c.get('course_name') or '').strip()
+        dept = (c.get('dept') or c.get('department') or '').strip()
+        type_2 = (c.get('type_2') or c.get('type2') or '').strip()
+
+        # If code was missing in JSON, resolve it from ProgramCourse
+        if not code and name:
+            clean_name = name.split('—')[-1].strip() if '—' in name else name
+            db_c = ProgramCourse.objects.filter(program_type__iexact=enrollment.program_type).filter(
+                Q(course_name__iexact=name) | Q(course_name__iexact=clean_name)
+            ).first()
+            if not db_c and dept:
+                db_c = ProgramCourse.objects.filter(
+                    program_type__iexact=enrollment.program_type,
+                    department__iexact=dept,
+                    course_type_2__iexact=type_2,
+                ).first()
+            if db_c and db_c.course_code:
+                code = db_c.course_code.strip()
+
+        if code and code not in codes:
+            codes.append(code)
+
+    return ', '.join(codes)
+
+
+def _format_enrollment_subjects(enrollment):
+    import json
+    courses = []
+    if enrollment.selected_courses_json:
+        try:
+            data = json.loads(enrollment.selected_courses_json)
+            if isinstance(data, list):
+                courses = data
+            elif isinstance(data, dict):
+                courses = data.get('courses') or data.get('subjects') or []
+        except Exception:
+            courses = []
+
+    names = []
+    for c in courses:
+        raw_name = ''
+        if isinstance(c, dict):
+            raw_name = c.get('name') or c.get('course_name') or ''
+        elif isinstance(c, str):
+            raw_name = c
+        if raw_name:
+            clean = _export_course_name_only(raw_name)
+            if clean and clean not in names:
+                names.append(clean)
+
+    if names:
+        return '; '.join(names)
+
+    adm = getattr(enrollment, 'admission', None)
+    if not adm and getattr(enrollment, 'reg_no', None):
+        from admissions.models import StudentAdmission
+        adm = StudentAdmission.objects.filter(reg_no=enrollment.reg_no).first()
+
+    if adm and (adm.subject or '').strip():
+        parts = [_export_course_name_only(p) for p in adm.subject.split(',') if _export_course_name_only(p)]
+        return '; '.join(parts)
+
+    return ''
+
+
 def _format_selected_courses_for_export(student):
-    """Paper names from the student's latest admission, for CSV export."""
+    """Paper names from the student's latest admission or enrollment, for export."""
     admission = getattr(student, 'latest_admission', None)
     if admission:
         subjects = parse_selected_subjects(admission)
@@ -261,7 +431,109 @@ def _format_selected_courses_for_export(student):
             ]
             if names:
                 return '; '.join(names)
-    return _export_course_name_only(student.course_name)
+
+    enrollment = getattr(student, 'latest_enrollment', None) or getattr(student, 'latest_nep_ug', None)
+    if enrollment:
+        enr_names = _format_enrollment_subjects(enrollment)
+        if enr_names:
+            return enr_names
+
+    return _export_course_name_only(student.course_name) if student.course_name else ''
+
+
+def _get_student_course_codes(student):
+    """Return comma-separated course codes for a student."""
+    from courses.models import ProgramCourse
+    admission = getattr(student, 'latest_admission', None)
+    enrollment = getattr(student, 'latest_enrollment', None)
+    nep = getattr(student, 'latest_nep_ug', None)
+
+    codes = []
+    # 1. From admission selected_subjects_json
+    if admission:
+        subjects = parse_selected_subjects(admission)
+        for s in subjects:
+            if isinstance(s, dict):
+                code = (s.get('code') or s.get('course_code') or '').strip()
+                name = (s.get('name') or s.get('course_name') or '').strip()
+                dept = (s.get('dept') or s.get('department') or '').strip()
+                type_2 = (s.get('type_2') or s.get('type2') or '').strip()
+                if not code and name:
+                    clean_name = name.split('—')[-1].strip() if '—' in name else name
+                    db_c = ProgramCourse.objects.filter(
+                        Q(course_name__iexact=name) | Q(course_name__iexact=clean_name)
+                    ).first()
+                    if not db_c and dept:
+                        db_c = ProgramCourse.objects.filter(
+                            department__iexact=dept,
+                            course_type_2__iexact=type_2,
+                        ).first()
+                    if db_c and db_c.course_code:
+                        code = db_c.course_code.strip()
+                if code and code not in codes:
+                    codes.append(code)
+
+    # 2. From enrollment selected_courses_json
+    if not codes and enrollment:
+        code_str = _format_enrollment_subject_codes(enrollment)
+        if code_str:
+            for c in code_str.split(','):
+                c_clean = c.strip()
+                if c_clean and c_clean not in codes:
+                    codes.append(c_clean)
+
+    # 3. From NEP selected_courses_json
+    if not codes and nep:
+        code_str = _format_enrollment_subject_codes(nep)
+        if code_str:
+            for c in code_str.split(','):
+                c_clean = c.strip()
+                if c_clean and c_clean not in codes:
+                    codes.append(c_clean)
+
+    # 4. Fallback to admission.subject string
+    if not codes and admission and (admission.subject or '').strip():
+        parts = [p.strip() for p in admission.subject.split(',') if p.strip()]
+        for p in parts:
+            clean = _export_course_name_only(p)
+            db_c = ProgramCourse.objects.filter(
+                Q(course_name__iexact=p) | Q(course_name__iexact=clean) | Q(department__iexact=clean)
+            ).first()
+            if db_c and db_c.course_code:
+                c_code = db_c.course_code.strip()
+                if c_code and c_code not in codes:
+                    codes.append(c_code)
+
+    # 5. Fallback to student.course_name
+    if not codes and getattr(student, 'course_name', None):
+        clean = _export_course_name_only(student.course_name)
+        db_c = ProgramCourse.objects.filter(
+            Q(course_name__iexact=student.course_name) | Q(course_name__iexact=clean)
+        ).first()
+        if db_c and db_c.course_code:
+            c_code = db_c.course_code.strip()
+            if c_code and c_code not in codes:
+                codes.append(c_code)
+
+    return ', '.join(codes)
+
+
+def _get_student_subject_names(student):
+    """Return subject names for a student."""
+    names = _format_selected_courses_for_export(student)
+    if names:
+        return names
+    enrollment = getattr(student, 'latest_enrollment', None)
+    if enrollment:
+        enr_names = _format_enrollment_subjects(enrollment)
+        if enr_names:
+            return enr_names
+    nep = getattr(student, 'latest_nep_ug', None)
+    if nep:
+        nep_names = _format_enrollment_subjects(nep)
+        if nep_names:
+            return nep_names
+    return _export_course_name_only(student.course_name) if getattr(student, 'course_name', None) else ''
 
 
 def _admission_dsc_course_labels(admission):
@@ -305,7 +577,7 @@ def _attach_admissions(students):
                 admission_map[adm.reg_no] = adm
         for enr in (
             StudentEnrollment.objects.filter(reg_no__in=reg_nos)
-            .defer('photo_base64', 'signature_base64', 'payment_receipt_base64', 'education_json', 'selected_courses_json')
+            .defer('photo_base64', 'signature_base64', 'payment_receipt_base64', 'education_json')
             .order_by('-submitted_date', '-created_at')
         ):
             if enr.reg_no not in enrollment_map:
@@ -313,7 +585,7 @@ def _attach_admissions(students):
         from admissions.models import NepUgAdmissionEnrollment
         for nep in (
             NepUgAdmissionEnrollment.objects.filter(reg_no__in=reg_nos)
-            .defer('photo_base64', 'signature_base64', 'payment_receipt_base64', 'education_json', 'selected_courses_json')
+            .defer('photo_base64', 'signature_base64', 'payment_receipt_base64', 'education_json')
             .order_by('-submitted_date', '-created_at')
         ):
             if nep.reg_no not in nep_map:
@@ -343,6 +615,24 @@ def _attach_admissions(students):
             or (enrollment.mother_name if enrollment and enrollment.mother_name else '')
             or (nep.mother_name if nep and nep.mother_name else '')
         )
+        dob_raw = (
+            (admission.dob if admission and admission.dob else None)
+            or (enrollment.dob if enrollment and enrollment.dob else None)
+            or (nep.dob if nep and nep.dob else None)
+        )
+        student.dob = dob_raw
+        student.dob_formatted = dob_raw.strftime('%d-%m-%Y') if hasattr(dob_raw, 'strftime') else (str(dob_raw) if dob_raw else '')
+        student.apaar_id = (
+            (admission.apaar_id if admission and admission.apaar_id else '')
+            or (enrollment.apaar_id if enrollment and enrollment.apaar_id else '')
+            or (nep.apaar_id if nep and nep.apaar_id else '')
+        )
+        student.mobile_no = (
+            (student.mobile or '').strip()
+            or (admission.mobile if admission and admission.mobile else '')
+            or (enrollment.mobile if enrollment and enrollment.mobile else '')
+            or (nep.mobile if nep and nep.mobile else '')
+        )
         group_key = _admission_bsc_group_key(admission)
         student.bsc_group_key = group_key
         student.bsc_group_label = (
@@ -352,6 +642,8 @@ def _attach_admissions(students):
         )
         student.dsc_course_names = _admission_dsc_course_labels(admission)
         student.dsc_courses_display = '; '.join(student.dsc_course_names)
+        student.course_code = _get_student_course_codes(student)
+        student.subject_name = _get_student_subject_names(student)
     return students
 
 
@@ -583,7 +875,12 @@ def manage_students(request):
         ),
     }
 
-    students = _filter_students_by_enrollment_status(all_students, enrollment_status_filter)
+    students = _filter_students_by_date_range(
+        _filter_students_by_enrollment_status(all_students, enrollment_status_filter),
+        params.get('date_from'),
+        params.get('date_to'),
+        enrollment_status_filter,
+    )
 
     edit_student = None
     if edit_pk:
@@ -605,6 +902,8 @@ def manage_students(request):
         'group_filter': group_filter,
         'enrollment_status_filter': enrollment_status_filter,
         'enrollment_counts': enrollment_counts,
+        'date_from': params['date_from'],
+        'date_to': params['date_to'],
         'program_types': program_types,
         'subject_group_choices': subject_group_choices,
         'show_group_filter': show_group_filter,
@@ -913,24 +1212,30 @@ def export_students_csv(request):
         return redirect('manage_students')
     group_filter = _normalize_group_filter(params['group'], params['program'])
     enrollment_status_filter = params.get('enrollment_status', 'ALL')
-    students = _filter_students_by_enrollment_status(
-        _filter_students_by_group(
-            _attach_admissions(
-                list(_get_students_queryset(params['search'], params['program'], params['verified']))
+    students = _filter_students_by_date_range(
+        _filter_students_by_enrollment_status(
+            _filter_students_by_group(
+                _attach_admissions(
+                    list(_get_students_queryset(params['search'], params['program'], params['verified']))
+                ),
+                group_filter,
             ),
-            group_filter,
+            enrollment_status_filter,
         ),
+        params.get('date_from'),
+        params.get('date_to'),
         enrollment_status_filter,
     )
 
     response = HttpResponse(content_type='text/csv')
     enr_suffix = f"_{enrollment_status_filter}" if enrollment_status_filter and enrollment_status_filter != 'ALL' else ""
-    filename = f"Students_{params['program'] or 'All'}{enr_suffix}.csv".replace(' ', '_').replace('/', '_')
+    date_suffix = f"_{params.get('date_from') or 'start'}_to_{params.get('date_to') or 'end'}" if params.get('date_from') or params.get('date_to') else ""
+    filename = f"Students_{params['program'] or 'All'}{enr_suffix}{date_suffix}.csv".replace(' ', '_').replace('/', '_')
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
     writer = csv.writer(response)
     writer.writerow([
-        'Registration No', 'Full Name', "Father's Name", "Mother's Name", 'Email', 'Mobile', 'Aadhaar',
-        'Program', 'Subject Group', 'DSC Courses', 'Course', 'Selected Courses / Paper Name',
+        'Registration No', 'Full Name', "Father's Name", "Mother's Name", 'Date of Birth', 'Email', 'Mobile No', 'Aadhaar', 'APAAR ID',
+        'Program', 'Subject Group', 'Course Code', 'Subject Name', 'DSC Courses', 'Course',
         'Application No', 'Verified', 'Enrollment Status', 'Enrollment No', 'Semester', 'Registered On',
     ])
     for s in students:
@@ -942,14 +1247,17 @@ def export_students_csv(request):
             s.full_name,
             father,
             mother,
+            getattr(s, 'dob_formatted', '') or '',
             s.email or '',
-            s.mobile or '',
+            getattr(s, 'mobile_no', '') or s.mobile or '',
             s.aadhaar or '',
+            getattr(s, 'apaar_id', '') or '',
             s.program_type,
             getattr(s, 'bsc_group_label', '') or '',
+            getattr(s, 'course_code', '') or '',
+            getattr(s, 'subject_name', '') or '',
             getattr(s, 'dsc_courses_display', '') or '',
             s.course_name,
-            _format_selected_courses_for_export(s),
             (admission.application_no if admission else '') or '',
             'Yes' if s.is_verified else 'No',
             getattr(s, 'enrollment_status', 'Not Enrolled') or 'Not Enrolled',
@@ -1038,18 +1346,25 @@ def export_students_excel(request):
     adm_status_filter    = (request.GET.get('admission_status', 'ALL') or 'ALL').strip()
     medium_filter        = (request.GET.get('medium', 'ALL') or 'ALL').strip()
     semester_filter      = (request.GET.get('semester', 'ALL') or 'ALL').strip()
+    enrollment_status_filter = (request.GET.get('enrollment_status') or params.get('enrollment_status') or 'ALL').strip()
+    date_from            = (request.GET.get('date_from') or params.get('date_from') or '').strip()
+    date_to              = (request.GET.get('date_to') or params.get('date_to') or '').strip()
 
     group_filter = _normalize_group_filter(params['group'], params['program'])
-    enrollment_status_filter = params.get('enrollment_status', 'ALL')
 
     students = _filter_students_for_export(
-        _filter_students_by_enrollment_status(
-            _filter_students_by_group(
-                _attach_admissions(
-                    list(_get_students_queryset(params['search'], params['program'], params['verified']))
+        _filter_students_by_date_range(
+            _filter_students_by_enrollment_status(
+                _filter_students_by_group(
+                    _attach_admissions(
+                        list(_get_students_queryset(params['search'], params['program'], params['verified']))
+                    ),
+                    group_filter,
                 ),
-                group_filter,
+                enrollment_status_filter,
             ),
+            date_from,
+            date_to,
             enrollment_status_filter,
         ),
         gender=gender_filter,
@@ -1069,17 +1384,20 @@ def export_students_excel(request):
         'Full Name',
         "Father's Name",
         "Mother's Name",
+        'Date of Birth',
         'E-mail',
-        'Mobile',
+        'Mobile No',
         'Aadhar No',
+        'APAAR ID',
         'Gender',
         'Category',
         'Medium',
         'Program',
         'Subject Group',
+        'Course Code',
+        'Subject Name',
         'DSC Courses',
         'Course',
-        'Selected Courses / Paper Name',
         'Application No',
         'Admission Status',
         'Verified',
@@ -1130,17 +1448,20 @@ def export_students_excel(request):
             s.full_name,
             father,
             mother,
+            getattr(s, 'dob_formatted', '') or '',
             s.email or '',
-            s.mobile or '',
+            getattr(s, 'mobile_no', '') or s.mobile or '',
             s.aadhaar or '',
+            getattr(s, 'apaar_id', '') or '',
             gender_val,
             category_val,
             medium_val,
             s.program_type,
             getattr(s, 'bsc_group_label', '') or '',
+            getattr(s, 'course_code', '') or '',
+            getattr(s, 'subject_name', '') or '',
             getattr(s, 'dsc_courses_display', '') or '',
             s.course_name,
-            _format_selected_courses_for_export(s),
             (admission.application_no if admission else '') or '',
             adm_status,
             'Yes' if s.is_verified else 'No',
@@ -1160,9 +1481,9 @@ def export_students_excel(request):
             if fill_to_apply.fill_type:
                 cell.fill = fill_to_apply
 
-            # Centre: Reg No, Mobile, Aadhar No, Gender, Category, App No, Adm Status,
+            # Centre: Reg No, Date of Birth, Mobile No, Aadhar No, APAAR ID, Gender, Category, Medium, Course Code, App No, Adm Status,
             #         Verified, Enrollment Status, Enrollment No, Semester, Registered On
-            if col_idx in (1, 6, 7, 8, 9, 16, 17, 18, 19, 20, 21, 22):
+            if col_idx in (1, 5, 7, 8, 9, 10, 11, 12, 15, 19, 20, 21, 22, 23, 24, 25):
                 cell.alignment = data_align_center
             else:
                 cell.alignment = data_align_left
@@ -1194,6 +1515,8 @@ def export_students_excel(request):
         parts.append(medium_filter)
     if semester_filter != 'ALL':
         parts.append(f'Sem{semester_filter}')
+    if date_from or date_to:
+        parts.append(f"{date_from or 'start'}_to_{date_to or 'end'}")
     filename = f"Students_{'_'.join(parts)}.xlsx".replace(' ', '_').replace('/', '_')
 
     response = HttpResponse(
@@ -2048,89 +2371,6 @@ def _format_enrollment_dob(dob_val):
     return str(dob_val)
 
 
-def _format_enrollment_subject_codes(enrollment):
-    import json
-    from courses.models import ProgramCourse
-
-    courses = []
-    if enrollment.selected_courses_json:
-        try:
-            data = json.loads(enrollment.selected_courses_json)
-            if isinstance(data, list):
-                courses = data
-            elif isinstance(data, dict):
-                courses = data.get('courses') or data.get('subjects') or []
-        except Exception:
-            courses = []
-
-    codes = []
-    for c in courses:
-        if not isinstance(c, dict):
-            continue
-        code = (c.get('code') or c.get('course_code') or '').strip()
-        name = (c.get('name') or c.get('course_name') or '').strip()
-        dept = (c.get('dept') or c.get('department') or '').strip()
-        type_2 = (c.get('type_2') or c.get('type2') or '').strip()
-
-        # If code was missing in JSON, resolve it from ProgramCourse
-        if not code and name:
-            clean_name = name.split('—')[-1].strip() if '—' in name else name
-            db_c = ProgramCourse.objects.filter(program_type__iexact=enrollment.program_type).filter(
-                Q(course_name__iexact=name) | Q(course_name__iexact=clean_name)
-            ).first()
-            if not db_c and dept:
-                db_c = ProgramCourse.objects.filter(
-                    program_type__iexact=enrollment.program_type,
-                    department__iexact=dept,
-                    course_type_2__iexact=type_2,
-                ).first()
-            if db_c and db_c.course_code:
-                code = db_c.course_code.strip()
-
-        if code and code not in codes:
-            codes.append(code)
-
-    return ', '.join(codes)
-
-
-def _format_enrollment_subjects(enrollment):
-    import json
-    courses = []
-    if enrollment.selected_courses_json:
-        try:
-            data = json.loads(enrollment.selected_courses_json)
-            if isinstance(data, list):
-                courses = data
-            elif isinstance(data, dict):
-                courses = data.get('courses') or data.get('subjects') or []
-        except Exception:
-            courses = []
-
-    names = []
-    for c in courses:
-        raw_name = ''
-        if isinstance(c, dict):
-            raw_name = c.get('name') or c.get('course_name') or ''
-        elif isinstance(c, str):
-            raw_name = c
-        if raw_name:
-            clean = _export_course_name_only(raw_name)
-            if clean and clean not in names:
-                names.append(clean)
-
-    if names:
-        return ', '.join(names)
-
-    adm = enrollment.admission
-    if not adm and enrollment.reg_no:
-        from admissions.models import StudentAdmission
-        adm = StudentAdmission.objects.filter(reg_no=enrollment.reg_no).first()
-
-    if adm and (adm.subject or '').strip():
-        parts = [_export_course_name_only(p) for p in adm.subject.split(',') if _export_course_name_only(p)]
-        return ', '.join(parts)
-
-    return ''
 
 
 def _enrollment_bsc_group(enrollment, adm=None):

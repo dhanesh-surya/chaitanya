@@ -732,6 +732,143 @@ class ExportEnrollmentsExcelTestCase(TestCase):
         self.assertIn("Ramesh Sahu", row2)
         self.assertIn("Savitri Sahu", row2)
 
+    def test_export_students_excel_has_mobile_no_apaar_course_code_subject_name(self):
+        from io import BytesIO
+        import openpyxl
+
+        self.adm_m.apaar_id = '123456789012'
+        self.adm_m.save()
+
+        self._login_admin()
+        resp = self.client.get(reverse('export_students_excel') + '?program=B.A.+First+Semester&verified=ALL')
+        self.assertEqual(resp.status_code, 200)
+
+        wb = openpyxl.load_workbook(BytesIO(resp.content))
+        ws = wb.active
+        headers = [cell.value for cell in ws[1]]
+
+        self.assertIn('Mobile No', headers)
+        self.assertIn('APAAR ID', headers)
+        self.assertIn('Course Code', headers)
+        self.assertIn('Subject Name', headers)
+
+        mobile_idx = headers.index('Mobile No')
+        apaar_idx = headers.index('APAAR ID')
+        code_idx = headers.index('Course Code')
+        subj_idx = headers.index('Subject Name')
+
+        row2 = [cell.value for cell in ws[2]]
+        self.assertEqual(row2[mobile_idx], '9876543210')
+        self.assertEqual(row2[apaar_idx], '123456789012')
+        self.assertIn('HNSC-01', str(row2[code_idx]))
+        self.assertTrue('Hindi' in str(row2[subj_idx]))
+
+    def test_export_students_csv_has_mobile_no_apaar_course_code_subject_name(self):
+        self.adm_m.apaar_id = '123456789012'
+        self.adm_m.save()
+
+        self._login_admin()
+        resp = self.client.get(reverse('export_students_csv') + '?program=B.A.+First+Semester&verified=ALL')
+        self.assertEqual(resp.status_code, 200)
+        content = resp.content.decode('utf-8')
+        lines = content.splitlines()
+        header_line = lines[0]
+        self.assertIn('Mobile No', header_line)
+        self.assertIn('APAAR ID', header_line)
+        self.assertIn('Date of Birth', header_line)
+        self.assertIn('Course Code', header_line)
+        self.assertIn('Subject Name', header_line)
+        self.assertIn('9876543210', content)
+        self.assertIn('123456789012', content)
+        self.assertIn('15-04-2003', content)
+        self.assertIn('HNSC-01', content)
+
+    def test_export_students_excel_has_date_of_birth(self):
+        from io import BytesIO
+        import openpyxl
+
+        self._login_admin()
+        resp = self.client.get(reverse('export_students_excel') + '?program=B.A.+First+Semester&verified=ALL')
+        self.assertEqual(resp.status_code, 200)
+
+        wb = openpyxl.load_workbook(BytesIO(resp.content))
+        ws = wb.active
+        headers = [cell.value for cell in ws[1]]
+
+        self.assertIn('Date of Birth', headers)
+        dob_idx = headers.index('Date of Birth')
+
+        row2 = [cell.value for cell in ws[2]]
+        self.assertEqual(row2[dob_idx], '15-04-2003')
+
+    def test_students_filter_by_enrollment_submitted_with_date_range(self):
+        from datetime import datetime
+        from django.utils.timezone import get_current_timezone, make_aware
+        from admissions.models import StudentEnrollment
+
+        tz = get_current_timezone()
+        # Set self.enr_m to Submitted with specific submitted_date
+        self.enr_m.status = 'Submitted'
+        self.enr_m.submitted_date = make_aware(datetime(2026, 10, 15, 12, 0), tz)
+        self.enr_m.save()
+
+        self._login_admin()
+
+        # 1. Date range matching October 2026
+        resp_match = self.client.get(
+            reverse('manage_students') + '?program=B.A.+First+Semester&enrollment_status=Submitted&date_from=2026-10-01&date_to=2026-10-31'
+        )
+        self.assertEqual(resp_match.status_code, 200)
+        self.assertEqual(len(resp_match.context['students']), 1)
+        self.assertEqual(resp_match.context['students'][0].registration_no, 'REG_M_01')
+        self.assertNotContains(resp_match, 'Course Code:')
+
+        # 2. Date range not matching (November 2026)
+        resp_nomatch = self.client.get(
+            reverse('manage_students') + '?program=B.A.+First+Semester&enrollment_status=Submitted&date_from=2026-11-01&date_to=2026-11-30'
+        )
+        self.assertEqual(resp_nomatch.status_code, 200)
+        self.assertEqual(len(resp_nomatch.context['students']), 0)
+
+        # 3. Export Excel with matching date range
+        resp_export_match = self.client.get(
+            reverse('export_students_excel') + '?program=B.A.+First+Semester&enrollment_status=Submitted&date_from=2026-10-01&date_to=2026-10-31'
+        )
+        self.assertEqual(resp_export_match.status_code, 200)
+        from io import BytesIO
+        import openpyxl
+        wb = openpyxl.load_workbook(BytesIO(resp_export_match.content))
+        ws = wb.active
+        self.assertEqual(len(list(ws.iter_rows(min_row=2))), 1)
+
+        # 4. Export Excel with non-matching date range
+        resp_export_nomatch = self.client.get(
+            reverse('export_students_excel') + '?program=B.A.+First+Semester&enrollment_status=Submitted&date_from=2026-11-01&date_to=2026-11-30'
+        )
+        self.assertEqual(resp_export_nomatch.status_code, 200)
+        wb2 = openpyxl.load_workbook(BytesIO(resp_export_nomatch.content))
+        ws2 = wb2.active
+        self.assertEqual(len(list(ws2.iter_rows(min_row=2))), 0)
+
+    def test_students_filter_by_not_enrolled(self):
+        self._login_admin()
+        # student_m has enrollment, let's create student_not_enrolled
+        not_enrolled = Student.objects.create(
+            registration_no='NOT_ENR_01',
+            full_name='Unenrolled Student',
+            program_type='B.A. First Semester',
+            mobile='9998887776',
+            password='pass',
+        )
+
+        resp = self.client.get(
+            reverse('manage_students') + '?program=B.A.+First+Semester&enrollment_status=Not+Enrolled'
+        )
+        self.assertEqual(resp.status_code, 200)
+        students = resp.context['students']
+        self.assertTrue(any(s.registration_no == 'NOT_ENR_01' for s in students))
+        self.assertFalse(any(s.registration_no == 'REG_M_01' for s in students))
+
     def test_attendance_sheets_view_get(self):
         self._login_admin()
         resp = self.client.get(reverse('attendance_sheets') + '?program=B.A.+First+Semester')

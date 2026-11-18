@@ -15,7 +15,7 @@
                     <i class="fas fa-file-excel" aria-hidden="true"></i><span>Export Excel</span>
                     <i class="fas fa-chevron-down" style="margin-left:4px; font-size:0.75em;" id="exportFilterChevron"></i>
                 </button>
-                <a href="{% url 'export_students_csv' %}?search={{ search|urlencode }}&program={{ program_filter|urlencode }}&verified={{ verified_filter|urlencode }}&group={{ group_filter|urlencode }}&enrollment_status={{ enrollment_status_filter|urlencode }}" class="page-action-btn" title="Export as CSV">
+                <a href="{% url 'export_students_csv' %}?search={{ search|urlencode }}&program={{ program_filter|urlencode }}&verified={{ verified_filter|urlencode }}&group={{ group_filter|urlencode }}&enrollment_status={{ enrollment_status_filter|urlencode }}&date_from={{ date_from|urlencode }}&date_to={{ date_to|urlencode }}" class="page-action-btn" title="Export as CSV">
                     <i class="fas fa-file-csv" aria-hidden="true"></i><span>Export CSV</span>
                 </a>
                 {% include 'partials/admin_nav_logout.html' %}
@@ -30,9 +30,26 @@
                 <input type="hidden" name="program"           value="{{ program_filter }}">
                 <input type="hidden" name="verified"          value="{{ verified_filter }}">
                 <input type="hidden" name="group"             value="{{ group_filter }}">
-                <input type="hidden" name="enrollment_status" value="{{ enrollment_status_filter }}">
 
                 <div style="display:flex; flex-wrap:wrap; gap:10px; align-items:flex-end;">
+                    <div>
+                        <label style="display:block; font-size:11.5px; font-weight:600; color:#1e40af; margin-bottom:3px;">Enrollment Status</label>
+                        <select name="enrollment_status" class="portal-input" style="min-width:160px;">
+                            <option value="ALL" {% if enrollment_status_filter == 'ALL' or not enrollment_status_filter %}selected{% endif %}>All Enrollment</option>
+                            <option value="Submitted" {% if enrollment_status_filter == 'Submitted' or enrollment_status_filter == 'Enrollment Submitted' %}selected{% endif %}>Enrollment Submitted</option>
+                            <option value="Not Enrolled" {% if enrollment_status_filter == 'Not Enrolled' %}selected{% endif %}>Not Enrolled</option>
+                            <option value="Approved" {% if enrollment_status_filter == 'Approved' %}selected{% endif %}>Approved / Accepted</option>
+                            <option value="Draft" {% if enrollment_status_filter == 'Draft' %}selected{% endif %}>Draft</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:11.5px; font-weight:600; color:#1e40af; margin-bottom:3px;">From Date</label>
+                        <input type="date" name="date_from" value="{{ date_from }}" class="portal-input" style="min-width:130px;">
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:11.5px; font-weight:600; color:#1e40af; margin-bottom:3px;">To Date</label>
+                        <input type="date" name="date_to" value="{{ date_to }}" class="portal-input" style="min-width:130px;">
+                    </div>
                     <div>
                         <label style="display:block; font-size:11.5px; font-weight:600; color:#1e40af; margin-bottom:3px;">Gender</label>
                         <select name="gender" class="portal-input" style="min-width:130px;">
@@ -143,19 +160,21 @@
                 <option value="ALL" {% if enrollment_status_filter == 'ALL' or not enrollment_status_filter %}selected{% endif %}>
                     All Enrollment {% if enrollment_counts.total %}({{ enrollment_counts.total }}){% endif %}
                 </option>
-                <option value="Approved" {% if enrollment_status_filter == 'Approved' %}selected{% endif %}>
-                    Approved / Accepted {% if enrollment_counts.approved %}({{ enrollment_counts.approved }}){% endif %}
-                </option>
-                <option value="Submitted" {% if enrollment_status_filter == 'Submitted' %}selected{% endif %}>
-                    Submitted {% if enrollment_counts.submitted %}({{ enrollment_counts.submitted }}){% endif %}
-                </option>
-                <option value="Draft" {% if enrollment_status_filter == 'Draft' %}selected{% endif %}>
-                    Draft {% if enrollment_counts.draft %}({{ enrollment_counts.draft }}){% endif %}
+                <option value="Submitted" {% if enrollment_status_filter == 'Submitted' or enrollment_status_filter == 'Enrollment Submitted' %}selected{% endif %}>
+                    Enrollment Submitted {% if enrollment_counts.submitted %}({{ enrollment_counts.submitted }}){% endif %}
                 </option>
                 <option value="Not Enrolled" {% if enrollment_status_filter == 'Not Enrolled' %}selected{% endif %}>
                     Not Enrolled {% if enrollment_counts.not_enrolled %}({{ enrollment_counts.not_enrolled }}){% endif %}
                 </option>
+                <option value="Approved" {% if enrollment_status_filter == 'Approved' %}selected{% endif %}>
+                    Approved / Accepted {% if enrollment_counts.approved %}({{ enrollment_counts.approved }}){% endif %}
+                </option>
+                <option value="Draft" {% if enrollment_status_filter == 'Draft' %}selected{% endif %}>
+                    Draft {% if enrollment_counts.draft %}({{ enrollment_counts.draft }}){% endif %}
+                </option>
             </select>
+            <input type="date" name="date_from" value="{{ date_from }}" class="portal-input" placeholder="From Date" title="From Date" style="max-width:135px;">
+            <input type="date" name="date_to" value="{{ date_to }}" class="portal-input" placeholder="To Date" title="To Date" style="max-width:135px;">
             <select name="verified" class="portal-input">
                 <option value="ALL" {% if verified_filter == 'ALL' %}selected{% endif %}>All Verification</option>
                 <option value="YES" {% if verified_filter == 'YES' %}selected{% endif %}>Verified Only</option>
@@ -171,8 +190,16 @@
             <span class="badge badge--compact" style="background:#e0f2fe; color:#0369a1; font-weight:600;">
                 Enrollment: {{ enrollment_status_filter }}
             </span>
-            <a href="{% url 'manage_students' %}?search={{ search|urlencode }}&program={{ program_filter|urlencode }}&verified={{ verified_filter|urlencode }}&group={{ group_filter|urlencode }}&enrollment_status=ALL" style="font-size:0.78rem; text-decoration:none; color:#dc2626;">
+            <a href="{% url 'manage_students' %}?search={{ search|urlencode }}&program={{ program_filter|urlencode }}&verified={{ verified_filter|urlencode }}&group={{ group_filter|urlencode }}&enrollment_status=ALL&date_from={{ date_from|urlencode }}&date_to={{ date_to|urlencode }}" style="font-size:0.78rem; text-decoration:none; color:#dc2626;">
                 <i class="fas fa-times"></i> Clear enrollment filter
+            </a>
+            {% endif %}
+            {% if date_from or date_to %}
+            <span class="badge badge--compact" style="background:#fef3c7; color:#92400e; font-weight:600;">
+                Date: {{ date_from|default:"Start" }} to {{ date_to|default:"End" }}
+            </span>
+            <a href="{% url 'manage_students' %}?search={{ search|urlencode }}&program={{ program_filter|urlencode }}&verified={{ verified_filter|urlencode }}&group={{ group_filter|urlencode }}&enrollment_status={{ enrollment_status_filter|urlencode }}" style="font-size:0.78rem; text-decoration:none; color:#dc2626;">
+                <i class="fas fa-times"></i> Clear date filter
             </a>
             {% endif %}
         </p>
@@ -187,6 +214,8 @@
             <input type="hidden" name="verified" value="{{ verified_filter }}">
             <input type="hidden" name="group" value="{{ group_filter }}">
             <input type="hidden" name="enrollment_status" value="{{ enrollment_status_filter }}">
+            <input type="hidden" name="date_from" value="{{ date_from }}">
+            <input type="hidden" name="date_to" value="{{ date_to }}">
             <span class="bulk-action-bar__count" id="bulkSelectedCount">0 selected</span>
             <select name="action" id="bulkActionSelect" class="portal-input" disabled aria-label="Bulk student action">
                 <option value="">Choose action...</option>
@@ -230,8 +259,18 @@
                                 <input type="checkbox" class="row-select" value="{{ s.pk }}" aria-label="Select {{ s.full_name }}">
                             </label>
                         </td>
-                        <td class="col-reg"><strong class="cell-exact">{{ s.registration_no }}</strong></td>
-                        <td class="col-name"><span class="cell-clip" title="{{ s.full_name }}">{{ s.full_name }}</span></td>
+                        <td class="col-reg">
+                            <strong class="cell-exact">{{ s.registration_no }}</strong>
+                            {% if s.apaar_id %}
+                            <small class="cell-exact cell-exact--mono text-muted" style="display:block; font-size:11px;" title="APAAR ID: {{ s.apaar_id }}">APAAR: {{ s.apaar_id }}</small>
+                            {% endif %}
+                        </td>
+                        <td class="col-name">
+                            <span class="cell-clip" title="{{ s.full_name }}">{{ s.full_name }}</span>
+                            {% if s.dob_formatted %}
+                            <small class="text-muted" style="display:block; font-size:11px;" title="Date of Birth: {{ s.dob_formatted }}">DOB: {{ s.dob_formatted }}</small>
+                            {% endif %}
+                        </td>
                         <td class="col-father">
                             {% if s.latest_admission and s.latest_admission.father_name %}
                             <span class="cell-clip" title="{{ s.latest_admission.father_name }}">{{ s.latest_admission.father_name }}</span>
@@ -241,7 +280,7 @@
                         </td>
                         <td class="col-contact">
                             <span class="cell-email">{{ s.email|default:"—" }}</span>
-                            <small class="text-muted cell-mobile">{{ s.mobile|default:"—" }}</small>
+                            <small class="text-muted cell-mobile">{{ s.mobile_no|default:s.mobile|default:"—" }}</small>
                         </td>
                         <td class="col-program">
                             <span class="cell-clip" title="{{ s.program_type|default:'—' }}">{{ s.program_type|default:"—" }}</span>
@@ -255,6 +294,8 @@
                                 <span class="student-dsc-courses__item">{{ name }}</span>{% if not forloop.last %}<span class="student-dsc-courses__sep">·</span>{% endif %}
                                 {% endfor %}
                             </div>
+                            {% elif s.subject_name %}
+                            <small class="text-muted cell-clip" title="{{ s.subject_name }}">{{ s.subject_name }}</small>
                             {% elif s.course_name %}
                             <small class="text-muted cell-clip" title="{{ s.course_name }}">{{ s.course_name }}</small>
                             {% endif %}

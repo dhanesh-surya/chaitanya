@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Enrollment Application - {{ enrollment.enrollment_no }}</title>
+    <title>Enrollment Application - {{ enrollment.reg_no }}</title>
     <style>
         @page {
             size: A4 portrait;
@@ -473,7 +473,6 @@
             <p class="form-heading">STUDENT ENROLLMENT APPLICATION (SESSION 2026-27)</p>
 
         <div class="meta-strip">
-            <div>Enrollment Number: <span class="enr-num">{{ enrollment.enrollment_no }}</span></div>
             <div>Registration No: <strong>{{ enrollment.reg_no }}</strong></div>
             <div>Submission Date: <strong>{{ enrollment.submitted_date|date:"d-M-Y" }}</strong></div>
         </div>

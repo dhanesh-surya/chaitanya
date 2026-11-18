@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fee Receipt - {{ enrollment.enrollment_no }}</title>
+    <title>Fee Receipt - {{ enrollment.reg_no }}</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @page {
@@ -395,10 +395,6 @@
                             <td>{{ enrollment.full_name|upper }}</td>
                         </tr>
                         <tr>
-                            <th>Enrollment No</th>
-                            <td>{{ enrollment.enrollment_no|default:"-" }}</td>
-                        </tr>
-                        <tr>
                             <th>Month/Year</th>
                             <td>{{ month_year }}</td>
                         </tr>
@@ -483,10 +479,6 @@
                         <tr>
                             <th>Name</th>
                             <td>{{ enrollment.full_name|upper }}</td>
-                        </tr>
-                        <tr>
-                            <th>Enrollment No</th>
-                            <td>{{ enrollment.enrollment_no|default:"-" }}</td>
                         </tr>
                         <tr>
                             <th>Month/Year</th>

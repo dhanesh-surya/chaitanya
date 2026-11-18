@@ -409,9 +409,6 @@
                 Registration No: <strong>{{ nep.reg_no }}</strong>
             </div>
             <div>
-                Enrollment No: <span class="enr-num">{{ nep.enrollment_no|default:"PENDING" }}</span>
-            </div>
-            <div>
                 Date: <strong>{{ nep.submitted_date|date:"d/m/Y"|default:nep.created_at|date:"d/m/Y" }}</strong>
             </div>
         </div>

@@ -70,10 +70,6 @@
                 {% endif %}
                 {% if enrollment %}
                 <div class="info-card">
-                    <label>Enrollment No</label>
-                    <p>{{ enrollment.enrollment_no|default:"—" }}</p>
-                </div>
-                <div class="info-card">
                     <label>Enrollment Status</label>
                     <p>
                         {% if enrollment.status == 'Approved' %}
@@ -89,7 +85,7 @@
                 {% if nep_ug_enrollment %}
                 <div class="info-card" style="border-left: 4px solid #0284c7;">
                     <label>NEP UG (Sem {{ nep_ug_enrollment.semester }})</label>
-                    <p>{{ nep_ug_enrollment.enrollment_no|default:nep_ug_enrollment.application_no }}</p>
+                    <p>{{ nep_ug_enrollment.application_no|default:nep_ug_enrollment.reg_no }}</p>
                 </div>
                 <div class="info-card">
                     <label>NEP UG Status</label>
